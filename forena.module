@@ -1,0 +1,28 @@
+<?php
+
+function forena_menu() { 
+	$items = array(); 
+	$items['ft'] = array(
+	  'page callback' => 'forena_test', 
+	  'page arguements' => array(), 
+	  'title' => 'Forena Testing',
+	  'access arguments' => array('access content'), 
+	  'type' => MENU_CALLBACK, 
+	); 
+	
+	return $items; 
+}
+
+function forena_test() { 
+  $output .= 'Report start'; 
+  require_once('FrxReport.inc'); 
+  $r = '<body xmlns:frx="urn:FrxReports"><div frx:block="test" ><div class="repeater" frx:foreach="row"><p>this is a test report for {first_name}</p></div></div></body>'; 
+  $o = new FrxReport($r); 
+  $output .= $o->render(); 
+  return $output; 
+}
+
+function forena_invoke_data_engine($block, $parameters=array()) {
+   $x = '<root><row><last_name>Metzler</last_name><first_name>Dave</first_name></row><row><last_name>Bailey</last_name><first_name>Scott</first_name></row></root>'; 
+   return new SimpleXMLElement($x); 
+}
