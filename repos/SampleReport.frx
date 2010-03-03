@@ -1,0 +1,7 @@
+<body xmlns:frx="urn:FrxReports">
+	<div frx:block="test">
+		<div class="repeater" frx:foreach="row">
+			<p>this is a test report for {first_name}</p>
+		</div>
+	</div>
+</body>
