@@ -1,16 +1,19 @@
 <?php
 
-function forena_admin_repos() {
-	$form['name'] = array(
-	  '#type' => 'textfield',
-	  '#title' => t('Name'),
-	  '#description' => t('Machine Readable repostiory name.'),
-	);
-	
-	$form['title'] = array(
-	  '#type' => 'textfield',
-	  '#title' => t('Title'),
-	  '#description' => t('Human readable repository name'),
-	);
-	return $form; 
+function forena_default_repository() { 
+  $path = drupal_get_path('module', 'forena'); 
+  $repos = array('path' => $path,
+          'access' => FALSE,
+          'title' => 'Forena Provided Reports'  
+         ); 
 }
+
+/**
+ * List existing repositories and configure new ones.  
+ *
+ */
+function forena_repository_admin($repos='') {
+  $repos = variable_get('forena_repositories',forena_default_repository()); 
+  
+}
+
