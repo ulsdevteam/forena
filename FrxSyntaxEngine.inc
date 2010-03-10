@@ -1,5 +1,5 @@
 <?php
-
+define('FRX_TOKEN_EXP','/\{[^}]+}/'); 
 class FrxSyntaxEngine { 
   private $tpattern; 
   
@@ -28,7 +28,7 @@ class FrxSyntaxEngine {
 	  } elseif (is_object($data)) {
 	    $rows = $data->xpath($key);
 	    if ($rows) $x = $rows[0];
-	    $retvar = $x->asXML(); 
+	    if ($x) $retvar = $x->asXML(); 
 	    if ($retvar) {
 	      // Find the end of the first tag.
 	      //print $root_tag; 

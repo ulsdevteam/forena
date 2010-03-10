@@ -12,17 +12,30 @@ function forena_menu() {
 	
 	return $items; 
 }
-
+/**
+ * Test function for white box testing. 
+ *
+ * @return unknown
+ */
 function forena_test() { 
   $output .= 'Report start'; 
-  require_once('FrxReport.inc'); 
-  $r = '<body xmlns:frx="urn:FrxReports"><div frx:block="test" ><div class="repeater" frx:foreach="row"><p>this is a test report for {first_name}</p></div></div></body>'; 
-  $o = new FrxReport($r); 
-  $output .= $o->render(); 
+
+  $r = '<body xmlns:frx="urn:FrxReports"><div frx:block="sample/sampleXML" ><div class="repeater" frx:foreach="row"><p>this is a test report for {first_name}</p></div></div></body>'; 
+  $output .= forena_report($r); 
   return $output; 
 }
 
-function forena_invoke_data_engine($block, $parameters=array()) {
-   $x = '<root><row><last_name>Metzler</last_name><first_name>Dave</first_name></row><row><last_name>Bailey</last_name><first_name>Scott</first_name></row></root>'; 
-   return new SimpleXMLElement($x); 
+/**
+ * Render report with some data
+ *
+ * @param unknown_type $report
+ * @param unknown_type $format
+ * @param unknown_type $data
+ * @return unknown
+ */
+function forena_report ($report, $format='', $data='') {
+  require_once('forena.common.inc'); 
+  $o = new FrxReport($report,$data);
+  $output = $o->render($report, $format, $data); 
+  return $output;  
 }

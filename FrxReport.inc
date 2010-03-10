@@ -1,5 +1,4 @@
 <?php
-define('FRX_TOKEN_EXP','/\{[^}]+}/'); 
 require_once('FrxSyntaxEngine.inc'); 
 
 class FrxReport { 
@@ -17,10 +16,7 @@ class FrxReport {
 	  	$this->rpt_xml = $xhtml; 
 	  }
 	}
-	
-	
-	
-	
+		
 	/**
 	 * Get the data block 
 	 * @param $block
@@ -32,7 +28,7 @@ class FrxReport {
 	}
 	
 	private function process_frx_attributes(SimpleXMLElement $node) { 
-	    $attrs = $node->attributes('frx',true); 
+	    $attrs = $node->attributes('urn:FrxReports'); 
       if ($attrs) foreach ($attrs as $key => $value) { 
           switch ($key) {
           	case "block":
@@ -62,13 +58,13 @@ class FrxReport {
 		  }
       
 	
-	  	$frx = $node->attributes('frx', true);
+	  	$frx = $node->attributes('urn:FrxReports');
 		  
 		  if ((string)$frx['foreach'] ){
 		  	// Save xml
 		  	$path = (string)$frx['foreach']; 
 		  	$data = $this->cur_xml; 
-		  	$nodes = $data->xpath($path); 
+		  	if($data)	$nodes = $data->xpath($path); 
 		  	if ($nodes) foreach ($nodes as $x) {
 		  		$this->cur_xml = $x;
 		  		
