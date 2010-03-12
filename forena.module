@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * Implementation of hook_menu. 
+ *
+ * @return array
+ */
 function forena_menu() { 
 	$items = array(); 
 	$items['ft'] = array(
@@ -12,6 +17,7 @@ function forena_menu() {
 	
 	return $items; 
 }
+
 /**
  * Test function for white box testing. 
  *
@@ -20,8 +26,8 @@ function forena_menu() {
 function forena_test() { 
   $output .= 'Report start'; 
 
-  $r = '<body xmlns:frx="urn:FrxReports"><div frx:block="sample/sampleXML" ><div class="repeater" frx:foreach="row"><p>this is a test report for {first_name}</p></div></div></body>'; 
-  $output .= forena_report($r); 
+  $r = '<body xmlns:frx="urn:FrxReports"><div frx:block="banner/test" ><div class="repeater" frx:foreach="row"><p>this is a test report for {name}</p></div></div></body>'; 
+  $output .= forena_report($r, null, array('uid' => 3)); 
   return $output; 
 }
 

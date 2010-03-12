@@ -1,6 +1,7 @@
 <?php
 // Include Report renderer. 
 require_once('FrxReport.inc');
+require_once('FrxDataEngine.inc');
   
 // Putting this in a function to sandbox the repository settings
 function __forena_load_repository(&$repo) { 
@@ -12,7 +13,7 @@ function __forena_load_repository(&$repo) {
      
   }
   
-  $repo['data'] = __forena_load_engine($data_engine, $uri); 
+  $repo['data'] = __forena_load_engine($conf, $repo['path']); 
   //$repo['auth'] = __forena_load_auth($security_provider); 
   
 }
@@ -23,14 +24,15 @@ function __forena_load_repository(&$repo) {
  * @param string $name
  * @return object The data engine object
  */
-function __forena_load_engine($name, $uri='') { 
-  $path = drupal_get_path( 'module', 'forena'). '/DataEngines/' . $name; 
+function __forena_load_engine($conf, $repo_path) { 
+  $name = $conf['data_engine']; 
+  $path = drupal_get_path( 'module', 'forena'). '/plugins/' . $name; 
   // Make sure that we don't override predefined classes
   if (!class_exists($name) && file_exists($path. '.inc')) { 
     include_once($path.'.inc'); 
   }
   if (class_exists($name)) { 
-    $o = new $name($uri); 
+    $o = new $name($conf, $repo_path); 
     return $o; 
   }
 }
@@ -42,6 +44,7 @@ function __forena_load_engine($name, $uri='') {
 function forena_repository($name='') { 
   global $forena_repositories; 
   static $repos =''; 
+
   
   // Empty repository so we need to initialize
   if (!$repos) {   
@@ -82,12 +85,52 @@ function forena_invoke_data_engine($data_block, $parameters=array(), $subquery='
    $repos = forena_repository($provider); 
    if ($repos['data']) { 
      $engine = $repos['data'];
-     if (method_exists($engine,'block')) {
-       $xml = $engine->block($block, $parameters, $subquery); 
+     if (method_exists($engine,'data')) {
+       $xml = $engine->data($block, $parameters, $subquery); 
      }
      return $xml; 
    }
 }
 
+/**
+ * Load a block file form disk and introspect the comments to determine security 
+ * Return a structured array based on this. 
+ *
+ * @param unknown_type $filepath
+ * @param unknown_type $comment
+ */
+function forena_load_block_file($filepath, $comment='--') { 
+  $block_data = file_get_contents($filepath); 
+  $lines = explode("\n",$block_data); 
+  $cnt = count($lines);
+  $access = '';
+  $i=0;  
+  $block = ''; 
+  while ($i<$cnt) { 
+    $l = trim($lines[$i],"\r"); 
+    list($d,$c) = explode($comment,$l,2);
+    if  ($c) { 
+      list($a,$o) = explode('=', $c, 2);
+      if (trim($a)=='ACCESS') { 
+        $access = trim($o);    
+      }
+    } 
+    if (strpos($l,$comment)!==0) { 
+      $data .= "$l\n";   
+    }
+    $i++;
+  }
+  return array('access'=>$access, 'source' => $data); 
+  
+}
+
+function forena_error($short_message, $log) { 
+  if ($short_message) { 
+    drupal_set_message($short_message,'error'); 
+  }
+  if ($log) {
+    watchdog('forena',$log, NULL, WATCHDOG_ERROR); 
+  }
+}
 
 

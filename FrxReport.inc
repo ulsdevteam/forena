@@ -8,13 +8,14 @@ class FrxReport {
 	private $data_context; 
 	private $teng; 
 	
-	public function __construct($xhtml) {
-	  $this->teng = new FrxSyntaxEngine(FRX_TOKEN_EXP); 
+	public function __construct($xhtml, $data=array()) {
+	  $this->teng = new FrxSyntaxEngine(FRX_TOKEN_EXP,'{}'); 
 	  if (!is_object($xhtml)) { 
 	  	$this->rpt_xml = new SimpleXMLElement($xhtml); 	
 	  } else { 
 	  	$this->rpt_xml = $xhtml; 
 	  }
+	  $this->cur_xml = $data; 
 	}
 		
 	/**
@@ -24,7 +25,7 @@ class FrxReport {
 	 */
 	private function get_data($block) {
 	  //@TODO: Merge xml data parameters into the report paramters
-	  $this->cur_xml = forena_invoke_data_engine($block, $parameters); 
+	  $this->cur_xml = forena_invoke_data_engine($block, $this->cur_xml); 
 	}
 	
 	private function process_frx_attributes(SimpleXMLElement $node) { 
@@ -99,7 +100,7 @@ class FrxReport {
 	 * Render the report
 	 * @return unknown_type
 	 */
-	public function render() { 
+	public function render($data= array()) { 
 	  $rpt_xml = $this->rpt_xml;
 	  return $this->render_section($rpt_xml);  
 	}
