@@ -17,14 +17,14 @@ class FrxDBEngine extends FrxDataEngine {
    * @param string $repos_path Path to location of data block definitions
    */
   public function __construct($conf, $repos_path) {
-
+    parent::__construct($conf, $repos_path);
     $uri = $conf['uri'];  
     if ($uri) { 
       try { 
         $db = new PDO($uri, $conf['user'], $conf['password']);
         $this->db = $db; 
       } catch (PDOException $e) { 
-        forena_error('Unable to connect', $e->GetMessage());  
+        forena_error('Unable to connect to database', $e->getMessage());  
       }
    
     } else { 
@@ -47,7 +47,8 @@ class FrxDBEngine extends FrxDataEngine {
     $db = $this->db; 
     $filename = $this->block_path .'/'. $block_name . '.sql';  
     $block = forena_load_block_file($filename); 
-    if ($block['source']) { 
+    $xml =''; 
+    if ($block['source'] && $this->access($block['access'])) { 
       $sql = $block['source']; 
       $sql = $this->te->replace($sql,$params);
       $rs = $db->query($sql); 

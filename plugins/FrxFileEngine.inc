@@ -9,7 +9,7 @@
 class FrxFileEngine extends FrxDataEngine {
 	private $path; 
 	public function __construct($conf, $repos_path) { 
-
+    parent::__construct($conf, $repos_path);
 		list($protocol,$path) = explode('://', $conf['uri'], 2); 
 		if (!$path) $path = $protocol; 
 		

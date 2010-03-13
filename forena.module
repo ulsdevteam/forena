@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Implementation of hook_menu. 
  *
@@ -9,10 +8,19 @@ function forena_menu() {
 	$items = array(); 
 	$items['ft'] = array(
 	  'page callback' => 'forena_test', 
-	  'page arguements' => array(), 
-	  'title' => 'Forena Testing',
+	  'page arguments' => array(), 
+	  'title' => t('Forena Testing'),
 	  'access arguments' => array('access content'), 
 	  'type' => MENU_CALLBACK, 
+	); 
+	
+	$path = variable_get('forena_path','reports'); 
+	$items[$path] = array(
+	  'page callback' => 'forena_report',
+	  'page arguments' => array(), 
+	  'title' => t('Forena Reports'),
+	  'access arguments' => array('access content'),  
+	  'type' => MENU_NORMAL_ITEM, 
 	); 
 	
 	return $items; 
@@ -27,7 +35,35 @@ function forena_test() {
   $output .= 'Report start'; 
 
   $r = '<body xmlns:frx="urn:FrxReports"><div frx:block="banner/test" ><div class="repeater" frx:foreach="row"><p>this is a test report for {name}</p></div></div></body>'; 
-  $output .= forena_report($r, null, array('uid' => 3)); 
+  $output .= forena_render_report($r, null, array('uid' => 3)); 
+  return $output; 
+}
+
+function forena_report($name='') {
+  require_once('forena.common.inc');  
+  $report_path = variable_get('forena_report_repos',''); 
+  if (!$report_path) {
+    $report_path = drupal_get_path('module','forena'). '/repos/reports'; 
+  }
+  if ($name) { 
+    $filename = $report_path . '/'. $name . '.frx';
+    $output .= 'Starting report '. $filename; 
+    if (file_exists($filename)) {
+      $output .= 'Found report';
+      $r_text = file_get_contents($filename);  
+      try { 
+        $r = new SimpleXMLElement($r_text);
+      } catch (Error $e) { 
+        forena_error('Unable to read report', $e->getMessage()); 
+      }
+      $parms = $_GET; 
+      unset($parms['q']); 
+      $output .= forena_render_report($r, $parms); 
+    }
+  } else { 
+    // @TODO: List reports 
+    $output = 'Need to specify a report name'; 
+  }
   return $output; 
 }
 
@@ -39,8 +75,8 @@ function forena_test() {
  * @param unknown_type $data
  * @return unknown
  */
-function forena_report ($report, $format='', $data='') {
-  require_once('forena.common.inc'); 
+function forena_render_report ($report, $format='', $data='') {
+  require_once('forena.common.inc');    
   $o = new FrxReport($report,$data);
   $output = $o->render($report, $format, $data); 
   return $output;  
