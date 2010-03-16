@@ -159,6 +159,18 @@ class FrxReport {
  
 	    }
 	  }
+	  
+	  if ($format) { 
+	    forena_define_plugins('formatter',$format);
+	    if (class_exists($format)) { 
+	      $f = new $format(); 
+	      if (method_exists(f,'format')) { 
+	        $f->format($value, $format_str); 
+	      }
+	    }
+	  }
+	  
+	  
 	  // Default if specified
 	  if (!$value && $default) { 
 	    $value = $default;  
