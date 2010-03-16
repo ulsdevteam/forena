@@ -14,6 +14,16 @@ function forena_menu() {
 	  'type' => MENU_CALLBACK, 
 	); 
 	
+	$items['admin/settings/forena'] = array(
+	  'page callback' => 'drupal_get_form',
+	  'page arguments' => array('forena_settings'), 
+	  'title' => 'Forena Reports', 
+	  'description' => t('Tell Forena where to store report files and how users should access them.'),
+	  'access arguments' => array('administer forena reports'),
+	  'type' => MENU_NORMAL_ITEM, 
+	  'file' => 'forena.admin.inc', 
+	); 
+	
 	$path = variable_get('forena_path','reports'); 
 	$items[$path] = array(
 	  'page callback' => 'forena_report',
@@ -27,38 +37,48 @@ function forena_menu() {
 }
 
 /**
+ * Implementation of hook_perm
+ *
+ * @return unknown
+ */
+function forena_perm() { 
+  $perms = array(
+    'create any report', 
+    'design any report',
+    'administer forena reports'
+  ); 
+  //@TODO: Add the ability to create subrepositories with different permissions. 
+  return $perms; 
+}
+
+/**
  * Test function for white box testing. 
  *
  * @return unknown
  */
 function forena_test() { 
-  $output .= 'Report start'; 
+  $output .= 'Forena test page'; 
 
-  $r = '<body xmlns:frx="urn:FrxReports"><div frx:block="banner/test" ><div class="repeater" frx:foreach="row"><p>this is a test report for {name}</p></div></div></body>'; 
-  $output .= forena_render_report($r, null, array('uid' => 3)); 
   return $output; 
 }
 
 function forena_report($name='') {
   require_once('forena.common.inc');  
-  $report_path = variable_get('forena_report_repos',''); 
-  if (!$report_path) {
-    $report_path = drupal_get_path('module','forena'). '/repos/reports'; 
-  }
+  $report_path = forena_report_path(); 
   if ($name) { 
     $filename = $report_path . '/'. $name . '.frx';
-    $output .= 'Starting report '. $filename; 
     if (file_exists($filename)) {
-      $output .= 'Found report';
       $r_text = file_get_contents($filename);  
       try { 
         $r = new SimpleXMLElement($r_text);
-      } catch (Error $e) { 
+      } catch (Exception $e) { 
         forena_error('Unable to read report', $e->getMessage()); 
       }
       $parms = $_GET; 
       unset($parms['q']); 
       $output .= forena_render_report($r, $parms); 
+    } else { 
+      drupal_not_found(); 
     }
   } else { 
     // @TODO: List reports 
@@ -81,3 +101,8 @@ function forena_render_report ($report, $format='', $data='') {
   $output = $o->render($report, $format, $data); 
   return $output;  
 }
+
+
+
+
+

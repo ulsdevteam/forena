@@ -1,0 +1,20 @@
+<html xmlns:frx="urn:FrxReports">
+	<head>
+		<title>Users</title>
+	</head>
+	<body>
+		<div frx:block="drupal/users">
+			<table class="datagrid" >
+				<thead>
+					<tr><th>Name</th><th>Email</th></tr>
+				</thead>
+				<tbody>
+					<tr frx:foreach="*">
+						<td width="1000">{name}</td>
+						<td>{mail}</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</body>
+</html>

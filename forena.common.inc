@@ -26,6 +26,7 @@ function __forena_load_repository(&$repo) {
  */
 function __forena_load_engine($conf, $repo_path) { 
   $name = $conf['data_engine']; 
+
   $path = drupal_get_path( 'module', 'forena'). '/plugins/' . $name; 
   // Make sure that we don't override predefined classes
   if (!class_exists($name) && file_exists($path. '.inc')) { 
@@ -83,10 +84,12 @@ function forena_repository($name='') {
 function forena_invoke_data_engine($data_block, $parameters=array(), $subquery='') {
    list($provider,$block) = explode('/',$data_block, 2); 
    // Get the data 
-   $repos = forena_repository($provider); 
+   $repos = forena_repository($provider);
+
    if ($repos['data']) { 
      $engine = $repos['data'];
      if (method_exists($engine,'data')) {
+
        $xml = $engine->data($block, $parameters, $subquery); 
      }
      return $xml; 
@@ -125,6 +128,12 @@ function forena_load_block_file($filepath, $comment='--') {
   
 }
 
+/**
+ * General wrapper procedure for reporting erros
+ *
+ * @param string $short_message Message that will be displayed to the users
+ * @param string $log Message that will be recorded in the logs. 
+ */
 function forena_error($short_message, $log) { 
   if ($short_message) { 
     drupal_set_message($short_message,'error'); 
@@ -132,6 +141,19 @@ function forena_error($short_message, $log) {
   if ($log) {
     watchdog('forena',$log, NULL, WATCHDOG_ERROR); 
   }
+}
+
+/**
+ * Load the report repository path
+ *
+ * @return unknown
+ */
+function forena_report_path() { 
+  $report_path = variable_get('forena_report_repos',''); 
+  if (!$report_path) {
+    $report_path = drupal_get_path('module','forena'). '/repos/reports'; 
+  }
+  return $report_path; 
 }
 
 

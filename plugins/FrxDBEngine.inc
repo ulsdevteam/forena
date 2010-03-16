@@ -48,17 +48,19 @@ class FrxDBEngine extends FrxDataEngine {
     $filename = $this->block_path .'/'. $block_name . '.sql';  
     $block = forena_load_block_file($filename); 
     $xml =''; 
-    if ($block['source'] && $this->access($block['access'])) { 
+    if ($block['source'] && $this->access($block['access']) && $db) { 
       $sql = $block['source']; 
       $sql = $this->te->replace($sql,$params);
       $rs = $db->query($sql); 
       $xml = new SimpleXMLElement('<table/>'); 
+      
       $e = $db->errorCode();
-      if ($e!='00000') { 
+      if ($e!='00000') {
        $i = $db->errorInfo(); 
        forena_error($i[2].':'.$sql, $i[2]); 
         
       } else { 
+
         //$rs->debugDumpParams(); 
         $data = $rs->fetchAll(PDO::FETCH_ASSOC); 
         foreach ($data as $row) { 

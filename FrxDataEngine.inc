@@ -15,11 +15,11 @@ class FrxDataEngine{
    * @return unknown
    */
   public function access($arg) {
-    $f = $conf['access callback']; 
-    if ($F && is_callable($f)) { 
+    $f = $this->conf['access callback']; 
+    if ($f && is_callable($f)) {
       return $f($arg); 
     } else { 
-      return FALSE; 
+      return user_access('access content'); 
     }
   }
   

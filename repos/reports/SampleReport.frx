@@ -1,0 +1,15 @@
+<html xmlns:frx="urn:FrxReports">
+	<head>
+		<title>A Sample Report</title>
+		<frx:fields>
+			<frx:field id="first_name" link="dave/foo?id={first_name}" format="" format-string=""/>
+		</frx:fields>
+	</head> 
+	<body >
+		<div frx:block="sample/sampleXML">
+			<div class="repeater" frx:foreach="row">
+				<p>this is a test report for {first_name}</p>
+			</div>
+		</div>
+	</body>
+</html>

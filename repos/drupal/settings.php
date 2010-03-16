@@ -15,7 +15,7 @@ $conf['access callback'] = 'user_access';
  * 
  */
 
-$conf['data_engine'] = 'FrxFileEngine'; 
+$conf['data_engine'] = 'FrxDrupal'; 
 
 /*
  * URI: 
@@ -23,12 +23,5 @@ $conf['data_engine'] = 'FrxFileEngine';
  * In database engines it might be the connection string to the db.  In the file 
  * engine it would be the path to the directory containting the files
  */
-$conf['uri'] = 'file://'. drupal_get_path('module','forena') . '/repos/sample';
+// Not applicable to drupal installs
 
-/**
- * Uncomment the following line to specify a particular path in which to save reports. 
- * The default value would be controlled by Forena configuration page. If you'd like users 
- * to be able to define their own reports in this repository then you need to make sure that this 
- * is writable by the web user (e.g. apache).  
- */
-// $conf['report_path'] = 'sites/files/reports' 

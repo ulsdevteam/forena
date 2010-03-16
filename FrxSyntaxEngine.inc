@@ -59,7 +59,8 @@ class FrxSyntaxEngine {
    * @param $data
    * @return unknown_type
    */
-  public function replace($text, $data) {
+  public function replace($text, $data, $raw=FALSE) {
+
   	  $match=array();
       $o_text = $text;  
       if (preg_match_all($this->tpattern,$o_text,$match))
@@ -70,7 +71,7 @@ class FrxSyntaxEngine {
 	    foreach($match[0] as $match_num=>$token)
 	    {
 	       $path = trim($token,$this->trim_chars);
-	       $value = $this->get_value($data, $path); 
+	       $value = $this->get_value($data, $path, $raw); 
 	       $text = str_replace($token, $value, $text);
 	    }
     
