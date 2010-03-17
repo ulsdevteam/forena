@@ -1,9 +1,15 @@
 <?php
+// $Id$ 
+/**
+ * @file
+ * Handles common date formats. 
+ *
+ */
 class FrxDateFormatter {
   public function format($value, $format_string) { 
     if (!$format_string) $format_string = 'F j,Y'; 
     if ($value)
-      $date = format_date(strtotime($value),'custom',$format_string);
+      $date = format_date(strtotime($value), 'custom', $format_string);
       if ($date) $value = $date; 
   }
   

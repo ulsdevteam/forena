@@ -1,9 +1,16 @@
 <?php
+// $Id$
+/**
+ * @file
+ * Provides data blocks for native drupal connections using the default 
+ * drupal connections.
+ *
+ */
 class frxDrupal extends FrxDataEngine {
-	/**
+  /**
 	 * Implements hooks into the drupal applications
 	 */
-private $te;  
+  private $te;  
   private $db;
   private $block_path; 
   
@@ -18,7 +25,7 @@ private $te;
      
     // Set up the stuff required to translate. 
     $this->block_path = $repos_path; 
-    $this->te = new FrxSyntaxEngine(FRX_SQL_TOKEN,':',$this); 
+    $this->te = new FrxSyntaxEngine(FRX_SQL_TOKEN, ':', $this); 
   }
   /**
    * Get data based on file data block in the repository. 
@@ -35,15 +42,15 @@ private $te;
     $xml =''; 
     if ($block['source'] && $this->access($block['access'])) { 
       $sql = $block['source']; 
-      $sql = $this->te->replace($sql,$params);
+      $sql = $this->te->replace($sql, $params);
       $rs = db_query($sql); 
       $xml = new SimpleXMLElement('<table/>'); 
       while ($data = db_fetch_object($rs)) { 
 
           $row_node = $xml->addChild('row'); 
           
-          foreach ($data as $key=>$value) {
-            $row_node->addChild($key,$value); 
+          foreach ($data as $key => $value) {
+            $row_node->addChild($key, $value); 
           }
       }
         
@@ -62,7 +69,7 @@ private $te;
    * @param unknown_type $data
    */
   public function format($value, $key, $data) { 
-    $value =  $db_escape_string($value); 
+    $value =  "'". db_escape_string($value) ."'"; 
     return $value; 
   }
   

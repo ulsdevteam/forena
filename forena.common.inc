@@ -1,4 +1,10 @@
 <?php
+// $Id$
+/**
+ * @file
+ * Common functions used throughout the project but loaded in this 
+ * file to keep the module file lean. 
+ */
 // Include Report renderer. 
 require_once('FrxReport.inc');
 require_once('FrxDataEngine.inc');
@@ -7,9 +13,9 @@ require_once('FrxDataEngine.inc');
 function __forena_load_repository(&$repo) { 
   // First determine if the class file exisits
   $path = $repo['path']; 
-  if (file_exists($path.'/settings.php')) {
+  if (file_exists($path .'/settings.php')) {
     // This should at minimum set  
-    include($path. '/settings.php'); 
+    include($path .'/settings.php'); 
      
   }
   
@@ -27,11 +33,8 @@ function __forena_load_repository(&$repo) {
 function __forena_load_engine($conf, $repo_path) { 
   $name = $conf['data_engine']; 
 
-  $path = drupal_get_path( 'module', 'forena'). '/plugins/' . $name; 
-  // Make sure that we don't override predefined classes
-  if (!class_exists($name) && file_exists($path. '.inc')) { 
-    include_once($path.'.inc'); 
-  }
+  forena_define_plugins('data'); 
+  // Instantiate the path
   if (class_exists($name)) { 
     $o = new $name($conf, $repo_path); 
     return $o; 
@@ -43,26 +46,26 @@ function __forena_load_engine($conf, $repo_path) {
  * If no repository is specified the descriptors for all repositories are returned. 
  */
 function forena_repository($name='') { 
-  global $forena_repositories; 
+  global $_forena_repositories; 
   static $repos =''; 
 
   
   // Empty repository so we need to initialize
   if (!$repos) {   
     // Build the default sample one
-    $path = drupal_get_path('module','forena');
+    $path = drupal_get_path('module', 'forena');
     
     $repos = array();
     // Load the repository list from the global settings.php file.  
-    if ($forena_repositories) { 
-      $repos = $forena_repositories; 
+    if ($_forena_repositories) { 
+      $repos = $_forena_repositories; 
     }
   
     // Overide difinitions of the sample and drupal repositories. 
-    $repos['sample'] = array('path' => $path.'/repos/sample',
+    $repos['sample'] = array('path' => $path .'/repos/sample',
                              'title' => 'Forena Sample Reports');
   
-    $repos['drupal'] = array('path' => $path.'/repos/drupal',
+    $repos['drupal'] = array('path' => $path .'/repos/drupal',
                              'title' => 'Drupal Reports');
   }
   
@@ -74,7 +77,8 @@ function forena_repository($name='') {
       }
       return $repos[$name];     
     }
-  } else { 
+  } 
+  else { 
     return $repos; 
   }
     
@@ -82,13 +86,13 @@ function forena_repository($name='') {
 
 
 function forena_invoke_data_engine($data_block, $parameters=array(), $subquery='') {
-   list($provider,$block) = explode('/',$data_block, 2); 
+   list($provider, $block) = explode('/', $data_block, 2); 
    // Get the data 
    $repos = forena_repository($provider);
 
    if ($repos['data']) { 
      $engine = $repos['data'];
-     if (method_exists($engine,'data')) {
+     if (method_exists($engine, 'data')) {
 
        $xml = $engine->data($block, $parameters, $subquery); 
      }
@@ -105,26 +109,26 @@ function forena_invoke_data_engine($data_block, $parameters=array(), $subquery='
  */
 function forena_load_block_file($filepath, $comment='--') { 
   $block_data = file_get_contents($filepath); 
-  $lines = explode("\n",$block_data); 
+  $lines = explode("\n", $block_data); 
   $cnt = count($lines);
   $access = '';
   $i=0;  
   $block = ''; 
   while ($i<$cnt) { 
-    $l = trim($lines[$i],"\r"); 
-    list($d,$c) = explode($comment,$l,2);
+    $l = trim($lines[$i], "\r"); 
+    list($d, $c) = explode($comment, $l, 2);
     if  ($c) { 
-      list($a,$o) = explode('=', $c, 2);
+      list($a, $o) = explode('=', $c, 2);
       if (trim($a)=='ACCESS') { 
         $access = trim($o);    
       }
     } 
-    if (strpos($l,$comment)!==0) { 
+    if (strpos($l, $comment)!==0) { 
       $data .= "$l\n";   
     }
     $i++;
   }
-  return array('access'=>$access, 'source' => $data); 
+  return array('access' => $access, 'source' => $data); 
   
 }
 
@@ -136,10 +140,10 @@ function forena_load_block_file($filepath, $comment='--') {
  */
 function forena_error($short_message, $log) { 
   if ($short_message) { 
-    drupal_set_message($short_message,'error'); 
+    drupal_set_message($short_message, 'error'); 
   }
   if ($log) {
-    watchdog('forena',$log, NULL, WATCHDOG_ERROR); 
+    watchdog('forena', $log, NULL, WATCHDOG_ERROR); 
   }
 }
 
@@ -149,11 +153,54 @@ function forena_error($short_message, $log) {
  * @return unknown
  */
 function forena_report_path() { 
-  $report_path = variable_get('forena_report_repos',''); 
+  $report_path = variable_get('forena_report_repos', ''); 
   if (!$report_path) {
-    $report_path = drupal_get_path('module','forena'). '/repos/reports'; 
+    $report_path = drupal_get_path('module', 'forena') . '/repos/reports';
   }
   return $report_path; 
 }
 
+/**
+ * Invokes the hooks required for forena plugin registration. 
+ * Each module returns an array structure that defines multiple plugins
+ * 
+ * types - Type of object: 
+ *         data  - Provides the data methods 
+ *         control - implements a rendering control
+ *         formatter - Implments a data formatter that is called when processing token replacements
+ * 
+ * class - Indicates the name of the class that will be used to define the plugins behaviors. 
+ * 
+ */
+function forena_plugins() {
+  static $plugins = ''; 
+  if (!$plugins) {  
+    $plugins = array(); 
+    foreach (module_list() as $module) {
+      $function = $module .'_forena_plugins';
+      if (function_exists($function)) {
+        $returned_plugins = $function();
+        if ($returned_plugins) foreach ((array)$returned_plugins as $p) { 
+          $p['module'] = $module; 
+          $plugins[]=$p; 
+        }
+      }
+    }
+  }
+  return $plugins; 
+}
+
+/**
+ * Loads all of the include files that 
+ */
+function forena_define_plugins($type ='', $class='') {
+  $plugins = forena_plugins(); 
+  foreach ($plugins as $p) { 
+    if ((!$type || $type==$p['type']) && ($class='' || $class=$p['class'])) { 
+      if ($p['file'] && $p['module']) { 
+        include_once( drupal_get_path('module' , $p['module']) .'/'. trim($p['file'], '/')); 
+      }
+    }
+  }
+}
 

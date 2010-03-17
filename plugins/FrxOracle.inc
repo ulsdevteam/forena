@@ -1,8 +1,10 @@
 <?php
+// $Id$
 /**
+ * @file
  * Oracle specific driver that takes advantage of oracles native XML support
  * 
- * The followiing 
+ * In order to take advantage of XML support the following XML 
  *
  */
 class FrxOracle extends FrxDataEngine {
@@ -28,13 +30,14 @@ class FrxOracle extends FrxDataEngine {
         forena_error('Unable to connect to database', $e->getMessage());  
       }
    
-    } else { 
+    } 
+    else { 
       forena_error('No database connection string specified'); 
     }
     
     // Set up the stuff required to translate. 
     $this->block_path = $repos_path; 
-    $this->te = new FrxSyntaxEngine(FRX_SQL_TOKEN,':',$this); 
+    $this->te = new FrxSyntaxEngine(FRX_SQL_TOKEN, ':', $this); 
   }
   /**
    * Get data based on file data block in the repository. 
@@ -46,23 +49,23 @@ class FrxOracle extends FrxDataEngine {
   public function data($block_name, $params=array(), $subQuery='') {
     // Load the block from the file
     $db = $this->db; 
-    $filename = $this->block_path .'/'. $block_name . '.sql';  
+    $filename = $this->block_path .'/'. $block_name .'.sql';  
     $block = forena_load_block_file($filename); 
     $xml =''; 
     if ($block['source'] && $this->access($block['access']) && $db) { 
       $sql = $block['source']; 
-      $sql = $this->te->replace($sql,$params);
+      $sql = $this->te->replace($sql, $params);
 
       $xml = new SimpleXMLElement('<table/>'); 
 
       //$rs->debugDumpParams();
-      $stmt = oci_parse($db,$sql); 
+      $stmt = oci_parse($db, $sql); 
       oci_execute($stmt);  
 
-      while ($row = oci_fetch_array($stmt,OCI_ASSOC+OCI_RETURN_NULLS)) { 
+      while ($row = oci_fetch_array($stmt, OCI_ASSOC+OCI_RETURN_NULLS)) { 
         $row_node = $xml->addChild('row'); 
-        foreach ($row as $key=>$value) {
-          $row_node->addChild(strtolower($key),$value); 
+        foreach ($row as $key => $value) {
+          $row_node->addChild(strtolower($key), $value); 
         }
       }
       oci_free_statement($stmt); 
@@ -81,7 +84,7 @@ class FrxOracle extends FrxDataEngine {
    * @param unknown_type $data
    */
   public function format($value, $key, $data) { 
-    $value =  "'".  str_replace("'","''", $value). "'"; 
+    $value =  "'".  str_replace("'", "''", $value) ."'"; 
     return $value; 
   }
   

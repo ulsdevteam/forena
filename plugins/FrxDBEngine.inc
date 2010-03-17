@@ -1,5 +1,7 @@
 <?php
+// $Id$
 /**
+ * @file
  * General database engine used to do sql queries. 
  *
  */
@@ -26,14 +28,14 @@ class FrxDBEngine extends FrxDataEngine {
       } catch (PDOException $e) { 
         forena_error('Unable to connect to database', $e->getMessage());  
       }
-   
-    } else { 
+    } 
+    else { 
       forena_error('No database connection string specified'); 
     }
     
     // Set up the stuff required to translate. 
     $this->block_path = $repos_path; 
-    $this->te = new FrxSyntaxEngine(FRX_SQL_TOKEN,':',$this); 
+    $this->te = new FrxSyntaxEngine(FRX_SQL_TOKEN, ':', $this); 
   }
   /**
    * Get data based on file data block in the repository. 
@@ -50,23 +52,24 @@ class FrxDBEngine extends FrxDataEngine {
     $xml =''; 
     if ($block['source'] && $this->access($block['access']) && $db) { 
       $sql = $block['source']; 
-      $sql = $this->te->replace($sql,$params);
+      $sql = $this->te->replace($sql, $params);
       $rs = $db->query($sql); 
       $xml = new SimpleXMLElement('<table/>'); 
       
       $e = $db->errorCode();
-      if ($e!='00000') {
+      if ($e != '00000') {
        $i = $db->errorInfo(); 
-       forena_error($i[2].':'.$sql, $i[2]); 
+       forena_error($i[2] .':'. $sql, $i[2]); 
         
-      } else { 
+      } 
+      else { 
 
         //$rs->debugDumpParams(); 
         $data = $rs->fetchAll(PDO::FETCH_ASSOC); 
         foreach ($data as $row) { 
           $row_node = $xml->addChild('row'); 
-          foreach ($row as $key=>$value) {
-            $row_node->addChild($key,$value); 
+          foreach ($row as $key => $value) {
+            $row_node->addChild($key, $value); 
           }
         }
         

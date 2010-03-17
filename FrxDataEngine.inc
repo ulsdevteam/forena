@@ -1,4 +1,10 @@
 <?php
+// $Id$
+/**
+ * @file
+ * Class that defines default methods for access control in an FrxDataEngine
+ *
+ */
 class FrxDataEngine{
 
   public $conf; 
@@ -18,7 +24,8 @@ class FrxDataEngine{
     $f = $this->conf['access callback']; 
     if ($f && is_callable($f)) {
       return $f($arg); 
-    } else { 
+    } 
+    else { 
       return user_access('access content'); 
     }
   }

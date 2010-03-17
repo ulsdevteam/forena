@@ -1,4 +1,9 @@
 <?php
+// $Id$
+/**
+ * @file
+ * Report administration forms and functions. 
+ */
 require_once('forena.common.inc'); 
 /**
  * Save the report file to disk
@@ -9,7 +14,7 @@ require_once('forena.common.inc');
 function forena_save_report($name, $data) { 
   $report_path = forena_report_path();
   //@TODO: Clean up filename to make sure  
-  $filepath = $report_path.'/'.$name. 'frx';
+  $filepath = $report_path .'/'. $name .'frx';
   if (is_object($data)) { 
     $data = $data->asXML(); 
   }
@@ -28,7 +33,7 @@ function forena_save_report($name, $data) {
  */
 function forena_settings() {
   $report_path = forena_report_path();
-  $path = variable_get('forena_path','reports');
+  $path = variable_get('forena_path', 'reports');
    
   $form['forena_path'] = array(
     '#type' => 'textfield',
@@ -69,12 +74,12 @@ function forena_settings() {
 function forena_settings_submit($form, &$form_state) { 
   $values = $form_state['values']; 
   $path = $values['forena_report_repos'];
-  $src_dir = drupal_get_path('module','forena') . '/repos/reports';  
+  $src_dir = drupal_get_path('module', 'forena') . '/repos/reports';  
   if (!file_exists($path)) { 
     try { 
 
       if (file_exists($path)) { 
-        drupal_set_message (t('Created directory %s', array($path))) ; 
+        drupal_set_message(t('Created directory %s', array($path))) ; 
       }
       mkdir($path);
       
@@ -82,23 +87,24 @@ function forena_settings_submit($form, &$form_state) {
       forena_error('Unable to create report directory', $e->getMessage());  
     }
    
-  } elseif ($path != $src_dir) { 
+  } 
+  elseif ($path != $src_dir) { 
     // Copy the reports from the 
     $d = dir($src_dir);
     $dest_dir = $d->path; 
     $i=0; 
     while (false !== ($rpt_file = $d->read())) {
-       echo $entry."\n";
+       echo $entry ."\n";
        $src_file = $d->path .'/'. $rpt_file; 
        $dest_file = $path .'/'. $rpt_file; 
        if (is_file($src_file)) {
-         file_put_contents($dest_file,file_get_contents($src_file)); 
+         file_put_contents($dest_file, file_get_contents($src_file)); 
          $i++;
        } 
     }
     
     $d->close();
-    drupal_set_message($i .' delivered reports copied from '. $src_dir. ' to '. $path);     
+    drupal_set_message($i .' delivered reports copied from '. $src_dir .' to '. $path);     
   }
   menu_cache_clear(); 
 }

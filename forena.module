@@ -5,35 +5,35 @@
  * @return array
  */
 function forena_menu() { 
-	$items = array(); 
-	$items['ft'] = array(
-	  'page callback' => 'forena_test', 
-	  'page arguments' => array(), 
-	  'title' => t('Forena Testing'),
-	  'access arguments' => array('access content'), 
-	  'type' => MENU_CALLBACK, 
-	); 
-	
-	$items['admin/settings/forena'] = array(
-	  'page callback' => 'drupal_get_form',
-	  'page arguments' => array('forena_settings'), 
-	  'title' => 'Forena Reports', 
-	  'description' => t('Tell Forena where to store report files and how users should access them.'),
-	  'access arguments' => array('administer forena reports'),
-	  'type' => MENU_NORMAL_ITEM, 
-	  'file' => 'forena.admin.inc', 
-	); 
-	
-	$path = variable_get('forena_path','reports'); 
-	$items[$path] = array(
-	  'page callback' => 'forena_report',
-	  'page arguments' => array(), 
-	  'title' => t('Forena Reports'),
-	  'access arguments' => array('access content'),  
-	  'type' => MENU_NORMAL_ITEM, 
-	); 
-	
-	return $items; 
+  $items = array(); 
+  $items['ft'] = array(
+    'page callback' => 'forena_test', 
+    'page arguments' => array(), 
+    'title' => t('Forena Testing'),
+    'access arguments' => array('access content'), 
+    'type' => MENU_CALLBACK, 
+  ); 
+
+  $items['admin/settings/forena'] = array(
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('forena_settings'), 
+    'title' => 'Forena Reports', 
+    'description' => t('Tell Forena where to store report files and how users should access them.'),
+    'access arguments' => array('administer forena reports'),
+    'type' => MENU_NORMAL_ITEM, 
+    'file' => 'forena.admin.inc', 
+  ); 
+
+  $path = variable_get('forena_path', 'reports'); 
+  $items[$path] = array(
+    'page callback' => 'forena_report',
+    'page arguments' => array(), 
+    'title' => t('Forena Reports'),
+    'access arguments' => array('access content'),  
+    'type' => MENU_NORMAL_ITEM, 
+   ); 
+
+  return $items; 
 }
 
 /**
@@ -62,9 +62,10 @@ function forena_test() {
   return $output; 
 }
 
-function forena_report($name='') {
+function forena_report($report_name='') {
   require_once('forena.common.inc');  
-  $report_path = forena_report_path(); 
+  $report_path = forena_report_path();
+  list($name, $format) = explode('.', $report_name, 2);  
   if ($name) { 
     $filename = $report_path . '/'. $name . '.frx';
     if (file_exists($filename)) {
@@ -76,11 +77,13 @@ function forena_report($name='') {
       }
       $parms = $_GET; 
       unset($parms['q']); 
-      $output .= forena_render_report($r, $parms); 
-    } else { 
+      $output .= forena_render_report($r, $format, $parms); 
+    } 
+    else { 
       drupal_not_found(); 
     }
-  } else { 
+  } 
+  else { 
     // @TODO: List reports 
     $output = 'Need to specify a report name'; 
   }
@@ -95,10 +98,10 @@ function forena_report($name='') {
  * @param unknown_type $data
  * @return unknown
  */
-function forena_render_report ($report, $format='', $data='') {
+function forena_render_report($report, $format='', $data='') {
   require_once('forena.common.inc');    
-  $o = new FrxReport($report,$data);
-  $output = $o->render($report, $format, $data); 
+  $o = new FrxReport($report, $data);
+  $output = $o->render($format); 
   return $output;  
 }
 
