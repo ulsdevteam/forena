@@ -1,0 +1,42 @@
+<html xmlns:frx="urn:FrxReports">
+	<head>
+		<title>User logs</title>
+
+		<frx:fields>
+			<frx:field id="details" link="admin/reports/event/{wid}">Details</frx:field>
+			<frx:field id="total"  link="reports/DrupalUserLogs?name={name}"></frx:field>
+			<frx:field id="name">Anonymous</frx:field>
+		</frx:fields>
+	</head>
+	<body>
+		<div frx:block="drupal/users_in_logs">
+			<h4>Users Appearing in Logs</h4>
+			<table>
+				<thead>
+					<tr><th width="200">User</th><th>Log Entries</th></tr>
+				</thead>
+				<tbody>
+					<tr frx:foreach="*">
+						<td >{name}</td>
+						<td>{total}</td>
+						<td></td>
+					</tr>
+				</tbody>
+			</table>			
+		</div>
+		<h4>Log Entries for {name}</h4>
+		  <table frx:block="drupal/user_logs">
+				<thead>
+					<tr><th width="200px">Type</th><th>Timestamp</th></tr>
+				</thead>
+				<tbody>
+					<tr frx:foreach="*">
+						<td>{type}</td>
+						<td>{timestamp}</td>
+						<td>{details}</td>
+						<td></td>
+					</tr>
+				</tbody>
+		  </table>
+	</body>
+</html>
