@@ -1,0 +1,41 @@
+<?php
+// $Id$
+/**
+ * @file
+ * Installation api for module
+ */
+/**
+ * Implementation of hook_schema
+ *
+ * @return unknown
+ */
+function forena_schema() {
+  $schema['forena_reports'] = array(
+    'fields' => array(
+       'report_name' => array('type' => 'varchar', 'length' => 255, 'NOT NULL' => TRUE),
+       'title' => array('type' => 'varchar', 'length' => 63, 'NOT NULL' => TRUE),
+       'file_name' => array('type' => 'varchar', 'length' => 255, 'NOT NULL' => TRUE),
+       'category' => array('type' => 'varchar', 'length' => 255, 'NOT NULL' => FALSE),
+       'repository' => array('type' => 'varchar', 'length' => 255, 'NOT NULL' => FALSE),
+       'access' => array('type' => 'varchar', 'length' => 255, 'NOT NULL' => FALSE),
+       'hidden' => array('type' => 'int', 'NOT NULL' => FALSE, ),
+    ),
+    'primary key' => array('report_name'),
+    'indexes' => array(
+      'category' => array('category'),
+    ),
+  ); 
+  return $schema;  
+}
+
+/**
+ * Basic install and uninstall
+ *
+ */
+function forena_install() { 
+  drupal_install_schema('forena'); 
+}
+
+function forena_uninstall() { 
+  drupal_uninstall_schema('forena'); 
+}

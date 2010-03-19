@@ -15,7 +15,7 @@ $conf['access callback'] = 'user_access';
  * 
  */
 
-$conf['data_engine'] = 'FrxDrupal'; 
+$conf['data_engine'] = 'FrxDrupal';
 
 /*
  * URI: 

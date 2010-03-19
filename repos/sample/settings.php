@@ -15,7 +15,7 @@ $conf['access callback'] = 'user_access';
  * 
  */
 
-$conf['data_engine'] = 'FrxFileEngine'; 
+$conf['data_engine'] = 'FrxFiles'; 
 
 /*
  * URI: 

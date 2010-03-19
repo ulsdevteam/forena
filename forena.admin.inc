@@ -11,21 +11,84 @@ require_once('forena.common.inc');
  * @param string $name File name  to save report to
  * @param unknown_type $data
  */
-function forena_save_report($name, $data) { 
+function forena_save_report($data, $report, $save_file = FALSE) { 
+  static $save_count=0; 
+  
   $report_path = forena_report_path();
   //@TODO: Clean up filename to make sure  
-  $filepath = $report_path .'/'. $name .'frx';
-  if (is_object($data)) { 
-    $data = $data->asXML(); 
+  $name = $data['name']; 
+  $filepath = $report_path .'/'. $data['name'] .'.frx';
+  $data['enabled'] = $data['enabled'] ? 1 : 0; 
+  
+  // If we need to save this to the file system 
+  if ($save_file) {
+    // Serialize the report for saving
+    if (is_object($data)) { 
+      $data = $data->asXML(); 
+    }
+    
+    try { 
+      file_put_contents($filepath, $data); 
+    } catch (Exception $e) {
+      fornea_error('Error Saving Report', $e->getMessage()); 
+    }
   }
 
-  try { 
-    file_put_contents($filepath, $data); 
-  } catch (Exception $e) {
-    fornea_error('Error Saving Report', $e->getMessage()); 
+  // Save to the Database
+  if (file_exists($filepath)) {
+    $result = db_query("SELECT report_name FROM {forena_reports} WHERE report_name='%s'", $name); 
+    if ($rpt = db_fetch_object($result)) { 
+      db_query("UPDATE {forena_reports} SET title='%s' WHERE report_name='%s'", array($data['title'], $name)); 
+    }
+    else { 
+      db_query("INSERT INTO {forena_reports} (report_name,title) VALUES ('%s','%s')", array($name, $data['title'])); 
+    }
+    $save_count++; 
+    
   }
-  
+  return $save_count; 
 }
+
+/**
+ * Syncronize the data 
+ *
+ */
+function forena_db_sync($subdir='') {
+  static $prefix = '';
+  if (!$subdir) { 
+    $prefix = ''; 
+  }
+  $path = forena_report_path() .'/'. $subdir; 
+  
+  $d = dir($path); 
+  if ($d) while (false !== ($rpt_file = $d->read())) {
+    $src_file = $d->path .'/'. $rpt_file; 
+    $dest_file = $path .'/'. $rpt_file; 
+    if (is_file($src_file)) {
+      list($report_name, $ext) = explode('.', $rpt_file, 2);
+      if ($ext == 'frx') {  
+        $report_name = trim($prefix .'/'. $report_name, '/');  
+        $r_xml = file_get_contents($src_file);
+        // Load the report
+        $r = new FrxReport($r_xml);  
+        $data['title'] = $r->title; 
+        $data['name'] = $report_name; 
+        $save_count = forena_save_report($data, $r_xml); 
+      }
+    } 
+    elseif (is_dir($src_file)) {
+      if (substr($rpt_file, 0, 1)!='.') { 
+        $save_prefix = $prefix; 
+        $prefix .=  trim('/'. $rpt_file, '/'); 
+        forena_db_sync($prefix); 
+        $prefix = $save_prefix; 
+      }
+    }
+  }    
+  if ($d) $d->close(); 
+  return $save_count; 
+}
+
 
 /**
  * Forena admin settings form
@@ -84,11 +147,11 @@ function forena_settings_submit($form, &$form_state) {
       mkdir($path);
       
     } catch (Exception $e) { 
-      forena_error('Unable to create report directory', $e->getMessage());  
+      forena_error(t('Unable to create report directory'), $e->getMessage());  
     }
    
   } 
-  elseif ($path != $src_dir) { 
+  if (file_exists($path) && $path != $src_dir) { 
     // Copy the reports from the 
     $d = dir($src_dir);
     $dest_dir = $d->path; 
@@ -104,7 +167,9 @@ function forena_settings_submit($form, &$form_state) {
     }
     
     $d->close();
-    drupal_set_message($i .' delivered reports copied from '. $src_dir .' to '. $path);     
+    drupal_set_message($i .' delivered reports copied from '. $src_dir .' to '. $path);
   }
+  $save_count = forena_db_sync();
+  drupal_set_message('Imported '. $save_count .' forms into the database');       
   menu_cache_clear(); 
 }

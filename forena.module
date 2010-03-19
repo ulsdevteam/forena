@@ -28,7 +28,7 @@ function forena_menu() {
   $items[$path] = array(
     'page callback' => 'forena_report',
     'page arguments' => array(), 
-    'title' => t('Forena Reports'),
+    'title' => t('Reports'),
     'access arguments' => array('access content'),  
     'type' => MENU_NORMAL_ITEM, 
    ); 
@@ -62,8 +62,17 @@ function forena_test() {
   return $output; 
 }
 
-function forena_report($report_name='') {
+function forena_report() {
+  $arg_list = func_get_args();
   require_once('forena.common.inc');  
+  
+  // Concat argument to function to get a path
+  $f_path = variable_get('forena_path', 'reports');
+  foreach ($arg_list as $arg) {
+       $report_name .= '/'. $arg; 
+  }
+  $report_name = trim($report_name, '/'); 
+  
   $report_path = forena_report_path();
   list($name, $format) = explode('.', $report_name, 2);  
   if ($name) { 
@@ -85,7 +94,12 @@ function forena_report($report_name='') {
   } 
   else { 
     // @TODO: List reports 
-    $output = 'Need to specify a report name'; 
+    $result = db_query('SELECT * FROM {forena_reports} ORDER BY title asc');
+    $output .= '<ul>'; 
+    while ($row = db_fetch_object($result)) {
+       $output .= '<li>'. l($row->title, variable_get('forena_path', 'reports') .'/'. $row->report_name) .'</li>';
+    }
+    $output .= '</ul>'; 
   }
   return $output; 
 }
@@ -110,9 +124,9 @@ function forena_render_report($report, $format='', $data='') {
  *
  */
 function forena_forena_plugins() { 
-  $plugins[] = array('file' => 'plugins/FrxDBEngine.inc', 
+  $plugins[] = array('file' => 'plugins/FrxPDO.inc', 
                      'type' => 'data',
-                     'class' => 'FrxDbEngine', 
+                     'class' => 'FrxPDO', 
                      );
   $plugins[] = array('file' => 'plugins/FrxOracle.inc', 
                      'type' => 'data',
@@ -122,9 +136,9 @@ function forena_forena_plugins() {
                      'type' => 'data', 
                      'class' => 'FrxDrupal',
                      ); 
-  $plugins[] = array('file' => 'plugins/FrxFileEngine.inc', 
+  $plugins[] = array('file' => 'plugins/FrxFiles.inc', 
                      'type' => 'data', 
-                     'class' => 'FrxFileEngine',
+                     'class' => 'FrxFiles',
                      ); 
   return $plugins; 
 }

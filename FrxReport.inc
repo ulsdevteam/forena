@@ -16,31 +16,33 @@ class FrxReport {
   public $access;  
   
   public function __construct($xhtml, $data=array()) {
-    $this->teng = new FrxSyntaxEngine(FRX_TOKEN_EXP, '{}', $this); 
-    if (!is_object($xhtml)) { 
-      $this->rpt_xml = new SimpleXMLElement($xhtml);
-    } 
-    else { 
-      $this->rpt_xml = $xhtml; 
-    }
-    $this->cur_data = $data;
-    
-    // Load header data
-    $rpt_xml = $this->rpt_xml; 
-    if ($rpt_xml->head) {
-      $this->title = (string)$rpt_xml->head->title; 
-    
-      foreach ($rpt_xml->head->children('urn:FrxReports') as $name => $node) { 
-        switch ($name) { 
-          case 'fields': 
-             $this->fields = $node;
-             break; 
-          case 'category':
-            $this->categories[] = (string)$node; 
-            break;     
-          case 'access': 
-            $this->access[] = (string)$node; 
-            break; 
+    $this->teng = new FrxSyntaxEngine(FRX_TOKEN_EXP, '{}', $this);
+    if ($xhtml) { 
+      if (!is_object($xhtml)) { 
+        $this->rpt_xml = new SimpleXMLElement($xhtml);
+      } 
+      else { 
+        $this->rpt_xml = $xhtml; 
+      }
+      $this->cur_data = $data;
+      
+      // Load header data
+      $rpt_xml = $this->rpt_xml; 
+      if ($rpt_xml->head) {
+        $this->title = (string)$rpt_xml->head->title; 
+      
+        foreach ($rpt_xml->head->children('urn:FrxReports') as $name => $node) { 
+          switch ($name) { 
+            case 'fields': 
+               $this->fields = $node;
+               break; 
+            case 'category':
+              $this->categories[] = (string)$node; 
+              break;     
+            case 'access': 
+              $this->access[] = (string)$node; 
+              break; 
+          }
         }
       }
     }
@@ -73,7 +75,7 @@ class FrxReport {
    * Walks the nodes renering the report. 
    */
   public function render_section(SimpleXMLElement $node) {
-  
+    $cur_data = $this->cur_data; 
     $elements = count($node->xpath('*'));
     $frx = $node->attributes('urn:FrxReports');
     // Test to see if we have any nodes that are contains data url
@@ -97,7 +99,7 @@ class FrxReport {
         
         if ($nodes) foreach ($nodes as $x) {
           $this->cur_data = $x;
-          $o .= $this->teng->replace('<'. $tag . $attr_text .'>', $this->cur_data);
+          $o .= $this->teng->replace('<'. $tag . $attr_text .'>', $cur_data);
           foreach ($node->children() as $child) { 
             $o .= $this->render_section($child); 
           }
@@ -121,6 +123,7 @@ class FrxReport {
       $text = $node->asXML();
       $o .= $this->teng->replace($text, $this->cur_data);
     }
+    $this->cur_data = $cur_data; 
     return $o; 
   }
   
@@ -185,5 +188,19 @@ class FrxReport {
       $value = l(htmlspecialchars_decode($value), $url, array('query' => $query));
     }
     return $value; 
+  }
+  
+  /**
+   * Return the xml data for the report. 
+   *
+   * @return unknown
+   */
+  public function asXML() { 
+     if ($this->rpt_xml) { 
+       return $this->rpt_xml->asXML(); 
+     } 
+     else { 
+       return '';    
+     }
   }
 }

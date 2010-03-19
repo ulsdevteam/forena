@@ -6,7 +6,7 @@
  *
  */
 
-class FrxDBEngine extends FrxDataEngine { 
+class FrxPDO extends FrxDataEngine { 
   
   private $te;  
   private $db;
@@ -69,7 +69,7 @@ class FrxDBEngine extends FrxDataEngine {
         foreach ($data as $row) { 
           $row_node = $xml->addChild('row'); 
           foreach ($row as $key => $value) {
-            $row_node->addChild($key, $value); 
+            $row_node->addChild($key, htmlspecialchars($value)); 
           }
         }
         

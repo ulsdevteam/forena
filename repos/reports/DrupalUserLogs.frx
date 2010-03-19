@@ -27,11 +27,12 @@
 		<h4>Log Entries for {name}</h4>
 		  <table frx:block="drupal/user_logs">
 				<thead>
-					<tr><th width="200px">Type</th><th>Timestamp</th></tr>
+					<tr><th width="200px">Type</th><th width="200">Location</th><th>Timestamp</th></tr>
 				</thead>
 				<tbody>
 					<tr frx:foreach="*">
 						<td>{type}</td>
+						<td>{location}</td>
 						<td>{timestamp}</td>
 						<td>{details}</td>
 						<td></td>

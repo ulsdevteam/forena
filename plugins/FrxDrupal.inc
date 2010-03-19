@@ -50,7 +50,8 @@ class frxDrupal extends FrxDataEngine {
           $row_node = $xml->addChild('row'); 
           
           foreach ($data as $key => $value) {
-            $row_node->addChild($key, $value); 
+            $row_node->addChild($key, htmlspecialchars($value)); 
+            //$row_node->$key = $value; 
           }
       }
         

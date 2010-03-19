@@ -65,7 +65,7 @@ class FrxOracle extends FrxDataEngine {
       while ($row = oci_fetch_array($stmt, OCI_ASSOC+OCI_RETURN_NULLS)) { 
         $row_node = $xml->addChild('row'); 
         foreach ($row as $key => $value) {
-          $row_node->addChild(strtolower($key), $value); 
+          $row_node->addChild(strtolower($key), htmlspecialchars($value)); 
         }
       }
       oci_free_statement($stmt); 
