@@ -12,7 +12,7 @@ class FrxReport {
   private $output; 
   private $teng; 
   public $fields;
-  public $categories; 
+  public $category; 
   public $access;  
   
   public function __construct($xhtml, $data=array()) {
@@ -37,11 +37,8 @@ class FrxReport {
                $this->fields = $node;
                break; 
             case 'category':
-              $this->categories[] = (string)$node; 
+              $this->category = (string)$node; 
               break;     
-            case 'access': 
-              $this->access[] = (string)$node; 
-              break; 
           }
         }
       }

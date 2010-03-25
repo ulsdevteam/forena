@@ -1,7 +1,7 @@
 <html xmlns:frx="urn:FrxReports">
 	<head>
 		<title>User logs</title>
-
+        <frx:category>Drupal Administration</frx:category>
 		<frx:fields>
 			<frx:field id="details" link="admin/reports/event/{wid}">Details</frx:field>
 			<frx:field id="total"  link="reports/DrupalUserLogs?name={name}"></frx:field>

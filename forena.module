@@ -6,13 +6,6 @@
  */
 function forena_menu() { 
   $items = array(); 
-  $items['ft'] = array(
-    'page callback' => 'forena_test', 
-    'page arguments' => array(), 
-    'title' => t('Forena Testing'),
-    'access arguments' => array('access content'), 
-    'type' => MENU_CALLBACK, 
-  ); 
 
   $items['admin/settings/forena'] = array(
     'page callback' => 'drupal_get_form',
@@ -30,8 +23,17 @@ function forena_menu() {
     'page arguments' => array(), 
     'title' => t('Reports'),
     'access arguments' => array('access content'),  
+    'type' => MENU_CALLBACK, 
+   ); 
+
+  $items['forena'] = array(
+    'page callback' => 'forena_user_reports',
+    'page arguments' => array(), 
+    'title' => t('My Reports'),
+    'access arguments' => array('list reports'),  
     'type' => MENU_NORMAL_ITEM, 
    ); 
+   
 
   return $items; 
 }
@@ -43,10 +45,11 @@ function forena_menu() {
  */
 function forena_perm() { 
   $perms = array(
+    'administer forena reports', 
+    'list reports', 
     'create any report', 
     'design any report',
-    'administer forena reports'
-  ); 
+    ); 
   //@TODO: Add the ability to create subrepositories with different permissions. 
   return $perms; 
 }
@@ -92,15 +95,53 @@ function forena_report() {
       drupal_not_found(); 
     }
   } 
-  else { 
-    // @TODO: List reports 
-    $result = db_query('SELECT * FROM {forena_reports} ORDER BY title asc');
-    $output .= '<ul>'; 
-    while ($row = db_fetch_object($result)) {
-       $output .= '<li>'. l($row->title, variable_get('forena_path', 'reports') .'/'. $row->report_name) .'</li>';
-    }
-    $output .= '</ul>'; 
+  else {
+    drupal_not_found();  
   }
+  return $output; 
+}
+
+function forena_user_reports() {
+  $result = db_query('SELECT * FROM {forena_reports} ORDER BY category,title asc');
+  $categories = array(); 
+  while ($row = db_fetch_object($result)) {
+    
+    $cache = $row->cache; 
+    if ($cache) {
+      $cache = unserialize($cache);
+      $access = TRUE; 
+      // Check each callback function to see if we have an error. 
+      foreach ($cache['access'] as $callback => $args) {
+
+        if ($callback && $args) foreach ($args as $arg) { 
+          if (function_exists($callback)) { 
+            $a = $callback($arg); 
+          }
+          if (!$a) $access = FALSE; 
+        } 
+        else { 
+          $access = FALSE; 
+        }
+      }
+    }
+    
+    if ($access) { 
+      $categories[$row->category][] = array(
+        'title' => $row->title, 
+        'report_name' => $row->report_name, 
+      );
+    } 
+  
+  }
+  $report_repos = variable_get('forena_path', 'reports'); 
+  foreach ($categories as $category => $reports) {
+    $output .= '<h3>'. $category .'</h3>';  
+    $output .= '<ul>'; 
+    foreach ($reports as $r) { 
+      $output .= '<li>'. l($r['title'], $report_repos .'/'. $r['report_name']) .'</li>';  
+    }
+  }
+  $output .= '</ul>'; 
   return $output; 
 }
 

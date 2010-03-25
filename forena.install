@@ -19,6 +19,7 @@ function forena_schema() {
        'repository' => array('type' => 'varchar', 'length' => 255, 'NOT NULL' => FALSE),
        'access' => array('type' => 'varchar', 'length' => 255, 'NOT NULL' => FALSE),
        'hidden' => array('type' => 'int', 'NOT NULL' => FALSE, ),
+       'cache' => array('type' => 'text'),
     ),
     'primary key' => array('report_name'),
     'indexes' => array(
@@ -29,7 +30,7 @@ function forena_schema() {
 }
 
 /**
- * Basic install and uninstall
+ * Basic install and uninstall hooks. 
  *
  */
 function forena_install() { 

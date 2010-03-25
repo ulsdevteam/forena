@@ -10,7 +10,7 @@ class FrxPDO extends FrxDataEngine {
   
   private $te;  
   private $db;
-  private $block_path; 
+ 
   
   /**
    * Object constructor
@@ -34,7 +34,6 @@ class FrxPDO extends FrxDataEngine {
     }
     
     // Set up the stuff required to translate. 
-    $this->block_path = $repos_path; 
     $this->te = new FrxSyntaxEngine(FRX_SQL_TOKEN, ':', $this); 
   }
   /**
@@ -46,9 +45,8 @@ class FrxPDO extends FrxDataEngine {
    */
   public function data($block_name, $params=array(), $subQuery='') {
     // Load the block from the file
-    $db = $this->db; 
-    $filename = $this->block_path .'/'. $block_name . '.sql';  
-    $block = forena_load_block_file($filename); 
+    $db = $this->db;   
+    $block = $this->load_block($block_name); 
     $xml =''; 
     if ($block['source'] && $this->access($block['access']) && $db) { 
       $sql = $block['source']; 

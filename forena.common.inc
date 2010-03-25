@@ -84,7 +84,50 @@ function forena_repository($name='') {
     
 }
 
+function forena_load_cache($r_xhtml) {
+  $blocks = array(); 
+  if (is_object($r_xhtml)) {
+    $block_xml = $r_xhtml->xpath('//*[@frx:block]'); 
+    // Extract all the blocks and organize by provider
+    foreach ($block_xml as $key => $block_node) {
+      $attrs = $block_node->attributes('urn:FrxReports'); 
+      foreach ($attrs as $key => $value) { 
+        list($provider, $block) = explode('/', $value, 2);
+        $repos[$provider][] = $block;          
+      }
+    } 
+    
+    foreach ($repos as $provider => $blocks) { 
+      $repos = forena_repository($provider);
+      $engine = $repos['data'];
+      $conf = $engine->conf;
+      $access = array(); 
+      foreach ($blocks as $block_name) {
+        if ($engine && $block_name) {
+          if (method_exists($engine, 'load_block')) {
+            $conf = $engine->conf; 
+            $block = $engine->load_block($block_name); 
+            if (array_search($block['access'], $access)===FALSE) $access[]=$block['access']; 
+          }
+        } 
+        else { 
+          //drupal_set_message('no engine found', 'error');    
+        }
+      }
+      $cache['access'][$conf['access callback']]=$access; 
+    } 
+  }
+  return $cache; 
+}
 
+/**
+ * Extract the data by running a block
+ *
+ * @param unknown_type $data_block
+ * @param unknown_type $parameters
+ * @param unknown_type $subquery
+ * @return unknown
+ */
 function forena_invoke_data_engine($data_block, $parameters=array(), $subquery='') {
    list($provider, $block) = explode('/', $data_block, 2); 
    // Get the data 
@@ -107,7 +150,7 @@ function forena_invoke_data_engine($data_block, $parameters=array(), $subquery='
  * @param unknown_type $filepath
  * @param unknown_type $comment
  */
-function forena_load_block_file($filepath, $comment='--') { 
+function forena_load_block_file($filepath, $comment='--', $trim) { 
   $block_data = file_get_contents($filepath); 
   $lines = explode("\n", $block_data); 
   $cnt = count($lines);
@@ -117,6 +160,7 @@ function forena_load_block_file($filepath, $comment='--') {
   while ($i<$cnt) { 
     $l = trim($lines[$i], "\r"); 
     list($d, $c) = explode($comment, $l, 2);
+    if ($trim) $c = trim($d, $trim); 
     if  ($c) { 
       list($a, $o) = explode('=', $c, 2);
       if (trim($a)=='ACCESS') { 

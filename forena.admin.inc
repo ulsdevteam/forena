@@ -13,35 +13,61 @@ require_once('forena.common.inc');
  */
 function forena_save_report($data, $report, $save_file = FALSE) { 
   static $save_count=0; 
-  
+  if ($report && !is_object($report)) $report = new SimpleXMLElement($report); 
   $report_path = forena_report_path();
   //@TODO: Clean up filename to make sure  
   $name = $data['name']; 
   $filepath = $report_path .'/'. $data['name'] .'.frx';
-  $data['enabled'] = $data['enabled'] ? 1 : 0; 
   
   // If we need to save this to the file system 
   if ($save_file) {
     // Serialize the report for saving
-    if (is_object($data)) { 
-      $data = $data->asXML(); 
+    if (is_object($report)) { 
+      $r_xml = $report->asXML(); 
     }
     
     try { 
-      file_put_contents($filepath, $data); 
+      file_put_contents($filepath, $r_xml); 
     } catch (Exception $e) {
       fornea_error('Error Saving Report', $e->getMessage()); 
     }
   }
+ 
+  // Get the security caches from the reports
+  if ($report) $cache = forena_load_cache($report); else $cache=''; 
 
+  if ($cache) $rpt_cache = serialize($cache); 
+  
+  // Set default interpretations of data 
+  $data['enabled'] = $data['enabled'] ? 1 : 0; 
+  if (!$data['category']) $data['category'] = 'All'; 
+  $data['hidden'] =  ($data['hidden'] && $data['hidden']!='N' && $data['hidden']!='0') ? 1:0; 
+  
   // Save to the Database
   if (file_exists($filepath)) {
     $result = db_query("SELECT report_name FROM {forena_reports} WHERE report_name='%s'", $name); 
     if ($rpt = db_fetch_object($result)) { 
-      db_query("UPDATE {forena_reports} SET title='%s' WHERE report_name='%s'", array($data['title'], $name)); 
+      db_query("UPDATE {forena_reports} SET title='%s', category='%s', repository='%s', access='%s'".
+        ", hidden='%s', cache='%s'  WHERE report_name='%s'", 
+        array($data['title'], 
+          $data['category'], 
+          $data['repository'], 
+          $data['access'], 
+          $data['hidden'], 
+          $rpt_cache,
+          $name )); 
     }
     else { 
-      db_query("INSERT INTO {forena_reports} (report_name,title) VALUES ('%s','%s')", array($name, $data['title'])); 
+      db_query("INSERT INTO {forena_reports} (report_name, title, category, repository, access, hidden, cache) ". 
+        "VALUES ('%s', '%s', '%s', '%s', '%s', %d, '%s')", 
+        array($name, 
+          $data['title'],
+          $data['category'],
+          $data['repository'], 
+          $data['access'],
+          $data['hidden'],
+          $rpt_cache,
+          )); 
     }
     $save_count++; 
     
@@ -68,10 +94,14 @@ function forena_db_sync($subdir='') {
       list($report_name, $ext) = explode('.', $rpt_file, 2);
       if ($ext == 'frx') {  
         $report_name = trim($prefix .'/'. $report_name, '/');  
-        $r_xml = file_get_contents($src_file);
+        $r_xml = new SimpleXMLElement(file_get_contents($src_file));
         // Load the report
+       
         $r = new FrxReport($r_xml);  
         $data['title'] = $r->title; 
+        $data['category'] = $r->category; 
+        $data['repository'] = $r->repository; 
+        $data['access'] = $r->access; 
         $data['name'] = $report_name; 
         $save_count = forena_save_report($data, $r_xml); 
       }

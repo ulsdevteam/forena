@@ -12,7 +12,6 @@ class frxDrupal extends FrxDataEngine {
 	 */
   private $te;  
   private $db;
-  private $block_path; 
   
   /**
    * Object constructor
@@ -24,7 +23,6 @@ class frxDrupal extends FrxDataEngine {
     parent::__construct($conf, $repos_path);
      
     // Set up the stuff required to translate. 
-    $this->block_path = $repos_path; 
     $this->te = new FrxSyntaxEngine(FRX_SQL_TOKEN, ':', $this); 
   }
   /**
@@ -37,8 +35,7 @@ class frxDrupal extends FrxDataEngine {
   public function data($block_name, $params=array(), $subQuery='') {
     // Load the block from the file
 
-    $filename = $this->block_path .'/'. $block_name . '.sql';  
-    $block = forena_load_block_file($filename); 
+    $block = $this->load_block($block_name); 
     $xml =''; 
     if ($block['source'] && $this->access($block['access'])) { 
       $sql = $block['source']; 
@@ -73,5 +70,12 @@ class frxDrupal extends FrxDataEngine {
     $value =  "'". db_escape_string($value) ."'"; 
     return $value; 
   }
+  
+  /**
+   * @section 
+   * Formatters 
+   * Below here are formatting types
+   */
+  
   
 }
