@@ -11,14 +11,19 @@ require_once('forena.common.inc');
  * @param string $name File name  to save report to
  * @param unknown_type $data
  */
-function forena_save_report($data, $report, $save_file = FALSE) { 
-  static $save_count=0; 
-  if ($report && !is_object($report)) $report = new SimpleXMLElement($report); 
+function forena_save_report($report_name, $report, $save_file = FALSE) { 
+  static $save_count=0;   
+  if ($report && !is_object($report)) $report = new SimpleXMLElement($report);
+
   $report_path = forena_report_path();
+  $r = new FrxReport($report);    
+  $data['title'] = $r->title; 
+  $data['category'] = $r->category; 
+  $data['options'] = $r->options; 
+  $data['name'] = $report_name; 
   //@TODO: Clean up filename to make sure  
   $name = $data['name']; 
-  $filepath = $report_path .'/'. $data['name'] .'.frx';
-  
+  $filepath = $report_path .'/'. $report_name .'.frx';
   // If we need to save this to the file system 
   if ($save_file) {
     // Serialize the report for saving
@@ -33,46 +38,44 @@ function forena_save_report($data, $report, $save_file = FALSE) {
     }
   }
  
-  // Get the security caches from the reports
+  // Get the security caches from the reports  
   if ($report) $cache = forena_load_cache($report); else $cache=''; 
 
   if ($cache) $rpt_cache = serialize($cache); 
-  
+          //drupal_set_message('saving'.$name. print_r($cache,1)); 
   // Set default interpretations of data 
   $data['enabled'] = $data['enabled'] ? 1 : 0; 
   if (!$data['category']) $data['category'] = 'All'; 
-  $data['hidden'] =  ($data['hidden'] && $data['hidden']!='N' && $data['hidden']!='0') ? 1:0; 
+  $data['hidden'] =  ($data['options']['hidden'] && $data['optioins']['hidden']!='N' && $data['options']['hidden']!='0') ? 1:0; 
   
   // Save to the Database
   if (file_exists($filepath)) {
     $result = db_query("SELECT report_name FROM {forena_reports} WHERE report_name='%s'", $name); 
     if ($rpt = db_fetch_object($result)) { 
-      db_query("UPDATE {forena_reports} SET title='%s', category='%s', repository='%s', access='%s'".
+  	    //drupal_set_message('updating '.$name. print_r($rpt,1));     	
+    	db_query("UPDATE {forena_reports} SET title='%s', category='%s'".
         ", hidden='%s', cache='%s'  WHERE report_name='%s'", 
         array($data['title'], 
           $data['category'], 
-          $data['repository'], 
-          $data['access'], 
           $data['hidden'], 
           $rpt_cache,
           $name )); 
     }
     else { 
-      db_query("INSERT INTO {forena_reports} (report_name, title, category, repository, access, hidden, cache) ". 
-        "VALUES ('%s', '%s', '%s', '%s', '%s', %d, '%s')", 
+      //drupal_set_message('insertnig'); 
+      db_query("INSERT INTO {forena_reports} (report_name, title, category, hidden, cache) ". 
+        "VALUES ('%s', '%s', '%s',  %d, '%s')", 
         array($name, 
           $data['title'],
           $data['category'],
-          $data['repository'], 
-          $data['access'],
           $data['hidden'],
           $rpt_cache,
           )); 
     }
     $save_count++; 
     
-  }
-  return $save_count; 
+  }  
+  return $save_count;
 }
 
 /**
@@ -98,12 +101,9 @@ function forena_db_sync($subdir='') {
         // Load the report
        
         $r = new FrxReport($r_xml);  
-        $data['title'] = $r->title; 
-        $data['category'] = $r->category; 
-        $data['repository'] = $r->repository; 
-        $data['access'] = $r->access; 
-        $data['name'] = $report_name; 
-        $save_count = forena_save_report($data, $r_xml); 
+
+
+        $save_count = forena_save_report($report_name, $r_xml); 
       }
     } 
     elseif (is_dir($src_file)) {
@@ -202,4 +202,76 @@ function forena_settings_submit($form, &$form_state) {
   $save_count = forena_db_sync();
   drupal_set_message('Imported '. $save_count .' forms into the database');       
   menu_cache_clear(); 
+}
+
+/**
+ * Form function for the edit report form
+ * @param $form_state
+ * @return the form
+ */
+function forena_edit_form($form_state){  
+  $r = forena_get_report(arg(1));  
+  $form = array();
+  $title = (string)$r->title; 
+  $category = (string)$r->category;
+  $body = $r->body->asXML(); 
+  
+  $form['head'] = array(
+    '#type' => 'value',
+    '#value' => $r->rpt_xml->head, 
+  );
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Title'),
+    '#default_value' => $title,  
+  );
+  
+  $form['category'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Category'),
+    '#default_value' => $category,  
+  );
+  
+  $form['body'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Body'),
+    '#default_value' => $body,      
+    '#rows' => 25,
+  );
+  
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Save', 
+  );  
+  return $form; 
+}
+/**
+ * builds a string of the xml document,
+ * submits it to forena_save_report.
+ */
+function forena_edit_form_submit($form, &$form_state) {  
+  $values = $form_state['values'];
+  $h = $values['head'];
+
+  $xml = '<html xmlns:frx="urn:FrxReports"><head>';
+  $xml .= '<title>'. htmlspecialchars($values['title']). '</title>';
+  $xml .= '<frx:category>'. htmlspecialchars($values['category']). '</frx:category>'; 
+
+  $nodes = $h->xpath('frx:options');
+  if ($nodes) $xml.=$nodes[0]->asXML();
+  
+  $nodes = $h->xpath('frx:parameters');
+  if ($nodes) $xml.=$nodes[0]->asXML();
+  
+  $nodes = $h->xpath('frx:fields');
+  if ($nodes) $xml.=$nodes[0]->asXML();
+    
+  $xml .= '</head>';    
+  $xml .= $form_state['values']['body']; 
+  $xml .= '</html>'; 
+  
+  if (forena_save_report(arg(1), $xml, TRUE) == 1){
+  	drupal_set_message('Your report, "'. $values['title']. '", has been saved');
+  	$form_state['redirect']= 'reports/' . arg(1); 
+  } 
 }

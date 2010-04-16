@@ -6,7 +6,7 @@
  * drupal connections.
  *
  */
-class frxDrupal extends FrxDataEngine {
+class FrxDrupal extends FrxDataEngine {
   /**
 	 * Implements hooks into the drupal applications
 	 */
@@ -76,6 +76,47 @@ class frxDrupal extends FrxDataEngine {
    * Formatters 
    * Below here are formatting types
    */
+  public function formats() {
+    $formats = array('drupal_date_format' => 'Drupal Date', 
+                     'drupal_filter' => 'Drupal Input Filter'
+ //                    'drupal_node' => 'Node Teaser from node id',
+    ); 
+    return $formats; 
+  }
+  
+  public function drupal_date_format($value, $format_str) { 
+     switch ($format_str) { 
+       case 'medium': 
+       case 'small':
+       case 'large': 
+         $type = $format_str;
+         $format=''; 
+         break; 
+       default: 
+         $type = 'custom'; 
+         $format = $format_str; 
+     }
+     
+     return format_date($value, $type, $format); 
+     
+  }
+  
+  public function drupal_filter($nid, $bool) {  	
+  	$node = node_load($nid, NULL, TRUE); 
+  	if(! $node){
+  		//error message goes here
+  	}
+  	//If true, render the teaser
+  	//else render the body
+  	$node = node_prepare($node, $bool);
+  	
+  	if($bool){
+      return $node->teaser;  
+  	}  	
+  	return $node->body;
+  }
+  
+
   
   
 }

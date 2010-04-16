@@ -16,8 +16,6 @@ function forena_schema() {
        'title' => array('type' => 'varchar', 'length' => 63, 'NOT NULL' => TRUE),
        'file_name' => array('type' => 'varchar', 'length' => 255, 'NOT NULL' => TRUE),
        'category' => array('type' => 'varchar', 'length' => 255, 'NOT NULL' => FALSE),
-       'repository' => array('type' => 'varchar', 'length' => 255, 'NOT NULL' => FALSE),
-       'access' => array('type' => 'varchar', 'length' => 255, 'NOT NULL' => FALSE),
        'hidden' => array('type' => 'int', 'NOT NULL' => FALSE, ),
        'cache' => array('type' => 'text'),
     ),

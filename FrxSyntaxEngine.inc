@@ -35,20 +35,29 @@ class FrxSyntaxEngine {
   */
   protected function get_value($data, $key, $raw=FALSE) {
     $retvar = ''; 
+    
     if (is_array($data)) {
+      
       $retvar = $data[$key];
     } 
     elseif (is_object($data)) {
+      
+      
       $rows = $data->xpath($key);
+      
       if ($rows) $x = $rows[0];
+      
       if ($x) $retvar = $x->asXML(); 
+      
+      
       if ($retvar) {
         // Find the end of the first tag.
         //print $root_tag; 
         $p = strpos($retvar, '>'); 
         $retvar = substr_replace($retvar, ' ', 0, $p+1);
         $p = strrpos($retvar, '<', -1); 
-        $retvar = substr_replace($retvar, '', $p, strlen($retvar) - $p); 
+        $retvar = substr_replace($retvar, '', $p, strlen($retvar) - $p);
+         
       }
     }
     // Call the formatter object if neccessary
@@ -68,7 +77,7 @@ class FrxSyntaxEngine {
    */
   public function replace($text, $data, $raw=FALSE) {
     $match=array();
-    $o_text = $text;  
+    $o_text = $text; 
     if (preg_match_all($this->tpattern, $o_text, $match)) {
       //list($params) = $match[1];
       $i=0; 
@@ -76,7 +85,7 @@ class FrxSyntaxEngine {
       foreach ($match[0] as $match_num => $token) {
          $path = trim($token, $this->trim_chars);
          $value = $this->get_value($data, $path, $raw); 
-         $text = str_replace($token, $value, $text);
+         $text = str_replace($token, $value, $text);         
       }
     }
     return $text;    

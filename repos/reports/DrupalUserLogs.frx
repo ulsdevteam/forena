@@ -2,14 +2,20 @@
 	<head>
 		<title>User logs</title>
         <frx:category>Drupal Administration</frx:category>
+        <frx:options  /> 
+		<frx:parameters >
+			<frx:parm id="user" require="1" label="User Name">3</frx:parm>
+		</frx:parameters>
 		<frx:fields>
 			<frx:field id="details" link="admin/reports/event/{wid}">Details</frx:field>
-			<frx:field id="total"  link="reports/DrupalUserLogs?name={name}"></frx:field>
+			<frx:field id="total"  link="reports/DrupalUserLogs?name={name}" format="date" format_string=""></frx:field>
 			<frx:field id="name">Anonymous</frx:field>
+			<frx:field id="timestamp" format="drupal_date_format" format-string="small"></frx:field>
+			<frx:field id="created" format="drupal_date_format" format-string="small"></frx:field>
 		</frx:fields>
 	</head>
 	<body>
-		<div frx:block="drupal/users_in_logs">
+		<div frx:block="drupal/users_in_logs" >
 			<h4>Users Appearing in Logs</h4>
 			<table>
 				<thead>

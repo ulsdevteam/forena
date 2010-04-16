@@ -4,41 +4,64 @@
  * @file 
  * Basic report engine.  Controls the rendering of the report. 
  */
+define('FRX_NS','urn:FrxReports'); 
 require_once('FrxSyntaxEngine.inc'); 
 
 class FrxReport { 
-  private $rpt_xml; 
+  public $rpt_xml; 
   private $cur_data; 
   private $output; 
   private $teng; 
   public $fields;
   public $category; 
   public $access;  
+  public $parameters; 
+  public $options; 
+  public $body; 
   
   public function __construct($xhtml, $data=array()) {
     $this->teng = new FrxSyntaxEngine(FRX_TOKEN_EXP, '{}', $this);
+    $this->access = array(); 
+    $this->parameters = array(); 
+    $this->options = array(); 
     if ($xhtml) { 
       if (!is_object($xhtml)) { 
         $this->rpt_xml = new SimpleXMLElement($xhtml);
       } 
-      else { 
+      else {       	
         $this->rpt_xml = $xhtml; 
       }
       $this->cur_data = $data;
       
       // Load header data
       $rpt_xml = $this->rpt_xml; 
+      $this->body = $rpt_xml->body; 
       if ($rpt_xml->head) {
         $this->title = (string)$rpt_xml->head->title; 
-      
-        foreach ($rpt_xml->head->children('urn:FrxReports') as $name => $node) { 
+                
+        foreach ($rpt_xml->head->children(FRX_NS) as $name => $node) { 
           switch ($name) { 
-            case 'fields': 
-               $this->fields = $node;
-               break; 
-            case 'category':
+            case 'fields':               
+              $this->fields = $node;
+              break; 
+            case 'category':              
               $this->category = (string)$node; 
               break;     
+            case 'options':               
+              foreach ($node->attributes() as $key => $value) { 
+                $this->options[$key] = (string)$value; 
+              }
+              break; 
+            case 'parameters':              
+              foreach ($node->children(FRX_NS) as $key => $node) {
+                $parm = array(); 
+                foreach ($node->attributes() as $akey => $attr) {
+                  $parm[$akey] = (string)$attr; 
+                }
+                $parm['value']= (string)$node; 
+                $this->parameters[$key] = $parm;
+              }
+              break; 
           }
         }
       }
@@ -51,30 +74,34 @@ class FrxReport {
    * @return unknown_type
    */
   private function get_data($block) {
-    //@TODO: Merge xml data parameters into the report paramters
+    //@TODO: Merge xml data parameters into the report paramters        
     $this->cur_data = forena_invoke_data_engine($block, $this->cur_data); 
   }
   
   private function process_frx_attributes(SimpleXMLElement $node) { 
-    $attrs = $node->attributes('urn:FrxReports'); 
+    $attrs = $node->attributes(FRX_NS); 
     if ($attrs) foreach ($attrs as $key => $value) { 
       switch ($key) {
         case "block":
+        	
            $this->get_data((string)$value);
+           
            break;  
       }
     }
   }
   
-  
   /**
    * Recursive report renderer
-   * Walks the nodes renering the report. 
+   * Walks the nodes rendering the report. 
    */
   public function render_section(SimpleXMLElement $node) {
+    //drupal_set_message('Rendering Section '. $node->getName()); 
     $cur_data = $this->cur_data; 
+
+    
     $elements = count($node->xpath('*'));
-    $frx = $node->attributes('urn:FrxReports');
+    $frx = $node->attributes(FRX_NS);
     // Test to see if we have any nodes that are contains data url
     if ($node->xpath('*//@frx:*') || $frx) {
       $attrs = $node->attributes();
@@ -84,19 +111,18 @@ class FrxReport {
         $attr_text =  ' '. $key .'="'. (string)$value .'"';
       }
 
-      $frx = $node->attributes('urn:FrxReports');
+      $frx = $node->attributes(FRX_NS);
       
-      if ((string)$frx['foreach'] ) {
-      
+      if ((string)$frx['foreach'] ) {       
         // Save xml
-        $path = (string)$frx['foreach']; 
-        $data = $this->cur_data; 
-        
+        $path = (string)$frx['foreach'];        
+        $data = $this->cur_data;   
+              
         if ($data) $nodes = $data->xpath($path);
-        
+                
         if ($nodes) foreach ($nodes as $x) {
           $this->cur_data = $x;
-          $o .= $this->teng->replace('<'. $tag . $attr_text .'>', $cur_data);
+          $o .= $this->teng->replace('<'. $tag . $attr_text .'>', $cur_data);          
           foreach ($node->children() as $child) { 
             $o .= $this->render_section($child); 
           }
@@ -106,21 +132,22 @@ class FrxReport {
         $this->cur_data = $data; 
       } 
       else {
-    
+
         $o .= $this->teng->replace('<'. $tag . $attr_text .'>', $this->cur_data);
         foreach ($node->children() as $child) {
-          $o .= $this->render_section($child);   
+          $o .= $this->render_section($child);  
         }
         $o .= '</'. $tag .'>';
       }
     } 
     else {       
+
       $tag = $node->getName(); 
       // We can render so lets do it. 
-      $text = $node->asXML();
+      $text = $node->asXML();      
       $o .= $this->teng->replace($text, $this->cur_data);
     }
-    $this->cur_data = $cur_data; 
+    $this->cur_data = $cur_data;  
     return $o; 
   }
   
@@ -164,13 +191,7 @@ class FrxReport {
     }
     
     if ($format) { 
-      forena_define_plugins('formatter', $format);
-      if (class_exists($format)) { 
-        $f = new $format(); 
-        if (method_exists(f, 'format')) { 
-          $f->format($value, $format_str); 
-        }
-      }
+       $value = forena_format_data($value,$format,$format_str); 
     }
     
     

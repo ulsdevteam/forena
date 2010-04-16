@@ -33,7 +33,7 @@ function __forena_load_repository(&$repo) {
 function __forena_load_engine($conf, $repo_path) { 
   $name = $conf['data_engine']; 
 
-  forena_define_plugins('data'); 
+  forena_define_plugins(); 
   // Instantiate the path
   if (class_exists($name)) { 
     $o = new $name($conf, $repo_path); 
@@ -84,8 +84,8 @@ function forena_repository($name='') {
     
 }
 
-function forena_load_cache($r_xhtml) {
-  $blocks = array(); 
+function forena_load_cache($r_xhtml) {  
+  $blocks = array();   
   if (is_object($r_xhtml)) {
     $block_xml = $r_xhtml->xpath('//*[@frx:block]'); 
     // Extract all the blocks and organize by provider
@@ -131,6 +131,7 @@ function forena_load_cache($r_xhtml) {
 function forena_invoke_data_engine($data_block, $parameters=array(), $subquery='') {
    list($provider, $block) = explode('/', $data_block, 2); 
    // Get the data 
+   
    $repos = forena_repository($provider);
 
    if ($repos['data']) { 
@@ -141,6 +142,79 @@ function forena_invoke_data_engine($data_block, $parameters=array(), $subquery='
      }
      return $xml; 
    }
+}
+
+/**
+ * Load the formatters for all initialized repositories.  
+ *   
+ */
+function forena_get_formatter($fkey) { 
+  // Get all repositories
+  $repos = forena_repository();
+  
+  
+  foreach ($repos as $k => $r) {
+  	$engine = $r['data']; 
+    if ($engine && method_exists($engine,'formats'))  {      
+      $f = $engine->formats();      
+      if ($f[$fkey] && method_exists($engine, $fkey)) {      	
+        // We found an object with the advertised method return it        
+        return $engine; 
+      }      
+    }
+  }
+  return $formats; 
+}
+
+/**
+ * Accepts the name of a file
+ * 
+ * Returns a xml object of the file. 
+ *
+*/
+
+function forena_get_report($report_name){	
+  if ($report_name) { 
+  	$report_path = forena_report_path();
+    $filename = $report_path . '/'. $report_name . '.frx';
+    if (file_exists($filename)) {
+      $r_text = file_get_contents($filename);
+               
+      try { 
+        $r = new SimpleXMLElement($r_text);
+        $r = new FrxReport($r);          
+      } catch (Exception $e) { 
+        forena_error('Unable to read report', $e->getMessage()); 
+      }
+    }
+	return $r;
+  }
+}
+
+/**
+ * Accepts the name of the html tag, and the string the tag is in.
+ * 
+ * Returns the string within the html tag name 
+ * 
+*/
+function forena_get_html($tag, $r_text){
+  $open = strpos($r_text, $tag);
+  $close = strpos($r_text, '>', $open);
+  $next = strpos($r_text, '<', $close + 1);
+  $str = substr($r_text, $close + 1, $next - ($close + 1));
+  
+  return $str;
+}
+
+function forena_format_data($value, $format, $format_str) {  
+  $fo = forena_get_formatter($format);   
+  if ($fo) { 
+  	
+    $ret = $fo->$format($value, $format_str); 
+  } else { 
+    $ret = $value; 
+  }
+  return $ret; 
 }
 
 /**
@@ -237,10 +311,10 @@ function forena_plugins() {
 /**
  * Loads all of the include files that 
  */
-function forena_define_plugins($type ='', $class='') {
+function forena_define_plugins( $class='') {
   $plugins = forena_plugins(); 
   foreach ($plugins as $p) { 
-    if ((!$type || $type==$p['type']) && ($class='' || $class=$p['class'])) { 
+    if (($class='' || $class=$p['class'])) { 
       if ($p['file'] && $p['module']) { 
         include_once( drupal_get_path('module' , $p['module']) .'/'. trim($p['file'], '/')); 
       }

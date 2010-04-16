@@ -17,15 +17,30 @@ function forena_menu() {
     'file' => 'forena.admin.inc', 
   ); 
 
-  $path = variable_get('forena_path', 'reports'); 
-  $items[$path] = array(
+
+  $items['reports/%'] = array(
     'page callback' => 'forena_report',
-    'page arguments' => array(), 
+    'page arguments' => array(1), 
     'title' => t('Reports'),
     'access arguments' => array('access content'),  
     'type' => MENU_CALLBACK, 
    ); 
 
+   $items['reports/%/view'] = array(
+    'title' => t('View'),
+    'type' => MENU_DEFAULT_LOCAL_TASK, 
+    'weight' => -10, 
+   ); 
+   
+   $items['reports/%/edit'] = array(
+     'title' => 'Edit',
+     'page callback' => 'forena_edit_report',
+     'page arguments' => array(1),
+     'access arguments' => array('design any report'),     
+     'description' => t('Edit the content of your node'),   
+     'type' => MENU_LOCAL_TASK, 
+   );
+   
   $items['forena'] = array(
     'page callback' => 'forena_user_reports',
     'page arguments' => array(), 
@@ -34,8 +49,15 @@ function forena_menu() {
     'type' => MENU_NORMAL_ITEM, 
    ); 
    
-
   return $items; 
+}
+/**
+ *  Calls forena_edit_form
+ *   
+ */
+function forena_edit_report() {
+  require_once('forena.admin.inc');  
+  return drupal_get_form('forena_edit_form');
 }
 
 /**
@@ -54,16 +76,6 @@ function forena_perm() {
   return $perms; 
 }
 
-/**
- * Test function for white box testing. 
- *
- * @return unknown
- */
-function forena_test() { 
-  $output .= 'Forena test page'; 
-  
-  return $output; 
-}
 
 function forena_report() {
   $arg_list = func_get_args();
@@ -71,19 +83,19 @@ function forena_report() {
   
   // Concat argument to function to get a path
   $f_path = variable_get('forena_path', 'reports');
-  foreach ($arg_list as $arg) {
-       $report_name .= '/'. $arg; 
-  }
-  $report_name = trim($report_name, '/'); 
-  
-  $report_path = forena_report_path();
-  list($name, $format) = explode('.', $report_name, 2);  
+  foreach ($arg_list as $arg) {  	   
+    $report_name .= '/'. $arg; 
+  }  
+  $report_name = trim($report_name, '/');   
+  $report_path = forena_report_path();  
+  list($name, $format) = explode('.', $report_name, 2);
+   
   if ($name) { 
     $filename = $report_path . '/'. $name . '.frx';
     if (file_exists($filename)) {
-      $r_text = file_get_contents($filename);  
+      $r_text = file_get_contents($filename);         
       try { 
-        $r = new SimpleXMLElement($r_text);
+        $r = new SimpleXMLElement($r_text);         
       } catch (Exception $e) { 
         forena_error('Unable to read report', $e->getMessage()); 
       }
@@ -101,15 +113,15 @@ function forena_report() {
   return $output; 
 }
 
-function forena_user_reports() {
-  $result = db_query('SELECT * FROM {forena_reports} ORDER BY category,title asc');
+function forena_user_reports() {  
+  $result = db_query('SELECT * FROM {forena_reports} where hidden=0 ORDER BY category,title asc');
   $categories = array(); 
   while ($row = db_fetch_object($result)) {
-    
     $cache = $row->cache; 
+    //drupal_set_message($row->title. print_r('<pre>'.$cache.'</pre>',1));
     if ($cache) {
       $cache = unserialize($cache);
-      $access = TRUE; 
+      $access = FALSE; 
       // Check each callback function to see if we have an error. 
       foreach ($cache['access'] as $callback => $args) {
 
@@ -117,7 +129,7 @@ function forena_user_reports() {
           if (function_exists($callback)) { 
             $a = $callback($arg); 
           }
-          if (!$a) $access = FALSE; 
+          if ($a) $access = TRUE; 
         } 
         else { 
           $access = FALSE; 
@@ -166,19 +178,15 @@ function forena_render_report($report, $format='', $data='') {
  */
 function forena_forena_plugins() { 
   $plugins[] = array('file' => 'plugins/FrxPDO.inc', 
-                     'type' => 'data',
                      'class' => 'FrxPDO', 
                      );
   $plugins[] = array('file' => 'plugins/FrxOracle.inc', 
-                     'type' => 'data',
                      'class' => 'FrxOracle', 
                      );
   $plugins[] = array('file' => 'plugins/FrxDrupal.inc', 
-                     'type' => 'data', 
                      'class' => 'FrxDrupal',
                      ); 
   $plugins[] = array('file' => 'plugins/FrxFiles.inc', 
-                     'type' => 'data', 
                      'class' => 'FrxFiles',
                      ); 
   return $plugins; 

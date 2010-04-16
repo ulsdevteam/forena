@@ -1,5 +1,6 @@
 <?php
 // $Id$
+require_once('forena.common.inc'); 
 /**
  * @file
  * Class that defines default methods for access control in an FrxDataEngine
