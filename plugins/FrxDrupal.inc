@@ -77,28 +77,9 @@ class FrxDrupal extends FrxDataEngine {
    * Below here are formatting types
    */
   public function formats() {
-    $formats = array('drupal_date_format' => 'Drupal Date', 
-                     'drupal_filter' => 'Drupal Input Filter'
- //                    'drupal_node' => 'Node Teaser from node id',
-    ); 
+    $formats = array('drupal_filter' => 'Drupal Input Filter' 
+                     ); 
     return $formats; 
-  }
-  
-  public function drupal_date_format($value, $format_str) { 
-     switch ($format_str) { 
-       case 'medium': 
-       case 'small':
-       case 'large': 
-         $type = $format_str;
-         $format=''; 
-         break; 
-       default: 
-         $type = 'custom'; 
-         $format = $format_str; 
-     }
-     
-     return format_date($value, $type, $format); 
-     
   }
   
   public function drupal_filter($nid, $bool) {  	

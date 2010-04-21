@@ -42,7 +42,7 @@ function forena_save_report($report_name, $report, $save_file = FALSE) {
   if ($report) $cache = forena_load_cache($report); else $cache=''; 
 
   if ($cache) $rpt_cache = serialize($cache); 
-          //drupal_set_message('saving'.$name. print_r($cache,1)); 
+  //drupal_set_message('saving'.$name. print_r($cache,1)); 
   // Set default interpretations of data 
   $data['enabled'] = $data['enabled'] ? 1 : 0; 
   if (!$data['category']) $data['category'] = 'All'; 
@@ -62,7 +62,7 @@ function forena_save_report($report_name, $report, $save_file = FALSE) {
           $name )); 
     }
     else { 
-      //drupal_set_message('insertnig'); 
+      //drupal_set_message('inserting'); 
       db_query("INSERT INTO {forena_reports} (report_name, title, category, hidden, cache) ". 
         "VALUES ('%s', '%s', '%s',  %d, '%s')", 
         array($name, 
@@ -203,6 +203,9 @@ function forena_settings_submit($form, &$form_state) {
   drupal_set_message('Imported '. $save_count .' forms into the database');       
   menu_cache_clear(); 
 }
+
+
+
 
 /**
  * Form function for the edit report form

@@ -41,6 +41,16 @@ function forena_menu() {
      'type' => MENU_LOCAL_TASK, 
    );
    
+   $items['reports/%/parameters'] = array(
+     'title' => 'Params',
+     'page callback' => 'forena_parameters_report',
+     'page arguments' => array(1),
+     'access arguments' => array('design any report'),     
+     'description' => t('Edit the parameters of your report'),
+     'weight' => -5,   
+     'type' => MENU_LOCAL_TASK, 
+   );
+   
   $items['forena'] = array(
     'page callback' => 'forena_user_reports',
     'page arguments' => array(), 
@@ -53,11 +63,20 @@ function forena_menu() {
 }
 /**
  *  Calls forena_edit_form
- *   
+ *  in forena.admin.inc   
  */
 function forena_edit_report() {
   require_once('forena.admin.inc');  
   return drupal_get_form('forena_edit_form');
+}
+
+/**
+ *  Calls forena_parameter_form
+ *  in forena.admin.inc
+ */
+function forena_parameters_report() {
+	require_once('forena.admin.inc');
+	return drupal_get_form('forena_parameters_form');
 }
 
 /**
@@ -76,7 +95,12 @@ function forena_perm() {
   return $perms; 
 }
 
-
+/**
+ * Load and render a report based on a drupal path. 
+ * In this function the arglist is used to get the full path to the report. 
+ *
+ * @return unknown
+ */
 function forena_report() {
   $arg_list = func_get_args();
   require_once('forena.common.inc');  
@@ -113,40 +137,40 @@ function forena_report() {
   return $output; 
 }
 
-function forena_user_reports() {  
+function forena_user_reports() {   
   $result = db_query('SELECT * FROM {forena_reports} where hidden=0 ORDER BY category,title asc');
   $categories = array(); 
-  while ($row = db_fetch_object($result)) {
+  while ($row = db_fetch_object($result)) { 	
     $cache = $row->cache; 
-    //drupal_set_message($row->title. print_r('<pre>'.$cache.'</pre>',1));
-    if ($cache) {
+        
+    if ($cache) {            
       $cache = unserialize($cache);
       $access = FALSE; 
+      
       // Check each callback function to see if we have an error. 
-      foreach ($cache['access'] as $callback => $args) {
-
-        if ($callback && $args) foreach ($args as $arg) { 
+      foreach ($cache['access'] as $callback => $args) {      			
+        if ($callback && $args) foreach ($args as $arg) {           
           if (function_exists($callback)) { 
             $a = $callback($arg); 
           }
-          if ($a) $access = TRUE; 
+          if ($a) $access = TRUE;           
         } 
-        else { 
+        else {          
           $access = FALSE; 
         }
       }
-    }
-    
-    if ($access) { 
+    }    
+    if ($access) {      
       $categories[$row->category][] = array(
         'title' => $row->title, 
         'report_name' => $row->report_name, 
       );
-    } 
-  
+    }   
   }
   $report_repos = variable_get('forena_path', 'reports'); 
+  
   foreach ($categories as $category => $reports) {
+  	
     $output .= '<h3>'. $category .'</h3>';  
     $output .= '<ul>'; 
     foreach ($reports as $r) { 
@@ -192,6 +216,15 @@ function forena_forena_plugins() {
   return $plugins; 
 }
 
-
+/**
+ * Self register controls with forena. 
+ *
+ */
+function forena_forena_controls() { 
+  $controls[] = array('file' => 'plugins/FrxControls.inc', 
+                     'class' => 'FrxControls', 
+                     );
+  return $controls; 
+}
 
 

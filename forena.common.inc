@@ -19,7 +19,7 @@ function __forena_load_repository(&$repo) {
      
   }
   
-  $repo['data'] = __forena_load_engine($conf, $repo['path']); 
+  $repo['data'] = __forena_load_engine($conf, $repo['path']);  
   //$repo['auth'] = __forena_load_auth($security_provider); 
   
 }
@@ -86,7 +86,7 @@ function forena_repository($name='') {
 
 function forena_load_cache($r_xhtml) {  
   $blocks = array();   
-  if (is_object($r_xhtml)) {
+  if (is_object($r_xhtml)) {  	
     $block_xml = $r_xhtml->xpath('//*[@frx:block]'); 
     // Extract all the blocks and organize by provider
     foreach ($block_xml as $key => $block_node) {
@@ -97,8 +97,8 @@ function forena_load_cache($r_xhtml) {
       }
     } 
     
-    foreach ($repos as $provider => $blocks) { 
-      $repos = forena_repository($provider);
+    foreach ($repos as $provider => $blocks) {       
+      $repos = forena_repository($provider);      
       $engine = $repos['data'];
       $conf = $engine->conf;
       $access = array(); 
@@ -150,11 +150,10 @@ function forena_invoke_data_engine($data_block, $parameters=array(), $subquery='
  */
 function forena_get_formatter($fkey) { 
   // Get all repositories
-  $repos = forena_repository();
-  
+  $repos = forena_repository();  
   
   foreach ($repos as $k => $r) {
-  	$engine = $r['data']; 
+  	$engine = $r['data'];
     if ($engine && method_exists($engine,'formats'))  {      
       $f = $engine->formats();      
       if ($f[$fkey] && method_exists($engine, $fkey)) {      	
@@ -163,6 +162,19 @@ function forena_get_formatter($fkey) {
       }      
     }
   }
+  //Did not find the formater in the data engine
+  //Look to see if it's in a control class 
+  $controls = forena_define_controls();
+  foreach ($controls as $k => $r) {
+    $engine = $r;
+    if ($engine && method_exists($engine,'formats'))  {      
+      $f = $engine->formats();      
+      if ($f[$fkey] && method_exists($engine, $fkey)) {      	
+        // We found an object with the advertised method return it        
+        return $engine; 
+      }      
+    }
+  }  
   return $formats; 
 }
 
@@ -282,11 +294,6 @@ function forena_report_path() {
  * Invokes the hooks required for forena plugin registration. 
  * Each module returns an array structure that defines multiple plugins
  * 
- * types - Type of object: 
- *         data  - Provides the data methods 
- *         control - implements a rendering control
- *         formatter - Implments a data formatter that is called when processing token replacements
- * 
  * class - Indicates the name of the class that will be used to define the plugins behaviors. 
  * 
  */
@@ -304,7 +311,7 @@ function forena_plugins() {
         }
       }
     }
-  }
+  }  
   return $plugins; 
 }
 
@@ -313,12 +320,93 @@ function forena_plugins() {
  */
 function forena_define_plugins( $class='') {
   $plugins = forena_plugins(); 
-  foreach ($plugins as $p) { 
-    if (($class='' || $class=$p['class'])) { 
-      if ($p['file'] && $p['module']) { 
+  foreach ($plugins as $p) {  
+    if (($class=='' || $class==$p['class'])) {       
+      if ($p['file'] && $p['module']) {       	
         include_once( drupal_get_path('module' , $p['module']) .'/'. trim($p['file'], '/')); 
       }
     }
   }
+}
+
+/**
+ * Builds a global array of available controls
+ * and returns the array.
+ */
+function forena_controls() {
+  static $controls = ''; 
+  if (!$controls) {  
+    $controls = array(); 
+    foreach (module_list() as $module) {
+      $function = $module .'_forena_controls';
+      if (function_exists($function)) {
+        $returned_controls = $function();
+        if ($returned_controls) foreach ((array)$returned_controls as $c) { 
+          $c['module'] = $module; 
+          $controls[]=$c; 
+        }
+      }
+    }
+  }
+  return $controls; 
+}
+
+/**
+ * returns a list of instances of the control classes
+ */
+function forena_define_controls( $class='') {
+  static $instances = '';   
+  if (!$instances) { 
+	  $classes = forena_controls();
+	  foreach ($classes as $c) { 
+	    if (($class=='' || $class==$c['class'])) { 	      
+	      if ($c['file'] && $c['module']) { 
+	        include_once( drupal_get_path('module' , $c['module']) .'/'. trim($c['file'], '/'));
+	        $instances[$c['class']] =  new $c['class'];
+	      }
+	    }
+	  }
+  }  
+  if($class && $instances[$class]){
+  	return $instances[$class];
+  }
+  return $instances;  
+}
+
+/** 
+ * Form to edit parameters
+ */
+function forena_parameters_form($form_state) {	
+	$r = forena_get_report(arg(1));
+	$head = $r->rpt_xml->head;
+	$form = array();
+	
+    $form['params'] = array('#tree' => true); 
+    $nodes = $head->xpath('frx:parameters/frx:parm');
+	foreach ($nodes as $node) {	  
+	  (strcmp((string)$node['require'], "1") == 0) ? $bool = TRUE : $bool = FALSE;
+	  $form['params'][(string)$node['id']] = array(
+        '#type' => 'textfield',
+        '#title' => t((string)$node['label']),
+        '#default_value' => $node,  
+	    '#required' => $bool,
+      );	  
+	}	
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Submit', 
+   );
+  return $form;  	
+}
+
+
+function forena_parameters_form_submit($form, &$form_state) {
+  $values = $form_state['values'];   
+  foreach ($values['params'] as $key => $value) {
+  	$q .= '&'.$key . '=' . urlencode($value); 
+  }
+  $q = trim($q,'&'); 
+
+  $form_state['redirect']= array('reports/' . arg(1),$q); 
 }
 
