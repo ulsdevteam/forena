@@ -62,7 +62,9 @@ class FrxSyntaxEngine {
     }
     // Call the formatter object if neccessary
     $f = $this->formatter; 
-    if (!$raw && is_object($f) && method_exists($f, 'format')) $retvar = $f->format($retvar, $key, $data);
+    if (!$raw && is_object($f) && method_exists($f, 'format')) {
+      $retvar = $f->format($retvar, $key, $data);
+    } 
       
     $retvar = trim($retvar); 
     return $retvar; 

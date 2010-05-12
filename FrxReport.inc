@@ -4,7 +4,7 @@
  * @file 
  * Basic report engine.  Controls the rendering of the report. 
  */
-define('FRX_NS','urn:FrxReports'); 
+define('FRX_NS', 'urn:FrxReports'); 
 require_once('FrxSyntaxEngine.inc'); 
 
 class FrxReport { 
@@ -28,7 +28,7 @@ class FrxReport {
       if (!is_object($xhtml)) { 
         $this->rpt_xml = new SimpleXMLElement($xhtml);
       } 
-      else {       	
+      else {
         $this->rpt_xml = $xhtml; 
       }
       $this->cur_data = $data;
@@ -78,11 +78,11 @@ class FrxReport {
     $this->cur_data = forena_invoke_data_engine($block, $this->cur_data); 
   }
   
-  private function process_frx_attributes(SimpleXMLElement $node) { 
+  private function process_frx_attributes(SimpleXMLElement $node) {
     $attrs = $node->attributes(FRX_NS); 
     if ($attrs) foreach ($attrs as $key => $value) { 
       switch ($key) {
-        case "block":        	
+        case "block":
            $this->get_data((string)$value);           
            break;  
       }
@@ -93,13 +93,12 @@ class FrxReport {
    * Recursive report renderer
    * Walks the nodes rendering the report. 
    */
-  public function render_section(SimpleXMLElement $node) {  	
-    //drupal_set_message('Rendering Section '. $node->getName()); 
+  public function render_section(SimpleXMLElement $node) {     
     $cur_data = $this->cur_data;     
     $elements = count($node->xpath('*'));
     $frx = $node->attributes(FRX_NS);
-    // Test to see if we have any nodes that are contains data url
-    if ($node->xpath('*//@frx:*') || $frx) {
+    // Test to see if we have any nodes that are contains data url    
+    if ($node->xpath('*//@frx:*') || $frx) {          
       $attrs = $node->attributes();
       $tag = $node->getName(); 
       $this->process_frx_attributes($node); 
@@ -151,7 +150,7 @@ class FrxReport {
    * Render the report
    * @return unknown_type
    */
-  public function render($format) {   	
+  public function render($format) {
     $rpt_xml = $this->rpt_xml;
     drupal_set_title($this->title);
     
@@ -161,6 +160,7 @@ class FrxReport {
     foreach ($body_xml->children() as $node) {
       $o .= $this->render_section($node);   
     }
+    
     return $o ;  
   }
   /*
@@ -172,22 +172,20 @@ class FrxReport {
     if ($this->fields) {
       $path = 'frx:field[@id="'. $key .'"]';
       $formatters = $this->fields->xpath($path); 
-      if ($formatters) foreach ($formatters as $formatter) {
-       
+      if ($formatters) foreach ($formatters as $formatter) {        
         if (((string)$formatter['block'] == $this->block) || (!(string)$formatter['block'])) {
           
            //@TODO: Replace the default extraction with something that will get sub elements of the string
            $default = (string)$formatter; 
            $link = (string) $formatter['link']; 
            $format = (string) $formatter['format']; 
-           $format_str = (string) $formatter['format-string'];   
-        }
-  
+           $format_str = (string) $formatter['format-string'];            
+        }  
       }
     }
     
     if ($format) { 
-       $value = forena_format_data($value,$format,$format_str);        
+      $value = forena_format_data($value, $format, $format_str);
     }
     
     

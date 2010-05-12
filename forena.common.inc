@@ -86,7 +86,7 @@ function forena_repository($name='') {
 
 function forena_load_cache($r_xhtml) {  
   $blocks = array();   
-  if (is_object($r_xhtml)) {  	
+  if (is_object($r_xhtml)) {
     $block_xml = $r_xhtml->xpath('//*[@frx:block]'); 
     // Extract all the blocks and organize by provider
     foreach ($block_xml as $key => $block_node) {
@@ -153,10 +153,10 @@ function forena_get_formatter($fkey) {
   $repos = forena_repository();  
   
   foreach ($repos as $k => $r) {
-  	$engine = $r['data'];
-    if ($engine && method_exists($engine,'formats'))  {      
+    $engine = $r['data'];
+    if ($engine && method_exists($engine, 'formats'))  {      
       $f = $engine->formats();      
-      if ($f[$fkey] && method_exists($engine, $fkey)) {      	
+    if ($f[$fkey] && method_exists($engine, $fkey)) {
         // We found an object with the advertised method return it        
         return $engine; 
       }      
@@ -167,9 +167,9 @@ function forena_get_formatter($fkey) {
   $controls = forena_define_controls();
   foreach ($controls as $k => $r) {
     $engine = $r;
-    if ($engine && method_exists($engine,'formats'))  {      
+    if ($engine && method_exists($engine, 'formats'))  {      
       $f = $engine->formats();      
-      if ($f[$fkey] && method_exists($engine, $fkey)) {      	
+    if ($f[$fkey] && method_exists($engine, $fkey)) {
         // We found an object with the advertised method return it        
         return $engine; 
       }      
@@ -185,9 +185,9 @@ function forena_get_formatter($fkey) {
  *
 */
 
-function forena_get_report($report_name){	
+function forena_get_report($report_name) {
   if ($report_name) { 
-  	$report_path = forena_report_path();
+    $report_path = forena_report_path();
     $filename = $report_path . '/'. $report_name . '.frx';
     if (file_exists($filename)) {
       $r_text = file_get_contents($filename);
@@ -199,7 +199,7 @@ function forena_get_report($report_name){
         forena_error('Unable to read report', $e->getMessage()); 
       }
     }
-	return $r;
+    return $r;
   }
 }
 
@@ -209,7 +209,7 @@ function forena_get_report($report_name){
  * Returns the string within the html tag name 
  * 
 */
-function forena_get_html($tag, $r_text){
+function forena_get_html($tag, $r_text) {
   $open = strpos($r_text, $tag);
   $close = strpos($r_text, '>', $open);
   $next = strpos($r_text, '<', $close + 1);
@@ -220,10 +220,10 @@ function forena_get_html($tag, $r_text){
 
 function forena_format_data($value, $format, $format_str) {  
   $fo = forena_get_formatter($format);   
-  if ($fo) { 
-  	
+  if ($fo) {
     $ret = $fo->$format($value, $format_str); 
-  } else { 
+  } 
+  else { 
     $ret = $value; 
   }
   return $ret; 
@@ -322,7 +322,7 @@ function forena_define_plugins( $class='') {
   $plugins = forena_plugins(); 
   foreach ($plugins as $p) {  
     if (($class=='' || $class==$p['class'])) {       
-      if ($p['file'] && $p['module']) {       	
+      if ($p['file'] && $p['module']) {
         include_once( drupal_get_path('module' , $p['module']) .'/'. trim($p['file'], '/')); 
       }
     }
@@ -338,7 +338,7 @@ function forena_controls() {
   if (!$controls) {  
     $controls = array(); 
     foreach (module_list() as $module) {
-      $function = $module .'_forena_controls';
+      $function = $module . '_forena_controls';
       if (function_exists($function)) {
         $returned_controls = $function();
         if ($returned_controls) foreach ((array)$returned_controls as $c) { 
@@ -357,56 +357,146 @@ function forena_controls() {
 function forena_define_controls( $class='') {
   static $instances = '';   
   if (!$instances) { 
-	  $classes = forena_controls();
-	  foreach ($classes as $c) { 
-	    if (($class=='' || $class==$c['class'])) { 	      
-	      if ($c['file'] && $c['module']) { 
-	        include_once( drupal_get_path('module' , $c['module']) .'/'. trim($c['file'], '/'));
-	        $instances[$c['class']] =  new $c['class'];
-	      }
-	    }
-	  }
+    $classes = forena_controls();
+    foreach ($classes as $c) {
+      if (($class=='' || $class==$c['class'])) {
+        if ($c['file'] && $c['module']) {
+          include_once( drupal_get_path('module' , $c['module']) .'/'. trim($c['file'], '/'));
+          $instances[$c['class']] =  new $c['class'];
+        }
+      }
+    }
   }  
-  if($class && $instances[$class]){
-  	return $instances[$class];
+  if ($class && $instances[$class]) {
+    return $instances[$class];
   }
-  return $instances;  
+  return $instances;
 }
 
 /** 
  * Form to edit parameters
  */
-function forena_parameters_form($form_state) {	
-	$r = forena_get_report(arg(1));
-	$head = $r->rpt_xml->head;
-	$form = array();
-	
-    $form['params'] = array('#tree' => true); 
-    $nodes = $head->xpath('frx:parameters/frx:parm');
-	foreach ($nodes as $node) {	  
-	  (strcmp((string)$node['require'], "1") == 0) ? $bool = TRUE : $bool = FALSE;
-	  $form['params'][(string)$node['id']] = array(
-        '#type' => 'textfield',
-        '#title' => t((string)$node['label']),
-        '#default_value' => $node,  
-	    '#required' => $bool,
-      );	  
-	}	
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => 'Submit', 
-   );
-  return $form;  	
+function forena_parameters_form($form_state) {
+  $report_name = arg(1);
+  list($name, $format) = explode('.', $report_name, 2);  
+  if ($name) {
+    $report_path = forena_report_path();
+    $filename = $report_path . '/'. $name . '.frx';
+    if (file_exists($filename)) {
+      $r = forena_get_report($name);
+      $head = $r->rpt_xml->head;
+      $form = array();
+      $form['params'] = array('#tree' => TRUE); 
+      $nodes = $head->xpath('frx:parameters/frx:parm');
+      foreach ($nodes as $node) {
+        (strcmp((string)$node['require'], "1") == 0) ? $bool = TRUE : $bool = FALSE;
+        $form['params'][(string)$node['id']] = array(
+          '#type' => 'textfield',
+          '#title' => t((string)$node['label']),
+          '#default_value' => $node,  
+          '#required' => $bool,
+        );
+      }
+      $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => 'Submit',
+      );
+    }
+    else {
+      drupal_not_found();
+    }
+  }
+  else {
+    drupal_not_found();
+  }
+    return $form;
 }
 
-
+/**
+ * 
+ * gets the values from the params form
+ * redirects to the report page with the values in 
+ * the querystring.
+ */
 function forena_parameters_form_submit($form, &$form_state) {
   $values = $form_state['values'];   
   foreach ($values['params'] as $key => $value) {
-  	$q .= '&'.$key . '=' . urlencode($value); 
+    $q .= '&'. $key .'='. urlencode($value);
   }
-  $q = trim($q,'&'); 
+  $q = trim($q, '&'); 
 
-  $form_state['redirect']= array('reports/' . arg(1),$q); 
+  $form_state['redirect']= array('reports/' . arg(1), $q); 
 }
 
+/**
+ * Gets the correct format function
+ * to render the document and returns an 
+ * object of that class.
+ * 
+ * If it fails it returns a 0;
+ */
+
+function forena_get_doctypes($fkey) {
+  $controls = forena_define_controls();
+  foreach ($controls as $k => $r) {
+    $engine = $r;
+    if ($engine && method_exists($engine, 'doc_types'))  { 
+      $f = $engine->doc_types();      
+      if ($f[$fkey] && method_exists($engine, $f[$fkey])) {
+        // We found an object with the advertised method return it        
+        return $engine; 
+      }      
+    }
+  }  
+  return 0;
+}
+
+/**
+ * 
+ * @param unknown_type $format: The extension of the document to be rendered
+ * @param unknown_type $output: The string of the page to be displayed
+ * @return: The document in the requested format. Returns a string if not
+ * able to format.
+ */
+function  forena_generate_doc($format, $output, $options = array()) {
+
+  $doc = forena_get_doctypes($format);
+  if ($doc) {
+    $all_methods = $doc->doc_types();
+    $method = $all_methods[$format];
+    $ret = $doc->$method($output, $options);
+  }
+
+  if ($ret) {
+  // If that was successful set the appropriate mime type (header doctype). 
+    $flen = strlen($ret);
+    switch ($format) { 
+      case 'doc':
+        header('Content-Type: application/msword');
+        header('Cache-Control:');
+        header('Pragma:');
+        header("Cache-Control: must-revalidate");
+        header("Content-Length: $flen");
+        break; 
+      case 'pdf': 
+        header('Content-Type: application/pdf');
+        header('Cache-Control:');
+        header('Pragma:');
+        header("Cache-Control: must-revalidate");
+        header("Content-Length: $flen");
+        header("Content-Disposition: attachment; filename=report.pdf");   
+      case 'xls':
+        header('Content-Type: application/msexcel');
+        header('Cache-Control:');
+        header('Pragma:');
+        header("Cache-Control: must-revalidate");
+        header("Content-Length: $flen");
+        header("Content-Disposition: attachment; filename=report.xls");
+    }     
+    // Print the output. 	
+    print $ret; 
+  }
+  else {
+    print $output;
+  }   
+}  

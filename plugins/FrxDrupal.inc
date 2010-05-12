@@ -82,22 +82,17 @@ class FrxDrupal extends FrxDataEngine {
     return $formats; 
   }
   
-  public function drupal_filter($nid, $bool) {  	
-  	$node = node_load($nid, NULL, TRUE); 
-  	if(! $node){
-  		//error message goes here
-  	}
-  	//If true, render the teaser
-  	//else render the body
-  	$node = node_prepare($node, $bool);
-  	
-  	if($bool){
+  public function drupal_filter($nid, $bool) {
+    $node = node_load($nid, NULL, TRUE);
+    if (!$node) {
+      return 'N/A';
+    }
+    //If true, render the teaser
+    //else render the body
+    $node = node_prepare($node, $bool);
+    if ($bool) {
       return $node->teaser;  
-  	}  	
-  	return $node->body;
-  }
-  
-
-  
-  
+    }
+    return $node->body;
+  }  
 }

@@ -15,9 +15,8 @@ function forena_menu() {
     'access arguments' => array('administer forena reports'),
     'type' => MENU_NORMAL_ITEM, 
     'file' => 'forena.admin.inc', 
-  ); 
-
-
+  );
+  
   $items['reports/%'] = array(
     'page callback' => 'forena_report',
     'page arguments' => array(1), 
@@ -75,8 +74,8 @@ function forena_edit_report() {
  *  in forena.admin.inc
  */
 function forena_parameters_report() {
-	require_once('forena.admin.inc');
-	return drupal_get_form('forena_parameters_form');
+  require_once('forena.admin.inc');
+  return drupal_get_form('forena_parameters_form'); 
 }
 
 /**
@@ -101,19 +100,18 @@ function forena_perm() {
  *
  * @return unknown
  */
-function forena_report() {
+function forena_report() {  
   $arg_list = func_get_args();
-  require_once('forena.common.inc');  
-  
+  require_once('forena.common.inc');    
   // Concat argument to function to get a path
-  $f_path = variable_get('forena_path', 'reports');
-  foreach ($arg_list as $arg) {  	   
-    $report_name .= '/'. $arg; 
-  }  
-  $report_name = trim($report_name, '/');   
+  $f_path = variable_get('forena_path', 'reports');  
+  foreach ($arg_list as $arg) {
+    $report_name .= '/'. $arg;
+  }
+  
+  $report_name = trim($report_name, '/');  
   $report_path = forena_report_path();  
-  list($name, $format) = explode('.', $report_name, 2);
-   
+  list($name, $format) = explode('.', $report_name, 2);    
   if ($name) { 
     $filename = $report_path . '/'. $name . '.frx';
     if (file_exists($filename)) {
@@ -123,9 +121,89 @@ function forena_report() {
       } catch (Exception $e) { 
         forena_error('Unable to read report', $e->getMessage()); 
       }
+      
       $parms = $_GET; 
-      unset($parms['q']); 
-      $output .= forena_render_report($r, $format, $parms); 
+      unset($parms['q']);
+
+      $head = $r->head;
+      $nodes = $head->xpath('frx:parameters/frx:parm');
+      $q; 
+      $bool = FALSE;      
+      //if the querystring is empty,
+      //find any default parameters in the xml
+      //and put them in the querystring
+      if (count($parms) == 0) {
+        foreach ($nodes as $node) {
+          if (strlen($node) > 0) {
+            $q .= '&'. $node['id'] . '='. $node[0];
+          } 
+          elseif (strlen($node) == 0 && strcmp ($node['require'], '1') == 0) {
+            drupal_goto('reports/'. arg(1) .'/parameters');
+          }
+        }
+        if (strlen($q) > 0) { //Default values were found. Redirect with the querystring
+          $q = trim($q, '&');
+          drupal_goto('reports/' . arg(1), $q);
+        }
+      }
+      else { // There are values in the querystring. Make sure required values are not passed over
+        foreach ($nodes as $node) {
+          if ((! $parms[(string)$node['id']]) && strcmp ($node['require'], '1') == 0) {
+            if (strlen($node)==0) {
+              drupal_goto('reports/'. arg(1) .'/parameters');
+            }
+            else {
+              $parms[(string)$node['id']] = $node[0];
+              $bool = TRUE;
+            }
+          }
+        }
+        if ($bool) { //Required values were found. Redirect with the querystring
+          foreach ($parms as $key => $value) {
+            $q .= '&'. $key .'='. $value;
+          }
+          $q = trim($q, '&');
+          drupal_goto('reports/' . arg(1), $q);
+        } 
+      }
+
+      $output .= forena_render_report($r, $format, $parms);  
+      $css_path = $report_path . '/'. $name;
+      if ($format) { //a format was requested
+      	$title = $head->xpath('title');
+	      $title = '<h1>' . $title[0] . '</h1>';      
+	      $output = $title . $output;
+        $css_file = $css_path .'.'. $format .'.css';
+        $options = array('css' => $css_file,
+                         'docname' => $name,
+                   );
+        forena_generate_doc($format, $output, $options);
+      }
+      else {
+        //Creating links for downloadable documents.
+        //build querystring for document href
+        foreach ($parms as $key => $value) {
+          $q .= "&". $key . '='. $value;
+        }
+        $q = trim($q, '&');
+        //list of desired documents
+        
+        $nodes = $head->xpath('frx:docgen/frx:doc');
+        if($nodes) {        	
+        	$div .= '<div class="doclinks">';
+        	foreach ($nodes as $value) {        		
+        		if (is_object(forena_get_doctypes((string)$value[0]))) {
+        		  $div .= '<a class="doclinks" href="'. $name . '.'. $value .'?'. $q .'">'. strtoupper($value) .'</a>';
+        		}	        		
+        	}
+          $div .= '</div>';        	
+        }        
+        $output = $div . $output;
+        $path = drupal_get_path('module', 'forena');
+        drupal_add_css($path .'/forena.css', 'module');  
+        drupal_add_css($css_path .'.css', 'module');
+        return $output;
+      }   
     } 
     else { 
       drupal_not_found(); 
@@ -134,13 +212,12 @@ function forena_report() {
   else {
     drupal_not_found();  
   }
-  return $output; 
 }
 
 function forena_user_reports() {   
   $result = db_query('SELECT * FROM {forena_reports} where hidden=0 ORDER BY category,title asc');
   $categories = array(); 
-  while ($row = db_fetch_object($result)) { 	
+  while ($row = db_fetch_object($result)) {
     $cache = $row->cache; 
         
     if ($cache) {            
@@ -148,7 +225,7 @@ function forena_user_reports() {
       $access = FALSE; 
       
       // Check each callback function to see if we have an error. 
-      foreach ($cache['access'] as $callback => $args) {      			
+      foreach ($cache['access'] as $callback => $args) {
         if ($callback && $args) foreach ($args as $arg) {           
           if (function_exists($callback)) { 
             $a = $callback($arg); 
@@ -170,8 +247,7 @@ function forena_user_reports() {
   $report_repos = variable_get('forena_path', 'reports'); 
   
   foreach ($categories as $category => $reports) {
-  	
-    $output .= '<h3>'. $category .'</h3>';  
+    $output .= '<h3>'. $category .'</h3>';
     $output .= '<ul>'; 
     foreach ($reports as $r) { 
       $output .= '<li>'. l($r['title'], $report_repos .'/'. $r['report_name']) .'</li>';  
@@ -192,8 +268,8 @@ function forena_user_reports() {
 function forena_render_report($report, $format='', $data='') {
   require_once('forena.common.inc');    
   $o = new FrxReport($report, $data);
-  $output = $o->render($format); 
-  return $output;  
+  $output = $o->render($format);
+  return $output; 
 }
 
 /**
@@ -223,7 +299,7 @@ function forena_forena_plugins() {
 function forena_forena_controls() { 
   $controls[] = array('file' => 'plugins/FrxControls.inc', 
                      'class' => 'FrxControls', 
-                     );
+                     );  
   return $controls; 
 }
 

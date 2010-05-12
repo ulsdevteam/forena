@@ -14,6 +14,6 @@ class FrxDateFormatter {
   }
   
   public function format_string_help() {
-    return 'Format  ISO formated date.  (e.g. "F j, Y, g:i a") Format string is passed ot hte PHP date_to_string.  See <a href="http://php.net/manual/en/function.date.php">PHP Documentation</a> for more info.';  
+    return 'Format  ISO formated date.  (e.g. "F j, Y, g:i a") Format string is passed to the PHP date_to_string.  See <a href="http://php.net/manual/en/function.date.php">PHP Documentation</a> for more info.';  
   }
 }
