@@ -8,16 +8,20 @@ define('FRX_NS', 'urn:FrxReports');
 require_once('FrxSyntaxEngine.inc'); 
 
 class FrxReport { 
+  public $blocks_loaded; 
   public $rpt_xml; 
-  private $cur_data; 
-  private $output; 
-  private $teng; 
   public $fields;
   public $category; 
+  public $form; 
   public $access;  
   public $parameters; 
   public $options; 
-  public $body; 
+  public $body;
+   
+  private $cur_data; 
+  private $output; 
+  private $teng; 
+  
   
   public function __construct($xhtml, $data=array()) {
     $this->teng = new FrxSyntaxEngine(FRX_TOKEN_EXP, '{}', $this);
@@ -52,6 +56,9 @@ class FrxReport {
                 $this->options[$key] = (string)$value; 
               }
               break; 
+            case 'form':
+              $this->form = (string) $value; 
+              break; 
             case 'parameters':              
               foreach ($node->children(FRX_NS) as $key => $node) {
                 $parm = array(); 
@@ -61,7 +68,11 @@ class FrxReport {
                 $parm['value']= (string)$node; 
                 $this->parameters[$key] = $parm;
               }
+              break;
+            case 'doctypes': 
+              $this->doctypes = $value;
               break; 
+               
           }
         }
       }
@@ -73,9 +84,10 @@ class FrxReport {
    * @param $block
    * @return unknown_type
    */
-  private function get_data($block) {
+  private function get_data($block, $clause='') {
     //@TODO: Merge xml data parameters into the report paramters        
-    $this->cur_data = forena_invoke_data_engine($block, $this->cur_data); 
+    $this->cur_data = forena_invoke_data_engine($block, $this->cur_data, $clause); 
+    if ($this->cur_data) $this->blocks_loaded = TRUE; 
   }
   
   private function process_frx_attributes(SimpleXMLElement $node) {
@@ -83,7 +95,7 @@ class FrxReport {
     if ($attrs) foreach ($attrs as $key => $value) { 
       switch ($key) {
         case "block":
-           $this->get_data((string)$value);           
+           $this->get_data((string)$value, (string)$attrs['clause']);           
            break;  
       }
     }
@@ -102,6 +114,7 @@ class FrxReport {
       $attrs = $node->attributes();
       $tag = $node->getName(); 
       $this->process_frx_attributes($node); 
+      $attr_text=''; 
       if ($attrs) foreach ($attrs as $key => $value) { 
         $attr_text =  ' '. $key .'="'. (string)$value .'"';
       }
@@ -114,10 +127,20 @@ class FrxReport {
         $data = $this->cur_data;   
               
         if ($data) $nodes = $data->xpath($path);
-                
+        $i=0;
+        $tmp_attrs = (array)$attrs; 
+                         
         if ($nodes) foreach ($nodes as $x) {
           $this->cur_data = $x;
-          $o .= $this->teng->replace('<'. $tag . $attr_text .'>', $cur_data);          
+          $i++; 
+          $odd = $i & 1;
+          $row_class = $odd ? 'odd':'even';  
+          $tmp_attrs['class'] = trim($attrs['class'] .' '. $row_class); 
+          $r_attr_text = ''; 
+          foreach ($tmp_attrs as $key => $value) { 
+             $r_attr_text .=  ' '. $key .'="'. (string)$value .'"';
+          }
+          $o .= $this->teng->replace('<'. $tag . $r_attr_text .'>', $cur_data);          
           foreach ($node->children() as $child) { 
             $o .= $this->render_section($child); 
           }
@@ -152,12 +175,11 @@ class FrxReport {
    */
   public function render($format) {
     $rpt_xml = $this->rpt_xml;
-    drupal_set_title($this->title);
-    
+        
     if ($rpt_xml->body) $rpt_xml = $rpt_xml->body; 
     $body_xml = $rpt_xml; 
   
-    foreach ($body_xml->children() as $node) {
+    if ($body_xml && $body_xml->children()) foreach ($body_xml->children() as $node) {
       $o .= $this->render_section($node);   
     }
     

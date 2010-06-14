@@ -10,6 +10,7 @@ class FrxPDO extends FrxDataEngine {
   
   private $te;  
   private $db;
+  public $debug; 
  
   
   /**
@@ -20,7 +21,8 @@ class FrxPDO extends FrxDataEngine {
    */
   public function __construct($conf, $repos_path) {
     parent::__construct($conf, $repos_path);
-    $uri = $conf['uri'];  
+    $uri = $conf['uri']; 
+    $this->debug = $conf['debug'];  
     if ($uri) { 
       try { 
         $db = new PDO($uri, $conf['user'], $conf['password']);
@@ -51,6 +53,7 @@ class FrxPDO extends FrxDataEngine {
     if ($block['source'] && $this->access($block['access']) && $db) { 
       $sql = $block['source']; 
       $sql = $this->te->replace($sql, $params);
+
       $rs = $db->query($sql); 
       $xml = new SimpleXMLElement('<table/>'); 
       
@@ -72,7 +75,11 @@ class FrxPDO extends FrxDataEngine {
         }
         
       }
-
+      
+      if ($this->debug) { 
+        if ($xml) $d = htmlspeicalchars($xml->asXML); 
+        forena_debug('SQL: '. $sql, '<pre> SQL:'. $sql . "\n XML: ". $d . "/n</pre>"); 
+      }      
       return $xml; 
     }
     
@@ -90,7 +97,7 @@ class FrxPDO extends FrxDataEngine {
   public function format($value, $key, $data) { 
     $db = $this->db; 
     if ($db) {
-      $value =  $db -> quote($value); 
+      if ($value=='') $value = 'NULL'; else  $value =  $db -> quote($value); 
     }
     return $value; 
   }

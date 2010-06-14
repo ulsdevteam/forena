@@ -9,6 +9,197 @@
 require_once('FrxReport.inc');
 require_once('FrxDataEngine.inc');
   
+/**
+ * Get name from argument 1 or alterntaively from a file name
+ *
+ * @param unknown_type $name
+ */
+function forena_report_desc($name='') {
+  if (!$name) $name = arg(1);
+  // Get defined document types
+  $doctypes = forena_supported_doctypes(); 
+  $parts = explode('.', $name);
+  $name =''; 
+
+  if ($parts) foreach ($parts as $part) { 
+    if (!$doctypes[$part]) { 
+      $name .= '/'. $part; 
+    } 
+    else { 
+      $desc['format'] = $part; 
+    }
+  } 
+  $desc['name'] = trim($name, '/');  
+  $report_path = variable_get('forena_report_repos', 'reports');
+  list ($dir, $name_part) = explode('/', $name_part, -2);
+  if (!$name_part) $dir = ''; 
+  $desc['directory'] = $report_path . '/' . $dir;    
+  $desc['filename'] = $report_path .'/'. trim($name, ' /') .'.frx';
+   
+  if (file_exists($desc['filename'])) {
+    $desc['exists'] = TRUE; 
+  }
+  
+  return $desc; 
+}
+
+/**
+ * Determines which css files need to be loaded.  
+ *
+ * @param array $desc Report descriptor from forena_rport_desc
+ * @param string $form The report "form" to be used.  From the report
+ * @param string $format Document format that will be used for the report.
+ * @return array A list of css files that should be applied to the report. 
+ */
+function forena_report_css($desc, $form,  $format = '') {
+  $css_files = array();
+  // First check for the form file  
+  $path = forena_report_path(); 
+  if ($format && file_exists($path .'/'. $form .'-'. $format .'.css')) {
+    $css_files[] = $path . '/'. $form . '-' . $format .'.css'; 
+  }
+  else {
+    if (file_exists($path . '/' . $form . '.css')) { 
+      $css_files[] = $path . '/' . $form . '.css'; 
+    }
+  }
+
+  // Now check for a report specific file
+  $base_file = $path . '/' . $desc['name']; 
+  if ($format && file_exists($base_file .'-' . $format .'.css')) { 
+    $css_files[] = $base_file .'-'. $format . '.css';   
+  }
+  elseif (file_exists($base_file .'.css')) { 
+    $css_files[] = $base_file .'.css'; 
+  }
+  
+  return $css_files; 
+}
+
+/**
+ * Load and render a report based on a drupal path. 
+ * In this function the arglist is used to get the full path to the report. 
+ *
+ * @return unknown
+ */
+function forena_report($name_in, $parms = array()) {   
+
+  $desc = forena_report_desc(); 
+  $name = $desc['name']; 
+  $format = $desc['format']; 
+  $filename = $desc['filename'];
+   
+  // Determine the data to get. 
+  if (!$parms) $parms = $_GET; 
+  unset($parms['q']);
+  
+  if ($name) {
+    $r = forena_get_report($name, $parms);  
+    if ($r) {
+      // Get data from the report; 
+      $r_parms = $r->parameters; 
+      $form = $r->form; 
+      $rpt_xml = $r->rpt_xml; 
+      
+      
+      // Default the form
+      if (!$form) $form = variable_get('forena_default_form', 'letter'); 
+      $q; 
+      $bool = FALSE;      
+      
+      if ($r_parms) {
+        //put default parmeters in the query string
+        foreach ($r_parms as $key => $parm) {
+        if (!$parms[$key] && $r_parm['value']) {
+              $parms[$key] = $r_parm['value']; 
+            }
+        }
+        if ((!$parms[$key]) && strcmp ($node['require'], '1') == 0) {
+          $missing_parms = TRUE; 
+        }
+        
+      }
+      
+      //put title on top of report
+      $title = $r->title; 
+      if (!$missing_parms) {
+        $output .= $r->render($format);    
+        $css_files = forena_report_css($desc, $form, $format);
+      }
+               
+      if ($format) { //a format was requested       
+        $header = '<h1>' . $title . '</h1>';      
+        $output = $header . $output;
+        if ($css_files) foreach ($css_files as $css_file) { 
+          $css_text .= file_get_contents($css_file); 
+        }
+        $options = array('css' => $css_text,
+                         'docname' => str_replace(' ', '_', $title),
+                         'xml' => $r_text,
+                         'title' => $title[0],
+                   );
+        forena_generate_doc($format, $output, $options);
+      }
+      else {
+        // We've got parameters so display the parameters form
+        if ($r_parms) $output = drupal_get_form('forena_parameters_form') . $output; 
+        //set the title        
+        $title = $r->title;        
+        drupal_set_title($title);
+        //Creating links for downloadable documents.
+        //build querystring for document href
+        foreach ($parms as $key => $value) {
+          $q .= "&". $key . '='. $value;
+        }
+        $q = trim($q, '&');
+               
+        //Building the document links
+        $rpt_xml = $r->rpt_xml; 
+        $nodes = $rpt_xml->xpath('//frx:docgen/frx:doc');        
+        $div .= '<div class="doclinks">';           
+        $default_doctypes = variable_get('forena_doc_formats', array());    
+        if (!$missing_parms) { 
+          if (!$nodes) { 
+            
+            //show the default. All supported links
+            foreach ($default_doctypes as $value) if (is_object(forena_get_doctypes($value))) {
+                $div .= '<a class="doclinks" href="'. $name_in . '.'. $value .'?'. $q .'">'. strtoupper($value) .'</a>';
+            }
+          }
+          else { 
+            
+            //There were nodes. show the prefered doc types          
+            foreach ($nodes as $value) { 
+              $type = (string)$value['type']; 
+              if ($doctypes[$type]) {                     
+                if (is_object(forena_get_doctypes($type))) {
+                  $div .= '<a class="doclinks" href="'. $name . '.'. $type .'?'. $q .'">'. strtoupper($type) .'</a>';
+                }
+              }                       
+            }
+          }
+          $div .= '</div>';         
+                
+          $output = $div . '<div class="forena-report">'. $output .'</div>';
+        }
+        $path = drupal_get_path('module', 'forena');
+        drupal_add_css($path .'/forena.css', 'module');  
+        if ($css_files) foreach ($css_files as $css_file) { 
+          drupal_add_css($css_file, 'module');
+        }
+        return $output;
+      }   
+    } 
+    else { 
+      drupal_not_found(); 
+    }
+  } 
+  else {
+    drupal_not_found();  
+  }
+}
+
+
 // Putting this in a function to sandbox the repository settings
 function __forena_load_repository(&$repo) { 
   // First determine if the class file exisits
@@ -18,7 +209,7 @@ function __forena_load_repository(&$repo) {
     include($path .'/settings.php'); 
      
   }
-  
+  $repo['user callback'] = $conf['user callback']; 
   $repo['data'] = __forena_load_engine($conf, $repo['path']);  
   //$repo['auth'] = __forena_load_auth($security_provider); 
   
@@ -76,6 +267,9 @@ function forena_repository($name='') {
         __forena_load_repository($repos[$name]); 
       }
       return $repos[$name];     
+    } 
+    else { 
+      forena_error('Undefined repository '. $name, "Undefined Repository: $name <pre>". print_r($repos, 1) .'</pre>'); 
     }
   } 
   else { 
@@ -84,6 +278,12 @@ function forena_repository($name='') {
     
 }
 
+/**
+ * Biuld cach
+ *
+ * @param xhtml $r_xhtml Forena XML report.  
+ * @return array data to be stored in the cache field for the report in the database. 
+ */
 function forena_load_cache($r_xhtml) {  
   $blocks = array();   
   if (is_object($r_xhtml)) {
@@ -92,12 +292,14 @@ function forena_load_cache($r_xhtml) {
     foreach ($block_xml as $key => $block_node) {
       $attrs = $block_node->attributes('urn:FrxReports'); 
       foreach ($attrs as $key => $value) { 
-        list($provider, $block) = explode('/', $value, 2);
-        $repos[$provider][] = $block;          
+        if ($key == 'block') { 
+          list($provider, $block) = explode('/', $value, 2);
+          $repos[$provider][] = $block;
+        }          
       }
     } 
     
-    foreach ($repos as $provider => $blocks) {       
+    if ($repos) foreach ($repos as $provider => $blocks) {       
       $repos = forena_repository($provider);      
       $engine = $repos['data'];
       $conf = $engine->conf;
@@ -114,7 +316,7 @@ function forena_load_cache($r_xhtml) {
           //drupal_set_message('no engine found', 'error');    
         }
       }
-      $cache['access'][$conf['access callback']]=$access; 
+      if ($conf['access callback'] && $access) $cache['access'][$conf['access callback']]=$access; 
     } 
   }
   return $cache; 
@@ -125,20 +327,24 @@ function forena_load_cache($r_xhtml) {
  *
  * @param unknown_type $data_block
  * @param unknown_type $parameters
- * @param unknown_type $subquery
+ * @param string $clause order / where cause
  * @return unknown
  */
-function forena_invoke_data_engine($data_block, $parameters=array(), $subquery='') {
+function forena_invoke_data_engine($data_block, $parameters=array(), $clause='') {
    list($provider, $block) = explode('/', $data_block, 2); 
    // Get the data 
    
    $repos = forena_repository($provider);
-
+   if ($repos['user callback']) {
+     $user_fn = $repos['user callback']; 
+     $parameters['current_user'] = $user_fn(); 
+   }
+   
    if ($repos['data']) { 
      $engine = $repos['data'];
      if (method_exists($engine, 'data')) {
 
-       $xml = $engine->data($block, $parameters, $subquery); 
+       $xml = $engine->data($block, $parameters, $clause); 
      }
      return $xml; 
    }
@@ -178,14 +384,15 @@ function forena_get_formatter($fkey) {
   return $formats; 
 }
 
+
+
 /**
  * Accepts the name of a file
  * 
  * Returns a xml object of the file. 
  *
 */
-
-function forena_get_report($report_name) {
+function forena_get_report($report_name, $data=array()) {
   if ($report_name) { 
     $report_path = forena_report_path();
     $filename = $report_path . '/'. $report_name . '.frx';
@@ -193,14 +400,30 @@ function forena_get_report($report_name) {
       $r_text = file_get_contents($filename);
                
       try { 
-        $r = new SimpleXMLElement($r_text);
-        $r = new FrxReport($r);          
+
+        $r = forena_report_object($r_text, $data);          
       } catch (Exception $e) { 
         forena_error('Unable to read report', $e->getMessage()); 
       }
     }
     return $r;
   }
+}
+
+/**
+ * Object factory for forena report
+ * When called without a report name, it returns the last created report.
+ * This static caching mechanism is used for form functions that are called 
+ * within a page load. 
+ *
+ * @param unknown_type $report_name
+ */
+function forena_report_object($report='', $data='') { 
+  static $object = '';
+  if ($report) {
+    $object = new FrxReport($report, $data);
+  }
+  return $object; 
 }
 
 /**
@@ -277,17 +500,13 @@ function forena_error($short_message, $log) {
   }
 }
 
-/**
- * Load the report repository path
- *
- * @return unknown
- */
-function forena_report_path() { 
-  $report_path = variable_get('forena_report_repos', ''); 
-  if (!$report_path) {
-    $report_path = drupal_get_path('module', 'forena') . '/repos/reports';
+function forena_debug($short_message, $log) { 
+  if ($log) {
+    watchdog('forena debug', $log, NULL); 
   }
-  return $report_path; 
+  if ($short_message) { 
+    drupal_set_message($short_message); 
+  }
 }
 
 /**
@@ -377,16 +596,14 @@ function forena_define_controls( $class='') {
  * Form to edit parameters
  */
 function forena_parameters_form($form_state) {
-  $report_name = arg(1);
-  list($name, $format) = explode('.', $report_name, 2);  
-  if ($name) {
-    $report_path = forena_report_path();
-    $filename = $report_path . '/'. $name . '.frx';
-    if (file_exists($filename)) {
-      $r = forena_get_report($name);
+
+  $r = forena_report_object(); 
+  if ($r) {
+      drupal_set_title($r->title);
       $head = $r->rpt_xml->head;
+      
       $form = array();
-      $form['params'] = array('#tree' => TRUE); 
+      $form['params'] = array('#tree' => TRUE, '#title' => 'Parameters', '#type' => 'fieldset', '#collapsible' => TRUE, '#collapsed' => $r->blocks_loaded); 
       $nodes = $head->xpath('frx:parameters/frx:parm');
       foreach ($nodes as $node) {
         (strcmp((string)$node['require'], "1") == 0) ? $bool = TRUE : $bool = FALSE;
@@ -397,19 +614,13 @@ function forena_parameters_form($form_state) {
           '#required' => $bool,
         );
       }
-      $form['submit'] = array(
+      $form['params']['submit'] = array(
         '#type' => 'submit',
         '#value' => 'Submit',
       );
     }
-    else {
-      drupal_not_found();
-    }
-  }
-  else {
-    drupal_not_found();
-  }
-    return $form;
+
+  return $form;
 }
 
 /**
@@ -424,8 +635,7 @@ function forena_parameters_form_submit($form, &$form_state) {
     $q .= '&'. $key .'='. urlencode($value);
   }
   $q = trim($q, '&'); 
-
-  $form_state['redirect']= array('reports/' . arg(1), $q); 
+  $form_state['redirect']= array($_GET['q'], $q); 
 }
 
 /**
@@ -451,6 +661,26 @@ function forena_get_doctypes($fkey) {
   return 0;
 }
 
+
+/**
+ * 
+ * @return returns an array of supported document format extensions
+ * 
+ */
+function forena_supported_doctypes() {
+  $controls = forena_define_controls();
+  $supported_doctypes = array();
+  foreach ($controls as $k => $r) {
+    $engine = $r;
+    if ($engine && method_exists($engine, 'doc_types'))  { 
+      $f = $engine->doc_types(); 
+      $supported_doctypes = array_merge($supported_doctypes, $f);
+    }
+  }
+  $temp = array_keys($supported_doctypes);
+  $supported_doctypes = array_combine($temp, $temp);  
+  return $supported_doctypes;
+}
 /**
  * 
  * @param unknown_type $format: The extension of the document to be rendered
@@ -466,9 +696,8 @@ function  forena_generate_doc($format, $output, $options = array()) {
     $method = $all_methods[$format];
     $ret = $doc->$method($output, $options);
   }
-
   if ($ret) {
-  // If that was successful set the appropriate mime type (header doctype). 
+  // If an object was found, set the appropriate mime type (header doctype). 
     $flen = strlen($ret);
     switch ($format) { 
       case 'doc':
@@ -484,15 +713,26 @@ function  forena_generate_doc($format, $output, $options = array()) {
         header('Pragma:');
         header("Cache-Control: must-revalidate");
         header("Content-Length: $flen");
-        header("Content-Disposition: attachment; filename=report.pdf");   
+        header("Content-Disposition: attachment; filename=report.pdf");
+        break;   
       case 'xls':
         header('Content-Type: application/msexcel');
         header('Cache-Control:');
         header('Pragma:');
         header("Cache-Control: must-revalidate");
         header("Content-Length: $flen");
-        header("Content-Disposition: attachment; filename=report.xls");
-    }     
+        header("Content-Disposition: attachment; filename=report.xls");  
+        break;   
+     case 'csv':
+        header('Content-Type: application/csv');
+        header('Cache-Control:');
+        header('Pragma:');
+        header("Cache-Control: must-revalidate");
+        header("Content-Length: $flen");
+        header("Content-Disposition: attachment; filename=report.csv");     
+        break;
+
+    }
     // Print the output. 	
     print $ret; 
   }

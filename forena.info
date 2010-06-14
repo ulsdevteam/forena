@@ -1,6 +1,5 @@
 ; $Id$
 name = Forena Reports
-description = Reporting to for use in local intranets.
-package = Forena Reports
+description = Reporting tool for use in local intranets.
 version = 0.1
 core = 6.x

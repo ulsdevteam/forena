@@ -11,6 +11,7 @@ class FrxOracle extends FrxDataEngine {
   
   private $te;  
   private $db;
+  private $use_oracle_xml; 
   
   /**
    * Object constructor
@@ -20,13 +21,16 @@ class FrxOracle extends FrxDataEngine {
    */
   public function __construct($conf, $repos_path) {
     parent::__construct($conf, $repos_path);
+    $this->use_oracle_xml = FALSE;
     $uri = $conf['uri'];  
+    $this->debug = $conf['debug']; 
+    if ($conf['oracle_xml']) $this->use_oracle_xml = TRUE; 
     if ($uri) { 
       try { 
         $db = oci_connect($conf['user'], $conf['password'], $uri, $conf['character_set']);
         $this->db = $db; 
       } catch (Exception $e) { 
-        forena_error('Unable to connect to database', $e->getMessage());  
+        forena_error('Unable to connect to database '. $conf['title'], $e->getMessage());  
       }
    
     } 
@@ -44,15 +48,57 @@ class FrxOracle extends FrxDataEngine {
    * @param Array $parm_data
    * @param Query $subQuery
    */
-  public function data($block_name, $params=array(), $subQuery='') {
+  public function data($block_name, $params=array(), $clause='') {
     // Load the block from the file
     $db = $this->db; 
     $block = $this->load_block($block_name); 
     $xml =''; 
     if ($block['source'] && $this->access($block['access']) && $db) { 
       $sql = $block['source']; 
+      if ($clause) {
+        $sql = 'SELECT * FROM ('. trim($sql, ' ;') . ') '. $clause; 
+      }
       $sql = $this->te->replace($sql, $params);
 
+      if ($this->use_oracle_xml) { 
+        $xml = $this->oracle_xml($sql); 
+      } 
+      else {
+        $xml = $this->php_xml($sql); 
+      }
+      if ($this->debug) { 
+        if ($xml) $d = htmlspecialchars($xml->asXML); 
+        forena_debug('SQL: '. $sql, '<pre> SQL:'. $sql . "\n XML: ". $d . "\n</pre>"); 
+      }
+      return $xml; 
+    }
+    
+  }
+  
+  /**
+   * Generate xml from sql using the provided f_forena
+   *
+   * @param unknown_type $sql
+   * @return unknown
+   */
+  private function oracle_xml($sql) { 
+      $db = $this->db; 
+
+      //$rs->debugDumpParams();
+      $fsql = 'declare x XMLTYPE; begin x := f_forena_xml(:p1); :ret_val := x.getClobVal();  end; '; 
+      $stmt = oci_parse($db, $fsql);
+      $ret = oci_new_descriptor($db, OCI_D_LOB); 
+      oci_bind_by_name($stmt, ':ret_val', $ret, -1, OCI_B_CLOB);  
+      oci_bind_by_name($stmt, ':p1', $sql);
+      oci_execute($stmt);  
+      $xml_text = $ret->load(); 
+      if ($xml_text) $xml = new SimpleXMLElement($xml_text);  
+      oci_free_statement($stmt); 
+      return $xml;     
+  }
+  
+  private function php_xml($sql) { 
+      $db = $this->db; 
       $xml = new SimpleXMLElement('<table/>'); 
 
       //$rs->debugDumpParams();
@@ -67,8 +113,6 @@ class FrxOracle extends FrxDataEngine {
       }
       oci_free_statement($stmt); 
       return $xml; 
-    }
-    
   }
   
   /**
@@ -81,9 +125,21 @@ class FrxOracle extends FrxDataEngine {
    * @param unknown_type $data
    */
   public function format($value, $key, $data) { 
-    $value =  "'".  str_replace("'", "''", $value) ."'"; 
+    if ($value=='') $value = 'NULL'; else $value =  "'".  str_replace("'", "''", $value) ."'"; 
     return $value; 
   }
+  
+    /**
+   * Destructor - Closes database connections. 
+   *
+   */
+  public function __destruct() { 
+    $db = $this->db; 
+    if ($db) { 
+      oci_close($db); 
+    }
+  }
+  
   
   
 }
