@@ -8,12 +8,13 @@
  * @author metzlerd
  *
  */
-class FrxFileEngine extends FrxDataEngine {
+class FrxFiles extends FrxDataEngine {
   private $path; 
   public function __construct($conf, $repos_path) { 
     parent::__construct($conf, $repos_path);
     $this->comment_prefix = '<!--'; 
     $this->comment_suffix = '-->'; 
+    $this->block_ext = 'xml'; 
     list($protocol, $path) = explode('://', $conf['uri'], 2); 
     if (!$path) $path = $protocol; 
     $this->path = $path;  
@@ -25,10 +26,13 @@ class FrxFileEngine extends FrxDataEngine {
 
   public function data($block_name, $parm_data='', $subQuery='') {
 
-    $xmlData = file_get_contents($this->path .'/'. $block_name .'.xml', FILE_USE_INCLUDE_PATH ); 
-    if ($xmlData) { 
+     $block = $this->load_block($block_name); 
+    $xml =''; 
+    if ($block['source'] && $this->access($block['access'])) { 
       try { 
+        $xmlData = $block['source']; 
         $xml = new SimpleXMLElement($xmlData);
+        drupal_set_message(htmlspecialchars($xml->asXML())); 
       } catch (Exception $e) { 
         print "Error processing xml\n";
         print $e->getMessage();  

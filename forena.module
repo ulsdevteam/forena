@@ -50,7 +50,7 @@ function forena_menu() {
    ); 
    
    $items['reports/%/edit'] = array(
-     'title' => 'Edit',
+     'title' => 'Layout',
      'page callback' => 'forena_edit_report',
      'page arguments' => array(1),
      'access arguments' => array('design any report'),     
@@ -58,8 +58,15 @@ function forena_menu() {
      'type' => MENU_LOCAL_TASK, 
      'file' => 'forena.common.inc', 
     );
-   
     
+   $items['reports/%/add'] = array(
+     'title' => 'Data',
+     'page callback' => 'forena_add_block',     
+     'access arguments' => array('design any report'),     
+     'description' => t('Add a data block to your report'),     
+     'type' => MENU_LOCAL_TASK, 
+   );
+       
   $items['forena'] = array(
     'page callback' => 'forena_user_reports',
     'page arguments' => array(), 
@@ -86,6 +93,11 @@ function forena_menu() {
 function forena_edit_report() {
   require_once('forena.admin.inc');  
   return drupal_get_form('forena_edit_form');
+}
+
+function forena_add_block() {
+  require_once('forena.admin.inc');  
+  return drupal_get_form('forena_add_block_form');
 }
 
 /**
@@ -220,8 +232,12 @@ function forena_forena_plugins() {
  */
 function forena_forena_controls() { 
   $controls[] = array('file' => 'plugins/FrxControls.inc', 
-                     'class' => 'FrxControls', 
+                     'class' => 'FrxControls',                       
                      );  
+/*  $controls[] = array('file' => 'plugins/FrxReportTemplates.inc',
+                      'class' => 'FrxReportTemplates'
+                      );
+*/
   return $controls; 
 }
 

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--ACCESS=administer site configuration -->
+<root>
+  <row><title>Overview</title><name>help.administration</name></row>
+  <row><title>Designing Documentation</title><name>help.design</name></row>
+</root>

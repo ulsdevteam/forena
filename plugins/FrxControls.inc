@@ -1,17 +1,18 @@
 <?php
 // $Id$
 /**
- * @file
- * Provides data blocks for native drupal connections using the default 
- * drupal connections.
+ * @file contains various methods for extending report 
+ * formating, layout, transformation and design. 
  *
  */
+
 class FrxControls {  
   /**
    * @section 
-   * Formatters 
-   * Below here are formatting types
+   * Below here are advertising methods
    */
+	
+	//date formats
   public function formats() {
     $formats = array('drupal_date_format' => 'Drupal Date',
                      'iso_date' => 'ISO Date', 
@@ -19,6 +20,7 @@ class FrxControls {
     return $formats; 
   }
   
+  //document transformations
   public function doc_types() {
     $doc_types = array('doc' => 'htmldocument',
                        'html' => 'htmldocument',
@@ -28,7 +30,16 @@ class FrxControls {
     return $doc_types;
   }
   
+  //Report templates
+  public function templates() {
+    $templates = array('table' => 'table',
+                       'vertical_list' => 'list',
+                      );
+                     
+    return $templates; 
+  }
 
+  //Date format methods
   public function drupal_date_format($value, $format_str) { 
      if (!$format_str) $format_str = 'small'; 
      switch ($format_str) { 
@@ -50,6 +61,7 @@ class FrxControls {
     return $this->drupal_date_format($date, $format_str); 
   }
 
+  //Document transformation methods  
   public function htmldocument($body, $options) {
     $output .= '<html><head>';
     if ($options['css'] && file_exists($options['css'])) {
@@ -82,20 +94,6 @@ class FrxControls {
     }    
     return $output;
   }
-  
-  public function cleantitle($title) {
-    $len = strlen($title);     
-    if ($len >= 23) { 
-     $title = substr($title, 0, 20);
-    }
-    $delims = array("*", "[]", "?", "/");
-    $title = str_replace($delims, "", $title);
-    
-    $title = explode("\\", $title);
-    $title = implode("", $title); 
-    
-    return $title;
-  }  
   
   public function xlsdocument($body, $options) {    
     $output .= '<?xml version="1.0"?>' . "\n";
@@ -149,4 +147,47 @@ class FrxControls {
     $output .= '</Workbook>';
     return $output;    
  }
+ 
+ //template methods
+  public function table($columns, $data_block) {
+    $xml .= '<div frx:block="'. $data_block .'">';
+    $xml .= '<table>';
+    $xml .= '<thead>';    
+    $xml .= '<tr>';
+    //Create the headers
+    foreach ($columns as $header) {
+     $xml .= '<th>'. $header .'</th>';
+    }
+    $xml .= '</tr>';
+    $xml .= '</thead>';
+    $xml .= '<tbody>';
+    $xml .= '<tr frx:foreach="*">';
+    foreach ($columns as $column){
+      $xml .= '<td>{'. $column .'}</td>';
+    }
+    $xml .= '</tr>';
+    $xml .= '</tbody>';
+    $xml .= '</table>';
+    $xml .= '</div>';
+    
+    return $xml;
+  }
+ 
+  public function vertical_list($columns, $data_block) {
+    $xml .= '<div frx:block="'. $data_block .'">';
+    $xml .= '<table frx:foreach="*">'; 
+    $xml .= '<tbody>';
+    
+    foreach ($columns as $column) {
+      $xml .= '<tr >';     
+      $xml .= '<th>'. $column .'</th><td>{'. $column .'}</td>';
+      $xml .= '</tr>';      
+    }
+    
+    $xml .= '</tbody>';
+    $xml .= '</table>';
+    $xml .= '</div>';
+        
+    return $xml;
+  }
 }

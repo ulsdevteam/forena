@@ -17,7 +17,7 @@ class FrxReport {
   public $parameters; 
   public $options; 
   public $body;
-   
+  private $ids;
   private $cur_data; 
   private $output; 
   private $teng; 
@@ -225,6 +225,19 @@ class FrxReport {
   }
   
   /**
+   * Delete a node based on id
+   * @param unknown_type $id
+   * @return unknown_type
+   */
+  public function deleteNode($id) {
+  	$path = '//*[@id="'. $id .'"]';
+    $nodes = $this->rpt_xml->xpath($path);
+    $node = $nodes[0];     
+    $dom=dom_import_simplexml($node);
+    $dom->parentNode->removeChild($dom);    
+  }
+  
+  /**
    * Return the xml data for the report. 
    *
    * @return unknown
@@ -237,4 +250,98 @@ class FrxReport {
        return '';    
      }
   }
+  /**
+   * Make sure all xml elements have ids
+   */ 
+  private function parse_ids() {
+     $i=0;  
+     if ($this->rpt_xml) {
+       $this->rpt_xml->registerXPathNamespace('frx', FRX_NS);
+       $frx_attributes = array();  
+       $frx_nodes = $this->rpt_xml->xpath('body//*[@frx:*]');
+
+       if ($frx_nodes) foreach ($frx_nodes as $node) {
+          $attr_nodes = $node->attributes(FRX_NS);
+          if ($attr_nodes) { 
+            // Make sure every element has an id
+            $i++;
+            $id = 'forena-'. $i;  
+  
+            if (!(string)$node['id']) {
+              $node->addAttribute('id', $id);
+              //drupal_set_message('node '. $id. (string)$node['id']); 
+            } 
+            else { 
+              if (strpos((string)$node['id'], 'forena-')===0) {
+                // Reset the id to the numerically generated one 
+                $node['id'] = $id;   
+              } 
+              else { 
+                // Use the id of the element
+                $id = (string)$node['id']; 
+              }
+            }
+            
+            // Save away the frx attributes in case we need them later. 
+            $attr_nodes = $node->attributes(FRX_NS);
+            $attrs = array(); 
+            if ($attr_nodes) foreach ($attr_nodes as $key => $value) { 
+              $attrs[$key] = (string)$value; 
+            }
+            // Save away the attributes
+            $frx_attributes[$id] = $attrs; 
+          }
+       }
+
+       $this->frx_attributes = $frx_attributes; 
+     }
+  }
+  
+  /**
+   * Get the attributes by 
+   *
+   * @return array Attributes 
+   * 
+   * This function will return an array for all of the frx attributes defined in the report body
+   * These attributes can be saved away and added back in later using. 
+   */
+  public function get_attributes_by_id() {
+    $this->parse_ids();  
+    return $this->frx_attributes; 
+  }
+  
+  /**
+   * Save attributes based on id match
+   *
+   * @param array $attributes
+   * 
+   * The attributes array should be of the form 
+   * array( element_id => array( key1 => value1, key2 => value2)
+   * The function restores the attributes based on the element id.   
+   */
+  public function save_attributes_by_id($attributes) {
+    $rpt_xml = $this->rpt_xml;  
+    if ($attributes) foreach ($attributes as $id => $att_list) { 
+      $id_search_path = '//*[@id="'. $id . '"]'; 
+      $fnd = $rpt_xml->xpath($id_search_path);
+      if ($fnd) { 
+        $node = $fnd[0]; 
+   
+        // Start attribute replacement
+        $frx_attributes = $node->Attributes(FRX_NS); 
+        
+        foreach ($att_list as $key => $value) { 
+          if (!$frx_attributes[$key]) { 
+            $node['frx:'. $key] = $value; 
+          } 
+          else {
+            unset($frx_attributes[$key]); 
+            $node['frx:'. $key] = $value;
+          }
+        }
+      }
+    }
+  }
+  
+  
 }

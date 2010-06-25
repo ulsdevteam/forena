@@ -87,10 +87,9 @@ function forena_report($name_in, $parms = array()) {
   $desc = forena_report_desc(); 
   $name = $desc['name']; 
   $format = $desc['format']; 
-  $filename = $desc['filename'];
-   
+  $filename = $desc['filename']; 
   // Determine the data to get. 
-  if (!$parms) $parms = $_GET; 
+  if (!$parms) $parms = $_GET; else $parms = (array)$parms; 
   unset($parms['q']);
   
   if ($name) {
@@ -204,10 +203,11 @@ function forena_report($name_in, $parms = array()) {
 function __forena_load_repository(&$repo) { 
   // First determine if the class file exisits
   $path = $repo['path']; 
+                
   if (file_exists($path .'/settings.php')) {
     // This should at minimum set  
     include($path .'/settings.php'); 
-     
+
   }
   $repo['user callback'] = $conf['user callback']; 
   $repo['data'] = __forena_load_engine($conf, $repo['path']);  
@@ -223,7 +223,6 @@ function __forena_load_repository(&$repo) {
  */
 function __forena_load_engine($conf, $repo_path) { 
   $name = $conf['data_engine']; 
-
   forena_define_plugins(); 
   // Instantiate the path
   if (class_exists($name)) { 
@@ -253,16 +252,17 @@ function forena_repository($name='') {
     }
   
     // Overide difinitions of the sample and drupal repositories. 
-    $repos['sample'] = array('path' => $path .'/repos/sample',
+    $repos['forena_help'] = array('path' => $path .'/repos/forena_help',
                              'title' => 'Forena Sample Reports');
   
     $repos['drupal'] = array('path' => $path .'/repos/drupal',
                              'title' => 'Drupal Reports');
   }
-  
+
   // Now determine if the object exists 
   if ($name) { 
     if ($repos[$name]) {
+
       if (!is_object($repos[$name]['data'])|| !is_object($repos[$name]['auth'])) {
         __forena_load_repository($repos[$name]); 
       }
@@ -333,15 +333,15 @@ function forena_load_cache($r_xhtml) {
 function forena_invoke_data_engine($data_block, $parameters=array(), $clause='') {
    list($provider, $block) = explode('/', $data_block, 2); 
    // Get the data 
-   
    $repos = forena_repository($provider);
    if ($repos['user callback']) {
      $user_fn = $repos['user callback']; 
      $parameters['current_user'] = $user_fn(); 
    }
-   
+  
    if ($repos['data']) { 
      $engine = $repos['data'];
+     $access = TRUE; 
      if (method_exists($engine, 'data')) {
 
        $xml = $engine->data($block, $parameters, $clause); 
@@ -349,6 +349,23 @@ function forena_invoke_data_engine($data_block, $parameters=array(), $clause='')
      return $xml; 
    }
 }
+
+function forena_load_block($data_block) {
+   list($provider, $block) = explode('/', $data_block, 2); 
+   // Get the data 
+   
+   $repos = forena_repository($provider);
+
+   if ($repos['data']) { 
+     $engine = $repos['data'];
+     if (method_exists($engine, 'data')) {
+       $block_info = $engine->load_block($block); 
+       
+     }
+     return $block_info; 
+   }
+}
+
 
 /**
  * Load the formatters for all initialized repositories.  
@@ -427,6 +444,24 @@ function forena_report_object($report='', $data='') {
 }
 
 /**
+ * Enter description here...
+ *
+ * @param simplexml $xml
+ * @param string $tag
+ * @return string
+ */
+function forena_inner_xml($xml,$tag) {
+  if (is_object($xml) && is_object($xml->$tag))
+  {
+    $xml_data = $xml->$tag->asXML();
+    $xml_data = preg_replace("/<\/?" . $tag . "(.|\s)*?>/","",$xml_data);
+  	
+    //$xml_data = str_replace(array('<'.$tag.'>','</'.$tag.'>','<'.$tag.'/>'),array('','',''),$xml_data);  
+  };
+  return $xml_data; 
+}
+
+/**
  * Accepts the name of the html tag, and the string the tag is in.
  * 
  * Returns the string within the html tag name 
@@ -460,7 +495,11 @@ function forena_format_data($value, $format, $format_str) {
  * @param unknown_type $comment
  */
 function forena_load_block_file($filepath, $comment='--', $trim) { 
-  $block_data = file_get_contents($filepath); 
+	if (!file_exists($filepath)) {
+		return array();
+	}
+ 
+  $block_data = file_get_contents($filepath);
   $lines = explode("\n", $block_data); 
   $cnt = count($lines);
   $access = '';
@@ -572,6 +611,7 @@ function forena_controls() {
 
 /**
  * returns a list of instances of the control classes
+ * if there wasn't a class, returns an empty string.
  */
 function forena_define_controls( $class='') {
   static $instances = '';   
@@ -581,7 +621,9 @@ function forena_define_controls( $class='') {
       if (($class=='' || $class==$c['class'])) {
         if ($c['file'] && $c['module']) {
           include_once( drupal_get_path('module' , $c['module']) .'/'. trim($c['file'], '/'));
-          $instances[$c['class']] =  new $c['class'];
+          if (class_exists($c['class'])) {
+            $instances[$c['class']] =  new $c['class'];
+          }
         }
       }
     }
@@ -661,7 +703,6 @@ function forena_get_doctypes($fkey) {
   return 0;
 }
 
-
 /**
  * 
  * @return returns an array of supported document format extensions
@@ -681,6 +722,47 @@ function forena_supported_doctypes() {
   $supported_doctypes = array_combine($temp, $temp);  
   return $supported_doctypes;
 }
+
+/**
+ * Returns an object of the template class 
+ * that has a method named templates.
+ * 
+ * If it fails it returns a 0;
+ */
+function forena_get_templates($fkey) {
+  $controls = forena_define_controls();
+  foreach ($controls as $k => $r) {
+    $engine = $r;
+    if ($engine && method_exists($engine, 'templates'))  { 
+      $f = $engine->templates();            
+      if ($f[$fkey] && method_exists($engine, $fkey)) {      	
+        // We found an object with the advertised method return it        
+        return $engine; 
+      }      
+    }
+  }  
+  return 0;
+}
+
+/**
+ * 
+ * @return returns an array of supported templates
+ * 
+ */
+function forena_supported_templates() {
+  $controls = forena_define_controls();
+  $supported_templates = array();
+  foreach ($controls as $k => $r) {
+    $engine = $r;
+    if ($engine && method_exists($engine, 'templates'))  { 
+      $f = $engine->templates(); 
+      $supported_templates = array_merge($supported_templates, $f);
+    }
+  }   
+  return $supported_templates;
+}
+
+
 /**
  * 
  * @param unknown_type $format: The extension of the document to be rendered
