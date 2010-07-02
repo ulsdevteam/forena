@@ -2,7 +2,7 @@
 // $Id$
 /**
  * @file 
- * Basic report engine.  Controls the rendering of the report. 
+ * Basic report provider.  Controls the rendering of the report. 
  */
 define('FRX_NS', 'urn:FrxReports'); 
 require_once('FrxSyntaxEngine.inc'); 
@@ -60,9 +60,9 @@ class FrxReport {
               $this->form = (string) $value; 
               break; 
             case 'parameters':              
-              foreach ($node->children(FRX_NS) as $key => $node) {
+              foreach ($node->children(FRX_NS) as $key => $node) {              	
                 $parm = array(); 
-                foreach ($node->attributes() as $akey => $attr) {
+                foreach ($node->attributes() as $akey => $attr) {                	
                   $parm[$akey] = (string)$attr; 
                 }
                 $parm['value']= (string)$node; 
@@ -86,7 +86,7 @@ class FrxReport {
    */
   private function get_data($block, $clause='') {
     //@TODO: Merge xml data parameters into the report paramters        
-    $this->cur_data = forena_invoke_data_engine($block, $this->cur_data, $clause); 
+    $this->cur_data = forena_invoke_data_provider($block, $this->cur_data, $clause); 
     if ($this->cur_data) $this->blocks_loaded = TRUE; 
   }
   
@@ -187,7 +187,7 @@ class FrxReport {
   }
   /*
    * Formatter used by the syntax engine to alter data that gets extracted.
-   * This invokes the field translation engine 
+   * This invokes the field translation  
    */
   public function format($value, $key, $data) {
     // Determine if there is a field overide entry    
@@ -230,7 +230,7 @@ class FrxReport {
    * @return unknown_type
    */
   public function deleteNode($id) {
-  	$path = '//*[@id="'. $id .'"]';
+    $path = '//*[@id="'. $id .'"]';
     $nodes = $this->rpt_xml->xpath($path);
     $node = $nodes[0];     
     $dom=dom_import_simplexml($node);

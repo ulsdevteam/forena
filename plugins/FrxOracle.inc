@@ -7,9 +7,9 @@
  * In order to take advantage of XML support the following XML 
  *
  */
-class FrxOracle extends FrxDataEngine {
+class FrxOracle extends FrxDataProvider {
   
-  private $te;  
+
   private $db;
   private $use_oracle_xml; 
   

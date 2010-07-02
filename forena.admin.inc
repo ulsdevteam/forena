@@ -6,6 +6,12 @@
  */
 require_once('forena.common.inc'); 
 
+/**
+ * Make sure a drectory exists in the report path prior to save. 
+ *
+ * @param unknown_type $fullpath
+ * @param unknown_type $recursive
+ */
 function _forena_verify_directory($fullpath, $recursive=FALSE) { 
   static $path=''; 
   if (!$recursive) $path = forena_report_path();
@@ -20,6 +26,48 @@ function _forena_verify_directory($fullpath, $recursive=FALSE) {
     watchdog('debug', $file); 
     _forena_verify_directory($file, TRUE); 
   }
+}
+
+/**
+ * Recursively copy all report files from the source directory to the destination directory
+ *
+ * @param string $src_dir  Source directory 
+ */
+function _forena_copy_reports($src_dir) {
+  static $dest_dir = ''; 
+  static $i = 0; 
+  if (!$dest_dir) {
+    $dest_dir = forena_report_path(); 
+  }
+  if (!file_exists($dest_dir)) {
+    mkdir($dest_dir); 
+  }
+  
+  $d = dir($src_dir);
+  while (false !== ($rpt_file = $d->read())) {
+    $src_file = $d->path .'/'. $rpt_file; 
+    $dest_file = $dest_dir .'/'. $rpt_file;
+    
+    if (is_file($src_file)) {
+      file_put_contents($dest_file, file_get_contents($src_file)); 
+      $i++;
+    } 
+    else {
+      if (strpos($rpt_file, '.')!==0) {
+        
+        // Recurse into sub directory 
+        $src_save = $src_dir; 
+        $dest_save = $dest_dir; 
+        $dest_dir .= '/'. $rpt_file; 
+        $src_dir .= '/'. $rpt_file; 
+        _forena_copy_reports($src_dir);
+        $src_dir = $src_save;  
+        $dest_dir = $dest_save; 
+      }
+    } 
+  }
+  $d->close(); 
+  return $i; 
 }
 
 /**
@@ -177,7 +225,7 @@ function forena_settings() {
     '#default_value' => $report_path, 
   ); 
   
-  $form['forena_input_format'] = filter_form(variable_get('forena_input_format', FILTER_FORMAT_DEFAULT), null, array('forena_input_format'));
+  $form['forena_input_format'] = filter_form(variable_get('forena_input_format', FILTER_FORMAT_DEFAULT), NULL, array('forena_input_format'));
   
   $form['instructions'] = array(
     '#type' => 'item',
@@ -224,20 +272,8 @@ function forena_settings_submit($form, &$form_state) {
   
   if (file_exists($path) && $path != $src_dir) { 
     // Copy the reports from the 
-    $d = dir($src_dir);
-    $dest_dir = $d->path; 
-    $i=0; 
-    while (false !== ($rpt_file = $d->read())) {
-       echo $entry ."\n";
-       $src_file = $d->path .'/'. $rpt_file; 
-       $dest_file = $path .'/'. $rpt_file; 
-       if (is_file($src_file)) {
-         file_put_contents($dest_file, file_get_contents($src_file)); 
-         $i++;
-       } 
-    }
     
-    $d->close();
+    $i = _forena_copy_reports($src_dir);
     drupal_set_message($i .' delivered reports copied from '. $src_dir .' to '. $path);
   }
   $save_count = forena_db_sync();
@@ -253,24 +289,35 @@ function forena_settings_submit($form, &$form_state) {
  * @param $form_state
  * @return the form
  */
-function forena_edit_form($form_state) {
+function forena_layout_form($form_state, $new_report) {
   $desc = forena_report_desc();
   $name = $desc['name']; 
+  $add_new_rpt;
+  //determine if this is an add new report request
+  if ($new_report == 'add') {
+  	$add_new_rpt = TRUE;
+  }
+  
   $filename = $desc['filename']; 
   $format = $desc['format']; 
+  //drupal_set_message("name: ". $name);
   if ($name) {
-    if ($desc['exists']) {
-      $r = forena_get_report($name);
-      drupal_set_title($r->title);
-      $form = array();
-      $title = (string)$r->title;
+    if ($desc['exists'] || $add_new_rpt) {    
+    	//set the name to empty string for new reports 
+    	if ($add_new_rpt) $name = '';
+    	
+	    $r = forena_get_report($name);
+	    drupal_set_title($r->title);
+	    $form = array();
+	    $title = (string)$r->title;
+	      
+	    // Get the attributes to save them away
+	    if ($r) $attributes = $r->get_attributes_by_id(); 
       
-      // Get the attributes to save them away
-      if ($r) $attributes = $r->get_attributes_by_id(); 
-      
-      
-      $category = (string)$r->category;
-      $body = $r->body->asXML();
+	    if ($r) $frx_options = $r->options;
+	    $category = (string)$r->category;
+	    if ($r) $body = $r->body->asXML();
+    	
       //array of xml attributes that are required to have a value
       $required = array('id' => TRUE, 'label' => TRUE);
       //list of supported document formats
@@ -278,7 +325,7 @@ function forena_edit_form($form_state) {
       $doclist = variable_get('forena_doc_formats', array());          
       
       $form['report_name'] = array(
-        '#type' => 'hidden',
+        '#type' => 'value',
         '#value' => $name,      
       );
       
@@ -297,69 +344,93 @@ function forena_edit_form($form_state) {
         '#title' => t('Report Name'),
         '#default_value' => $name,
         '#description' => t('Enter only letters, numbers, and special characters: <.>, <->, <_>. White space is not permitted.'),
+        '#required' => TRUE,
       );
+      
       $form['title'] = array(
         '#type' => 'textfield',
         '#title' => t('Title'),
         '#default_value' => $title,
+        '#description' => t('The title of your report will be displayed on the report list.'),
       );
 
       $form['category'] = array(
         '#type' => 'textfield',
         '#title' => t('Category'),
         '#default_value' => $category,
+        '#description' => t('The category your report will be grouped under on the report list.'),
+      );
+      
+      $form['form'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Form'),
+        '#default_value' => $frx_options['form'],
+      );
+      
+      $form['hidden'] = array(
+        '#type' => 'checkboxes',
+        '#title' => t('Hidden'),
+        '#options' => array(
+          '1' => t(''),
+         ), 
+        '#default_value' => ($r) ? ($frx_options) : array(),
+        '#description' => t('Hide your report from showing up on the report list.'),         
       );
 
-      $form['params'] = array('#tree' => TRUE, '#type' => 'fieldset', '#title' => 'Params', '#collapsible' => TRUE, '#collapsed' => TRUE );
-      $nodes = $r->rpt_xml->head->xpath('frx:parameters/frx:parm');
-      if ($nodes) foreach ($nodes as $node) {
-        //make a subtree of params
-        $form['params'][(string)$node['id']] = array('#tree' => TRUE, '#type' => 'fieldset', '#title' => (string)$node['label'], '#collapsible' => TRUE, '#collapsed' => TRUE );
+      if ($r) $nodes = $r->rpt_xml->head->xpath('frx:parameters/frx:parm');
+      if ($nodes) {
+	      $form['params'] = array('#tree' => TRUE, '#type' => 'fieldset', '#title' => 'Params', '#collapsible' => TRUE, '#collapsed' => TRUE );
+        foreach ($nodes as $node) {
+	        //make a subtree of params
+	        $form['params'][(string)$node['id']] = array('#tree' => TRUE, '#type' => 'fieldset', '#title' => (string)$node['label'], '#collapsible' => TRUE, '#collapsed' => TRUE );
+	
+	        //now walk the attributes of each node
+	        //and make a subtree for each node
+	        $w_count = 0; // increments the weight, so form elements show in order  
+	        foreach ($node->attributes() as $key => $value) {
+	          if (strcmp($key, 'require') == 0) {
+	            $form['params'][(string)$node['id']][(string)$key] = array(
+	             '#type' => 'radios',
+	             '#title' => $key,
+	             '#default_value' => $value,
+	             '#options' => array("1" => t('Yes'), "0" => t('No')),
+	            );
+	          }
+	          else{
+	              $form['params'][(string)$node['id']][(string)$key] = array(
+	                '#type' => 'textfield',
+	                '#title' => $key,
+	                '#default_value' => $value,
+	                '#required' => $required[$key],
+	                '#weight'  => ($required[$key]) ? -20 + $w_count : 0,
+	              );
+	          }
+	          $w_count ++;
+	        }
+	
+	        //add the default value
+	        $form['params'][(string)$node['id']]['default'] = array(
+	          '#type' => 'textfield',
+	          '#title' => 'Default Value',
+	          '#default_value' => (string)$node,
+	          '#required' => FALSE,
+	        );
+        }     	
+      } 
 
-        //now walk the attributes of each node
-        //and make a subtree for each node
-        $w_count = 0; // increments the weight, so form elements show in order	
-        foreach ($node->attributes() as $key => $value) {
-          if (strcmp($key, 'require') == 0) {
-            $form['params'][(string)$node['id']][(string)$key] = array(
-             '#type' => 'radios',
-             '#title' => $key,
-             '#default_value' => $value,
-             '#options' => array("1" => t('Yes'), "0" => t('No')),
-            );
-          }
-          else{
-              $form['params'][(string)$node['id']][(string)$key] = array(
-                '#type' => 'textfield',
-                '#title' => $key,
-                '#default_value' => $value,
-                '#required' => $required[$key],
-                '#weight'  => ($required[$key]) ? -20 + $w_count : 0,
-              );
-          }
-          $w_count ++;
-        }
-
-        //add the default value
-        $form['params'][(string)$node['id']]['default'] = array(
-          '#type' => 'textfield',
-          '#title' => 'Default Value',
-          '#default_value' => (string)$node,
-          '#required' => FALSE,
-        );
-      }
-      
+     
+     
       //begin checking doc generation options
-      $nodes = $r->rpt_xml->head->xpath('frx:docgen/frx:doc');      
+      if ($r) $nodes = $r->rpt_xml->head->xpath('frx:docgen/frx:doc');      
       
       $form['docgen'] = array('#tree' => TRUE, '#type' => 'fieldset', '#title' => 'Document Options', '#collapsible' => TRUE, '#collapsed' => TRUE );
       //build the options and default list
       $options = array();
       $default = array();             
-      foreach ($doclist as $key => $value) {
+      if ($doclist) foreach ($doclist as $key => $value) {
         if (is_object(forena_get_doctypes($value))) {
           $options[$value] = strtoupper($value); 
-          $doc =  $r->rpt_xml->head->xpath('frx:docgen/frx:doc[@type="' . $value . '"]');  
+          if ($r) $doc =  $r->rpt_xml->head->xpath('frx:docgen/frx:doc[@type="' . $value . '"]');  
           if ($doc && $doclist[$value]) {
             $default[$value] = $value;
           }
@@ -372,7 +443,7 @@ function forena_edit_form($form_state) {
         '#options' => $options,
         '#default_value' => $default
       );
-      
+     
 
       $form['body'] = array(
         '#type' => 'textarea',
@@ -397,7 +468,7 @@ function forena_edit_form($form_state) {
   }  
 }
 
-function forena_edit_form_validate($form, &$form_state) {
+function forena_layout_form_validate($form, &$form_state) {
   $values = $form_state['values'];
   $regexp = "/^[A-Za-z0-9\/\.\_\-]*$/";
   $save_report_name = $values['save_report_name'];
@@ -422,7 +493,7 @@ function forena_edit_form_validate($form, &$form_state) {
  * builds a string of the xml document,
  * submits it to forena_save_report.
  */
-function forena_edit_form_submit($form, &$form_state) {  
+function forena_layout_form_submit($form, &$form_state) {  
   $values = $form_state['values'];
   $h = $values['head'];
   //$xml = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">'. "\n"; 
@@ -430,9 +501,13 @@ function forena_edit_form_submit($form, &$form_state) {
   $xml .= '  <head>'. "\n";
   $xml .= '    <title>'. htmlspecialchars($values['title']) .'</title>'. "\n";
   $xml .= '    <frx:category>'. htmlspecialchars($values['category']) .'</frx:category>'. "\n"; 
-
-  $nodes = $h->xpath('frx:options');
-  if ($nodes) $xml .= '    ' . $nodes[0]->asXML() . "\n";
+  
+  $hidden = (array_filter($values['hidden'])) ? '1' : '0';
+  
+  $xml .= '    <frx:options ';
+  $xml .= 'hidden="'. $hidden .'" ';
+  $xml .= 'form="'. $values['form'] .'"';
+  $xml .= '/>'. "\n"; 
 
   $xml .= '    <frx:parameters>'. "\n";
   $default_value;
@@ -464,7 +539,8 @@ function forena_edit_form_submit($form, &$form_state) {
     $xml .= '    </frx:docgen>' . "\n";
   }
   
-  $nodes = $h->xpath('frx:fields');
+  if ($h) $nodes = $h->xpath('frx:fields');
+  
   if ($nodes) $xml .= $nodes[0]->asXML();
   $body = $values['body'];
   // Put the body tag back on if it was stripped.   
@@ -478,18 +554,22 @@ function forena_edit_form_submit($form, &$form_state) {
   $xml .= $body; 
   $xml .= '</html>'; 
   
+  //drupal_set_message("test: ". htmlspecialchars($xml));
   $file = $values['save_report_name'];
   $o = forena_report_object($xml);
+
   // If there are no frx attributes in the body then replace them with the old values.
-  $frx_nodes = $o->rpt_xml->xpath('body//*[@frx:block]'); 
+  if ($o) $frx_nodes = $o->rpt_xml->xpath('body//*[@frx:block]'); 
   if (!$frx_nodes) {
-    drupal_set_message('saving attributes'); 
     $o->save_attributes_by_id($values['attributes']);
   } 
+
   if (forena_save_report($file, $o->rpt_xml, TRUE) == 1) {
     drupal_set_message('Your report, "' . $file . '" has been saved.');
-   // $form_state['redirect']= 'reports/' . str_replace('/','.',$file);
-  } 
+    
+    $form_state['redirect']= 'reports/' . str_replace('/', '.', $file) .'/layout';
+  }
+ 
 }
 
 /*
@@ -522,7 +602,7 @@ function forena_fields_form($form_state) {
     if (file_exists($filename)) {
       $r = forena_get_report($name);
       drupal_set_title($r->title);
-      $regexp = '/\{[^}]+}/';
+      $regexp = FRX_TOKEN_EXP;
       $match = array("{", "}");
 
       /*search the body, looking for {}*/
@@ -536,41 +616,46 @@ function forena_fields_form($form_state) {
           $clean_element = str_replace($match, "", $el);                
           $fields[$clean_element] = $clean_element;          
         }
-      }
+      }    
       
       $form = array();
+      
+      
       $form['head'] = array(
         '#type' => 'hidden',
         '#value' => $head,      
       );
       
       $form['body'] = array(
-        '#type' => 'hidden',
+        '#type' => 'value',
         '#value' => $r->body,      
       );
       
       $form['report_name'] = array(
-        '#type' => 'hidden',
-        '#value' => $name,
-      );
-      
-      $form['fields'] = array('#tree' => TRUE, '#type' => 'fieldset', '#title' => 'Fields', '#collapsible' => FALSE, '#collapsed' => FALSE );
+        '#type' => 'value',
+        '#value' => $name,      
+      );      
+
+      $form['fields'] = array('#tree' => TRUE, );
       /*Now check the fields in the body against the xml*/
       foreach ($fields as $field) {
-        $form['fields'][$field] = array('#tree' => TRUE, 
+        $form['fields'][$field] = array(
+          '#tree' => TRUE, 
           '#type' => 'fieldset',
           '#title' => $field,
-          '#collapsible' => FALSE, 
-          '#collapsed' => FALSE, );
+          '#collapsible' => TRUE, 
+          '#collapsed' => TRUE, 
+        );
+
         $path = 'frx:fields/frx:field[@id="' . $field . '"]'; 
         $node =  $head->xpath($path);
         $attr = $node[0];
-        
         $form['fields'][$field]['format'] = array(
           '#type' => 'textfield',
           '#title' => t('format'),
           '#default_value' => $attr['format'],
-          '#size' => 30,                  
+          '#size' => 30, 
+          '#autocomplete_path' => 'forena/fields/format/autocomplete',                 
         );
             
         $form['fields'][$field]['format-string'] = array(
@@ -595,7 +680,7 @@ function forena_fields_form($form_state) {
         ); 
         
       }    
-      $form['fields']['submit'] = array(
+      $form['submit'] = array(
         '#type' => 'submit',
         '#value' => 'Save',
       );
@@ -615,8 +700,7 @@ function forena_fields_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   $head = $values['head'];
   $body = $values['body'];
-  $fields = $values['fields'];  
-
+  $fields = $values['fields']; 
   
   $xml = '<html xmlns:frx="urn:FrxReports">'. "\n";
   $xml .= '  <head>'. "\n";
@@ -636,23 +720,23 @@ function forena_fields_form_submit($form, &$form_state) {
   $xml .= '    <frx:fields>' . "\n";
   foreach ($fields as $key => $value) {
     //skip the submit key  
-    if(strcmp($key, 'submit') != 0) {
-    	//skip fields that have no attributes
-	    if (! ($value['format'] == '' && $value['format-string'] == '' && $value['link'] == '' && $value['default'] == '')) {
-	    	$xml .= '      <frx:field id="' . $key . '" ';
+    if (strcmp($key, 'submit') != 0) {
+    //skip fields that have no attributes
+      if (! ($value['format'] == '' && $value['format-string'] == '' && $value['link'] == '' && $value['default'] == '')) {
+        $xml .= '      <frx:field id="' . $key . '" ';
         if ($value) foreach ($value as $k => $v) {
-		      if (strcmp($k, 'default') != 0 && $value[$k]) {
-		    	  $xml .= ' ' . $k . '="' . $v . '"'; 
-		    	}   	
-		    }
-		    /*if there is not a default value, self close the tag.*/
-		    if ($value['default']) {
-		    	$xml .= '>' . $value['default'] . '</frx:field>' . "\n";
-		    }
-		    else{
-		    	$xml .= '/>' . "\n";
-		    }	    
-	    }
+          if (strcmp($k, 'default') != 0 && $value[$k]) {
+            $xml .= ' ' . $k . '="' . $v . '"';
+          }
+        }
+        /*if there is not a default value, self close the tag.*/
+        if ($value['default']) {
+          $xml .= '>' . $value['default'] . '</frx:field>' . "\n";
+        }
+        else {
+          $xml .= '/>' . "\n";
+        }
+      }
     }   
   }
   $xml .= '    </frx:fields>' . "\n";
@@ -664,12 +748,13 @@ function forena_fields_form_submit($form, &$form_state) {
   $file = $values['report_name'];
 
   if (forena_save_report($file, $xml, TRUE) == 1) {
-    drupal_set_message('Your report, "' . $file . '" has been saved.');
-    $form_state['redirect']= 'reports/' . $file;
+    drupal_set_message('Your report, "' . arg(1) . '" has been saved.');    
+    $form_state['redirect']= 'reports/' . arg(1);
   }
   else {
     drupal_set_message('There was an error saving your report, "'. $file . '" to the database');
   }
+  
 }
 
 /**
@@ -677,8 +762,8 @@ function forena_fields_form_submit($form, &$form_state) {
  * @param unknown_type $form_state
  * @return unknown_type
  */
-function forena_add_block_form(&$form_state) {
-	$desc = forena_report_desc();
+function forena_data_block_form(&$form_state) {
+  $desc = forena_report_desc();
   $name = $desc['name']; 
   $filename = $desc['filename']; 
   $format = $desc['format']; 
@@ -688,20 +773,31 @@ function forena_add_block_form(&$form_state) {
     $form = array();
     $title = (string)$r->title;
 
-    $template_array = forena_supported_templates(); 		
-		
-		$form = array();
-		
-		$form['report_name'] = array(
+    $template_array = forena_supported_templates(); 
+    $default_template = $form_state['storage']['template'];
+    $params = $form_state['storage']['parameters'];
+    $param_values = $form_state['storage']['param_values'];
+    
+    $form = array();
+
+    $form['report_name'] = array(
         '#type' => 'value',
         '#value' => $name,      
-      );    
-    
+     );     
       
-		$from['report'] = array(
-		  '#type' => 'value',
-		  '#value' => $r,
-		); 
+    $from['report'] = array(
+      '#type' => 'value',
+      '#value' => $r,
+     ); 
+
+    //The default submit handler
+    //If someone presses enter, this handler will execute
+    $form['default_submit'] = array(
+      '#type' => 'submit',          
+      '#submit' => array('forena_data_block_form_submit'),
+      '#prefix' => '<div style="visibility:hidden;float:right">', 
+      '#suffix' => '</div>',     
+    );
     
     //find the datablocks in the existing report
     $data_block_array = array();
@@ -710,9 +806,9 @@ function forena_add_block_form(&$form_state) {
     $path = '//*[@frx:block]';
    
     foreach ($body->xpath($path) as $node) {
-    	 $attrs = $node->attributes(FRX_NS); 
-    	 $id = (string)$node['id']; 
-       $data_block_array[$id] = (string)$attrs['block'];
+      $attrs = $node->attributes(FRX_NS);
+      $id = (string)$node['id'];
+      $data_block_array[$id] = (string)$attrs['block'];
     }
     
     $form['delete_blocks'] = array(
@@ -721,75 +817,85 @@ function forena_add_block_form(&$form_state) {
       '#options' => $data_block_array,
       '#description' => t('Check the data block to be deleted from your report.'),    
     );
-		
+
     $form['delete'] = array(
       '#type' => 'submit',
       '#value' => 'Delete',      
-      '#submit' => array('forena_delete_block_report'),     
+      '#submit' => array('forena_data_block_delete'),   
+      
+    );   
+
+    $form['data_block'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Data Block'),
+      '#default_value' => $form_state['storage']['data_block'],
+      '#autocomplete_path' => 'forena/data_block/autocomplete',
+      '#description' => t('Enter a data block, a preview will appear below'),
     );
-     
+
+    $form['templates'] = array(
+      '#type' => 'radios',
+      '#title' => t('Templates'),
+      '#default_value' => ($default_template) ? $default_template : $template_array['table'],
+      '#options' => $template_array,
+      '#required' => TRUE,
+      '#description' => t('Select a template to preview the data block in.'),
+    );
     
-		
-		$form['data_block'] = array(
-		  '#type' => 'textfield',
-	    '#title' => t('Data Block'),
-		  '#default_value' => $form_state['storage']['data_block'],		  
-	    '#description' => t('Enter a data block, a preview will appear below'),	
-		);
-		
-		$form['templates'] = array(
-			'#type' => 'radios',
-			'#title' => t('Templates'),
-			'#default_value' => ($form_state['storage']['templates']) ? $form_state['storage']['templates'] : $template_array['table'],
-		  '#options' => $template_array,
-		  '#required' => TRUE,
-		);
-		
-		$form['output'] = array(    
-		  '#type' => 'markup',
-		  '#value' => '</p>'. $form_state['storage']['output'] .'</p>',	  
-		);
-		
-		$form['preview'] = array(
-	    '#type' => 'submit',
-		  '#value' => 'Preview',
-		);
-		
-		if (isset($form_state['storage']['output'])){
-			$form['add'] = array(
+    if ($params) {    	
+    	$form['params'] = array('#tree' => TRUE, '#title' => 'Parameters', '#type' => 'fieldset', '#collapsible' => TRUE, '#collapsed' => ($form_state['storage']['output']) ? TRUE : FALSE);
+      foreach ($params as $param) {
+		    $form['params'][$param] = array(
+		      '#type' => 'textfield',
+		      '#title' => t($param),
+		      '#default_value' => $param_values[$param],	      
+		    );
+      }
+    }
+
+    $form['output'] = array(
+      '#type' => 'markup',
+      '#value' => '</p>'. $form_state['storage']['output'] .'</p>',
+    );
+
+    $form['preview'] = array(
+      '#type' => 'submit',
+      '#value' => 'Preview',
+    );
+
+    if (isset($form_state['storage']['output'])) {
+      $form['add'] = array(
         '#type' => 'submit',
         '#value' => 'Add',
-			  '#submit' => array('forena_add_block_report'),
+        '#submit' => array('forena_data_block_add'),
       );
-		}
-		
+    }
     return $form;
   }
-  else {    	
+  else {
     drupal_not_found();
-  }    
+   }
 }
 
 /**
- * Validates the forena_add_block_form's datablock field.
+ * Validates the forena_data_block_form's data_block field.
  * @param $form
  * @param $form_state
  * @return unknown_type
  */
 
-function forena_add_block_form_validate($form, &$form_state) {
-	$values = $form_state['values'];
-	$data_block = $values['data_block'];
-	$delete_blocks = $values['delete_blocks'];
-	$templates = $values['templates'];	
+function forena_data_block_form_validate($form, &$form_state) {
+  $values = $form_state['values'];
+  $data_block = $values['data_block'];
+  $delete_blocks = $values['delete_blocks'];
 
-	//validate the data block only if delete block was not chosen
-	if(!$delete_blocks) {
-		$block_info = forena_load_block($data_block);	
-		if(!$block_info) {
-			form_set_error('data_block', t('Invalid data block.'));
-	  }
-	}
+  //validate the data block only if delete block was not chosen
+  if (!$delete_blocks) {
+    $block_info = forena_load_block($data_block);
+    if (!$block_info) {
+      form_set_error('data_block', t('Invalid data block.'));
+    }
+  }
 }
 
 
@@ -801,63 +907,73 @@ function forena_add_block_form_validate($form, &$form_state) {
  * @param $form_state
  * @return unknown_type
  */
-function forena_add_block_form_submit($form, &$form_state) {
-	$values = $form_state['values'];
-	$data_block = $values['data_block'];
-	$template = $values['templates'];
-	
-	$form_state['storage']['data_block'] = $data_block;
-	if ($data_block)  {
-		//get xml from data block
-		$xml = forena_invoke_data_engine($data_block);
-	}
-	if ($xml) { 	
-		//create an array of columns
-		$rows = $xml->xpath('//row');
-		$column_array = array();
-			
-		foreach ($rows as $columns) {
-			foreach ($columns as $name => $value) {
-				$column_array[$name] = $name;
-			}
-		}
-	
-		//create xml from template
-		$template_obj = forena_get_templates($template);	
-		if($template_obj) {
-	    $body = $template_obj->$template($column_array, $data_block);
-		}
-		
-		$rpt_xml =  '<html xmlns:frx="urn:FrxReports"><body>'. $body. '</body></html>';    
-		
-		//render the xml
-		$output = forena_render_report($rpt_xml);
-	
+function forena_data_block_form_submit($form, &$form_state) {
+  $values = $form_state['values'];
+  $data_block = $values['data_block'];
+  $template = $values['templates'];
+  $params = $values['params'];
+  
+  $form_state['storage']['param_values'] = $values['params'];
+  $form_state['storage']['data_block'] = $data_block;
+  $form_state['storage']['template'] = $template;
+  
+  if ($data_block)  {
+    //get xml from data block
+    //check for and store parameters   
+    $block_info = forena_load_block($data_block); 
+    if ($block_info) {   
+      $xml = forena_invoke_data_provider($data_block, $params);
+    }
+  }
+  if ($xml) {
+    //create an array of columns
+    $rows = $xml->xpath('//row');
+    $column_array = array();
 
-	  $form_state['storage']['output'] = $output;
-	  $form_state['storage']['template'] = $body;  
-	} 	
+    foreach ($rows as $columns) {
+      foreach ($columns as $name => $value) {
+        $column_array[$name] = $name;
+      }
+    }
+
+    //create xml from template object
+    $template_obj = forena_get_templates($template);
+    if ($template_obj) {
+      $body = $template_obj->$template($column_array, $data_block);  
+    }
+
+	  $rpt_xml =  '<html xmlns:frx="urn:FrxReports"><body>'. $body .'</body></html>';    
+	
+	  //render the xml	  
+	  $output = forena_render_report($rpt_xml, null, $params);
+	  $form_state['storage']['output'] = $output;	  
+	  $form_state['storage']['template_body'] = $body;
+    
+  }
+  else { //there wasn't any xml returned. clear the storage
+  	$form_state['storage']['output'] = '';    
+  }
+  $form_state['storage']['parameters'] = $block_info['tokens'];  
 }
 
 /**
- * Add submit handler for forena_add_block_form. 
+ * Add submit handler for forena_data_block_form. 
  * This adds the datablock to an existing report.
  *
  */
-function forena_add_block_report($form, &$form_state) {
+function forena_data_block_add($form, &$form_state) {
   $values = $form_state['values'];  
   $report_name = $values['report_name'];
   $data_block = $values['data_block'];
   $template = $values['templates'];
-  $added_report = $form_state['storage']['template']; 
+  $added_report = $form_state['storage']['template_body']; 
   $r = forena_get_report($report_name);  
   $head = (string)$r->rpt_xml->head->asXML();
-  $main_report = forena_inner_xml($r->rpt_xml,'body'); 
-  $new_report =  '<html xmlns:frx="urn:FrxReports">'. $head. '<body>'. $main_report . $added_report. '</body></html>';  
-  
+  $main_report = forena_inner_xml($r->rpt_xml, 'body');
+  $new_report =  '<html xmlns:frx="urn:FrxReports">'. $head .'<body>'. $main_report . $added_report .'</body></html>';
+
   if (forena_save_report($report_name, $new_report, TRUE) == 1) {
-    drupal_set_message('Your report, "' . $file . '" has been saved.');
-   // $form_state['redirect']= 'reports/' . str_replace('/','.',$file);
+    drupal_set_message('Your report has been saved');
   } 
 }
 
@@ -867,28 +983,24 @@ function forena_add_block_report($form, &$form_state) {
  * @param $form_state
  * @return unknown_type
  */
-function forena_delete_block_report($form, &$form_state) {
-	$values = $form_state['values'];
-	$delete_blocks = array_filter($values['delete_blocks']);
-		
-	$report_name = $values['report_name'];
-	$r = forena_get_report($report_name);
+function forena_data_block_delete($form, &$form_state) {
+  $values = $form_state['values'];
+  $delete_blocks = array_filter($values['delete_blocks']);
 
-	
-  //find the datablocks in the existing report
-  
+  $report_name = $values['report_name'];
+  $r = forena_get_report($report_name);
+
+  //find the datablocks in the existing report  
   $r->get_attributes_by_id(); 
   $body = $r->body;   
   
-  foreach ($delete_blocks as $id) {  	
-  	$r->deleteNode($id);  	
+  foreach ($delete_blocks as $id) {
+    $r->deleteNode($id);
   }
   
  if (forena_save_report($report_name, $r->rpt_xml, TRUE) == 1) {
-    drupal_set_message(t('Your report has been saved.'));
-   // $form_state['redirect']= 'reports/' . str_replace('/','.',$file);
-  } 
-	
+    drupal_set_message(t('Your report has been saved.')); 
+  }
 }
 
 /**
@@ -903,11 +1015,13 @@ function forena_clean_xhtml($xhtml) {
   if (is_callable('tidy_repair_string')) { 
     $config = array(
       'doctype'            => 'omit', 
-      'indent'             => 2,
-      'input-xml'          => true, 
-      'output-xml'         => true, 
-      'indent-attributes'  => false,
+      'indent-spaces'             => 2,
+      'indent' => 'auto', 
+      'input-xml'          => TRUE, 
+      'output-xml'         => TRUE, 
+      'indent-attributes'  => FALSE,
       'indent-spaces'      => 2,
+      'add_xml_space'      => TRUE, 
       'wrap'               => 135 );
     $ret = tidy_repair_string($xhtml, $config, 'utf8');
   }    
@@ -917,11 +1031,34 @@ function forena_clean_xhtml($xhtml) {
   return $ret; 
 }
 
-
-
-
-
-
-
-
-
+/**
+ * Provides list of blocks that a user has access to that are in any repository matching 
+ * a specified search string
+ *
+ * @param string $search block to search for. 
+ * @return array list of blocks the user has access to. 
+ */
+function forena_user_data_blocks($search) { 
+  $repos = forena_repository();
+  foreach ($repos as $name => $r) {
+    // Make really sure the data provider objects have been instantiated
+    $provider = $r;  
+    if (!$provider['data']) { 
+      $provider = forena_repository($name); 
+    }
+    $repos[$name] = $provider; 
+    // Invoke the list block function to find out all of the block names    
+    $o = $provider['data']; 
+    if (method_exists($o, 'list_blocks')) { 
+      $blocks = $o->list_blocks($search); 
+      foreach ($blocks as $block) { 
+        $block_info = $o->load_block($block); 
+        if (method_exists($o,'access')) { 
+          $allow = $o->access($block_info['access']);
+          if ($allow) $user_blocks[] = $name . '/' . $block; 
+        }
+      }
+    }
+  }
+  return $user_blocks;  
+}

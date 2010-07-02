@@ -6,11 +6,11 @@
  * drupal connections.
  *
  */
-class FrxDrupal extends FrxDataEngine {
+class FrxDrupal extends FrxDataProvider {
   /**
 	 * Implements hooks into the drupal applications
 	 */
-  private $te;  
+ 
   private $db;
   
   /**
@@ -40,6 +40,7 @@ class FrxDrupal extends FrxDataEngine {
     if ($block['source'] && $this->access($block['access'])) { 
       $sql = $block['source']; 
       $sql = $this->te->replace($sql, $params);
+      //drupal_set_message("sql: ". $sql);
       $rs = db_query($sql); 
       $xml = new SimpleXMLElement('<table/>'); 
       while ($data = db_fetch_object($rs)) { 

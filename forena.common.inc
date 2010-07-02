@@ -7,7 +7,7 @@
  */
 // Include Report renderer. 
 require_once('FrxReport.inc');
-require_once('FrxDataEngine.inc');
+require_once('FrxDataProvider.inc');
   
 /**
  * Get name from argument 1 or alterntaively from a file name
@@ -17,7 +17,7 @@ require_once('FrxDataEngine.inc');
 function forena_report_desc($name='') {
   if (!$name) $name = arg(1);
   // Get defined document types
-  $doctypes = forena_supported_doctypes(); 
+  $doctypes = forena_supported_doctypes();   
   $parts = explode('.', $name);
   $name =''; 
 
@@ -121,7 +121,7 @@ function forena_report($name_in, $parms = array()) {
       
       //put title on top of report
       $title = $r->title; 
-      if (!$missing_parms) {
+      if (!$missing_parms) {      	
         $output .= $r->render($format);    
         $css_files = forena_report_css($desc, $form, $format);
       }
@@ -156,20 +156,20 @@ function forena_report($name_in, $parms = array()) {
         $rpt_xml = $r->rpt_xml; 
         $nodes = $rpt_xml->xpath('//frx:docgen/frx:doc');        
         $div .= '<div class="doclinks">';           
-        $default_doctypes = variable_get('forena_doc_formats', array());    
+        $default_doctypes = variable_get('forena_doc_formats', array()); 
         if (!$missing_parms) { 
-          if (!$nodes) { 
-            
+          if (!$nodes) {            
             //show the default. All supported links
             foreach ($default_doctypes as $value) if (is_object(forena_get_doctypes($value))) {
-                $div .= '<a class="doclinks" href="'. $name_in . '.'. $value .'?'. $q .'">'. strtoupper($value) .'</a>';
+              $div .= '<a class="doclinks" href="'. $name_in . '.'. $value .'?'. $q .'">'. strtoupper($value) .'</a>';
             }
           }
-          else { 
-            
+          else {            
             //There were nodes. show the prefered doc types          
-            foreach ($nodes as $value) { 
-              $type = (string)$value['type']; 
+		        $doctypes = forena_supported_doctypes();   
+            foreach ($nodes as $value) {             	
+            	$arr = $value->attributes();
+              $type = (string)$arr['type'];            	
               if ($doctypes[$type]) {                     
                 if (is_object(forena_get_doctypes($type))) {
                   $div .= '<a class="doclinks" href="'. $name . '.'. $type .'?'. $q .'">'. strtoupper($type) .'</a>';
@@ -177,8 +177,7 @@ function forena_report($name_in, $parms = array()) {
               }                       
             }
           }
-          $div .= '</div>';         
-                
+          $div .= '</div>';                
           $output = $div . '<div class="forena-report">'. $output .'</div>';
         }
         $path = drupal_get_path('module', 'forena');
@@ -186,6 +185,7 @@ function forena_report($name_in, $parms = array()) {
         if ($css_files) foreach ($css_files as $css_file) { 
           drupal_add_css($css_file, 'module');
         }
+        
         return $output;
       }   
     } 
@@ -203,26 +203,29 @@ function forena_report($name_in, $parms = array()) {
 function __forena_load_repository(&$repo) { 
   // First determine if the class file exisits
   $path = $repo['path']; 
+  $conf = array(); 
                 
   if (file_exists($path .'/settings.php')) {
-    // This should at minimum set  
+    // Override with repository specific data 
     include($path .'/settings.php'); 
 
   }
-  $repo['user callback'] = $conf['user callback']; 
-  $repo['data'] = __forena_load_engine($conf, $repo['path']);  
+  $repo = array_merge($repo, $conf); 
+  // $repo['user callback'] = $conf['user callback']; 
+  $repo['data'] = __forena_load_provider($repo, $repo['path']);  
   //$repo['auth'] = __forena_load_auth($security_provider); 
   
 }
 
 /**
- * Load the data engine class based on the class name. 
+ * Load the data provider class based on the class name. 
  *
  * @param string $name
- * @return object The data engine object
+ * @return object The data provider object
  */
-function __forena_load_engine($conf, $repo_path) { 
-  $name = $conf['data_engine']; 
+function __forena_load_provider($conf, $repo_path) {
+  $name = $conf['data provider'];  
+  if (!$name) $name = $conf['data_engine']; 
   forena_define_plugins(); 
   // Instantiate the path
   if (class_exists($name)) { 
@@ -250,13 +253,13 @@ function forena_repository($name='') {
     if ($_forena_repositories) { 
       $repos = $_forena_repositories; 
     }
-  
     // Overide difinitions of the sample and drupal repositories. 
     $repos['forena_help'] = array('path' => $path .'/repos/forena_help',
                              'title' => 'Forena Sample Reports');
   
     $repos['drupal'] = array('path' => $path .'/repos/drupal',
-                             'title' => 'Drupal Reports');
+                             'title' => 'Drupal Reports');  
+
   }
 
   // Now determine if the object exists 
@@ -301,19 +304,19 @@ function forena_load_cache($r_xhtml) {
     
     if ($repos) foreach ($repos as $provider => $blocks) {       
       $repos = forena_repository($provider);      
-      $engine = $repos['data'];
-      $conf = $engine->conf;
+      $provider = $repos['data'];
+      $conf = $provider->conf;
       $access = array(); 
       foreach ($blocks as $block_name) {
-        if ($engine && $block_name) {
-          if (method_exists($engine, 'load_block')) {
-            $conf = $engine->conf; 
-            $block = $engine->load_block($block_name); 
+        if ($provider && $block_name) {
+          if (method_exists($provider, 'load_block')) {
+            $conf = $provider->conf; 
+            $block = $provider->load_block($block_name); 
             if (array_search($block['access'], $access)===FALSE) $access[]=$block['access']; 
           }
         } 
         else { 
-          //drupal_set_message('no engine found', 'error');    
+          //drupal_set_message('no provider found', 'error');    
         }
       }
       if ($conf['access callback'] && $access) $cache['access'][$conf['access callback']]=$access; 
@@ -330,7 +333,7 @@ function forena_load_cache($r_xhtml) {
  * @param string $clause order / where cause
  * @return unknown
  */
-function forena_invoke_data_engine($data_block, $parameters=array(), $clause='') {
+function forena_invoke_data_provider($data_block, $parameters=array(), $clause='') {
    list($provider, $block) = explode('/', $data_block, 2); 
    // Get the data 
    $repos = forena_repository($provider);
@@ -340,16 +343,27 @@ function forena_invoke_data_engine($data_block, $parameters=array(), $clause='')
    }
   
    if ($repos['data']) { 
-     $engine = $repos['data'];
+     $provider = $repos['data'];
      $access = TRUE; 
-     if (method_exists($engine, 'data')) {
+     if (method_exists($provider, 'data')) {
 
-       $xml = $engine->data($block, $parameters, $clause); 
+       $xml = $provider->data($block, $parameters, $clause); 
      }
+     //drupal_set_message("xml invoked: ". htmlspecialchars($xml->asXML()));
      return $xml; 
    }
 }
-
+/**
+ * Load information about a data block
+ *
+ * @param string $data_block provider/blockpath to use for the load. 
+ * @return unknown
+ */
+/**
+ * Returns an array of information about the data block
+ * @param $data_block
+ * @return unknown_type
+ */
 function forena_load_block($data_block) {
    list($provider, $block) = explode('/', $data_block, 2); 
    // Get the data 
@@ -357,15 +371,14 @@ function forena_load_block($data_block) {
    $repos = forena_repository($provider);
 
    if ($repos['data']) { 
-     $engine = $repos['data'];
-     if (method_exists($engine, 'data')) {
-       $block_info = $engine->load_block($block); 
+     $provider = $repos['data'];
+     if (method_exists($provider, 'load_block')) {
+       $block_info = $provider->load_block($block); 
        
      }
      return $block_info; 
    }
 }
-
 
 /**
  * Load the formatters for all initialized repositories.  
@@ -376,25 +389,25 @@ function forena_get_formatter($fkey) {
   $repos = forena_repository();  
   
   foreach ($repos as $k => $r) {
-    $engine = $r['data'];
-    if ($engine && method_exists($engine, 'formats'))  {      
-      $f = $engine->formats();      
-    if ($f[$fkey] && method_exists($engine, $fkey)) {
+    $provider = $r['data'];
+    if ($provider && method_exists($provider, 'formats'))  {      
+      $f = $provider->formats();      
+    if ($f[$fkey] && method_exists($provider, $fkey)) {
         // We found an object with the advertised method return it        
-        return $engine; 
+        return $provider; 
       }      
     }
   }
-  //Did not find the formater in the data engine
+  //Did not find the formater in the data provider
   //Look to see if it's in a control class 
   $controls = forena_define_controls();
   foreach ($controls as $k => $r) {
-    $engine = $r;
-    if ($engine && method_exists($engine, 'formats'))  {      
-      $f = $engine->formats();      
-    if ($f[$fkey] && method_exists($engine, $fkey)) {
+    $provider = $r;
+    if ($provider && method_exists($provider, 'formats'))  {      
+      $f = $provider->formats();      
+    if ($f[$fkey] && method_exists($provider, $fkey)) {
         // We found an object with the advertised method return it        
-        return $engine; 
+        return $provider; 
       }      
     }
   }  
@@ -450,13 +463,10 @@ function forena_report_object($report='', $data='') {
  * @param string $tag
  * @return string
  */
-function forena_inner_xml($xml,$tag) {
-  if (is_object($xml) && is_object($xml->$tag))
-  {
+function forena_inner_xml($xml, $tag) {
+  if (is_object($xml) && is_object($xml->$tag)) {
     $xml_data = $xml->$tag->asXML();
-    $xml_data = preg_replace("/<\/?" . $tag . "(.|\s)*?>/","",$xml_data);
-  	
-    //$xml_data = str_replace(array('<'.$tag.'>','</'.$tag.'>','<'.$tag.'/>'),array('','',''),$xml_data);  
+    $xml_data = preg_replace("/<\/?" . $tag . "(.|\s)*?>/", "", $xml_data);
   };
   return $xml_data; 
 }
@@ -495,9 +505,9 @@ function forena_format_data($value, $format, $format_str) {
  * @param unknown_type $comment
  */
 function forena_load_block_file($filepath, $comment='--', $trim) { 
-	if (!file_exists($filepath)) {
-		return array();
-	}
+  if (!file_exists($filepath)) {
+    return array();
+  }
  
   $block_data = file_get_contents($filepath);
   $lines = explode("\n", $block_data); 
@@ -691,12 +701,12 @@ function forena_parameters_form_submit($form, &$form_state) {
 function forena_get_doctypes($fkey) {
   $controls = forena_define_controls();
   foreach ($controls as $k => $r) {
-    $engine = $r;
-    if ($engine && method_exists($engine, 'doc_types'))  { 
-      $f = $engine->doc_types();      
-      if ($f[$fkey] && method_exists($engine, $f[$fkey])) {
+    $provider = $r;
+    if ($provider && method_exists($provider, 'doc_types'))  { 
+      $f = $provider->doc_types();      
+      if ($f[$fkey] && method_exists($provider, $f[$fkey])) {
         // We found an object with the advertised method return it        
-        return $engine; 
+        return $provider; 
       }      
     }
   }  
@@ -712,9 +722,9 @@ function forena_supported_doctypes() {
   $controls = forena_define_controls();
   $supported_doctypes = array();
   foreach ($controls as $k => $r) {
-    $engine = $r;
-    if ($engine && method_exists($engine, 'doc_types'))  { 
-      $f = $engine->doc_types(); 
+    $provider = $r;
+    if ($provider && method_exists($provider, 'doc_types'))  { 
+      $f = $provider->doc_types(); 
       $supported_doctypes = array_merge($supported_doctypes, $f);
     }
   }
@@ -732,12 +742,12 @@ function forena_supported_doctypes() {
 function forena_get_templates($fkey) {
   $controls = forena_define_controls();
   foreach ($controls as $k => $r) {
-    $engine = $r;
-    if ($engine && method_exists($engine, 'templates'))  { 
-      $f = $engine->templates();            
-      if ($f[$fkey] && method_exists($engine, $fkey)) {      	
-        // We found an object with the advertised method return it        
-        return $engine; 
+    $provider = $r;
+    if ($provider && method_exists($provider, 'templates'))  { 
+      $f = $provider->templates();            
+      if ($f[$fkey] && method_exists($provider, $fkey)) {
+        // We found an object with the advertised method, return it        
+        return $provider; 
       }      
     }
   }  
@@ -753,15 +763,28 @@ function forena_supported_templates() {
   $controls = forena_define_controls();
   $supported_templates = array();
   foreach ($controls as $k => $r) {
-    $engine = $r;
-    if ($engine && method_exists($engine, 'templates'))  { 
-      $f = $engine->templates(); 
+    $provider = $r;
+    if ($provider && method_exists($provider, 'templates'))  { 
+      $f = $provider->templates(); 
       $supported_templates = array_merge($supported_templates, $f);
     }
   }   
   return $supported_templates;
 }
 
+function forena_supported_formats() {
+  $controls = forena_define_controls();
+  $supported_formats = array();
+  $f = array();
+  foreach ($controls as $k => $r) {
+    $provider = $r;
+    if ($provider && method_exists($provider, 'formats'))  { 
+      $f = $provider->formats(); 
+	    $supported_formats = array_merge($supported_formats, $f);
+    }
+  }   
+  return $supported_formats;
+}
 
 /**
  * 

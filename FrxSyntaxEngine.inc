@@ -7,7 +7,7 @@
  * before substituting them.  
  *
  */
-define('FRX_TOKEN_EXP', '/\{[^}]+}/'); 
+define('FRX_TOKEN_EXP', '/\{[^\n^\r^}]+}/'); 
 define('FRX_SQL_TOKEN', '/:([a-z]|[0-9]|{A-Z]|[-_])+/'); 
 class FrxSyntaxEngine { 
   private $tpattern; 
@@ -91,5 +91,27 @@ class FrxSyntaxEngine {
       }
     }
     return $text;    
+  }
+  
+  /**
+   * List all of the tokens used in a piece of text, ignoring duplicates. 
+   *
+   * @param string $text
+   * @return array tokens contained in the text according to the regular expression. 
+   */
+  public function tokens($text) { 
+   $match=array();
+   $tokens = array();
+
+    if (preg_match_all($this->tpattern, $text, $match)) {      
+      $i=0;   
+      foreach ($match[0] as $match_num => $token) {
+         $path = trim($token, $this->trim_chars); 
+         if (array_search($path,$tokens)===FALSE) { 
+           $tokens[] = $path; 
+         }
+      }
+    }
+    return $tokens; 
   }
 }

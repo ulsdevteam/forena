@@ -6,9 +6,9 @@
  *
  */
 
-class FrxPDO extends FrxDataEngine { 
+class FrxPDO extends FrxDataProvider { 
   
-  private $te;  
+
   private $db;
   public $debug; 
  

@@ -8,7 +8,7 @@
  * @author metzlerd
  *
  */
-class FrxFiles extends FrxDataEngine {
+class FrxFiles extends FrxDataProvider {
   private $path; 
   public function __construct($conf, $repos_path) { 
     parent::__construct($conf, $repos_path);
@@ -32,7 +32,6 @@ class FrxFiles extends FrxDataEngine {
       try { 
         $xmlData = $block['source']; 
         $xml = new SimpleXMLElement($xmlData);
-        drupal_set_message(htmlspecialchars($xml->asXML())); 
       } catch (Exception $e) { 
         print "Error processing xml\n";
         print $e->getMessage();  

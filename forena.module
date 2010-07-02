@@ -49,24 +49,43 @@ function forena_menu() {
     'access arguments' => array('design any report'), 
    ); 
    
-   $items['reports/%/edit'] = array(
+   $items['reports/%/layout'] = array(
      'title' => 'Layout',
-     'page callback' => 'forena_edit_report',
+     'page callback' => 'forena_layout_report',
      'page arguments' => array(1),
      'access arguments' => array('design any report'),     
-     'description' => t('Edit the content of your node'),   
+     'description' => t('Edit the layout of your report'),   
      'type' => MENU_LOCAL_TASK, 
      'file' => 'forena.common.inc', 
     );
     
-   $items['reports/%/add'] = array(
+   $items['reports/%/data'] = array(
      'title' => 'Data',
-     'page callback' => 'forena_add_block',     
+     'page callback' => 'forena_data_block',     
      'access arguments' => array('design any report'),     
      'description' => t('Add a data block to your report'),     
      'type' => MENU_LOCAL_TASK, 
    );
        
+   
+   $items['reports/%/fields'] = array(
+     'title' => 'Fields',
+     'page callback' => 'forena_fields_report',
+     'page arguments' => array(1),
+     'access arguments' => array('design any report'),     
+     'description' => t('Edit the fields of your report'),        
+     'type' => MENU_LOCAL_TASK, 
+   );  
+   
+   $items['reports/add'] = array(
+     'title' => t('Add Report'),
+     'page callback' => 'forena_add_report',
+     'page arguments' => array(1),
+     'access arguments' => array('create any report'),     
+     'description' => t('Create a new report'),        
+     'type' => MENU_NORMAL_ITEM, 
+   );
+   
   $items['forena'] = array(
     'page callback' => 'forena_user_reports',
     'page arguments' => array(), 
@@ -76,28 +95,84 @@ function forena_menu() {
     'file' => 'forena.common.inc', 
    ); 
    
-   $items['reports/%/fields'] = array(
-     'title' => 'Fields',
-     'page callback' => 'forena_fields_report',
-     'page arguments' => array(1),
-     'access arguments' => array('design any report'),     
-     'description' => t('Edit the fields of your report'),        
-     'type' => MENU_LOCAL_TASK, 
+   $items['forena/fields/format/autocomplete'] = array(
+     'page callback' => 'forena_fields_format_autocomplete', 
+     'access callback' => TRUE, 
+     'type' => MENU_CALLBACK, 
    );
+   
+   $items['forena/data_block/autocomplete'] = array(
+     'page callback' => 'forena_data_block_autocomplete', 
+     'access callback' => TRUE, 
+     'type' => MENU_CALLBACK, 
+   );
+   
   return $items; 
+}
+
+/**
+ * Auto complete for data blocks
+ * @param $string
+ * @return unknown_type
+ */
+function forena_data_block_autocomplete($string='') {
+  require_once('forena.admin.inc');    
+  $data_blocks = forena_user_data_blocks($string);
+  
+  if ($data_blocks) {
+	  $temp = array_values($data_blocks);
+	  $data_blocks = array_combine($temp, $temp);
+  }
+  else {
+  	$data_blocks = array();
+  }
+  
+  print drupal_json($data_blocks);  
+}
+
+/**
+ * Auto complete for formats
+ * @param $string
+ * @return unknown_type
+ */
+function forena_fields_format_autocomplete($string='') {
+	require_once('forena.common.inc');
+	$matches = array();
+	$formats = forena_supported_formats();
+	
+	if ($formats && $string) foreach ($formats as $name => $value) {
+		if (strpos(strtolower($name), strtolower($string)) !== FALSE || strpos(strtolower($value), strtolower($string))!==FALSE) {
+			$matches[$name] = $value;
+		}
+		
+	}
+	print drupal_json($matches);	
 }
 /**
  *  Calls forena_edit_form
  *  in forena.admin.inc   
  */
-function forena_edit_report() {
+function forena_layout_report() {
   require_once('forena.admin.inc');  
-  return drupal_get_form('forena_edit_form');
+  return drupal_get_form('forena_layout_form');
 }
 
-function forena_add_block() {
+/**
+ *  Add a new report from scratch
+ *  in forena.admin.inc   
+ */
+function forena_add_report($new_report) {
   require_once('forena.admin.inc');  
-  return drupal_get_form('forena_add_block_form');
+  return drupal_get_form('forena_layout_form', $new_report);
+}
+
+/**
+ * Add, preview, or delete data blocks from your report
+ * @return unknown_type
+ */
+function forena_data_block() {
+  require_once('forena.admin.inc');  
+  return drupal_get_form('forena_data_block_form');
 }
 
 /**
@@ -201,8 +276,8 @@ function forena_user_reports() {
  */
 function forena_render_report($report, $format='', $data='') {
   require_once('forena.common.inc');    
-  $o = forena_report_object($report, $data);
-  $output = $o->render($format);
+  $o = forena_report_object($report, $data);  
+  $output = $o->render($format);  
   return $output; 
 }
 
@@ -232,12 +307,8 @@ function forena_forena_plugins() {
  */
 function forena_forena_controls() { 
   $controls[] = array('file' => 'plugins/FrxControls.inc', 
-                     'class' => 'FrxControls',                       
+                      'class' => 'FrxControls',                       
                      );  
-/*  $controls[] = array('file' => 'plugins/FrxReportTemplates.inc',
-                      'class' => 'FrxReportTemplates'
-                      );
-*/
   return $controls; 
 }
 

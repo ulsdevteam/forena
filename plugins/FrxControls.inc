@@ -11,8 +11,8 @@ class FrxControls {
    * @section 
    * Below here are advertising methods
    */
-	
-	//date formats
+
+  //date formats
   public function formats() {
     $formats = array('drupal_date_format' => 'Drupal Date',
                      'iso_date' => 'ISO Date', 
@@ -162,7 +162,7 @@ class FrxControls {
     $xml .= '</thead>';
     $xml .= '<tbody>';
     $xml .= '<tr frx:foreach="*">';
-    foreach ($columns as $column){
+    foreach ($columns as $column) {
       $xml .= '<td>{'. $column .'}</td>';
     }
     $xml .= '</tr>';
