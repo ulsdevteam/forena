@@ -121,7 +121,7 @@ function forena_report($name_in, $parms = array()) {
       
       //put title on top of report
       $title = $r->title; 
-      if (!$missing_parms) {      	
+      if (!$missing_parms) {
         $output .= $r->render($format);    
         $css_files = forena_report_css($desc, $form, $format);
       }
@@ -166,10 +166,10 @@ function forena_report($name_in, $parms = array()) {
           }
           else {            
             //There were nodes. show the prefered doc types          
-		        $doctypes = forena_supported_doctypes();   
-            foreach ($nodes as $value) {             	
-            	$arr = $value->attributes();
-              $type = (string)$arr['type'];            	
+            $doctypes = forena_supported_doctypes();
+            foreach ($nodes as $value) {
+              $arr = $value->attributes();
+              $type = (string)$arr['type'];
               if ($doctypes[$type]) {                     
                 if (is_object(forena_get_doctypes($type))) {
                   $div .= '<a class="doclinks" href="'. $name . '.'. $type .'?'. $q .'">'. strtoupper($type) .'</a>';
@@ -780,7 +780,7 @@ function forena_supported_formats() {
     $provider = $r;
     if ($provider && method_exists($provider, 'formats'))  { 
       $f = $provider->formats(); 
-	    $supported_formats = array_merge($supported_formats, $f);
+      $supported_formats = array_merge($supported_formats, $f);
     }
   }   
   return $supported_formats;

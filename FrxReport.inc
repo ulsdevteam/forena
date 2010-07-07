@@ -60,13 +60,14 @@ class FrxReport {
               $this->form = (string) $value; 
               break; 
             case 'parameters':              
-              foreach ($node->children(FRX_NS) as $key => $node) {              	
+              foreach ($node->children(FRX_NS) as $key => $node) {
                 $parm = array(); 
-                foreach ($node->attributes() as $akey => $attr) {                	
+                foreach ($node->attributes() as $akey => $attr) {
                   $parm[$akey] = (string)$attr; 
                 }
+                $id = $parm['id']; 
                 $parm['value']= (string)$node; 
-                $this->parameters[$key] = $parm;
+                $this->parameters[$id] = $parm;                
               }
               break;
             case 'doctypes': 
@@ -90,16 +91,6 @@ class FrxReport {
     if ($this->cur_data) $this->blocks_loaded = TRUE; 
   }
   
-  private function process_frx_attributes(SimpleXMLElement $node) {
-    $attrs = $node->attributes(FRX_NS); 
-    if ($attrs) foreach ($attrs as $key => $value) { 
-      switch ($key) {
-        case "block":
-           $this->get_data((string)$value, (string)$attrs['clause']);           
-           break;  
-      }
-    }
-  }
   
   /**
    * Recursive report renderer
@@ -108,19 +99,24 @@ class FrxReport {
   public function render_section(SimpleXMLElement $node) {     
     $cur_data = $this->cur_data;     
     $elements = count($node->xpath('*'));
+    $continue = TRUE; 
     $frx = $node->attributes(FRX_NS);
     // Test to see if we have any nodes that are contains data url    
     if ($node->xpath('*//@frx:*') || $frx) {          
       $attrs = $node->attributes();
+      $frx = $node->attributes(FRX_NS);
       $tag = $node->getName(); 
-      $this->process_frx_attributes($node); 
+      if ((string)$frx['block']) {
+        $this->get_data((string)$frx['block'], (string)$frx['clause']);           
+        if (!$this->cur_data) $continue = FALSE;
+      } 
       $attr_text=''; 
+      
       if ($attrs) foreach ($attrs as $key => $value) { 
         $attr_text =  ' '. $key .'="'. (string)$value .'"';
       }
-
-      $frx = $node->attributes(FRX_NS);
       
+
       if ((string)$frx['foreach'] ) {       
         // Save xml
         $path = (string)$frx['foreach'];        
@@ -149,7 +145,7 @@ class FrxReport {
         
         $this->cur_data = $data; 
       } 
-      else {
+      elseif ($continue) { 
 
         $o .= $this->teng->replace('<'. $tag . $attr_text .'>', $this->cur_data);
         foreach ($node->children() as $child) {

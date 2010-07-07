@@ -107,7 +107,7 @@ class FrxSyntaxEngine {
       $i=0;   
       foreach ($match[0] as $match_num => $token) {
          $path = trim($token, $this->trim_chars); 
-         if (array_search($path,$tokens)===FALSE) { 
+         if (array_search($path, $tokens)===FALSE) { 
            $tokens[] = $path; 
          }
       }

@@ -120,11 +120,11 @@ function forena_data_block_autocomplete($string='') {
   $data_blocks = forena_user_data_blocks($string);
   
   if ($data_blocks) {
-	  $temp = array_values($data_blocks);
-	  $data_blocks = array_combine($temp, $temp);
+    $temp = array_values($data_blocks);
+    $data_blocks = array_combine($temp, $temp);
   }
   else {
-  	$data_blocks = array();
+    $data_blocks = array();
   }
   
   print drupal_json($data_blocks);  
@@ -136,17 +136,22 @@ function forena_data_block_autocomplete($string='') {
  * @return unknown_type
  */
 function forena_fields_format_autocomplete($string='') {
-	require_once('forena.common.inc');
-	$matches = array();
-	$formats = forena_supported_formats();
-	
-	if ($formats && $string) foreach ($formats as $name => $value) {
-		if (strpos(strtolower($name), strtolower($string)) !== FALSE || strpos(strtolower($value), strtolower($string))!==FALSE) {
-			$matches[$name] = $value;
-		}
-		
-	}
-	print drupal_json($matches);	
+  require_once('forena.common.inc');
+  $matches = array();
+  $formats = forena_supported_formats();
+
+  if ($string == "*") {
+    $matches = $formats;
+    print drupal_json($matches);
+    return;
+  }
+
+  if ($formats && $string) foreach ($formats as $name => $value) {
+    if (strpos(strtolower($name), strtolower($string)) !== FALSE || strpos(strtolower($value), strtolower($string))!==FALSE) {
+      $matches[$name] = $value;
+    }
+  }
+  print drupal_json($matches);
 }
 /**
  *  Calls forena_edit_form
@@ -343,4 +348,73 @@ function forena_current_user_uid() {
 function forena_current_user_name() { 
   global $user; 
   return $user->name; 
+}
+
+/**
+ * Implememntation of hook_filter
+ */ 
+function forena_filter($op, $delta=0, $format=-1, $text='') {
+
+   if ($op == 'list') {
+    return array(
+       0 => t('Insert Report'),
+       ); 
+   }
+       
+   switch ($delta) {
+    case 0:
+      switch ($op) { 
+        case 'description':
+          return t('Inserts a forena report'); 
+        case 'prepare':
+          return $text; 
+          case 'process':
+          return _forena_filter_process($text); 
+          case 'no cache':
+            return TRUE; 
+      }
+   }
+}
+
+/**
+ * Process tag replacement for xml filters 
+ */ 
+function _forena_filter_process($text='') { 
+  require_once('forena.admin.inc'); 
+  // initial Parameters
+  $in_parms = array(); 
+
+  $in_parms = array_merge((array)$_GET, (array)$parms); 
+  
+  // Find the instances of [xmlreport:view,
+  if (preg_match_all("/\[report?:?([^\]]+)\]/i", $text, $match)) {
+
+    foreach ($match[1] as $idx => $value) {
+      $parms=array(); 
+      // Separate view from parmeters
+      list($report_name, $parmsStr)=explode(':', $value); 
+
+      // Get any static parmeters
+      $pairs = split(',', $parmsStr); 
+      if ($pairs) foreach ($pairs as $pair) {
+        list($key, $value)=explode('=', $pair); 
+        $parms[$key]=$value; 
+      }
+      
+      $parms = array_merge($parms, $in_parms); 
+      // Debug the result
+      $output = ''; 
+      $r = forena_get_report($report_name);
+      if ($r) {
+        $output .= forena_render_report($r, NULL, $parms); 
+      } 
+      
+      // Finally replace the parameters
+      $find[]=$match[0][$idx]; 
+      $replace[]=$output; 
+    }
+    return str_replace($find, $replace, $text); 
+  } 
+  // If we didn't find anything return the text. 
+  return $text; 
 }

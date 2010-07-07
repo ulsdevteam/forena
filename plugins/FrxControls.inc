@@ -44,8 +44,14 @@ class FrxControls {
      if (!$format_str) $format_str = 'small'; 
      switch ($format_str) { 
        case 'medium': 
-       case 'small':
-       case 'large': 
+         $type = $format_str;
+         $format=''; 
+         break; 
+        case 'small':
+         $type = $format_str;
+         $format=''; 
+         break; 
+        case 'large': 
          $type = $format_str;
          $format=''; 
          break; 
@@ -149,8 +155,9 @@ class FrxControls {
  }
  
  //template methods
-  public function table($columns, $data_block) {
-    $xml .= '<div frx:block="'. $data_block .'">';
+  public function table($columns, $data_block, $clause='') {
+  	if ($clause) $clause = 'frx:clause ="'. $clause .'"';
+    $xml .= '<div frx:block="'. $data_block .'" '. $clause .'>';
     $xml .= '<table>';
     $xml .= '<thead>';    
     $xml .= '<tr>';
@@ -173,8 +180,9 @@ class FrxControls {
     return $xml;
   }
  
-  public function vertical_list($columns, $data_block) {
-    $xml .= '<div frx:block="'. $data_block .'">';
+  public function vertical_list($columns, $data_block, $clause) {
+    if ($clause) $clause = 'frx:clause ="'. $clause .'"';
+    $xml .= '<div frx:block="'. $data_block .'" '. $clause .'>';
     $xml .= '<table frx:foreach="*">'; 
     $xml .= '<tbody>';
     

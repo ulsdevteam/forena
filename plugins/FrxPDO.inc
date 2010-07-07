@@ -45,13 +45,17 @@ class FrxPDO extends FrxDataProvider {
    * @param Array $parm_data
    * @param Query $subQuery
    */
-  public function data($block_name, $params=array(), $subQuery='') {
+  public function data($block_name, $params=array(), $clause='') {
     // Load the block from the file
     $db = $this->db;   
     $block = $this->load_block($block_name); 
     $xml =''; 
     if ($block['source'] && $this->access($block['access']) && $db) { 
-      $sql = $block['source']; 
+      $sql = $block['source'];
+	    
+      if ($clause) {
+	        $sql = 'SELECT * FROM ('. trim($sql, ' ;') . ') forena_table '. $clause; 
+	      }
       $sql = $this->te->replace($sql, $params);
 
       $rs = $db->query($sql); 
@@ -77,7 +81,7 @@ class FrxPDO extends FrxDataProvider {
       }
       
       if ($this->debug) { 
-        if ($xml) $d = htmlspeicalchars($xml->asXML); 
+        if ($xml) $d = htmlspecialchars($xml->asXML); 
         forena_debug('SQL: '. $sql, '<pre> SQL:'. $sql . "\n XML: ". $d . "/n</pre>"); 
       }      
       return $xml; 

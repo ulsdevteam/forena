@@ -66,16 +66,30 @@ class FrxDataProvider{
    * @param string $search part block names to search for
    * @return unknown
    */
-  public function list_blocks($search) { 
+  public function list_blocks($search, $subdir='') { 
     $block_list = array(); 
-    
     // First find files that match the search string
-    $path = $this->block_path. '/*'. $search . '*.' . $this->block_ext;
-    $d = glob($path); 
+    $path = $this->block_path .'/'; 
+    if ($subdir) $path = $subdir .'/'; 
+    $block_path .= $path . '*'. $search . '*.' . $this->block_ext;
+    
+    // Find sql files
+    $d = glob($block_path); 
     foreach ($d as $file_name) {
       list($block_name, $ext) = explode('.', $file_name);  
-      $block_list[] = str_replace($this->block_path .'/','',$block_name);
+      $block_list[] = str_replace($this->block_path .'/', '', $block_name);
     }         
+    
+    // Find directories
+    $d = glob($path .'*');
+    foreach ($d as $dir_name) {
+      if (is_dir($dir_name)) {
+        $block_list += $this->list_blocks($search, $dir_name); 
+      }
+    }
+    
+    
+    
     return $block_list; 
   }
 }

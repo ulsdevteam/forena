@@ -32,16 +32,19 @@ class FrxDrupal extends FrxDataProvider {
    * @param Array $parm_data
    * @param Query $subQuery
    */
-  public function data($block_name, $params=array(), $subQuery='') {
+  public function data($block_name, $params=array(), $clause='') {
     // Load the block from the file
 
     $block = $this->load_block($block_name); 
     $xml =''; 
     if ($block['source'] && $this->access($block['access'])) { 
       $sql = $block['source']; 
-      $sql = $this->te->replace($sql, $params);
-      //drupal_set_message("sql: ". $sql);
-      $rs = db_query($sql); 
+      if ($clause) {
+        $sql = 'SELECT * FROM ('. trim($sql, ' ;') . ') forena_table '. $clause; 
+      }
+      $sql = $this->te->replace($sql, $params);            
+      $rs = db_query($sql);
+      	
       $xml = new SimpleXMLElement('<table/>'); 
       while ($data = db_fetch_object($rs)) { 
 
@@ -82,21 +85,7 @@ class FrxDrupal extends FrxDataProvider {
                      ); 
     return $formats; 
   }
- /* 
-  public function drupal_filter($nid, $bool) {
-    $node = node_load($nid, NULL, TRUE);
-    if (!$node) {
-      return 'N/A';
-    }
-    //If true, render the teaser
-    //else render the body
-    $node = node_prepare($node, $bool);
-    if ($bool) {
-      return $node->teaser;  
-    }
-    return $node->body;
-  }  
-  */
+
   
   public function drupal_filter($nid, $format) {
     $node = node_load($nid, NULL, TRUE);
