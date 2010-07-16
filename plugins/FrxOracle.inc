@@ -35,7 +35,7 @@ class FrxOracle extends FrxDataProvider {
    
     } 
     else { 
-      forena_error('No database connection string specified'); 
+      forena_error('No database connection string specified', 'No database connection: '. print_r($conf,1)); 
     }
     
     // Set up the stuff required to translate. 

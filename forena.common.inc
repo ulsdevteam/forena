@@ -55,10 +55,11 @@ function forena_report_css($desc, $form,  $format = '') {
   $css_files = array();
   // First check for the form file  
   $path = forena_report_path(); 
+ 
   if ($format && file_exists($path .'/'. $form .'-'. $format .'.css')) {
     $css_files[] = $path . '/'. $form . '-' . $format .'.css'; 
   }
-  else {
+  else {  	
     if (file_exists($path . '/' . $form . '.css')) { 
       $css_files[] = $path . '/' . $form . '.css'; 
     }
@@ -71,8 +72,9 @@ function forena_report_css($desc, $form,  $format = '') {
   }
   elseif (file_exists($base_file .'.css')) { 
     $css_files[] = $base_file .'.css'; 
-  }
-  
+  }  
+  //drupal_set_message("desc: <pre>". print_r($desc, 1) ."</pre>");
+  //drupal_set_message("css files: <pre>". print_r($css_files, 1) ."</pre>");
   return $css_files; 
 }
 
@@ -90,35 +92,41 @@ function forena_report($name_in, $parms = array()) {
   $filename = $desc['filename']; 
   // Determine the data to get. 
   if (!$parms) $parms = $_GET; else $parms = (array)$parms; 
-  unset($parms['q']);
-  
+  unset($parms['q']);  
   if ($name) {
     $r = forena_get_report($name, $parms);  
     if ($r) {
+    	//check for default parameters
+    	$r_params = $r->parameters;
+    	
+    	if ($r_params) {
+    		//put default parameters in parms array
+    	  foreach ($r_params as $key => $parm) {
+          if (!$parms[$key] && $parm['value']) {
+            $parms[$key] = $parm['value']; 
+            $reload_params = TRUE;
+          }
+          //do not show report if a required parameter does not have a value
+          //force the user to input a parameter
+          if ((!$parms[$key]) && (strcmp($parm['require'], "1") == 0) && (!$parm['value'])) {          	
+          	$missing_parms = TRUE;
+          }
+    	  }
+    	}
+    	//Reload report if parameters were missing
+    	if ($reload_params) {
+    		$r = forena_get_report($name, $parms);
+    	}    	
+    	
       // Get data from the report; 
       $r_parms = $r->parameters; 
       $form = $r->form; 
-      $rpt_xml = $r->rpt_xml; 
-      
+      $rpt_xml = $r->rpt_xml;       
       
       // Default the form
       if (!$form) $form = variable_get('forena_default_form', 'letter'); 
-      $q; 
-      $bool = FALSE;      
-      
-      if ($r_parms) {
-        //put default parmeters in the query string
-        foreach ($r_parms as $key => $parm) {
-        if (!$parms[$key] && $r_parm['value']) {
-              $parms[$key] = $r_parm['value']; 
-            }
-        }
-        if ((!$parms[$key]) && strcmp ($node['require'], '1') == 0) {
-          $missing_parms = TRUE; 
-        }
-        
-      }
-      
+      $q;                
+ 
       //put title on top of report
       $title = $r->title; 
       if (!$missing_parms) {
@@ -137,6 +145,7 @@ function forena_report($name_in, $parms = array()) {
                          'xml' => $r_text,
                          'title' => $title[0],
                    );
+
         forena_generate_doc($format, $output, $options);
       }
       else {
@@ -349,7 +358,6 @@ function forena_invoke_data_provider($data_block, $parameters=array(), $clause='
 
        $xml = $provider->data($block, $parameters, $clause); 
      }
-     //drupal_set_message("xml invoked: ". htmlspecialchars($xml->asXML()));
      return $xml; 
    }
 }
@@ -364,7 +372,8 @@ function forena_invoke_data_provider($data_block, $parameters=array(), $clause='
  * @param $data_block
  * @return unknown_type
  */
-function forena_load_block($data_block) {
+function forena_load_block($data_block, $clause='') {
+	
    list($provider, $block) = explode('/', $data_block, 2); 
    // Get the data 
    
@@ -373,7 +382,7 @@ function forena_load_block($data_block) {
    if ($repos['data']) { 
      $provider = $repos['data'];
      if (method_exists($provider, 'load_block')) {
-       $block_info = $provider->load_block($block); 
+       $block_info = $provider->load_block($block, $clause); 
        
      }
      return $block_info; 
@@ -540,7 +549,7 @@ function forena_load_block_file($filepath, $comment='--', $trim) {
  * @param string $short_message Message that will be displayed to the users
  * @param string $log Message that will be recorded in the logs. 
  */
-function forena_error($short_message, $log) { 
+function forena_error($short_message='', $log='') { 
   if ($short_message) { 
     drupal_set_message($short_message, 'error'); 
   }
@@ -648,7 +657,9 @@ function forena_define_controls( $class='') {
  * Form to edit parameters
  */
 function forena_parameters_form($form_state) {
-
+  $parms = $_GET;
+  unset($parms['q']);
+  
   $r = forena_report_object(); 
   if ($r) {
       drupal_set_title($r->title);
@@ -657,13 +668,28 @@ function forena_parameters_form($form_state) {
       $form = array();
       $form['params'] = array('#tree' => TRUE, '#title' => 'Parameters', '#type' => 'fieldset', '#collapsible' => TRUE, '#collapsed' => $r->blocks_loaded); 
       $nodes = $head->xpath('frx:parameters/frx:parm');
-      foreach ($nodes as $node) {
+      foreach ($nodes as $node) { 
+      	$label = (string)$node['label'];   
+      	$id = (string)$node['id'];
+
+      	//check querystring for parameters
+      	if ($parms[$id]) {
+      		$value = $parms[$id];
+      	}
+      	else {
+	      	$value = (string)$node['value'];       		
+      	}
+      	
+      	
+      	
         (strcmp((string)$node['require'], "1") == 0) ? $bool = TRUE : $bool = FALSE;
+        
         $form['params'][(string)$node['id']] = array(
           '#type' => 'textfield',
-          '#title' => t((string)$node['label']),
-          '#default_value' => $node,  
+          '#title' => ($label) ? t($label) : t($id),
+          '#default_value' => ($value) ? $value : $node,  
           '#required' => $bool,
+          '#description' => $node['desc'],
         );
       }
       $form['params']['submit'] = array(
@@ -819,7 +845,8 @@ function  forena_generate_doc($format, $output, $options = array()) {
         header("Cache-Control: must-revalidate");
         header("Content-Length: $flen");
         header("Content-Disposition: attachment; filename=report.pdf");
-        break;   
+        break;
+   
       case 'xls':
         header('Content-Type: application/msexcel');
         header('Cache-Control:');

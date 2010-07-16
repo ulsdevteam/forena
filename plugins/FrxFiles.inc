@@ -33,9 +33,7 @@ class FrxFiles extends FrxDataProvider {
         $xmlData = $block['source']; 
         $xml = new SimpleXMLElement($xmlData);
       } catch (Exception $e) { 
-        print "Error processing xml\n";
-        print $e->getMessage();  
-        print $xmlData; 
+        forena_error("Error processing xml\n", $e->getMessage() . "\n" . $xmlData);
       }
     }
 

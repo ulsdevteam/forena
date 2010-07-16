@@ -66,7 +66,7 @@ class FrxReport {
                   $parm[$akey] = (string)$attr; 
                 }
                 $id = $parm['id']; 
-                $parm['value']= (string)$node; 
+                $parm['value']= ((string)$node) ? (string)$node : $parm['value']; 
                 $this->parameters[$id] = $parm;                
               }
               break;
