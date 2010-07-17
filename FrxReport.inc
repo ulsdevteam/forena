@@ -120,7 +120,7 @@ class FrxReport {
       if ((string)$frx['foreach'] ) {       
         // Save xml
         $path = (string)$frx['foreach'];        
-        $data = $this->cur_data;   
+        $data = $this->cur_data;           
               
         if ($data) $nodes = $data->xpath($path);
         $i=0;

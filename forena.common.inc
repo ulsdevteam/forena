@@ -434,7 +434,7 @@ function forena_get_formatter($fkey) {
 function forena_get_report($report_name, $data=array()) {
   if ($report_name) { 
     $report_path = forena_report_path();
-    $filename = $report_path . '/'. $report_name . '.frx';
+    $filename = $report_path . '/'. $report_name . '.frx';    
     if (file_exists($filename)) {
       $r_text = file_get_contents($filename);
                

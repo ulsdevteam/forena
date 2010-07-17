@@ -299,11 +299,20 @@ function forena_user_reports() {
  * @param unknown_type $data
  * @return unknown
  */
-function forena_render_report($report, $format='', $data='') {
-  require_once('forena.common.inc');    
-  $o = forena_report_object($report, $data);  
+function forena_render_report($report, $format='', $data='', $options= array()) {
+  require_once('forena.common.inc');
+  $o = forena_report_object($report, $data);
   $output = $o->render($format);  
-  return $output; 
+  
+  //If a format was requested render a custom non-drupal document  
+  if ($format) {       
+  	 
+    forena_generate_doc($format, $output, $options);
+  }
+  else { 
+	  return $output;
+  } 
+  
 }
 
 /**

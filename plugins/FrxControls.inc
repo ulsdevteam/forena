@@ -63,7 +63,7 @@ class FrxControls {
   } 
   
   public function iso_date($value, $format_str) {
-    if ($value) $date = strtotime($value);    
+  	if ($value) $date = strtotime($value);   
     return $this->drupal_date_format($date, $format_str); 
   }
 

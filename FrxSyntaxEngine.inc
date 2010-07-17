@@ -48,9 +48,11 @@ class FrxSyntaxEngine {
       if ($rows) $x = $rows[0];
       
       if ($x) $retvar = $x->asXML(); 
+      // Check to see if there are child nodes
+      // If so use asXML otherwise string cast. 
       
       
-      if ($retvar) {
+      if ($retvar && strpos('<', $retvar)!==FALSE) {
         // Find the end of the first tag.
         $p = strpos($retvar, '>'); 
         $retvar = substr_replace($retvar, ' ', 0, $p+1);
@@ -58,6 +60,10 @@ class FrxSyntaxEngine {
         $retvar = substr_replace($retvar, '', $p, strlen($retvar) - $p);
          
       }
+      else { 
+      	$retvar = (string)$x; 
+      }
+      
     }
     // Call the formatter object if neccessary
     $f = $this->formatter; 
