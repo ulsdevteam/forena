@@ -51,8 +51,8 @@ class FrxSyntaxEngine {
       // Check to see if there are child nodes
       // If so use asXML otherwise string cast. 
       
-      
-      if ($retvar && strpos('<', $retvar)!==FALSE) {
+
+      if ($retvar && strpos($retvar, '<')!==FALSE) {
         // Find the end of the first tag.
         $p = strpos($retvar, '>'); 
         $retvar = substr_replace($retvar, ' ', 0, $p+1);

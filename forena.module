@@ -102,7 +102,6 @@ function forena_menu() {
     'title' => t('My Reports'),
     'access arguments' => array('list reports'),  
     'type' => MENU_NORMAL_ITEM,
-    'file' => 'forena.common.inc', 
    ); 
       
    $items['forena/fields/format/autocomplete'] = array(
@@ -253,7 +252,7 @@ function forena_user_reports() {
   while ($row = db_fetch_object($result)) {
     $access = TRUE; 
     $cache = $row->cache; 
-       
+     
     if ($cache) {            
       $cache = unserialize($cache);
       
@@ -305,8 +304,7 @@ function forena_render_report($report, $format='', $data='', $options= array()) 
   $output = $o->render($format);  
   
   //If a format was requested render a custom non-drupal document  
-  if ($format) {       
-  	 
+  if ($format) {  	 
     forena_generate_doc($format, $output, $options);
   }
   else { 

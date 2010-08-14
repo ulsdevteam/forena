@@ -828,6 +828,8 @@ function forena_data_block_form($form_state) {
       '#description' => t('Select a template to preview the data block in.'),
     );
     
+    //If there are parameters in the data block allow the user to input data
+    //Check if there is already a parameter of the same name in the existing report. If there is, use the report value.
     if ($params) {
     	$rpt_params = array();
     	//returns a 2 dimensional array of report parameters from the report
@@ -1135,11 +1137,11 @@ function forena_admin_params_form($form_state) {
 	      $attrs = $node->attributes();
 	      $id = (string)$attrs['id'];
 	      $label = (string)$attrs['label'];
-	      $value = (string)$attrs['value'];
+	      $value = (string)$attrs['value'] ? (string)$attrs['value'] : (string)$node;
 	      $require = $attrs['require'];
 	      $desc = (string)$attrs['desc'];
 	                
-	      //make a subtree of params
+	      //make a subtree for each param
 	      $form['params'][$id] = array(
 	        '#tree' => TRUE, 
 	        '#type' => 'fieldset', 

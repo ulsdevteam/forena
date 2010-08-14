@@ -52,7 +52,7 @@ function forena_report_desc($name='') {
  * @return array A list of css files that should be applied to the report. 
  */
 function forena_report_css($desc, $form,  $format = '') {
-  $css_files = array();
+	$css_files = array();
   // First check for the form file  
   $path = forena_report_path(); 
  
@@ -119,9 +119,9 @@ function forena_report($name_in, $parms = array()) {
     	}    	
     	
       // Get data from the report; 
-      $r_parms = $r->parameters; 
-      $form = $r->form; 
-      $rpt_xml = $r->rpt_xml;       
+      $r_parms = $r->parameters;       
+      $form = $r->options['form'];
+      $rpt_xml = $r->rpt_xml;         
       
       // Default the form
       if (!$form) $form = variable_get('forena_default_form', 'letter'); 
@@ -145,7 +145,7 @@ function forena_report($name_in, $parms = array()) {
                          'xml' => $r_text,
                          'title' => $title[0],
                    );
-
+        
         forena_generate_doc($format, $output, $options);
       }
       else {
@@ -217,11 +217,12 @@ function __forena_load_repository(&$repo) {
   if (file_exists($path .'/settings.php')) {
     // Override with repository specific data 
     include($path .'/settings.php'); 
-
   }
+ 
   $repo = array_merge($repo, $conf); 
   // $repo['user callback'] = $conf['user callback']; 
   $repo['data'] = __forena_load_provider($repo, $repo['path']);  
+  
   //$repo['auth'] = __forena_load_auth($security_provider); 
   
 }
@@ -234,13 +235,16 @@ function __forena_load_repository(&$repo) {
  */
 function __forena_load_provider($conf, $repo_path) {
   $name = $conf['data provider'];  
-  if (!$name) $name = $conf['data_engine']; 
+  if (!$name) $name = $conf['data_engine'];
+  
   forena_define_plugins(); 
   // Instantiate the path
+  //drupal_set_message("conf: <pre>". print_r($conf, 1) ."</pre>  repo_path: <pre>". print_r($repo_path,1) ."</pre>");
   if (class_exists($name)) { 
     $o = new $name($conf, $repo_path); 
     return $o; 
   }
+  
 }
 
 /*
@@ -251,7 +255,6 @@ function forena_repository($name='') {
   global $_forena_repositories; 
   static $repos =''; 
 
-  
   // Empty repository so we need to initialize
   if (!$repos) {   
     // Build the default sample one
@@ -270,6 +273,8 @@ function forena_repository($name='') {
                              'title' => 'Drupal Reports');  
 
   }
+  //drupal_set_message("repos: <pre>". print_r($repos, 1) ."</pre>");
+
 
   // Now determine if the object exists 
   if ($name) { 
@@ -287,7 +292,7 @@ function forena_repository($name='') {
   else { 
     return $repos; 
   }
-    
+
 }
 
 /**
@@ -344,8 +349,9 @@ function forena_load_cache($r_xhtml) {
  */
 function forena_invoke_data_provider($data_block, $parameters=array(), $clause='') {
    list($provider, $block) = explode('/', $data_block, 2); 
-   // Get the data 
+   // Get the data    
    $repos = forena_repository($provider);
+   
    if ($repos['user callback']) {
      $user_fn = $repos['user callback']; 
      $parameters['current_user'] = $user_fn(); 
@@ -439,7 +445,6 @@ function forena_get_report($report_name, $data=array()) {
       $r_text = file_get_contents($filename);
                
       try { 
-
         $r = forena_report_object($r_text, $data);          
       } catch (Exception $e) { 
         forena_error('Unable to read report', $e->getMessage()); 

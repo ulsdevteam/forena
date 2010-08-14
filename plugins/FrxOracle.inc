@@ -20,6 +20,7 @@ class FrxOracle extends FrxDataProvider {
    * @param string $repos_path Path to location of data block definitions
    */
   public function __construct($conf, $repos_path) {
+  	
     parent::__construct($conf, $repos_path);
     $this->use_oracle_xml = FALSE;
     $uri = $conf['uri'];  
