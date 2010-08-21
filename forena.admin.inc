@@ -647,6 +647,14 @@ function forena_fields_form($form_state) {
           '#description' => t('Create a link that incorporates this field, e.g "profile/{field_name}" will create a link to this field_name\'s profile. *Note the field must be wrapped in {}.')                
         ); 
         
+        $form['fields'][$field]['target'] = array(
+          '#type' => 'textfield',
+          '#title' => t('target'),
+          '#default_value' => $attr['target'],
+          '#size' => 30,
+          '#description' => t('Link target eg. _BLANK')
+        );
+
         $form['fields'][$field]['default'] = array(
           '#type' => 'textfield',
           '#title' => t('default value'), 

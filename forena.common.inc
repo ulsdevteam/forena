@@ -55,15 +55,14 @@ function forena_report_css($desc, $form,  $format = '') {
 	$css_files = array();
   // First check for the form file  
   $path = forena_report_path(); 
- 
+  if (file_exists($path . '/' . $form . '.css')) { 
+    $css_files[] = $path . '/' . $form . '.css'; 
+  }
   if ($format && file_exists($path .'/'. $form .'-'. $format .'.css')) {
     $css_files[] = $path . '/'. $form . '-' . $format .'.css'; 
   }
-  else {  	
-    if (file_exists($path . '/' . $form . '.css')) { 
-      $css_files[] = $path . '/' . $form . '.css'; 
-    }
-  }
+	
+
 
   // Now check for a report specific file
   $base_file = $path . '/' . $desc['name']; 

@@ -195,9 +195,10 @@ class FrxReport {
           
            //@TODO: Replace the default extraction with something that will get sub elements of the string
            $default = (string)$formatter; 
-           $link = (string) $formatter['link']; 
+           $link = (string) $formatter['link'];
            $format = (string) $formatter['format']; 
-           $format_str = (string) $formatter['format-string'];            
+           $format_str = (string) $formatter['format-string'];
+           $target = (string) $formatter['target'];
         }  
       }
     }
@@ -214,8 +215,8 @@ class FrxReport {
     
     if ($link) { 
       $link = $this->teng->replace($link,  $data, TRUE);
-      list($url, $query) = explode('?', $link); 
-      $value = l(htmlspecialchars_decode($value), $url, array('query' => $query));
+      list($url, $query) = explode('?', $link);
+      $value = l(htmlspecialchars_decode($value), $url, array('query' => $query, 'attributes'=> array('target' => $target)));
     }
     return $value; 
   }

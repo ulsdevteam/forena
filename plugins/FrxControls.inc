@@ -70,13 +70,13 @@ class FrxControls {
   //Document transformation methods  
   public function htmldocument($body, $options) {
     $output .= '<html><head>';
-    if ($options['css'] && file_exists($options['css'])) {
-      $css = file_get_contents($options['css']);
+
+    if ($options['css']) {
       $output .= '<style type="text/css">';
-      $output .= $css;
+      $output .= $options['css'];
       $output .= '</style>';
     }
-    $output .= '<title>'. $options['title'] .'</title></head>'. $body .'</html>';
+    $output .= '<title>'. $options['title'] .'</title></head><body class="forena-report">'. $body .'</body></html>';
     return $output;
   } 
   
