@@ -56,8 +56,7 @@ class FrxPDO extends FrxDataProvider {
       if ($clause) {
 	        $sql = 'SELECT * FROM ('. trim($sql, ' ;') . ') forena_table '. $clause; 
 	      }
-      $sql = $this->te->replace($sql, $params);
-
+      $sql = $this->te->replace($sql, $params);     
       $rs = $db->query($sql); 
       $xml = new SimpleXMLElement('<table/>'); 
       

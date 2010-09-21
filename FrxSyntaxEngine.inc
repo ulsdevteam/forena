@@ -26,6 +26,19 @@ class FrxSyntaxEngine {
     }
   }
   
+  
+  protected function simplexml_evaluate($xml, $path) { 
+    $dom_node = dom_import_simplexml($xml);
+    $dom_doc = new DOMDocument(''); 
+    $dom_node = $dom_doc->importNode($dom_node, TRUE);
+    $dom_doc->appendChild($dom_node); 
+    // Do we also need to call AppendChild?   
+    $xpath = new DOMXpath($dom_doc); 
+    $ret = $xpath->evaluate($path, $dom_node);
+    return $ret; 
+  }
+  
+  
   /**
   * Get the value from the data.  
   * This is used by token_replace method to extract the data based on the path provided. 
@@ -42,26 +55,28 @@ class FrxSyntaxEngine {
     } 
     elseif (is_object($data)) {
       
-      
-      $rows = $data->xpath($key);
-      
-      if ($rows) $x = $rows[0];
-      
-      if ($x) $retvar = $x->asXML(); 
-      // Check to see if there are child nodes
-      // If so use asXML otherwise string cast. 
-      
-
-      if ($retvar && strpos($retvar, '<')!==FALSE) {
-        // Find the end of the first tag.
-        $p = strpos($retvar, '>'); 
-        $retvar = substr_replace($retvar, ' ', 0, $p+1);
-        $p = strrpos($retvar, '<', -1); 
-        $retvar = substr_replace($retvar, '', $p, strlen($retvar) - $p);
-         
+      if (strpos($key,'=')===0) { 
+        $retvar = $this->simplexml_evaluate($data,ltrim($key,'='));
       }
       else { 
-      	$retvar = (string)$x; 
+        $rows = $data->xpath($key);
+        
+        if ($rows) $x = $rows[0];
+        
+        if ($x) $retvar = $x->asXML(); 
+        // Check to see if there are child nodes
+        // If so use asXML otherwise string cast. 
+        if ($retvar && strpos($retvar, '<')!==FALSE) {
+          // Find the end of the first tag.
+          $p = strpos($retvar, '>'); 
+          $retvar = substr_replace($retvar, ' ', 0, $p+1);
+          $p = strrpos($retvar, '<', -1); 
+          $retvar = substr_replace($retvar, '', $p, strlen($retvar) - $p);
+           
+        }
+        else { 
+        	$retvar = (string)$x; 
+        }
       }
       
     }

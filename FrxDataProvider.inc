@@ -3,7 +3,7 @@
 require_once('forena.common.inc'); 
 /**
  * @file
- * Class that defines default methods for access control in an FrxDataEngine
+ * Class that defines default methods for access control in an FrxDataProvider
  *
  */
 class FrxDataProvider{
@@ -49,25 +49,31 @@ class FrxDataProvider{
    * @return unknown
    */
   public function load_block($block_name, $clause='') { 
-  	
+ 
     $filename = $this->block_path .'/'. $block_name .'.'. $this->block_ext;  
     $block = forena_load_block_file($filename, $this->comment_prefix, $this->comment_suffix);
     // If we have a regular expression token parser, then get the tokens out of the block.  
+
     if ($this->te) { 
       $tokens = $this->te->tokens($block['source']);
+      //drupal_set_message("tokens: ". print_r($tokens, 1));
       //check tokens in the where clause 
       if ($clause) {  
-	      $clause_tokens = $this->te->tokens($clause);	           
-	      $temp = array_combine($tokens, $tokens);	
+	      $clause_tokens = $this->te->tokens($clause);	
+	      //drupal_set_message("clause tokens: ". print_r($clause_tokens, 1));
+	      $temp = array();           
+	      $temp = array_merge($tokens, $clause_tokens);	
 	      //check for duplicates in block tokens      
 	      if ($clause_tokens) foreach ($clause_tokens as $ct) {
 	      	if (!$temp[$ct]) {
 	      		array_push($tokens,$ct);
 	      	}      	
 	      }
-      }      
+      } 
+   
       $block['tokens'] = $tokens; 
     }
+
     return $block; 
   }
   
@@ -77,28 +83,33 @@ class FrxDataProvider{
    * @param string $search part block names to search for
    * @return unknown
    */
-  public function list_blocks($search, $subdir='') { 
-    $block_list = array(); 
+  public function list_blocks($search, $subdir='', $this_list=array()) { 
+    $block_list = $this_list;
     // First find files that match the search string
     $path = $this->block_path .'/'; 
-    if ($subdir) $path = $subdir .'/'; 
-    $block_path .= $path . '*'. $search . '*.' . $this->block_ext;
+    if ($subdir) $path = $subdir .'/';   
+    $block_path .= $path . '*'. $search . '*.' . $this->block_ext;    
     
     // Find sql files
     $d = glob($block_path); 
     foreach ($d as $file_name) {
       list($block_name, $ext) = explode('.', $file_name);  
       $block_list[] = str_replace($this->block_path .'/', '', $block_name);
-    }         
-    
+    }     
+       
     // Find directories
-    $d = glob($path .'*');
+    $d = glob($path .'*');    
     foreach ($d as $dir_name) {
-      if (is_dir($dir_name)) {
-        $block_list += $this->list_blocks($search, $dir_name); 
+      if (is_dir($dir_name)) {        
+        $block_list += $this->list_blocks($search, $dir_name, $block_list); 
       }
     }    
     
     return $block_list; 
   }
+  
+  
+
+
+
 }

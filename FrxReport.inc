@@ -72,8 +72,7 @@ class FrxReport {
               break;
             case 'doctypes': 
               $this->doctypes = $value;
-              break; 
-               
+              break;               
           }
         }
       }
@@ -111,9 +110,10 @@ class FrxReport {
         if (!$this->cur_data) $continue = FALSE;
       } 
       $attr_text=''; 
-      
+      $tmp_attrs = array();  
       if ($attrs) foreach ($attrs as $key => $value) { 
         $attr_text =  ' '. $key .'="'. (string)$value .'"';
+        $tmp_attr[$key] = (string)$value; 
       }
       
 
@@ -124,15 +124,17 @@ class FrxReport {
               
         if ($data) $nodes = $data->xpath($path);
         $i=0;
-        $tmp_attrs = (array)$attrs; 
+     
+        //$tmp_attrs = (array)$attrs; 
                          
         if ($nodes) foreach ($nodes as $x) {
           $this->cur_data = $x;
           $i++; 
           $odd = $i & 1;
-          $row_class = $odd ? 'odd':'even';  
+          $row_class = $odd ? 'odd' : 'even';  
           $tmp_attrs['class'] = trim($attrs['class'] .' '. $row_class); 
           $r_attr_text = ''; 
+          
           foreach ($tmp_attrs as $key => $value) { 
              $r_attr_text .=  ' '. $key .'="'. (string)$value .'"';
           }
@@ -177,8 +179,7 @@ class FrxReport {
   
     if ($body_xml && $body_xml->children()) foreach ($body_xml->children() as $node) {
       $o .= $this->render_section($node);   
-    }
-    
+    }    
     return $o ;  
   }
   /*
@@ -188,6 +189,7 @@ class FrxReport {
   public function format($value, $key, $data) {
     // Determine if there is a field overide entry    
     if ($this->fields) {
+    	
       $path = 'frx:field[@id="'. $key .'"]';
       $formatters = $this->fields->xpath($path); 
       if ($formatters) foreach ($formatters as $formatter) {        
@@ -195,7 +197,7 @@ class FrxReport {
           
            //@TODO: Replace the default extraction with something that will get sub elements of the string
            $default = (string)$formatter; 
-           $link = (string) $formatter['link'];
+           $link = (string)$formatter['link'];
            $format = (string) $formatter['format']; 
            $format_str = (string) $formatter['format-string'];
            $target = (string) $formatter['target'];
@@ -342,3 +344,5 @@ class FrxReport {
   
   
 }
+
+

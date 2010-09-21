@@ -52,7 +52,7 @@ function forena_report_desc($name='') {
  * @return array A list of css files that should be applied to the report. 
  */
 function forena_report_css($desc, $form,  $format = '') {
-	$css_files = array();
+  $css_files = array();
   // First check for the form file  
   $path = forena_report_path(); 
   if (file_exists($path . '/' . $form . '.css')) { 
@@ -61,15 +61,15 @@ function forena_report_css($desc, $form,  $format = '') {
   if ($format && file_exists($path .'/'. $form .'-'. $format .'.css')) {
     $css_files[] = $path . '/'. $form . '-' . $format .'.css'; 
   }
-	
-
-
+  
   // Now check for a report specific file
   $base_file = $path . '/' . $desc['name']; 
+  
   if ($format && file_exists($base_file .'-' . $format .'.css')) { 
     $css_files[] = $base_file .'-'. $format . '.css';   
   }
-  elseif (file_exists($base_file .'.css')) { 
+  elseif (file_exists($base_file .'.css')) {
+
     $css_files[] = $base_file .'.css'; 
   }  
   //drupal_set_message("desc: <pre>". print_r($desc, 1) ."</pre>");
@@ -95,28 +95,28 @@ function forena_report($name_in, $parms = array()) {
   if ($name) {
     $r = forena_get_report($name, $parms);  
     if ($r) {
-    	//check for default parameters
-    	$r_params = $r->parameters;
-    	
-    	if ($r_params) {
-    		//put default parameters in parms array
-    	  foreach ($r_params as $key => $parm) {
+    //check for default parameters
+    $r_params = $r->parameters;
+
+      if ($r_params) {
+        //put default parameters in parms array
+        foreach ($r_params as $key => $parm) {
           if (!$parms[$key] && $parm['value']) {
             $parms[$key] = $parm['value']; 
             $reload_params = TRUE;
           }
           //do not show report if a required parameter does not have a value
           //force the user to input a parameter
-          if ((!$parms[$key]) && (strcmp($parm['require'], "1") == 0) && (!$parm['value'])) {          	
-          	$missing_parms = TRUE;
+          if ((!$parms[$key]) && (strcmp($parm['require'], "1") == 0) && (!$parm['value'])) {
+            $missing_parms = TRUE;
           }
-    	  }
-    	}
-    	//Reload report if parameters were missing
-    	if ($reload_params) {
-    		$r = forena_get_report($name, $parms);
-    	}    	
-    	
+        }
+      }
+      //Reload report if parameters were missing
+      if ($reload_params) {
+        $r = forena_get_report($name, $parms);
+      }
+
       // Get data from the report; 
       $r_parms = $r->parameters;       
       $form = $r->options['form'];
@@ -180,7 +180,7 @@ function forena_report($name_in, $parms = array()) {
               $type = (string)$arr['type'];
               if ($doctypes[$type]) {                     
                 if (is_object(forena_get_doctypes($type))) {
-                  $div .= '<a class="doclinks" href="'. $name . '.'. $type .'?'. $q .'">'. strtoupper($type) .'</a>';
+                  $div .= '<a class="doclinks" href="'. $name_in . '.'. $type .'?'. $q .'">'. strtoupper($type) .'</a>';
                 }
               }                       
             }
@@ -190,10 +190,9 @@ function forena_report($name_in, $parms = array()) {
         }
         $path = drupal_get_path('module', 'forena');
         drupal_add_css($path .'/forena.css', 'module');  
-        if ($css_files) foreach ($css_files as $css_file) { 
+        if ($css_files) foreach ($css_files as $css_file) {         	
           drupal_add_css($css_file, 'module');
-        }
-        
+        }        
         return $output;
       }   
     } 
@@ -212,15 +211,15 @@ function __forena_load_repository(&$repo) {
   // First determine if the class file exisits
   $path = $repo['path']; 
   $conf = array(); 
-                
+            
   if (file_exists($path .'/settings.php')) {
     // Override with repository specific data 
     include($path .'/settings.php'); 
   }
  
-  $repo = array_merge($repo, $conf); 
+  $repo = array_merge($repo, $conf);    
   // $repo['user callback'] = $conf['user callback']; 
-  $repo['data'] = __forena_load_provider($repo, $repo['path']);  
+  if (!is_object($repo['data'])) $repo['data'] = __forena_load_provider($repo, $repo['path']);  
   
   //$repo['auth'] = __forena_load_auth($security_provider); 
   
@@ -301,10 +300,13 @@ function forena_repository($name='') {
  * @return array data to be stored in the cache field for the report in the database. 
  */
 function forena_load_cache($r_xhtml) {  
+  
   $blocks = array();   
   if (is_object($r_xhtml)) {
+
     $block_xml = $r_xhtml->xpath('//*[@frx:block]'); 
     // Extract all the blocks and organize by provider
+  
     foreach ($block_xml as $key => $block_node) {
       $attrs = $block_node->attributes('urn:FrxReports'); 
       foreach ($attrs as $key => $value) { 
@@ -314,12 +316,13 @@ function forena_load_cache($r_xhtml) {
         }          
       }
     } 
-    
+   
     if ($repos) foreach ($repos as $provider => $blocks) {       
       $repos = forena_repository($provider);      
       $provider = $repos['data'];
       $conf = $provider->conf;
       $access = array(); 
+
       foreach ($blocks as $block_name) {
         if ($provider && $block_name) {
           if (method_exists($provider, 'load_block')) {
@@ -332,9 +335,15 @@ function forena_load_cache($r_xhtml) {
           //drupal_set_message('no provider found', 'error');    
         }
       }
+   
       if ($conf['access callback'] && $access) $cache['access'][$conf['access callback']]=$access; 
-    } 
+ 
+    }
+
+  
+  
   }
+ 
   return $cache; 
 }
 
@@ -360,7 +369,6 @@ function forena_invoke_data_provider($data_block, $parameters=array(), $clause='
      $provider = $repos['data'];
      $access = TRUE; 
      if (method_exists($provider, 'data')) {
-
        $xml = $provider->data($block, $parameters, $clause); 
      }
      return $xml; 
@@ -462,8 +470,8 @@ function forena_get_report($report_name, $data=array()) {
  * @param unknown_type $report_name
  */
 function forena_report_object($report='', $data='') { 
-  static $object = '';
-  if ($report) {
+  static $object = ''; 
+  if ($report) {  	 
     $object = new FrxReport($report, $data);
   }
   return $object; 
@@ -657,45 +665,121 @@ function forena_define_controls( $class='') {
   return $instances;
 }
 
+/*
+ * Recieves a datablock and returns an array of values from the data block.
+ * @data_block: name of the data block to be invoked for values
+ * @field: Specific field name within the data block. The values returned will only 
+ * come from this field.
+ * @params: filtering for the data block
+ * @where_clause: Where clause for data block to be filtered against.
+ * 
+ */
+function forena_get_data_block_params($data_block, $field, $label, $params=array(), $clause='') {
+  $xml = forena_invoke_data_provider($data_block, $params, $clause);   
+  
+  $list = array();
+  if ($xml) {     	  
+    $path = ($field) ? $field : '*[1]';
+    $label_path = ($label) ? $label : '*[2]';
+    drupal_set_message($label);
+    
+    //walk through the $xml.
+    $rows = $xml->xpath('*');    
+    if ($rows) foreach ($rows as $row) {    	
+    	$value = $row->xpath($path);
+    	$label_field = $row->xpath($label_path);
+    	$label_value =  $label_field ? (string)$label_field[0] : (string)$value[0]; 
+    	$list[(string)$value[0]] = (string)$label_value;
+    	
+    }
+  }
+  return $list;
+}
+
 /** 
  * Form to edit parameters
+ * Extra features: 
+ * In the parameters section of the report are new attributes
+ * frx:parm: 
+ * @data_source = data block for the parameter to values from
+ * @data_field = specific field of the data block to recieve values from.
+ * if no field is specified then the first column is arbitrarily chosen.
+ * @type = The form element that will display the values: select, radios are supported
+ * default is textfield.
+ * 
+ * This function will evaluate each parameter, determine its type, data_source, and data_field
+ * and display those values appropriately.
+ * 
  */
 function forena_parameters_form($form_state) {
   $parms = $_GET;
-  unset($parms['q']);
+  unset($parms['q']); 
   
   $r = forena_report_object(); 
+  
   if ($r) {
       drupal_set_title($r->title);
       $head = $r->rpt_xml->head;
       
       $form = array();
-      $form['params'] = array('#tree' => TRUE, '#title' => 'Parameters', '#type' => 'fieldset', '#collapsible' => TRUE, '#collapsed' => $r->blocks_loaded); 
+      $form['params'] = array(
+        '#tree' => TRUE, 
+        '#title' => 'Parameters', 
+        '#type' => 'fieldset', 
+        '#collapsible' => TRUE, 
+        '#collapsed' => $r->blocks_loaded,
+      ); 
+      
       $nodes = $head->xpath('frx:parameters/frx:parm');
-      foreach ($nodes as $node) { 
+      
+      foreach ($nodes as $node) {
       	$label = (string)$node['label'];   
-      	$id = (string)$node['id'];
-
-      	//check querystring for parameters
-      	if ($parms[$id]) {
-      		$value = $parms[$id];
-      	}
-      	else {
-	      	$value = (string)$node['value'];       		
-      	}
-      	
-      	
-      	
-        (strcmp((string)$node['require'], "1") == 0) ? $bool = TRUE : $bool = FALSE;
+        $id = (string)$node['id'];
+        $data_source = (string)$node['data_source'];
+        $data_field = (string)$node['data_field'];
+        $type = (string)$node['type'];
+        $value = ($parms[$id]) ? $parms[$id] : (string)$node['value'];  
+        $desc =  (string)$node['desc'];
+        $label_field = (string)$node['label_field']; 
         
-        $form['params'][(string)$node['id']] = array(
-          '#type' => 'textfield',
-          '#title' => ($label) ? t($label) : t($id),
-          '#default_value' => ($value) ? $value : $node,  
-          '#required' => $bool,
-          '#description' => $node['desc'],
+        (strcmp((string)$node['require'], "1") == 0) ? $required = TRUE : $required = FALSE; 
+                
+        //Determine the form element type to be displayed
+        //If select or radios is chosen then begin a $list array for display values.
+        switch ($type) {
+        	case 'select':
+        		$list = array('--select--');
+        		break;
+        	case 'radios';
+        	 $list = array('--choose--');
+        	 break;
+        	default:
+        	 $type = 'textfield';
+        	 $list = '';        	 	       	 
+        }
+        
+        //If a data_source attr was found then create an array of
+        //returned values filtered against data_field attr.
+      	if ($data_source) {
+      		$list = forena_get_data_block_params($data_source, $data_field, $label_field);      		
+      	}		
+      		
+        $form['params'][$id] = array (
+      		'#type' => $type,
+      		'#title' => ($label) ? t($label) : t($id),      		
+          '#default_value' => $value,
+          '#required' => $required,
+          '#description' => $desc,
         );
-      }
+        
+        //if $list is not empty then push options 
+        //onto the array. options will cause an error for 
+        //textfield elements.       
+        if ($type != 'textfield') {
+        	$form['params'][$id]['#options'] = $list;
+        }      	
+      }      
+
       $form['params']['submit'] = array(
         '#type' => 'submit',
         '#value' => 'Submit',
@@ -876,3 +960,52 @@ function  forena_generate_doc($format, $output, $options = array()) {
     print $output;
   }   
 }  
+
+function forena_get_user_reports() { 
+  $result = db_query('SELECT * FROM {forena_reports} where hidden=0 ORDER BY category,title asc');
+  $reports = array();
+  while ($row = db_fetch_object($result)) {
+    $access = TRUE; 
+    $cache = $row->cache; 
+     
+    if ($cache) {            
+      $cache = unserialize($cache);
+      
+      // Check each callback function to see if we have an error. 
+      if ($cache['access']) foreach ($cache['access'] as $callback => $args) {
+        if ($callback) foreach ($args as $arg) {
+          $access = FALSE;            
+          if (function_exists($callback)) { 
+            $a = $callback($arg); 
+          }
+          if ($a) $access = TRUE;           
+        } 
+        else {          
+          $access = TRUE; 
+        }
+      }
+    }    
+    if ($access) {      
+      $reports[$row->category][] = array(
+        'title' => $row->title, 
+        'report_name' => $row->report_name, 
+      );
+    }   
+  }
+  return $reports; 
+}
+
+/**
+ * Render the my reports category block
+ *
+ */
+function forena_my_reports_block() { 
+  $reports = forena_get_user_reports();
+  if (!$reports) return ''; 
+  $output = '<ul>'; 
+  foreach ($reports as $category=>$reports) {
+    $output .= '<li>'. l($category, 'forena', array(fragment => urlencode($category))). '</li>';  
+  }
+  $output .= '</ul>';
+  return $output; 
+}

@@ -118,7 +118,7 @@ class FrxControls {
     $output .= '    <NumberFormat/>' . "\n";
     $output .= '    <Protection/>' . "\n";
     $output .= '  </Style>' . "\n";
-    $output .= '</Styles>' . "\n";
+    $output .= '</Styles>' . "\n";    
     
     $doc = new DOMDocument();   
     $doc->strictErrorChecking = FALSE;
@@ -138,7 +138,13 @@ class FrxControls {
         foreach ($row as $column) {
           $value = $column->asXML();        
           $value = strip_tags($value);
-          $output .= '      <Cell><Data ss:Type="String">' . $value . '</Data></Cell>' . "\n";  
+          $is_number = trim($value, ' +-.,0123456789'); 
+          if (empty($is_number)) {
+          	$output .= '      <Cell><Data ss:Type="Number">' . trim($value) . '</Data></Cell>' . "\n";
+          }
+          else {
+            $output .= '      <Cell><Data ss:Type="String">' . $value . '</Data></Cell>' . "\n";            	
+          }
         }        
         $output .= '    </Row>' . "\n";
       }

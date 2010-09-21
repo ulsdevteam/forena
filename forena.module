@@ -116,8 +116,56 @@ function forena_menu() {
      'type' => MENU_CALLBACK, 
    );
    
+   $items['forena/categories/autocomplete'] = array(
+     'page callback' => 'forena_categories_autocomplete', 
+     'access callback' => TRUE, 
+     'type' => MENU_CALLBACK, 
+   );
+   
   return $items; 
 }
+
+
+/**
+ * Implementation of hook_block
+ */
+function forena_block($op = 'list', $delta = 0, $edit=array()) {
+  if ($op == 'list') { 
+    $blocks[0] = array('info' => t('My reports'),
+      'status' => 1, 
+      'region' => 'right',
+      'visibility' => 1,  
+      'pages' => 'forena', 
+    ); 
+    return $blocks; 
+  }    
+
+  if ($op == 'view') {
+    // Inlcude the base library
+    require_once('forena.common.inc');  
+    switch ($delta) { 
+      case 0:
+          $block = array('subject' => 'My Reports',
+            'content' => forena_my_reports_block()); 
+          break; 
+    }
+    return $block; 
+  }
+}
+
+/**
+ * Auto complete for categories
+ * 
+ */
+
+function forena_categories_autocomplete($string='') {
+  require_once('forena.admin.inc');
+  $categories = forena_get_categories($string);
+  print drupal_json($categories);
+}
+
+
+
 
 /**
  * Auto complete for data blocks
@@ -125,7 +173,7 @@ function forena_menu() {
  * @return unknown_type
  */
 function forena_data_block_autocomplete($string='') {
-  require_once('forena.admin.inc');    
+  require_once('forena.admin.inc');     
   $data_blocks = forena_user_data_blocks($string);
   
   if ($data_blocks) {
@@ -246,41 +294,14 @@ function forena_perm() {
 }
 
 
-function forena_user_reports() {   
-  $result = db_query('SELECT * FROM {forena_reports} where hidden=0 ORDER BY category,title asc');
-  $categories = array();
-  while ($row = db_fetch_object($result)) {
-    $access = TRUE; 
-    $cache = $row->cache; 
-     
-    if ($cache) {            
-      $cache = unserialize($cache);
-      
-      // Check each callback function to see if we have an error. 
-      if ($cache['access']) foreach ($cache['access'] as $callback => $args) {
-        if ($callback) foreach ($args as $arg) {
-          $access = FALSE;            
-          if (function_exists($callback)) { 
-            $a = $callback($arg); 
-          }
-          if ($a) $access = TRUE;           
-        } 
-        else {          
-          $access = TRUE; 
-        }
-      }
-    }    
-    if ($access) {      
-      $categories[$row->category][] = array(
-        'title' => $row->title, 
-        'report_name' => $row->report_name, 
-      );
-    }   
-  }
+
+function forena_user_reports() {
+  require_once('forena.common.inc');
+  $reports = forena_get_user_reports(); 
   $report_repos = variable_get('forena_path', 'reports'); 
-  
-  foreach ($categories as $category => $reports) {
-    $output .= '<h3>'. $category .'</h3>';
+  foreach ($reports as $category => $reports) {
+    $links .= '<li><a href="#'. urlencode($category) .'">'. $category . '</a></li> ';  
+    $output .= '<h3><a name="'. urlencode($category) . '"/>' . $category .'</h3>';
     $output .= '<ul>'; 
     foreach ($reports as $r) { 
       $output .= '<li>'. l($r['title'], $report_repos .'/'. str_replace('/', '.', $r['report_name'])) .'</li>';  
@@ -304,11 +325,11 @@ function forena_render_report($report, $format='', $data='', $options= array()) 
   $output = $o->render($format);  
   
   //If a format was requested render a custom non-drupal document  
-  if ($format) {  	 
+  if ($format) {
     forena_generate_doc($format, $output, $options);
   }
-  else { 
-	  return $output;
+  else {
+    return $output;
   } 
   
 }
