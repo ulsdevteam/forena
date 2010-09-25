@@ -16,6 +16,7 @@ class FrxControls {
   public function formats() {
     $formats = array('drupal_date_format' => 'Drupal Date',
                      'iso_date' => 'ISO Date', 
+                     'sprintf' => 'PHP sprintf()',  
                      ); 
     return $formats; 
   }
@@ -67,6 +68,13 @@ class FrxControls {
     return $this->drupal_date_format($date, $format_str); 
   }
 
+  public function sprintf($value, $format_str) {
+    if ($value) {  
+      $value =  sprintf($format_str,$value);
+    } 
+    return $value; 
+  }
+  
   //Document transformation methods  
   public function htmldocument($body, $options) {
     $output .= '<html><head>';
@@ -138,9 +146,15 @@ class FrxControls {
         foreach ($row as $column) {
           $value = $column->asXML();        
           $value = strip_tags($value);
-          $is_number = trim($value, ' +-.,0123456789'); 
-          if (empty($is_number)) {
-          	$output .= '      <Cell><Data ss:Type="Number">' . trim($value) . '</Data></Cell>' . "\n";
+          $tval = trim($value); 
+          // Find if it contains invalid number characters
+          $non_numeric_chars = trim($value, ' +-.,0123456789');
+          // Determine if it contains +- in the interior 
+          // Zero is ok here bu
+          $inner_symbols = FALSE; 
+          if (strpos($tval,'+') || strpos($tval,'-') || strpos($tval,' ')) $inner_symbols =  TRUE;  
+          if (empty($non_numeric_chars) && trim($value)!=='' && !$inner_symbols) {
+          	$output .= '      <Cell><Data ss:Type="Number">' . $tval . '</Data></Cell>' . "\n";
           }
           else {
             $output .= '      <Cell><Data ss:Type="String">' . $value . '</Data></Cell>' . "\n";            	

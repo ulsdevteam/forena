@@ -62,7 +62,7 @@ class FrxOracle extends FrxDataProvider {
       $sql = $this->te->replace($sql, $params);
 
       if ($this->use_oracle_xml) { 
-        $xml = $this->oracle_xml($sql); 
+        $xml = $this->oracle_xml($sql, $block_name); 
       } 
       else {
         $xml = $this->php_xml($sql); 
@@ -82,7 +82,7 @@ class FrxOracle extends FrxDataProvider {
    * @param unknown_type $sql
    * @return unknown
    */
-  private function oracle_xml($sql) { 
+  private function oracle_xml($sql, $block) { 
       $db = $this->db; 
 
       //$rs->debugDumpParams();
@@ -91,9 +91,27 @@ class FrxOracle extends FrxDataProvider {
       $ret = oci_new_descriptor($db, OCI_D_LOB); 
       oci_bind_by_name($stmt, ':ret_val', $ret, -1, OCI_B_CLOB);  
       oci_bind_by_name($stmt, ':p1', $sql);
-      oci_execute($stmt);  
+      $r = oci_execute($stmt, OCI_DEFAULT);       
+      // Report errors
+      if (!$r) {
+        $e = oci_error($stmt);  // For oci_execute errors pass the statement handle
+        $msg .=  htmlentities($e['message']);
+        $msg .= "\n<pre>\n";
+        $msg .= htmlentities($e['sqltext']);
+        //printf("\n%".($e['offset']+1)."s", "^");
+        $msg .= "\n</pre>\n";
+        forena_error('Database error in '. $block. ' see logs for info', $msg);
+        return null;  
+      }
+       
       $xml_text = $ret->load(); 
-      if ($xml_text) $xml = new SimpleXMLElement($xml_text);  
+      if ($xml_text) {
+        $xml = new SimpleXMLElement($xml_text);
+        if ($xml->getName() == 'error'){ 
+          $msg = (string)$xml . ' in '. $block .'.sql. '; 
+          forena_error($msg .'See logs for more info', $msg. ' in <pre> '.$sql. '</pre>');
+        }   
+      }
       oci_free_statement($stmt); 
       return $xml;     
   }

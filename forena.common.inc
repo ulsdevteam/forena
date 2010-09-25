@@ -917,21 +917,19 @@ function  forena_generate_doc($format, $output, $options = array()) {
   }
   if ($ret) {
   // If an object was found, set the appropriate mime type (header doctype). 
-    $flen = strlen($ret);
+ //   $flen = strlen($ret);
     switch ($format) { 
       case 'doc':
         header('Content-Type: application/msword');
         header('Cache-Control:');
         header('Pragma:');
         header("Cache-Control: must-revalidate");
-        header("Content-Length: $flen");
         break; 
       case 'pdf': 
         header('Content-Type: application/pdf');
         header('Cache-Control:');
         header('Pragma:');
         header("Cache-Control: must-revalidate");
-        header("Content-Length: $flen");
         header("Content-Disposition: attachment; filename=report.pdf");
         break;
    
@@ -940,7 +938,6 @@ function  forena_generate_doc($format, $output, $options = array()) {
         header('Cache-Control:');
         header('Pragma:');
         header("Cache-Control: must-revalidate");
-        header("Content-Length: $flen");
         header("Content-Disposition: attachment; filename=report.xls");  
         break;   
      case 'csv':
@@ -948,7 +945,6 @@ function  forena_generate_doc($format, $output, $options = array()) {
         header('Cache-Control:');
         header('Pragma:');
         header("Cache-Control: must-revalidate");
-        header("Content-Length: $flen");
         header("Content-Disposition: attachment; filename=report.csv");     
         break;
 
