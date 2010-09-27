@@ -735,8 +735,8 @@ function forena_fields_form_submit($form, &$form_state) {
         $xml .= '      <frx:field ';        
         //walk through all the attributes that have values and write them out.
         if ($value) foreach ($value as $k => $v) {        	
-          if (strcmp($k, 'default') != 0 && $value[$k]) {
-            $xml .= ' ' . $k . '="' . $v . '"';
+          if ($k != 'default' && $value[$k]) {
+            $xml .= ' ' . $k . '="' . htmlentities($v) . '"';
           }
         }
         /*if there is not a default value, self close the tag.*/        
