@@ -671,7 +671,8 @@ function forena_fields_form($form_state) {
           '#type' => 'textfield',
           '#title' => t('link'), 
           '#default_value' => $attr['link'],
-          '#size' => 100,                   
+          '#size' => 100,
+          '#maxlength' => 256,                     
           '#description' => t('Create a link that incorporates this field, e.g "profile/{field_name}" will create a link to this field_name\'s profile. *Note the field must be wrapped in {}.')                
         ); 
         
