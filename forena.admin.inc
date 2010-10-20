@@ -360,7 +360,8 @@ function forena_layout_form($form_state, $new_report='') {
         '#type' => 'textfield',
         '#title' => t('Report Name'),
         '#default_value' => $name,
-        '#description' => t('Enter only letters, numbers, and special characters: < . >, < - >, < _ >, < / >. White space is not permitted.
+        '#description' => t('Enter only letters, numbers, and special characters:  - _ /  
+                             <br/>White space is not permitted.
                              Create a directory using the format: (directory name) / (report name). Save multiple reports to the same directory
                              by referencing the same name.'),
         '#required' => TRUE,
@@ -459,7 +460,7 @@ function forena_layout_form($form_state, $new_report='') {
 
 function forena_layout_form_validate($form, &$form_state) {
   $values = $form_state['values'];
-  $regexp = "/^[A-Za-z0-9\/\.\_\-]*$/";
+  $regexp = "/^[A-Za-z0-9\/\_\-]*$/";
   $save_report_name = $values['save_report_name'];
   $report_name = $values['report_name'];
   
@@ -1143,7 +1144,43 @@ function forena_user_data_blocks($search) {
   return $user_blocks;  
 }
 
+/** 
+ *  Prettifies an XML string into a human-readable and indented work of art
+ *  @param string $xml The XML as a string
+ *  @param boolean $html_output True if the output should be escaped (for use in HTML)
+ */
+function forena_xmlpp($xml, $html_output=false) {
+    $xml_obj = new SimpleXMLElement($xml);
+    $level = 4;
+    $indent = 0; // current indentation level
+    $pretty = array();
+    
+    // get an array containing each XML element
+    $xml = explode("\n", preg_replace('/>\s*</', ">\n<", $xml_obj->asXML()));
 
+    // shift off opening XML tag if present
+    if (count($xml) && preg_match('/^<\?\s*xml/', $xml[0])) {
+      $pretty[] = array_shift($xml);
+    }
+
+    foreach ($xml as $el) {
+      if (preg_match('/^<([\w])+[^>\/]*>$/U', $el)) {
+          // opening tag, increase indent
+          $pretty[] = str_repeat(' ', $indent) . $el;
+          $indent += $level;
+      } else {
+        if (preg_match('/^<\/.+>$/', $el)) {            
+          $indent -= $level;  // closing tag, decrease indent
+        }
+        if ($indent < 0) {
+          $indent += $level;
+        }
+        $pretty[] = str_repeat(' ', $indent) . $el;
+      }
+    }   
+    $xml = implode("\n", $pretty);   
+    return ($html_output) ? htmlentities($xml) : $xml;
+}
 
 function forena_admin_params_form($form_state) {
 	
