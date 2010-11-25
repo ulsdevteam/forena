@@ -300,7 +300,6 @@ function forena_settings_submit($form, &$form_state) {
 
 
 
-
 /**
  * Form function for the edit report form
  * @param $form_state
@@ -812,8 +811,11 @@ function forena_data_block_form($form_state) {
     if ($body) foreach ($body->xpath($path) as $node) {
       $attrs = $node->attributes(FRX_NS);
       $id = (string)$node['id'];
+      $block = (string)$attrs['block']; 
       if ($attrs['clause']) $clause = "(". (string)$attrs['clause'] .")";
-      $data_block_array[$id] = (string)$attrs['block'] ." ". $clause;      
+      $block_info = forena_load_block($block, $clause); 
+      $access = $block_info['access']; 
+      $data_block_array[$id] = $block .": <i>". $clause . ' security "' . $access . '"</i>';      
     }
     
     $form['delete_blocks'] = array(
