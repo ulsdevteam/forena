@@ -13,6 +13,7 @@ class FrxSyntaxEngine {
   private $tpattern; 
   private $trim_chars; 
   private $formatter; // Object used to format the data
+  private $data_stack; 
   /**
    * Class for doing syntax replacements; 
    * @param $regexp
@@ -24,6 +25,15 @@ class FrxSyntaxEngine {
     if (is_object($formatter)) { 
       $this->formatter=$formatter; 
     }
+    $this->data_stack = array(); 
+  }
+  
+  public function push_data($data) { 
+  	$this->data_stack[]=$data; 
+  }
+  
+  public function pop_data() { 
+  	array_pop($this->data_stack); 
   }
   
   
@@ -46,11 +56,16 @@ class FrxSyntaxEngine {
   * @param $key
   * @return unknown_type
   */
-  protected function get_value($data, $key, $raw=FALSE) {
+  protected function get_value( $key, $raw=FALSE) {
     $retvar = ''; 
+    // Determne which $data var we're going to get
+    if ($this->data_stack) { 
+    	$i = count($this->data_stack) - 1; 
+    	$data = $this->data_stack[$i]; 
+    }
+    
     
     if (is_array($data)) {
-      
       $retvar = $data[$key];
     } 
     elseif (is_object($data)) {
@@ -99,17 +114,20 @@ class FrxSyntaxEngine {
    */
   public function replace($text, $data, $raw=FALSE) {
     $match=array();
-    $o_text = $text; 
+    $o_text = $text;
+    // Put the data on the stack. 
+    if ($data) $this->push_data($data);  
     if (preg_match_all($this->tpattern, $o_text, $match)) {
       //list($params) = $match[1];
       $i=0; 
   
       foreach ($match[0] as $match_num => $token) {
          $path = trim($token, $this->trim_chars);
-         $value = $this->get_value($data, $path, $raw); 
+         $value = $this->get_value($path, $raw); 
          $text = str_replace($token, $value, $text);         
       }
     }
+    if ($data) $this->pop_data(); 
     return $text;    
   }
   
