@@ -21,6 +21,7 @@ class FrxReport {
   private $cur_data; 
   private $output; 
   private $teng; 
+  private $root_data; 
   
   
   public function __construct($xhtml, $data=array()) {
@@ -28,6 +29,7 @@ class FrxReport {
     $this->access = array(); 
     $this->parameters = array(); 
     $this->options = array(); 
+    $this->root_data = $data; 
     if ($xhtml) { 
       if (!is_object($xhtml)) { 
         $this->rpt_xml = new SimpleXMLElement($xhtml);
@@ -36,7 +38,7 @@ class FrxReport {
         $this->rpt_xml = $xhtml; 
       }
       $this->cur_data = $data;
-      
+      $this->teng->push_data($data,'parm');
       // Load header data
       $rpt_xml = $this->rpt_xml; 
       $this->body = $rpt_xml->body;       
@@ -84,9 +86,11 @@ class FrxReport {
    * @param $block
    * @return unknown_type
    */
-  private function get_data($block, $clause='') {
-    //@TODO: Merge xml data parameters into the report paramters        
+  private function get_data($block, $clause='',$id='') {
+    //@TODO: Merge xml data parameters into the report paramters   
     $this->cur_data = forena_invoke_data_provider($block, $this->cur_data, $clause); 
+
+    $this->teng->push_data($this->cur_data,$id); 
     if ($this->cur_data) $this->blocks_loaded = TRUE; 
   }
   
@@ -99,14 +103,18 @@ class FrxReport {
     $cur_data = $this->cur_data;     
     $elements = count($node->xpath('*'));
     $continue = TRUE; 
+    $is_data_block = FALSE; 
     $frx = $node->attributes(FRX_NS);
     // Test to see if we have any nodes that are contains data url    
-    if ($node->xpath('*//@frx:*') || $frx) {          
+    if ($node->xpath('*//@frx:*') || $frx) { 
       $attrs = $node->attributes();
+      $id = (string)$attrs['id'];
       $frx = $node->attributes(FRX_NS);
       $tag = $node->getName(); 
+      
       if ((string)$frx['block']) {
-        $this->get_data((string)$frx['block'], (string)$frx['clause']);           
+        $is_data_block = TRUE; 
+        $this->get_data((string)$frx['block'], (string)$frx['clause'], $id);           
         if (!$this->cur_data) $continue = FALSE;
       } 
       $attr_text=''; 
@@ -129,6 +137,8 @@ class FrxReport {
                          
         if ($nodes) foreach ($nodes as $x) {
           $this->cur_data = $x;
+
+          $this->teng->push_data($x,$id);
           $i++; 
           $odd = $i & 1;
           $row_class = $odd ? 'odd' : 'even';  
@@ -146,10 +156,11 @@ class FrxReport {
         }
         
         $this->cur_data = $data; 
+        $this->teng->pop_data($id); 
       } 
       elseif ($continue) { 
 
-        $o .= $this->teng->replace('<'. $tag . $attr_text .'>', $this->cur_data);
+        $o .= $this->teng->replace('<'. $tag . $attr_text .'>');
         foreach ($node->children() as $child) {
           $o .= $this->render_section($child);  
         }
@@ -163,7 +174,9 @@ class FrxReport {
       $text = $node->asXML();      
       $o .= $this->teng->replace($text, $this->cur_data);
     }
+
     $this->cur_data = $cur_data;  
+    //if ($is_data_block) $this->teng->pop_data($id); 
     return $o; 
   }
   
@@ -268,7 +281,7 @@ class FrxReport {
   
             if (!(string)$node['id']) {
               $node->addAttribute('id', $id);
-              //drupal_set_message('node '. $id. (string)$node['id']); 
+
             } 
             else { 
               if (strpos((string)$node['id'], 'forena-')===0) {

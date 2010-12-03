@@ -14,6 +14,7 @@ class FrxSyntaxEngine {
   private $trim_chars; 
   private $formatter; // Object used to format the data
   private $data_stack; 
+  private $data_sources; 
   /**
    * Class for doing syntax replacements; 
    * @param $regexp
@@ -26,14 +27,20 @@ class FrxSyntaxEngine {
       $this->formatter=$formatter; 
     }
     $this->data_stack = array(); 
+    $this->data_sources = array(); 
   }
   
-  public function push_data($data) { 
+  public function push_data($data, $id='') { 
   	$this->data_stack[]=$data; 
+
+  	if ($id) { 
+  	  $this->data_sources[$id] = $data; 
+  	}
   }
   
-  public function pop_data() { 
+  public function pop_data($id='') { 
   	array_pop($this->data_stack); 
+
   }
   
   
@@ -62,6 +69,15 @@ class FrxSyntaxEngine {
     if ($this->data_stack) { 
     	$i = count($this->data_stack) - 1; 
     	$data = $this->data_stack[$i]; 
+    }
+    
+    // Determine if we have a . syntax for the id. 
+    if ($key) { 
+      list($id,$path) = explode('.',$key,2); 
+      if ($data && $this->data_sources[$id]) { 
+        $data = $this->data_sources[$id]; 
+        $key = $path; 
+      }
     }
     
     
@@ -112,7 +128,7 @@ class FrxSyntaxEngine {
    * @param $data
    * @return unknown_type
    */
-  public function replace($text, $data, $raw=FALSE) {
+  public function replace($text, $data='', $raw=FALSE) {
     $match=array();
     $o_text = $text;
     // Put the data on the stack. 
