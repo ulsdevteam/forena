@@ -30,6 +30,15 @@ class FrxSyntaxEngine {
     $this->data_sources = array(); 
   }
   
+  /**
+   * Push a data context onto the data stacks 
+   * to make sure that we can address these using an 
+   * appropriate syntax.  I think we don't need data_stack 
+   * but i'm holding it there in case we develop a "relative" path syntax.
+   * @param $data
+   * @param $id
+   * @return unknown_type
+   */
   public function push_data($data, $id='') { 
   	$this->data_stack[]=$data; 
 
@@ -38,12 +47,29 @@ class FrxSyntaxEngine {
   	}
   }
   
+  /**
+   * Remove data from the data stack.  This will make data unavaiable 
+   * when we leave the context of the current nested reports. 
+   * @param $id
+   * @return unknown_type
+   */
   public function pop_data($id='') { 
-  	array_pop($this->data_stack); 
-
+  	array_pop($this->data_stack);
+  	if ($id) {
+  		unset($this->data_stack[$id]); 
+  	}
   }
   
-  
+  /**
+   * Provides an api to the {=xpath} syntax that can be used 
+   * to evaluat expressions such as sum and count in a report.  We 
+   * need to use the DOM object here, because this method isn't exposed 
+   * with simplexml. 
+   * 
+   * @param $xml
+   * @param $path
+   * @return unknown_type
+   */
   protected function simplexml_evaluate($xml, $path) { 
     $dom_node = dom_import_simplexml($xml);
     $dom_doc = new DOMDocument(''); 
