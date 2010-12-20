@@ -18,6 +18,7 @@ function forena_schema() {
        'category' => array('type' => 'varchar', 'length' => 255, 'NOT NULL' => FALSE),
        'hidden' => array('type' => 'int', 'NOT NULL' => FALSE, ),
        'cache' => array('type' => 'text'),
+       'modified' => array('type' => 'int'),
     ),
     'primary key' => array('report_name'),
     'indexes' => array(
@@ -25,6 +26,12 @@ function forena_schema() {
     ),
   ); 
   return $schema;  
+}
+
+function forena_update_6001() {
+  $ret = array();
+  db_add_field($ret, 'forena_reports', 'modified', array('type' => 'int'));
+  return $ret;
 }
 
 /**

@@ -18,7 +18,7 @@ function _forena_verify_directory($fullpath, $recursive=FALSE) {
   list($dir, $file) = explode('/', $fullpath, 2); 
   $path .= '/'. $dir; 
   // Path 
-  if (!file_exists($path)) {
+  if (!file_exists($path) && $file) {
     mkdir($path); 
   }
   // Recurse to next file. 
@@ -173,6 +173,19 @@ function forena_save_report($report_name, $report, $save_file = FALSE) {
 }
 
 /**
+ * Remove the report from the database and file system. 
+ * @param string $report_name
+ */
+function forena_delete_report($report_name) { 
+  $report_path = forena_report_path();
+  $filepath = $report_path .'/'. $report_name .'.frx';
+  if (file_exists($file_path)) {
+  	unlink($filename); 
+  }
+  DB_QUERY("DELETE FROM {forena_reports} WHERE report_name='%s'", array($report_name));
+}
+
+/**
  * Syncronize the data 
  *
  */
@@ -298,6 +311,19 @@ function forena_settings_submit($form, &$form_state) {
   menu_cache_clear(); 
 }
 
+
+function forenea_general_form($form_state, $new_report='') { 
+  $desc = forena_report_desc();
+  $name = $desc['name']; 
+  $add_new_rpt;
+  //determine if this is an add new report request
+  if ($new_report == 'add') {
+    $add_new_rpt = TRUE;
+  }
+  
+  $filename = $desc['filename']; 
+  $format = $desc['format']; 
+}
 
 
 /**
@@ -478,6 +504,7 @@ function forena_layout_form_validate($form, &$form_state) {
     }
   }
 }
+
 /**
  * builds a string of the xml document,
  * submits it to forena_save_report.

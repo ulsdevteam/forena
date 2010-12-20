@@ -355,6 +355,43 @@ class FrxReport {
     }
   }
   
+  /**
+   * Set the value of an element within the report
+   * @param String $xpath Xpath to element being saved 
+   * @param string $value Value to be saved. 
+   * @return unknown_type
+   */
+  public function set_value($xpath, $value) { 
+  $xml = $this->rpt_xml; 
+  drupal_set_message($xpath); 
+  $i = strrpos($xpath,'/');
+  $path = substr($xpath,0,$i); 
+  $key = substr($xpath,$i+1); 
+  drupal_set_message($path. '-' .$key);
+  $nodes = $xml->xpath($path);
+  if ($nodes) { 
+    // if the last part of the xpath is a key then assume the key
+    if (strpos($key,'@')===0) { 
+      $key = trim($key,'@'); 
+      if (is_null($value)) {
+        unset($nodes[0][$key]); 
+      } 
+      else { 
+        $nodes[0][$key] = $value;
+      }       
+    } 
+    // We must be refering to the text element of a node. 
+    else { 
+      if (is_null($value)) {
+        unset($nodes[0]->$key); 
+      }
+      else { 
+        $nodes[0]->$key = $value; 
+      }
+    }
+  }
+}
+  
   
 }
 

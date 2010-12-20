@@ -197,6 +197,9 @@ function forena_report($name_in, $parms = array()) {
       }   
     } 
     else { 
+    	// Didn't find it so assume we've got a stale cache entry and delete it. 
+    	require_once('forena.admin.inc');
+    	forena_delete_report($name); 
       drupal_not_found(); 
     }
   } 
