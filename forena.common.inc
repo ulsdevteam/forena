@@ -453,11 +453,27 @@ function forena_get_report($report_name, $data=array()) {
     $filename = $report_path . '/'. $report_name . '.frx';    
     if (file_exists($filename)) {
       $r_text = file_get_contents($filename);
-               
+      $modified = filemtime($filepath); 
+      $result = db_query("SELECT report_name, modified FROM {forena_reports} WHERE report_name='%s'", $name);
+      $save = FALSE; 
+      // If the file modification time has changed then save. 
+      if ($rpt = db_fetch_object($result)) {
+        if ($result->modified != $modified) {
+        	$save = TRUE; 	       
+        }
+      }
+      else { 
+      	$save = TRUE; 
+      }
       try { 
-        $r = forena_report_object($r_text, $data);          
+        $r = forena_report_object($r_text, $data);  
+                
       } catch (Exception $e) { 
         forena_error('Unable to read report', $e->getMessage()); 
+      }
+      if ($save) {
+      	require_once('forena.admin.inc');
+      	forena_save_report($report_name,$r_text,FALSE); 
       }
     }
     return $r;

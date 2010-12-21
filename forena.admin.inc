@@ -116,7 +116,6 @@ function forena_save_report($report_name, $report, $save_file = FALSE) {
   }
   
   // Get the security caches from the reports  
-
   
   if ($report) $cache = forena_load_cache($report); else $cache=''; 
 
@@ -134,25 +133,28 @@ function forena_save_report($report_name, $report, $save_file = FALSE) {
   }
   // Save to the Database
   if (file_exists($filepath)) {
+	  $modified = filemtime($filepath); 
     $result = db_query("SELECT report_name FROM {forena_reports} WHERE report_name='%s'", $name);
      
     if ($rpt = db_fetch_object($result)) {
-      db_query("UPDATE {forena_reports} SET title='%s', category='%s'".", hidden='%s', cache='%s'  WHERE report_name='%s'", 
+      db_query("UPDATE {forena_reports} SET title='%s', category='%s'".", hidden='%s', cache='%s', modified=%d  WHERE report_name='%s'", 
         array($data['title'], 
           $data['category'], 
           $data['hidden'], 
           $rpt_cache,
+          $modified,
           $name )); 
 
     }
     else { 
-      db_query("INSERT INTO {forena_reports} (report_name, title, category, hidden, cache) ". 
-        "VALUES ('%s', '%s', '%s',  %d, '%s')", 
+      db_query("INSERT INTO {forena_reports} (report_name, title, category, hidden, cache, modified) ". 
+        "VALUES ('%s', '%s', '%s',  %d, '%s', %d)", 
         array($name, 
           $data['title'],
           $data['category'],
           $data['hidden'],
           $rpt_cache,
+          $modified,
           )); 
     }
     
