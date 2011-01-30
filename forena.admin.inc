@@ -1028,6 +1028,7 @@ function forena_data_block_form_submit($form, &$form_state) {
   $form_state['storage']['parameters'] = $block_info['tokens'];  
 }
 
+
 /**
  * submit handler for forena_data_block_form. 
  * This adds the datablock to an existing report.
@@ -1114,6 +1115,36 @@ function forena_data_block_delete($form, &$form_state) {
   }
 }
 
+/**
+ * Form to confirm the delete of a form. 
+ * @param $form_state
+ * @return unknown_type
+ */
+function forena_delete_form($form_state, $report_name) {
+	// Parse names from url
+	$desc = forena_report_desc();
+  $name = $desc['name']; 
+	
+  $form['message'] = array(
+    '#type'=>'markup',
+    '#value' => 'Delete form handler'
+  );
+   
+  $form['report_name'] = array(
+    '#type' => 'value',
+    '#value' => $name,
+  ); 
+  
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Submit',
+  );
+  return $form;  	
+}
+
+function forena_delete_submit($form, &$form_state) {
+	forena_delete_report($report_name); 
+}
 /**
  * Clean xhtml 
  *

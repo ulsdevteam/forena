@@ -297,7 +297,7 @@ function forena_repository($name='') {
 }
 
 /**
- * Biuld cach
+ * Biuld cache
  *
  * @param xhtml $r_xhtml Forena XML report.  
  * @return array data to be stored in the cache field for the report in the database. 
