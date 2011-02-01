@@ -272,6 +272,8 @@ function forena_repository($name='') {
   
     $repos['drupal'] = array('path' => $path .'/repos/drupal',
                              'title' => 'Drupal Reports');  
+    $repos['sampledb'] = array('path' => $path . '/repos/sample',
+                             'title' => 'Sample DB Repository'); 
 
   }
   //drupal_set_message("repos: <pre>". print_r($repos, 1) ."</pre>");

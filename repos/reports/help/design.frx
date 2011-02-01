@@ -8,7 +8,9 @@
     </frx:parameters>
     <frx:docgen>
     </frx:docgen>
-
+<frx:fields>
+      <frx:field id="title" link="reports/{name}"/>
+    </frx:fields>
   </head>
 <body>
   <ul id="forena-1" frx:block="forena_help/design_topics">
@@ -58,6 +60,22 @@
   are usually parameterized queries.&#xA0; If you are a developer, you might
   want to read more about defining data blocks in the Forena Data source.</p>
   <p>
-  <strong>frx:foreach attribute</strong>- This will cause the div tag to be
-  repeated for every row returned in the data block.</p>
+  <strong>frx:foreach attribute</strong>- This will cause the containing tag to be
+  repeated for every row returned in the data block.  The attribute value can be any 
+  valid xpath expression, but is often simply '*', which would imply creating a a repeating 
+  pattern for every row or element returned by the query. </p>
+  <h3>Report fields</h3>
+  <p>each field in the report is referenced by an xpath expression enclosed by curly braces.  
+  In its simplest form the xpath xpression can be thought of as the name of the field in the
+  database, but when using more complex data sources, there is a lot that can be done using this syntax.
+  In some cases, the field name may be used using a '.' syntax to reference fields in other blocks 
+  as report parameters.   
+  </p>
+  <h3>Sample Reports</h3>
+  <p>The following sample reports are provided to illustrate some of the more sophiticated things
+  that you can do with reports: 
+  <ul id="sample-reports" frx:block="forena_help/sample_reports">
+    <li frx:foreach="*"><span>{title}</span></li>
+  </ul>
+  </p>
 </body></html>

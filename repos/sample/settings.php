@@ -14,8 +14,7 @@ $conf['access callback'] = 'user_access';
  * Note that data blocks in a repository  
  * 
  */
-
-$conf['data_engine'] = 'FrxFiles'; 
+$conf['data_engine'] = 'FrxPDO'; 
 
 /*
  * URI: 
@@ -23,8 +22,9 @@ $conf['data_engine'] = 'FrxFiles';
  * In database engines it might be the connection string to the db.  In the file 
  * engine it would be the path to the directory containting the files
  */
-$conf['uri'] = 'file://'. drupal_get_path('module','forena') . '/repos/sample';
-
+$path = realpath(dirname(drupal_get_path('module','forena').'/forena.info')); 
+$conf['uri'] = 'sqlite2:'. $path . '/sample.sqlite';
+$conf['debug'] = TRUE; 
 /**
  * Uncomment the following line to specify a particular path in which to save reports. 
  * The default value would be controlled by Forena configuration page. If you'd like users 

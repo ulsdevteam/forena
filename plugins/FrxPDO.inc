@@ -25,11 +25,20 @@ class FrxPDO extends FrxDataProvider {
     $this->debug = $conf['debug'];  
     if ($uri) { 
       try { 
-        $db = new PDO($uri, $conf['user'], $conf['password']);
+      	if ($conf['user']) { 
+          $db = new PDO($uri, $conf['user'], $conf['password']);
+      	}
+      	else {
+      		$db = new PDO($uri); 
+      	}
         $this->db = $db; 
+        if (!is_object($db)) { 
+        	forena_error('Unknown error connecting to database '. $uri); 
+        }
       } catch (PDOException $e) { 
         forena_error('Unable to connect to database', $e->getMessage());  
       }
+           
     } 
     else { 
       forena_error('No database connection string specified'); 
@@ -49,14 +58,16 @@ class FrxPDO extends FrxDataProvider {
     // Load the block from the file
     $db = $this->db;   
     $block = $this->load_block($block_name); 
+
+    
     $xml =''; 
     if ($block['source'] && $this->access($block['access']) && $db) { 
       $sql = $block['source'];
-	    
       if ($clause) {
 	        $sql = 'SELECT * FROM ('. trim($sql, ' ;') . ') forena_table '. $clause; 
 	      }
-      $sql = $this->te->replace($sql, $params);     
+      $sql = $this->te->replace($sql, $params); 
+    
       $rs = $db->query($sql); 
       $xml = new SimpleXMLElement('<table/>'); 
       
