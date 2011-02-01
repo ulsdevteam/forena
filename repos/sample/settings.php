@@ -23,7 +23,7 @@ $conf['data_engine'] = 'FrxPDO';
  * engine it would be the path to the directory containting the files
  */
 $path = realpath(dirname(drupal_get_path('module','forena').'/forena.info')); 
-$conf['uri'] = 'sqlite2:'. $path . '/sample.sqlite';
+$conf['uri'] = 'sqlite:'. $path . '/sample.sqlite';
 $conf['debug'] = TRUE; 
 /**
  * Uncomment the following line to specify a particular path in which to save reports. 
