@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<html xmlns:frx="urn:FrxReports">
+  <head>
+    <title>2. User distribution prompts for state based on lookup</title>
+    <frx:category>Sample</frx:category>
+    <frx:options hidden="0" form=""/>
+    <frx:parameters>
+      <frx:parm id="state" label="" require="1" value="" desc="" data_source="sampledb/states" data_field="" type="select"/>
+    </frx:parameters>
+    <frx:docgen>
+    </frx:docgen>
+
+  </head>
+<body><body><div frx:block="sampledb/distribution" id="forena-1"><table><thead><tr><th>city</th><th>state</th><th>users</th></tr></thead><tbody><tr frx:foreach="*" id="forena-2"><td>{city}</td><td>{state}</td><td>{users}</td></tr></tbody></table></div></body></body></html>
