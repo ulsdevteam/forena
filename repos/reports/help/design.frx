@@ -8,8 +8,9 @@
     </frx:parameters>
     <frx:docgen>
     </frx:docgen>
-<frx:fields>
+    <frx:fields>
       <frx:field id="title" link="reports/{name}"/>
+      <frx:field id="first_name">{first_name}</frx:field>
     </frx:fields>
   </head>
 <body>
