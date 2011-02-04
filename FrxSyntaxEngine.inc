@@ -126,7 +126,7 @@ class FrxSyntaxEngine {
         if ($retvar && strpos($retvar, '<')!==FALSE) {
           // Find the end of the first tag.
           $p = strpos($retvar, '>'); 
-          $retvar = substr_replace($retvar, ' ', 0, $p+1);
+          $retvar = substr_replace($retvar, '', 0, $p+1);
           $p = strrpos($retvar, '<', -1); 
           $retvar = substr_replace($retvar, '', $p, strlen($retvar) - $p);
            

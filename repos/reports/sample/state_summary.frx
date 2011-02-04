@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<html xmlns:frx="urn:FrxReports">
+  <head>
+    <title>3. Master Summary with drill down</title>
+    <frx:category>Sample</frx:category>
+    <frx:options hidden="0" form=""/>
+    <frx:parameters>
+    </frx:parameters>
+    <frx:docgen>
+    </frx:docgen>
+    <frx:fields>
+      <frx:field id="total" link="reports/sample.user_distribution_simple?state={state}"/>
+    </frx:fields>
+  </head>
+<body>
+<div><p>This report links back to the sample report 2.  You can begin to see the possibilities for
+  inter-connecting reports</p></div>
+<div frx:block="sampledb/users_by_state"><table><thead><tr><th>name</th><th>total</th></tr></thead><tbody><tr frx:foreach="*"><td>{state} - {name}</td><td>{total}</td></tr></tbody></table></div></body></html>
