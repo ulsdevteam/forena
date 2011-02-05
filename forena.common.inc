@@ -276,7 +276,7 @@ function forena_repository($name='') {
                              'title' => 'Sample DB Repository'); 
 
   }
-  //drupal_set_message("repos: <pre>". print_r($repos, 1) ."</pre>");
+
 
 
   // Now determine if the object exists 
