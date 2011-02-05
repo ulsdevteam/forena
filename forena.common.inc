@@ -560,11 +560,11 @@ function forena_load_block_file($filepath, $comment='--', $trim) {
   while ($i<$cnt) { 
     $l = trim($lines[$i], "\r"); 
     list($d, $c) = explode($comment, $l, 2);
-    if ($trim) $c = trim($d, $trim); 
+    if ($trim) $c = trim($c, $trim); 
     if  ($c) { 
       list($a, $o) = explode('=', $c, 2);
       if (trim($a)=='ACCESS') { 
-        $access = trim($o);    
+        $access = trim($o);  
       }
     } 
     if (strpos($l, $comment)!==0) { 
