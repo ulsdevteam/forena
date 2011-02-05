@@ -27,6 +27,11 @@ class FrxPostgres extends FrxDataProvider {
     $this->debug = $conf['debug']; 
     if ($conf['postgres_xml']) $this->use_postgres_xml = TRUE; 
     if ($uri) { 
+    	// Test for postgres suport
+    	if (!is_callable('pg_connect')) { 
+    		forena_error('PHP Postgres support not installed.', 'PHP Postgres support not installed.'); 
+    		return;
+    	}
       try { 
         $db = pg_connect($uri);
         $this->db = $db; 
@@ -99,7 +104,7 @@ class FrxPostgres extends FrxDataProvider {
           forena_error($msg .'See logs for more info', $msg. ' in <pre> '.$sql. '</pre>');
         }   
       }
-      pg_free_result($rs); 
+      if ($rs) pg_free_result($rs); 
       return $xml;     
   }
   
@@ -115,7 +120,7 @@ class FrxPostgres extends FrxDataProvider {
           $row_node->addChild(strtolower($key), htmlspecialchars($value)); 
         }
       }
-      pg_free_result($rs); 
+      if ($rs) pg_free_result($rs); 
       return $xml; 
   }
   

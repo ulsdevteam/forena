@@ -27,6 +27,11 @@ class FrxOracle extends FrxDataProvider {
     $this->debug = $conf['debug']; 
     if ($conf['oracle_xml']) $this->use_oracle_xml = TRUE; 
     if ($uri) { 
+         // Test for postgres suport
+      if (!is_callable('oci_connect')) { 
+        forena_error('OCI support not installed.', 'OCI support not installed.'); 
+        return; 
+      }
       try { 
         $db = oci_connect($conf['user'], $conf['password'], $uri, $conf['character_set']);
         $this->db = $db; 

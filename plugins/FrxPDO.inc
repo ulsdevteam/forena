@@ -24,6 +24,20 @@ class FrxPDO extends FrxDataProvider {
     $uri = $conf['uri']; 
     $this->debug = $conf['debug'];  
     if ($uri) { 
+      // Test for PDO suport
+      if (!class_exists('PDO')) { 
+        forena_error('PDO support not installed.', 'PDO support not installed.'); 
+        return;
+      }
+      
+      // Test for driver support
+      list($prot, $c) = explode(':', $uri, 2); 
+      $drivers = PDO::getAvailableDrivers(); 
+      if ($drivers && (array_search($prot, $drivers)===FALSE)) {
+      	$msg = 'PDO driver support for ' . $prot . ' not installed'; 
+      	forena_error($msg, $msg);
+      	return; 
+      }
       try { 
       	if ($conf['user']) { 
           $db = new PDO($uri, $conf['user'], $conf['password']);
