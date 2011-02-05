@@ -1,15 +1,19 @@
 <?xml version="1.0"?>
-<html xmlns:frx="urn:FrxReports"><head>
+<html xmlns:frx="urn:FrxReports">
+  <head>
     <title>2. Report that filters based on state lookup</title>
     <frx:category>Sample</frx:category>
     <frx:options hidden="0" form=""/>
     <frx:parameters>
-      
-    <frx:parm id="state" label="State" require="1" value="" desc="See the parameters tab to understand how this dropdown was created from another data block. " data_source="sampledb/states" data_field="" type="select"/></frx:parameters>
+      <frx:parm id="state" label="State" require="1" value="" desc="See the parameters tab to understand how this dropdown was created from another data block. " data_source="sampledb/states" data_field="" type="select"/>
+    </frx:parameters>
     <frx:docgen>
     </frx:docgen>
-
-  </head><body><body><body>
+    <frx:fields>
+      <frx:field id="users" format="number" format-string="9,999"/>
+    </frx:fields>
+  </head>
+<body><body><body>
   
   <div frx:block="sampledb/state" id="state"><h3>{row/name}</h3>
   </div>

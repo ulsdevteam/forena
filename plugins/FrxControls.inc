@@ -16,7 +16,8 @@ class FrxControls {
   public function formats() {
     $formats = array('drupal_date_format' => 'Drupal Date',
                      'iso_date' => 'ISO Date', 
-                     'sprintf' => 'PHP sprintf()',  
+                     'sprintf' => 'PHP sprintf()', 
+                     'number' => 'Number',
                      ); 
     return $formats; 
   }
@@ -75,6 +76,37 @@ class FrxControls {
     return $value; 
   }
   
+  public function number($value, $format_str) { 
+      
+    $dec= 2;
+    $dec_sep='.';
+    $th_sep = ',';
+  	if ($format_str && !trim($format_str,'9.,$')) {
+  	  	// Determine the decimal places. 
+        $dec_pos = strrpos($format_str, $dec_sep); 
+        if ($dec_pos) { 
+        	$dec = strlen($format_str) - $dec_pos -1; 
+        }
+        else {
+        	$dec = 0;
+        	$dec_sep = ''; 
+        }
+  	} 
+  	
+  	if ($value && $this->is_number($value)) $value = number_format($value, $dec, $dec_sep, $th_sep); 
+  	return $value; 
+  	
+  }
+  
+  private function is_number($value) {
+           $non_numeric_chars = trim($value, ' +-.,0123456789');
+          // Determine if it contains +- in the interior 
+          // Zero is ok here bu
+          $inner_symbols = FALSE; 
+          if (strpos($tval,'+') || strpos($tval,'-') || strpos($tval,' ')) $inner_symbols =  TRUE;  
+          return (empty($non_numeric_chars) && trim($value)!=='' && !$inner_symbols) ? TRUE : FALSE; 
+  }
+  
   //Document transformation methods  
   public function htmldocument($body, $options) {
     $output .= '<html><head>';
@@ -109,6 +141,8 @@ class FrxControls {
     return $output;
   }
   
+  
+
   public function xlsdocument($body, $options) {    
     $output .= '<?xml version="1.0"?>' . "\n";
     $output .= '<?mso-application progid="Excel.Sheet"?>' . "\n";
