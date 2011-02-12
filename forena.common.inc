@@ -256,7 +256,7 @@ function __forena_load_repository(&$repo) {
     include($path .'/settings.php'); 
   }
  
-  $repo = array_merge($repo, $conf);    
+  $repo = array_merge($conf, $repo);    
   // $repo['user callback'] = $conf['user callback']; 
   if (!is_object($repo['data'])) $repo['data'] = __forena_load_provider($repo, $repo['path']);  
   
@@ -403,7 +403,7 @@ function forena_invoke_data_provider($data_block, $parameters=array(), $clause='
    
    if ($repos['user callback']) {
      $user_fn = $repos['user callback']; 
-     $parameters['current_user'] = $user_fn(); 
+     if (is_callable($user_fn)) $parameters['current_user'] = $user_fn(); 
    }
   
    if ($repos['data']) { 
