@@ -33,6 +33,11 @@ class FrxDataProvider{
     if ($f && is_callable($f)) {
       return $f($arg); 
     } 
+    elseif (isset($this->conf['access block'])) {
+    	$block = $this->conf['access block']; 
+      if (isset($this->conf['access path'])) $path = $this->conf['access path']; 
+      return forena_block_access($block, $path, $arg); 
+    }
     else { 
       return user_access('access content'); 
     }

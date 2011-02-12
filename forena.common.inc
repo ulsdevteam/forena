@@ -79,6 +79,41 @@ function forena_report_css($desc, $form,  $format = '') {
 }
 
 /**
+ * Check access control using the block in a data block.  In this case 
+ * public assess returns true. 
+ * @param $block  Repository block used to test access
+ * @param $path   xpath to user right within xml data. 
+ * @param $access Access to test
+ * @return unknown_type
+ */
+function forena_block_access($block, $path, $access, $cache=TRUE) {
+	if ($access=='PUBLIC') return TRUE; 
+	if (!isset($_SESSION['forena_access'])) $_SESSION['forena_access'] = array(); 
+	if ($cache && isset($_SESSION['forena_access'][$block])) {
+		$rights = $_SESSION['forena_access'][$block]; 
+	} 
+	else {
+		$rights = array();  
+	  // Get the block from the repository
+    $data = forena_invoke_data_provider($block, array(), null);
+    if ($data) { 
+			if (!$path) {
+				$path ='*/*'; 
+			}
+			$nodes = $data->xpath($path); 
+			if ($nodes) foreach ($nodes as $node) {
+				$rights[] = (string)$node; 
+			}
+			$_SESSION['forena_access'][$block]=$rights; 
+    }
+	} 
+	foreach ($rights as $right) {
+		if ($access == $right) return TRUE; 
+	}
+	return FALSE; 
+}
+
+/**
  * Load and render a report based on a drupal path. 
  * In this function the arglist is used to get the full path to the report. 
  *
@@ -407,6 +442,8 @@ function forena_load_block($data_block, $clause='') {
      return $block_info; 
    }
 }
+
+
 
 /**
  * Load the formatters for all initialized repositories.  
