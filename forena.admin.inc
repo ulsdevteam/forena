@@ -183,7 +183,6 @@ function forena_delete_report($report_name) {
   $filepath = $report_path .'/'. $report_name .'.frx';
   $info = pathinfo($filepath); 
   
-	drupal_set_message(print_r($info,1)); 
   if (file_exists($filepath)) {
   	chdir($info['dirname']); 
   	$do = unlink($info['basename']); 
