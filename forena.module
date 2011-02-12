@@ -87,6 +87,15 @@ function forena_menu() {
      'type' => MENU_LOCAL_TASK, 
    );  
    
+   $items['reports/%/delete'] = array(
+     'title' => 'Delete Report', 
+     'page callback' => 'drupal_get_form', 
+     'page arguments' => array('forena_delete_form'),
+     'access arguments' => array('delete report'),
+     'type' => MENU_NORMAL_ITEM,
+     'file' => 'forena.admin.inc', 
+   ); 
+   
    $items['reports/add'] = array(
      'title' => t('Add Report'),
      'page callback' => 'forena_add_report',
@@ -287,7 +296,8 @@ function forena_perm() {
     'administer forena reports', 
     'list reports', 
     'create any report', 
-    'design any report',    
+    'design any report',   
+    'delete report', 
     ); 
   //@TODO: Add the ability to create subrepositories with different permissions. 
   return $perms; 

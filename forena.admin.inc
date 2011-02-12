@@ -181,10 +181,19 @@ function forena_save_report($report_name, $report, $save_file = FALSE) {
 function forena_delete_report($report_name) { 
   $report_path = forena_report_path();
   $filepath = $report_path .'/'. $report_name .'.frx';
-  if (file_exists($file_path)) {
-  	unlink($filename); 
+  $info = pathinfo($filepath); 
+  
+	drupal_set_message(print_r($info,1)); 
+  if (file_exists($filepath)) {
+  	chdir($info['dirname']); 
+  	$do = unlink($info['basename']); 
+  	if ($do) {
+  		DB_QUERY("DELETE FROM {forena_reports} WHERE report_name='%s'", array($report_name));
+  	}
+  	else {
+  		drupal_set_message('Unable to delete file '. $info['basename'],'error'); 
+  	}
   }
-  DB_QUERY("DELETE FROM {forena_reports} WHERE report_name='%s'", array($report_name));
 }
 
 /**
@@ -219,8 +228,6 @@ function forena_db_sync($subdir='') {
        
         $r = new FrxReport($r_xml);  
         $save_count = forena_save_report($report_name, $r_xml, false);  
-
-
       }
     } 
     elseif (is_dir($src_file)) {
@@ -470,10 +477,20 @@ function forena_layout_form($form_state, $new_report='') {
       );
       
       $form['format'] = filter_form(variable_get('forena_input_format', FILTER_FORMAT_DEFAULT));
-      $form['submit'] = array(
+      $form['#validate'][]='forena_layout_form_validate'; 
+      $form['buttons']['save'] = array(
         '#type' => 'submit',
         '#value' => 'Save',
+        '#submit' => array('forena_layout_form_submit'), 
       );
+      
+      if (user_access('delete report')) {
+	      $form['buttons']['delete'] = array(
+	        '#type' => 'submit',
+	        '#value' => 'Delete',
+	        '#submit' => array('forena_edit_delete_submit'),
+	      ); 
+      }
       return $form;
     }
     else {
@@ -1120,31 +1137,48 @@ function forena_data_block_delete($form, &$form_state) {
  * @param $form_state
  * @return unknown_type
  */
-function forena_delete_form($form_state, $report_name) {
+function forena_delete_form() {
 	// Parse names from url
 	$desc = forena_report_desc();
-  $name = $desc['name']; 
-	
-  $form['message'] = array(
-    '#type'=>'markup',
-    '#value' => 'Delete form handler'
-  );
-   
+  $report_name = $desc['name']; 
+  $link = $desc['link']; 
   $form['report_name'] = array(
     '#type' => 'value',
-    '#value' => $name,
-  ); 
-  
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => 'Submit',
-  );
+    '#value' => $report_name
+  ); 	
+  return confirm_form($form, 
+    t('Are you sure you want to delete %title?', array('%title' => $report_name)), 
+    isset($_GET['destination']) ? $_GET['destination'] : $link, 
+    t('This action cannot be undone.'), 
+    t('Delete'), 
+    t('Cancel')
+  );  
   return $form;  	
 }
 
-function forena_delete_submit($form, &$form_state) {
+function forena_delete_form_submit($form, &$form_state) {
+	$report_name = $form_state['values']['report_name']; 
+	
+	drupal_set_message('Deleted ' . $report_name); 
 	forena_delete_report($report_name); 
+	$form_state['redirect'] = 'forena'; 
 }
+/**
+ * Handle delete buttons from edit forms. 
+ * @return unknown_type
+ */
+function forena_edit_delete_submit($form, &$form_state) {
+	$desc = forena_report_desc();
+	$link = $desc['link']; 
+  $report_name = $form_state['values']['report_name']; 
+  $destination = '';
+  if (isset($_REQUEST['destination'])) {
+    $destination = drupal_get_destination();
+    unset($_REQUEST['destination']);
+  }
+  $form_state['redirect'] = array($link . '/delete', $destination);
+}
+
 /**
  * Clean xhtml 
  *
@@ -1423,3 +1457,5 @@ function forena_get_categories($string='') {
     }    
     return $categories;
 }
+
+

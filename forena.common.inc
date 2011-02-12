@@ -35,6 +35,7 @@ function forena_report_desc($name='') {
   if (!$name_part) $dir = ''; 
   $desc['directory'] = $report_path . '/' . $dir;    
   $desc['filename'] = $report_path .'/'. trim($name, ' /') .'.frx';
+  $desc['link'] = 'reports/'. trim(str_replace('/' ,'.', $name),'.'); 
    
   if (file_exists($desc['filename'])) {
     $desc['exists'] = TRUE; 
