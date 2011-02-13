@@ -364,6 +364,9 @@ function forena_forena_plugins() {
   $plugins[] = array('file' => 'plugins/FrxPostgres.inc', 
                      'class' => 'FrxPostgres', 
                      );                     
+  $plugins[] = array('file' => 'plugins/FrxMSSQL.inc', 
+                     'class' => 'FrxMSSQL', 
+                     );                     
   return $plugins; 
 }
 
