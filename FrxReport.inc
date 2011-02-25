@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file 
  * Basic report provider.  Controls the rendering of the report. 

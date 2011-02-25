@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file
  * Oracle specific driver that takes advantage of oracles native XML support

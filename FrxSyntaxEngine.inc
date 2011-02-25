@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file
  * FrXSytnaxEngine defines how regular expression procesing/token substitution takes place. 

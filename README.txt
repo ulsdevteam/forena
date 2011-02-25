@@ -1,4 +1,3 @@
-/* $Id$ */
 Forena Reports
 
 Enterprise Reporting module that provides a mechanism for writing reports 

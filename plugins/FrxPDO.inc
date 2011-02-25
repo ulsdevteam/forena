@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file
  * General database engine used to do sql queries. 

@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file
  * Provides data blocks for native drupal connections using the default 

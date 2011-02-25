@@ -1,5 +1,4 @@
 <?php
-// $Id$ 
 /**
  * @file 
  * File class for loading raw xml files as Sample data  

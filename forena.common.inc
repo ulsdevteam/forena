@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file
  * Common functions used throughout the project but loaded in this 

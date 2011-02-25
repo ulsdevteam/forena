@@ -1,5 +1,4 @@
 <?php
-// $Id$ 
 /**
  * @file
  * Handles common date formats. 

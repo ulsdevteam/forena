@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file contains various methods for extending report 
  * formating, layout, transformation and design. 
