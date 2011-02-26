@@ -19,9 +19,6 @@ After saving your settings, visit your my reports page to see help reports,
 sample reports, as well as some useful canned drupal administration reports. 
 The provided sample reports also serve as documentation for the product. 
 
----
-Now using GIT
-
 Author
 ------
 David Metzler

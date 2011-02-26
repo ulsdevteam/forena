@@ -33,6 +33,7 @@ class FrxPostgres extends FrxDataProvider {
     	}
       try { 
         $db = pg_connect($uri);
+        pg_query($db,"SET search_path=". $conf['search path']);
         $this->db = $db; 
       } catch (Exception $e) { 
         forena_error('Unable to connect to database '. $conf['title'], $e->getMessage());  
