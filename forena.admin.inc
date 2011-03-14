@@ -1,72 +1,72 @@
 <?php
 /**
  * @file
- * Report administration forms and functions. 
+ * Report administration forms and functions.
  */
-require_once('forena.common.inc'); 
+require_once('forena.common.inc');
 
 /**
- * Make sure a drectory exists in the report path prior to save. 
+ * Make sure a drectory exists in the report path prior to save.
  *
  * @param unknown_type $fullpath
  * @param unknown_type $recursive
  */
-function _forena_verify_directory($fullpath, $recursive=FALSE) { 
-  static $path=''; 
+function _forena_verify_directory($fullpath, $recursive=FALSE) {
+  static $path='';
   if (!$recursive) $path = forena_report_path();
-  list($dir, $file) = explode('/', $fullpath, 2); 
-  $path .= '/'. $dir; 
-  // Path 
+  list($dir, $file) = explode('/', $fullpath, 2);
+  $path .= '/'. $dir;
+  // Path
   if (!file_exists($path) && $file) {
-    mkdir($path); 
+    mkdir($path);
   }
-  // Recurse to next file. 
+  // Recurse to next file.
   if ($file && strpos($file, '/')) {
-    watchdog('debug', $file); 
-    _forena_verify_directory($file, TRUE); 
+    watchdog('debug', $file);
+    _forena_verify_directory($file, TRUE);
   }
 }
 
 /**
  * Recursively copy all report files from the source directory to the destination directory
  *
- * @param string $src_dir  Source directory 
+ * @param string $src_dir  Source directory
  */
 function _forena_copy_reports($src_dir) {
-  static $dest_dir = ''; 
-  static $i = 0; 
+  static $dest_dir = '';
+  static $i = 0;
   if (!$dest_dir) {
-    $dest_dir = forena_report_path(); 
+    $dest_dir = forena_report_path();
   }
   if (!file_exists($dest_dir)) {
-    mkdir($dest_dir); 
+    mkdir($dest_dir);
   }
-  
+
   $d = dir($src_dir);
   while (false !== ($rpt_file = $d->read())) {
-    $src_file = $d->path .'/'. $rpt_file; 
+    $src_file = $d->path .'/'. $rpt_file;
     $dest_file = $dest_dir .'/'. $rpt_file;
-    
+
     if (is_file($src_file)) {
-      file_put_contents($dest_file, file_get_contents($src_file)); 
+      file_put_contents($dest_file, file_get_contents($src_file));
       $i++;
-    } 
+    }
     else {
       if (strpos($rpt_file, '.')!==0) {
-        
-        // Recurse into sub directory 
-        $src_save = $src_dir; 
-        $dest_save = $dest_dir; 
-        $dest_dir .= '/'. $rpt_file; 
-        $src_dir .= '/'. $rpt_file; 
+
+        // Recurse into sub directory
+        $src_save = $src_dir;
+        $dest_save = $dest_dir;
+        $dest_dir .= '/'. $rpt_file;
+        $src_dir .= '/'. $rpt_file;
         _forena_copy_reports($src_dir);
-        $src_dir = $src_save;  
-        $dest_dir = $dest_save; 
+        $src_dir = $src_save;
+        $dest_dir = $dest_save;
       }
-    } 
+    }
   }
-  $d->close(); 
-  return $i; 
+  $d->close();
+  return $i;
 }
 
 /**
@@ -75,172 +75,172 @@ function _forena_copy_reports($src_dir) {
  * @param string $name File name  to save report to
  * @param unknown_type $data
  */
-function forena_save_report($report_name, $report, $save_file = FALSE) { 
-  static $save_count=0;  
+function forena_save_report($report_name, $report, $save_file = FALSE) {
+  static $save_count=0;
 
   if ($report && !is_object($report)) {
     try {
       $report = new SimpleXMLElement($report);
-    } 
+    }
     catch (Exception $e) {
-      forena_error(t('Could not save %s because XML was malformed', htmlspecialchars($report_name)), 
-        "<p>Invalid XML</p><pre>XML:". htmlspecialchars($report) ."\n". $e->getMessage() ."</pre>"); 
-      return; 
+      forena_error(t('Could not save %s because XML was malformed', htmlspecialchars($report_name)),
+        "<p>Invalid XML</p><pre>XML:". htmlspecialchars($report) ."\n". $e->getMessage() ."</pre>");
+      return;
     }
   }
-  
-  _forena_verify_directory($report_name); 
+
+  _forena_verify_directory($report_name);
   $report_path = forena_report_path();
-  $r = new FrxReport($report);    
-  $data['title'] = $r->title; 
-  $data['category'] = $r->category; 
-  $data['options'] = $r->options; 
-  $data['name'] = $report_name; 
-  //@TODO: Clean up filename to make sure  
-  $name = $data['name']; 
+  $r = new FrxReport($report);
+  $data['title'] = $r->title;
+  $data['category'] = $r->category;
+  $data['options'] = $r->options;
+  $data['name'] = $report_name;
+  //@TODO: Clean up filename to make sure
+  $name = $data['name'];
   $filepath = $report_path .'/'. $report_name .'.frx';
-  // If we need to save this to the file system 
-  
+  // If we need to save this to the file system
+
   if ($save_file) {
     // Serialize the report for saving
-    if (is_object($report)) { 
-      $r_xml = $report->asXML(); 
+    if (is_object($report)) {
+      $r_xml = $report->asXML();
     }
-    
-    try { 
-      file_put_contents($filepath, $r_xml); 
+
+    try {
+      file_put_contents($filepath, $r_xml);
     } catch (Exception $e) {
-      fornea_error('Error Saving Report', $e->getMessage()); 
+      fornea_error('Error Saving Report', $e->getMessage());
     }
   }
-  
-  // Get the security caches from the reports  
-  
-  if ($report) $cache = forena_load_cache($report); else $cache=''; 
 
-  if ($cache) $rpt_cache = serialize($cache); 
-  //drupal_set_message('saving'.$name. print_r($cache,1)); 
-  // Set default interpretations of data 
-  $data['enabled'] = $data['enabled'] ? 1 : 0; 
+  // Get the security caches from the reports
+
+  if ($report) $cache = forena_load_cache($report); else $cache='';
+
+  if ($cache) $rpt_cache = serialize($cache);
+  //drupal_set_message('saving'.$name. print_r($cache,1));
+  // Set default interpretations of data
+  $data['enabled'] = $data['enabled'] ? 1 : 0;
   if ((string)$data['options']['hidden']) {
     $data['hidden'] =  ($data['options']['hidden'] && $data['options']['hidden']!='N' && $data['options']['hidden']!='0') ? 1:0;
-    if (!$data['category']) $data['category'] = 'All'; 
-  } 
+    if (!$data['category']) $data['category'] = 'All';
+  }
   else {
     // Set hidden based on category
-    $data['hidden'] = ($data['category'])? 0 : 1;  
+    $data['hidden'] = ($data['category'])? 0 : 1;
   }
   // Save to the Database
   if (file_exists($filepath)) {
-	  $modified = filemtime($filepath); 
+	  $modified = filemtime($filepath);
     $result = db_query("SELECT report_name FROM {forena_reports} WHERE report_name='%s'", $name);
-     
+
     if ($rpt = db_fetch_object($result)) {
-      db_query("UPDATE {forena_reports} SET title='%s', category='%s'".", hidden='%s', cache='%s', modified=%d  WHERE report_name='%s'", 
-        array($data['title'], 
-          $data['category'], 
-          $data['hidden'], 
+      db_query("UPDATE {forena_reports} SET title='%s', category='%s'".", hidden='%s', cache='%s', modified=%d  WHERE report_name='%s'",
+        array($data['title'],
+          $data['category'],
+          $data['hidden'],
           $rpt_cache,
           $modified,
-          $name )); 
+          $name ));
 
     }
-    else { 
-      db_query("INSERT INTO {forena_reports} (report_name, title, category, hidden, cache, modified) ". 
-        "VALUES ('%s', '%s', '%s',  %d, '%s', %d)", 
-        array($name, 
+    else {
+      db_query("INSERT INTO {forena_reports} (report_name, title, category, hidden, cache, modified) ".
+        "VALUES ('%s', '%s', '%s',  %d, '%s', %d)",
+        array($name,
           $data['title'],
           $data['category'],
           $data['hidden'],
           $rpt_cache,
           $modified,
-          )); 
+          ));
     }
-    
-    $save_count++;    
+
+    $save_count++;
   }
 
   $r=null;
-  $result = null; 
-  $r_xml = null; 
+  $result = null;
+  $r_xml = null;
   $report = NULL;
-  $data = NULL; 
-  $rpt = null; 
-  $cache = null; 
-  $rpt_cache = null; 
+  $data = NULL;
+  $rpt = null;
+  $cache = null;
+  $rpt_cache = null;
 
- 
+
   return $save_count;
 }
 
 /**
- * Remove the report from the database and file system. 
+ * Remove the report from the database and file system.
  * @param string $report_name
  */
-function forena_delete_report($report_name) { 
+function forena_delete_report($report_name) {
   $report_path = forena_report_path();
   $filepath = $report_path .'/'. $report_name .'.frx';
-  $info = pathinfo($filepath); 
-  
+  $info = pathinfo($filepath);
+
   if (file_exists($filepath)) {
-  	chdir($info['dirname']); 
-  	$do = unlink($info['basename']); 
+  	chdir($info['dirname']);
+  	$do = unlink($info['basename']);
   	if ($do) {
   		DB_QUERY("DELETE FROM {forena_reports} WHERE report_name='%s'", array($report_name));
   	}
   	else {
-  		drupal_set_message('Unable to delete file '. $info['basename'],'error'); 
+  		drupal_set_message('Unable to delete file '. $info['basename'],'error');
   	}
   }
 }
 
 /**
- * Syncronize the data 
+ * Syncronize the data
  *
  */
 function forena_db_sync($subdir='') {
   static $prefix = '';
-  if (!$subdir) { 
-    $prefix = ''; 
-     db_query('delete from {forena_reports}'); 
+  if (!$subdir) {
+    $prefix = '';
+     db_query('delete from {forena_reports}');
   }
-  $path =forena_report_path() .'/'. $subdir; 
-  $d = dir($path); 
+  $path =forena_report_path() .'/'. $subdir;
+  $d = dir($path);
   if ($d) while (false !== ($rpt_file = $d->read())) {
-    $src_file = trim($d->path, '/') .'/'. trim($rpt_file, '/'); 
-    $dest_file = $path .'/'. trim($rpt_file, '/'); 
+    $src_file = trim($d->path, '/') .'/'. trim($rpt_file, '/');
+    $dest_file = $path .'/'. trim($rpt_file, '/');
     if (is_file($src_file)) {
       list($report_name, $ext) = explode('.', $rpt_file, 2);
-      if ($ext == 'frx') {  
+      if ($ext == 'frx') {
         $report_name = trim($prefix .'/'. $report_name, '/');
 
-        try { 
+        try {
           $r_xml =file_get_contents($src_file);
-        } catch (Exception $e) { 
-          $s = t('unable to load Report %s', $r_xml); 
-          forena_error($s, $s . $e->getMessage()); 
-          
+        } catch (Exception $e) {
+          $s = t('unable to load Report %s', $r_xml);
+          forena_error($s, $s . $e->getMessage());
+
         }
-        
+
         // Load the report
-       
-        $r = new FrxReport($r_xml);  
-        $save_count = forena_save_report($report_name, $r_xml, false);  
-      }
-    } 
-    elseif (is_dir($src_file)) {
-      if (strpos($rpt_file, '.')!==0) { 
-        $save_prefix = $prefix; 
-        $prefix .=  '/'. $rpt_file; 
-        $prefix = trim($prefix, '/'); 
-        forena_db_sync($prefix); 
-        $prefix = $save_prefix; 
+
+        $r = new FrxReport($r_xml);
+        $save_count = forena_save_report($report_name, $r_xml, false);
       }
     }
-  }    
-  if ($d) $d->close(); 
+    elseif (is_dir($src_file)) {
+      if (strpos($rpt_file, '.')!==0) {
+        $save_prefix = $prefix;
+        $prefix .=  '/'. $rpt_file;
+        $prefix = trim($prefix, '/');
+        forena_db_sync($prefix);
+        $prefix = $save_prefix;
+      }
+    }
+  }
+  if ($d) $d->close();
 
-  return $save_count; 
+  return $save_count;
 }
 
 
@@ -255,32 +255,32 @@ function forena_settings() {
   $form['forena_report_repos'] = array(
     '#type' => 'textfield',
     '#title' => t('Report Repository'),
-    '#description' => t('Indicate the directory that you want to use for your reports.  In order for you to '. 
-                        'to be able to save reports, this directory should be writable by the web user. Relative'. 
-                        'paths should be entered relative to the base path of your drupal installation.'), 
-    '#default_value' => $report_path, 
-  ); 
-  
+    '#description' => t('Indicate the directory that you want to use for your reports.  In order for you to '.
+                        'to be able to save reports, this directory should be writable by the web user. Relative'.
+                        'paths should be entered relative to the base path of your drupal installation.'),
+    '#default_value' => $report_path,
+  );
+
   $form['forena_input_format'] = filter_form(variable_get('forena_input_format', FILTER_FORMAT_DEFAULT), NULL, array('forena_input_format'));
-  
+
   $form['instructions'] = array(
     '#type' => 'item',
-    '#title' => t('Data Sources'), 
+    '#title' => t('Data Sources'),
     '#value' => '<p>'. t('Database connections and data block repositories are configured directly in the file system for '.
-                         'security reasons.  See the Forena Reports README.txt file for more information.') .'</p>', 
-  ); 
-  
+                         'security reasons.  See the Forena Reports README.txt file for more information.') .'</p>',
+  );
+
   $form['forena_default_form'] = array(
-    '#type' => 'textield', 
-    '#title' => t('Default report form'), 
-    '#description' => t('Indicates the default style sheet(s) that will be used when no tag is present in the report.'), 
-  ); 
-  
-  
+    '#type' => 'textield',
+    '#title' => t('Default report form'),
+    '#description' => t('Indicates the default style sheet(s) that will be used when no tag is present in the report.'),
+  );
+
+
   $form =  system_settings_form($form);
-  $form['#submit'][] = 'forena_settings_submit'; 
-  return $form; 
-  
+  $form['#submit'][] = 'forena_settings_submit';
+  return $form;
+
 }
 /**
  * Added submit handler to create directories and clear menu cache
@@ -288,48 +288,48 @@ function forena_settings() {
  * @param unknown_type $form
  * @param unknown_type $form_state
  */
-function forena_settings_submit($form, &$form_state) { 
-  $values = $form_state['values']; 
+function forena_settings_submit($form, &$form_state) {
+  $values = $form_state['values'];
   $path = $values['forena_report_repos'];
-  $src_dir = drupal_get_path('module', 'forena') . '/repos/reports';  
-  if (!file_exists($path)) { 
-    try { 
+  $src_dir = drupal_get_path('module', 'forena') . '/repos/reports';
+  if (!file_exists($path)) {
+    try {
 
-      if (file_exists($path)) { 
-        drupal_set_message(t('Created directory %s', array($path))) ; 
+      if (file_exists($path)) {
+        drupal_set_message(t('Created directory %s', array($path))) ;
       }
       mkdir($path);
-      
-    } catch (Exception $e) { 
-      forena_error(t('Unable to create report directory'), $e->getMessage());  
+
+    } catch (Exception $e) {
+      forena_error(t('Unable to create report directory'), $e->getMessage());
     }
-   
-  } 
-  
-  if (file_exists($path) && $path != $src_dir) { 
-    // Copy the reports from the 
-    
+
+  }
+
+  if (file_exists($path) && $path != $src_dir) {
+    // Copy the reports from the
+
     $i = _forena_copy_reports($src_dir);
     drupal_set_message($i .' delivered reports copied from '. $src_dir .' to '. $path);
   }
   $save_count = forena_db_sync();
 
-  drupal_set_message('Imported '. $save_count .' forms into the database');       
-  menu_cache_clear(); 
+  drupal_set_message('Imported '. $save_count .' forms into the database');
+  menu_cache_clear();
 }
 
 
-function forenea_general_form($form_state, $new_report='') { 
+function forenea_general_form($form_state, $new_report='') {
   $desc = forena_report_desc();
-  $name = $desc['name']; 
+  $name = $desc['name'];
   $add_new_rpt;
   //determine if this is an add new report request
   if ($new_report == 'add') {
     $add_new_rpt = TRUE;
   }
-  
-  $filename = $desc['filename']; 
-  $format = $desc['format']; 
+
+  $filename = $desc['filename'];
+  $format = $desc['format'];
 }
 
 
@@ -340,18 +340,18 @@ function forenea_general_form($form_state, $new_report='') {
  */
 function forena_layout_form($form_state, $new_report='') {
   $desc = forena_report_desc();
-  $name = $desc['name']; 
+  $name = $desc['name'];
   $add_new_rpt;
   //determine if this is an add new report request
   if ($new_report == 'add') {
     $add_new_rpt = TRUE;
   }
-  
-  $filename = $desc['filename']; 
-  $format = $desc['format']; 
+
+  $filename = $desc['filename'];
+  $format = $desc['format'];
   //drupal_set_message("name: ". $name);
   if ($name) {
-    if ($desc['exists'] || $add_new_rpt) {    
+    if ($desc['exists'] || $add_new_rpt) {
       //set the name to empty string for new reports
       if ($add_new_rpt) $name = '';
 
@@ -362,7 +362,7 @@ function forena_layout_form($form_state, $new_report='') {
 
       // Get the attributes to save them away
       if ($r) $attributes = $r->get_attributes_by_id();
-      
+
       if ($r) $frx_options = $r->options;
       $category = (string)$r->category;
       if ($r) $body = $r->body->asXML();
@@ -371,34 +371,34 @@ function forena_layout_form($form_state, $new_report='') {
       $required = array('id' => TRUE, 'label' => TRUE);
       //list of supported document formats
       $supported = forena_supported_doctypes();
-      $doclist = variable_get('forena_doc_formats', array());          
-      
+      $doclist = variable_get('forena_doc_formats', array());
+
       $form['report_name'] = array(
         '#type' => 'value',
-        '#value' => $name,      
+        '#value' => $name,
       );
-      
+
       $form['head'] = array(
         '#type' => 'value',
         '#value' => $r->rpt_xml->head,
       );
-      
+
       $form['attributes'] = array(
-        '#type' => 'value', 
+        '#type' => 'value',
         '#value' => $attributes,
-      ); 
-      
+      );
+
       $form['save_report_name'] = array(
         '#type' => 'textfield',
         '#title' => t('Report Name'),
         '#default_value' => $name,
-        '#description' => t('Enter only letters, numbers, and special characters:  - _ /  
+        '#description' => t('Enter only letters, numbers, and special characters:  - _ /
                              <br/>White space is not permitted.
                              Create a directory using the format: (directory name) / (report name). Save multiple reports to the same directory
                              by referencing the same name.'),
         '#required' => TRUE,
       );
-      
+
       $form['title'] = array(
         '#type' => 'textfield',
         '#title' => t('Title'),
@@ -412,45 +412,45 @@ function forena_layout_form($form_state, $new_report='') {
         '#autocomplete_path' => 'forena/categories/autocomplete',
         '#description' => t('The heading your report will be grouped under on the report list.'),
       );
-      
+
       $form['form'] = array(
         '#type' => 'textfield',
         '#title' => t('Form'),
         '#default_value' => $frx_options['form'],
         '#description' => t('The page style of your report, such as letter or landscape. The default form is letter.')
       );
-      
+
       $form['hidden'] = array(
         '#type' => 'checkboxes',
         '#title' => t('Hidden'),
         '#options' => array(
           '1' => t(''),
-         ), 
+         ),
         '#default_value' => ($r) ? ($frx_options) : array(),
-        '#description' => t('Hide your report from showing up on the report list.'),         
+        '#description' => t('Hide your report from showing up on the report list.'),
       );
 
-     
-     
+
+
       //begin checking doc generation options
-      if ($r) $nodes = $r->rpt_xml->head->xpath('frx:docgen/frx:doc');      
+      if ($r) $nodes = $r->rpt_xml->head->xpath('frx:docgen/frx:doc');
       if ($doclist) {
         $form['docgen'] = array(
-         '#tree' => TRUE, 
-         '#type' => 'fieldset', 
-         '#title' => 'Document Options', 
-         '#collapsible' => TRUE, 
+         '#tree' => TRUE,
+         '#type' => 'fieldset',
+         '#title' => 'Document Options',
+         '#collapsible' => TRUE,
          '#collapsed' => TRUE,
          '#description' => t('These are document transformation options. Options selected will display as links in your report view.')
         );
 
         //build the options and default list
         $options = array();
-        $default = array();             
+        $default = array();
         foreach ($doclist as $key => $value) {
           if (is_object(forena_get_doctypes($value))) {
-            $options[$value] = strtoupper($value); 
-            if ($r) $doc =  $r->rpt_xml->head->xpath('frx:docgen/frx:doc[@type="' . $value . '"]');  
+            $options[$value] = strtoupper($value);
+            if ($r) $doc =  $r->rpt_xml->head->xpath('frx:docgen/frx:doc[@type="' . $value . '"]');
             if ($doc && $doclist[$value]) {
               $default[$value] = $value;
             }
@@ -458,14 +458,14 @@ function forena_layout_form($form_state, $new_report='') {
         }
         //display checkboxes
         $form['docgen']['docs'] = array(
-          '#type' => 'checkboxes',          
+          '#type' => 'checkboxes',
           '#description' => t('*If no options are selected, the system will display all of the above as available for this report.'),
           '#options' => $options,
           '#default_value' => $default
         );
-      } 
-      
-     
+      }
+
+
 
       $form['body'] = array(
         '#type' => 'textarea',
@@ -473,21 +473,21 @@ function forena_layout_form($form_state, $new_report='') {
         '#default_value' => $body,
         '#rows' => 25,
       );
-      
+
       $form['format'] = filter_form(variable_get('forena_input_format', FILTER_FORMAT_DEFAULT));
-      $form['#validate'][]='forena_layout_form_validate'; 
+      $form['#validate'][]='forena_layout_form_validate';
       $form['buttons']['save'] = array(
         '#type' => 'submit',
         '#value' => 'Save',
-        '#submit' => array('forena_layout_form_submit'), 
+        '#submit' => array('forena_layout_form_submit'),
       );
-      
+
       if (user_access('delete report')) {
 	      $form['buttons']['delete'] = array(
 	        '#type' => 'submit',
 	        '#value' => 'Delete',
 	        '#submit' => array('forena_edit_delete_submit'),
-	      ); 
+	      );
       }
       return $form;
     }
@@ -497,7 +497,7 @@ function forena_layout_form($form_state, $new_report='') {
   }
   else {
     drupal_not_found();
-  }  
+  }
 }
 
 function forena_layout_form_validate($form, &$form_state) {
@@ -505,17 +505,17 @@ function forena_layout_form_validate($form, &$form_state) {
   $regexp = "/^[A-Za-z0-9\/\_\-]*$/";
   $save_report_name = $values['save_report_name'];
   $report_name = $values['report_name'];
-  
+
   //checking illegal characters
   if (!preg_match($regexp, $save_report_name)) {
     form_set_error('save_report_name', t('Invalid character entered in Report Name'));
   }
-  
+
   //comparing the report names to see if they have changed.
   //If they have, making sure the new name does not already exist.
   if ($report_name != $save_report_name) {
     $report_path = forena_report_path();
-    $filename = $report_path .'/'. $save_report_name .'.frx'; 
+    $filename = $report_path .'/'. $save_report_name .'.frx';
     if (file_exists($filename)) {
       form_set_error('save_report_name', t('The file ' . $save_report_name . ' already exists. Please enter another name.'));
     }
@@ -526,31 +526,31 @@ function forena_layout_form_validate($form, &$form_state) {
  * builds a string of the xml document,
  * submits it to forena_save_report.
  */
-function forena_layout_form_submit($form, &$form_state) {  
+function forena_layout_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   $report_name = $values['report_name'];
-  
+
   $h = $values['head'];
-  //$xml = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">'. "\n"; 
-  $xml = '<html xmlns:frx="urn:FrxReports">'. "\n"; 
+  //$xml = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">'. "\n";
+  $xml = '<html xmlns:frx="urn:FrxReports">'. "\n";
   $xml .= '  <head>'. "\n";
   $xml .= '    <title>'. htmlspecialchars($values['title']) .'</title>'. "\n";
-  $xml .= '    <frx:category>'. htmlspecialchars($values['category']) .'</frx:category>'. "\n"; 
-  
+  $xml .= '    <frx:category>'. htmlspecialchars($values['category']) .'</frx:category>'. "\n";
+
   $hidden = (array_filter($values['hidden'])) ? '1' : '0';
-  
+
   $xml .= '    <frx:options ';
   $xml .= 'hidden="'. $hidden .'" ';
   $xml .= 'form="'. $values['form'] .'"';
-  $xml .= '/>'. "\n"; 
+  $xml .= '/>'. "\n";
 
-  $xml .= '    <frx:parameters>'. "\n";  
-  if ($h) $parms = $h->xpath('//frx:parm'); 
+  $xml .= '    <frx:parameters>'. "\n";
+  if ($h) $parms = $h->xpath('//frx:parm');
   if ($parms) foreach ($parms as $parm) {
-  	$xml .= '      '. $parm[0]->asXML() . "\n";  	
-  } 
+  	$xml .= '      '. $parm[0]->asXML() . "\n";
+  }
   $xml .= '    </frx:parameters>' . "\n";
-  
+
   //check if docgen is avaialable for report
   if ($values['docgen']) {
     $xml .= '    <frx:docgen>' . "\n";
@@ -562,50 +562,50 @@ function forena_layout_form_submit($form, &$form_state) {
     }
     $xml .= '    </frx:docgen>' . "\n";
   }
-  
+
   if ($h) $nodes = $h->xpath('frx:fields');
-  
+
   if ($nodes) $xml .= $nodes[0]->asXML();
   $body = $values['body'];
-  // Put the body tag back on if it was stripped.   
+  // Put the body tag back on if it was stripped.
 
   if (strpos($body, '<body')===FALSE) {
-    $body = forena_clean_xhtml('<body>'. $body .'</body>'); 
+    $body = forena_clean_xhtml('<body>'. $body .'</body>');
   }
-  
+
   // Build the html
-  $xml .= "\n" . '  </head>' . "\n";    
-  $xml .= $body; 
-  $xml .= '</html>'; 
-  
+  $xml .= "\n" . '  </head>' . "\n";
+  $xml .= $body;
+  $xml .= '</html>';
+
   //drupal_set_message("test: ". htmlspecialchars($xml));
   $file = $values['save_report_name'];
   $o = forena_report_object($xml);
 
   // If there are no frx attributes in the body then replace them with the old values.
-  if ($o) $frx_nodes = $o->rpt_xml->xpath('body//*[@frx:block]'); 
+  if ($o) $frx_nodes = $o->rpt_xml->xpath('body//*[@frx:block]');
   if (!$frx_nodes) {
     $o->save_attributes_by_id($values['attributes']);
-  } 
+  }
 
   //determine redirection.
   $report_path = forena_report_path();
-  $filename = $report_path .'/'. $report_name .'.frx';   
-  if (!file_exists($filename)) {    
+  $filename = $report_path .'/'. $report_name .'.frx';
+  if (!file_exists($filename)) {
     $new_rpt = TRUE;
   }
-  
-  
+
+
   if (forena_save_report($file, $o->rpt_xml, TRUE) == 1) {
-    drupal_set_message('Your report, "' . $file . '" has been saved.');    
+    drupal_set_message('Your report, "' . $file . '" has been saved.');
     //if this is a new report then redirect to data blocks
-    if ($new_rpt) {    	
+    if ($new_rpt) {
     	$form_state['redirect']= 'reports/' . str_replace('/', '.', $file) .'/data';
     }
-    else{    
+    else{
       $form_state['redirect']= 'reports/' . str_replace('/', '.', $file) .'/layout';
     }
-  }  
+  }
 }
 
 /*
@@ -613,7 +613,7 @@ function forena_layout_form_submit($form, &$form_state) {
  */
 function forena_doc_formats_settings() {
   $supported_doctypes = forena_supported_doctypes();
-    
+
   $form['forena_doc_formats'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Document Formats'),
@@ -625,15 +625,15 @@ function forena_doc_formats_settings() {
 }
 
 /**
- * 
+ *
  * @param $form_state
  * @return a form to edit the fields of the report
  */
 function forena_fields_form($form_state) {
   $desc = forena_report_desc();
-  $name = $desc['name']; 
-  $filename = $desc['filename']; 
-  $format = $desc['format']; 
+  $name = $desc['name'];
+  $filename = $desc['filename'];
+  $format = $desc['format'];
   if ($name) {
     if (file_exists($filename)) {
       $r = forena_get_report($name);
@@ -642,84 +642,84 @@ function forena_fields_form($form_state) {
       $match = array("{", "}");
 
       /*search the body, looking for {}*/
-      $body = $r->body->asXML();  
+      $body = $r->body->asXML();
       $head = $r->rpt_xml->head;
-         
-      $fields = array();    
+
+      $fields = array();
       preg_match_all($regexp, $body, $out);
       foreach ($out as $key => $value) {
         foreach ($value as $el) {
-          $clean_element = str_replace($match, "", $el);                
-          $fields[$clean_element] = $clean_element;          
+          $clean_element = str_replace($match, "", $el);
+          $fields[$clean_element] = $clean_element;
         }
-      }    
-      
-      $form = array();      
-      
+      }
+
+      $form = array();
+
       $form['head'] = array(
         '#type' => 'hidden',
-        '#value' => $head,      
+        '#value' => $head,
       );
-      
+
       $form['body'] = array(
         '#type' => 'value',
-        '#value' => $r->body,      
+        '#value' => $r->body,
       );
-      
+
       $form['report_name'] = array(
         '#type' => 'value',
-        '#value' => $name,      
-      );      
+        '#value' => $name,
+      );
 
       $form['fields'] = array('#tree' => TRUE, );
-      /*Now check the fields in the body against the xml*/      
-      $i=0; 
+      /*Now check the fields in the body against the xml*/
+      $i=0;
       foreach ($fields as $field) {
-      	$i++; 
-      	$field_ids[$i] = $field; 
+      	$i++;
+      	$field_ids[$i] = $field;
         $form['fields'][$i] = array(
-          '#tree' => TRUE, 
+          '#tree' => TRUE,
           '#type' => 'fieldset',
           '#title' => $field,
-          '#collapsible' => TRUE, 
-          '#collapsed' => TRUE, 
+          '#collapsible' => TRUE,
+          '#collapsed' => TRUE,
         );
 
-        $path = 'frx:fields/frx:field[@id="' . $field . '"]'; 
+        $path = 'frx:fields/frx:field[@id="' . $field . '"]';
         $node =  $head->xpath($path);
         $attr = $node[0];
-        
+
         $form['fields'][$i]['id'] = array(
-          '#type' => 'value', 
+          '#type' => 'value',
           '#value' => $field,
         );
-        
+
         $form['fields'][$i]['format'] = array(
           '#type' => 'textfield',
           '#title' => t('format'),
           '#default_value' => $attr['format'],
-          '#size' => 30, 
-          '#autocomplete_path' => 'forena/fields/format/autocomplete', 
-          '#description' => t('Format a date and time field by entering the name of a supported format function. Enter a "*" to see all available formats.')                
+          '#size' => 30,
+          '#autocomplete_path' => 'forena/fields/format/autocomplete',
+          '#description' => t('Format a date and time field by entering the name of a supported format function. Enter a "*" to see all available formats.')
         );
-            
+
         $form['fields'][$i]['format-string'] = array(
           '#type' => 'textfield',
           '#title' => t('format-string'),
           '#default_value' => $attr['format-string'],
-          '#size' => 30,                  
-          '#description' => t('The display type of your format.')                
+          '#size' => 30,
+          '#description' => t('The display type of your format.')
         );
-            
+
         $form['fields'][$i]['link'] = array(
           '#type' => 'textfield',
-          '#title' => t('link'), 
+          '#title' => t('link'),
           '#default_value' => $attr['link'],
           '#size' => 100,
-          '#maxlength' => 256,                     
-          '#description' => t('Create a link that incorporates this field, e.g "profile/{field_name}" will create a link to this field_name\'s profile. *Note the field must be wrapped in {}.')                
-        ); 
-        
+          '#maxlength' => 256,
+          '#description' => t('Create a link that incorporates this field, e.g "profile/{field_name}" will create a link to this field_name\'s profile. *Note the field must be wrapped in {}.')
+        );
+
         $form['fields'][$i]['target'] = array(
           '#type' => 'textfield',
           '#title' => t('target'),
@@ -730,12 +730,12 @@ function forena_fields_form($form_state) {
 
         $form['fields'][$i]['default'] = array(
           '#type' => 'textfield',
-          '#title' => t('default value'), 
+          '#title' => t('default value'),
           '#default_value' => $attr,
-          '#size' => 30,                   
-          '#description' => t('The value to be displayed in the report in the place of the field.')                
-        );         
-      }    
+          '#size' => 30,
+          '#description' => t('The value to be displayed in the report in the place of the field.')
+        );
+      }
       $form['submit'] = array(
         '#type' => 'submit',
         '#value' => 'Save',
@@ -752,15 +752,15 @@ function forena_fields_form($form_state) {
 }
 
 
-function forena_fields_form_submit($form, &$form_state) {  
+function forena_fields_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   $head = $values['head'];
   $body = $values['body'];
-  $fields = $values['fields'];   
- 
+  $fields = $values['fields'];
+
   $xml = '<html xmlns:frx="urn:FrxReports">'. "\n";
   $xml .= '  <head>'. "\n";
-    
+
   /*walk through all the children of the head and build the xml*/
   foreach ($head->children() as $node) {
     $xml .= '    ' . $node[0]->asXML() . "\n";
@@ -770,38 +770,38 @@ function forena_fields_form_submit($form, &$form_state) {
     if (strcmp($name, 'fields') != 0) {
       $xml .= '    ' . $frx_node[0]->asXML() . "\n";
     }
-  }  
-  
+  }
+
   /*now build the fields*/
  $xml .= '    <frx:fields>' . "\n";
-  foreach ($fields as $key => $value) {    
+  foreach ($fields as $key => $value) {
     //skip fields that have no attributes
       if (! ($value['format'] == '' && $value['format-string'] == '' && $value['link'] == '' && $value['default'] == '' && $value['target'] == '')) {
-        $xml .= '      <frx:field ';        
+        $xml .= '      <frx:field ';
         //walk through all the attributes that have values and write them out.
-        if ($value) foreach ($value as $k => $v) {        	
+        if ($value) foreach ($value as $k => $v) {
           if ($k != 'default' && $value[$k]) {
             $xml .= ' ' . $k . '="' . htmlentities($v) . '"';
           }
         }
-        /*if there is not a default value, self close the tag.*/        
-        $xml .= ($value['default']) ? '>' . $value['default'] . '</frx:field>' . "\n" : '/>' . "\n";      
-      }     	  
+        /*if there is not a default value, self close the tag.*/
+        $xml .= ($value['default']) ? '>' . $value['default'] . '</frx:field>' . "\n" : '/>' . "\n";
+      }
   }
   $xml .= '    </frx:fields>' . "\n";
   $xml .= '  </head>' . "\n";
   $xml .= $body->asXML();
-  $xml .= '</html>';  
-  
-  $file = $values['report_name'];  
+  $xml .= '</html>';
+
+  $file = $values['report_name'];
   if (forena_save_report($file, $xml, TRUE) == 1) {
-    drupal_set_message('Your report, "' . arg(1) . '" has been saved.');    
+    drupal_set_message('Your report, "' . arg(1) . '" has been saved.');
     $form_state['redirect']= 'reports/' . arg(1);
   }
   else {
     drupal_set_message('There was an error saving your report, "'. $file . '" to the database');
   }
-  
+
 }
 
 /**
@@ -811,70 +811,70 @@ function forena_fields_form_submit($form, &$form_state) {
  */
 function forena_data_block_form($form_state) {
   $desc = forena_report_desc();
-  $name = $desc['name']; 
-  $filename = $desc['filename']; 
-  $format = $desc['format']; 
-  if ($desc['exists']) { 
+  $name = $desc['name'];
+  $filename = $desc['filename'];
+  $format = $desc['format'];
+  if ($desc['exists']) {
     $r = forena_get_report($name);
     drupal_set_title($r->title);
     $form = array();
     $title = (string)$r->title;
 
-    $template_array = forena_supported_templates(); 
+    $template_array = forena_supported_templates();
     $default_template = $form_state['storage']['template'];
     $params = $form_state['storage']['parameters'];
     $param_values = $form_state['storage']['param_values'];
-    
+
     $form = array();
 
     $form['report_name'] = array(
         '#type' => 'value',
-        '#value' => $name,      
-     );     
-      
+        '#value' => $name,
+     );
+
     $from['head'] = array(
       '#type' => 'value',
       '#value' => $r->rpt_xml->head,
-     ); 
+     );
 
     //The default submit handler
     //If someone presses enter, this handler will execute
     $form['default_submit'] = array(
-      '#type' => 'submit',          
+      '#type' => 'submit',
       '#submit' => array('forena_data_block_form_submit'),
-      '#prefix' => '<div style="visibility:hidden;float:right">', 
-      '#suffix' => '</div>',     
+      '#prefix' => '<div style="visibility:hidden;float:right">',
+      '#suffix' => '</div>',
     );
-    
+
     //find the datablocks in the existing report
     $data_block_array = array();
-    if ($r) $r->get_attributes_by_id(); 
-    $body = $r->body;    
+    if ($r) $r->get_attributes_by_id();
+    $body = $r->body;
     $path = '//*[@frx:block]';
-   
+
     if ($body) foreach ($body->xpath($path) as $node) {
       $attrs = $node->attributes(FRX_NS);
       $id = (string)$node['id'];
-      $block = (string)$attrs['block']; 
+      $block = (string)$attrs['block'];
       if ($attrs['clause']) $clause = "(". (string)$attrs['clause'] .")";
-      $block_info = forena_load_block($block, $clause); 
-      $access = $block_info['access']; 
-      $data_block_array[$id] = $block .": <i>". $clause . ' security "' . $access . '"</i>';      
+      $block_info = forena_load_block($block, $clause);
+      $access = $block_info['access'];
+      $data_block_array[$id] = $block .": <i>". $clause . ' security "' . $access . '"</i>';
     }
-    
+
     $form['delete_blocks'] = array(
       '#type' => 'checkboxes',
       '#title' => t('Data Blocks In Report'),
       '#options' => $data_block_array,
-      '#description' => ($data_block_array) ? t('Check the data block to be deleted from your report.') : '',    
+      '#description' => ($data_block_array) ? t('Check the data block to be deleted from your report.') : '',
     );
 
     if ($data_block_array) {
 	    $form['delete'] = array(
 	      '#type' => 'submit',
-	      '#value' => 'Delete',      
-	      '#submit' => array('forena_data_block_delete'),	      
-	    );   
+	      '#value' => 'Delete',
+	      '#submit' => array('forena_data_block_delete'),
+	    );
     }
 
     $form['data_block'] = array(
@@ -884,15 +884,15 @@ function forena_data_block_form($form_state) {
       '#autocomplete_path' => 'forena/data_block/autocomplete',
       '#description' => t('Enter a data block, a preview will appear below'),
     );
-		
+
     $form['where_clause'] = array(
 		      '#type' => 'textfield',
 		      '#title' => t('Where Clause'),
-		      '#default_value' => $form_state['storage']['where_clause'],      
+		      '#default_value' => $form_state['storage']['where_clause'],
 		      '#description' => t('Enter a where clause to filter your report.'),
 		    );
 
-    
+
 
     $form['templates'] = array(
       '#type' => 'radios',
@@ -902,23 +902,23 @@ function forena_data_block_form($form_state) {
       '#required' => TRUE,
       '#description' => t('Select a template to preview the data block in.'),
     );
-    
+
     //If there are parameters in the data block allow the user to input data
     //Check if there is already a parameter of the same name in the existing report. If there is, use the report value.
     if ($params) {
     	$rpt_params = array();
     	//returns a 2 dimensional array of report parameters from the report
     	if ($r) $rpt_params = $r->parameters;
-    	
+
      	$form['params'] = array(
-        '#tree' => TRUE, 
-        '#title' => 'Parameters', 
-        '#type' => 'fieldset', 
-        '#collapsible' => TRUE, 
+        '#tree' => TRUE,
+        '#title' => 'Parameters',
+        '#type' => 'fieldset',
+        '#collapsible' => TRUE,
         '#collapsed' => ($form_state['storage']['output']) ? TRUE : FALSE,
       );
-      
-      foreach ($params as $param) {      	
+
+      foreach ($params as $param) {
         $form['params'][$param] = array(
           '#type' => 'textfield',
           '#title' => t($param),
@@ -989,31 +989,31 @@ function forena_data_block_form_submit($form, &$form_state) {
   $name = $values['report_name'];
   $where_clause = $values['where_clause'];
   $r = forena_get_report($name);
-  
+
   $form_state['storage']['param_values'] = $values['params'];
   $form_state['storage']['data_block'] = $data_block;
   $form_state['storage']['template'] = $template;
   $form_state['storage']['where_clause'] = $where_clause;
-  
+
   if ($data_block)  {
     //get xml from data block
-    //check for and store parameters       
-    $block_info = forena_load_block($data_block, $where_clause); 
-    if ($block_info) {     	
-    	//if there were not any parameters passed. Use the report parameters   
-      if(!$params) {     	
+    //check for and store parameters
+    $block_info = forena_load_block($data_block, $where_clause);
+    if ($block_info) {
+    	//if there were not any parameters passed. Use the report parameters
+      if(!$params) {
       	$rpt_params = $r->parameters;
       	if ($rpt_params) foreach ($block_info['tokens'] as $index => $id) {
       		$params[$id] = $rpt_params[$id]['value'];
-      	}      	
+      	}
       }
-      
+
       //now invoke the data provider with the correct params
-      $xml = forena_invoke_data_provider($data_block, $params, $where_clause);      
+      $xml = forena_invoke_data_provider($data_block, $params, $where_clause);
     }
   }
   if ($xml) {
-  	
+
     //create an array of columns
     $rows = $xml->xpath('//row');
     $column_array = array();
@@ -1027,81 +1027,81 @@ function forena_data_block_form_submit($form, &$form_state) {
     //create xml from template object
     $template_obj = forena_get_templates($template);
     if ($template_obj) {
-      $body = $template_obj->$template($column_array, $data_block, $where_clause);  
-    }    
-    $rpt_xml =  '<html xmlns:frx="urn:FrxReports"><body>'. $body .'</body></html>';    
+      $body = $template_obj->$template($column_array, $data_block, $where_clause);
+    }
+    $rpt_xml =  '<html xmlns:frx="urn:FrxReports"><body>'. $body .'</body></html>';
 
-    //render the xml	  
+    //render the xml
     $output = forena_render_report($rpt_xml, NULL, $params);
     $form_state['storage']['output'] = $output;
     $form_state['storage']['template_body'] = $body;
-    
+
   }
   else { //there wasn't any xml returned. clear the storage
-    $form_state['storage']['output'] = '';    
+    $form_state['storage']['output'] = '';
   }
-  $form_state['storage']['parameters'] = $block_info['tokens'];  
+  $form_state['storage']['parameters'] = $block_info['tokens'];
 }
 
 
 /**
- * submit handler for forena_data_block_form. 
+ * submit handler for forena_data_block_form.
  * This adds the datablock to an existing report.
  *
  */
 function forena_data_block_add($form, &$form_state) {
-  $values = $form_state['values'];  
+  $values = $form_state['values'];
   $report_name = $values['report_name'];
   $data_block = $values['data_block'];
   $template = $values['templates'];
-  $form_params = $values['params'];   
+  $form_params = $values['params'];
   $where_clause = $values['where_clause'];
-  
-  $r = forena_get_report($report_name);  
+
+  $r = forena_get_report($report_name);
   $head = $r->rpt_xml->head;
-    
+
   //Get the xml body of the added data block
   $added_report = $form_state['storage']['template_body'];
-  
+
   //Get the data block parameters
   $block_info = forena_load_block($data_block, $where_clause);
-  $data_block_parms = $block_info['tokens'];  
-  
+  $data_block_parms = $block_info['tokens'];
+
   //Build the parameters
-  $xml = "";  
+  $xml = "";
   $path_parent = '//frx:parameters';
-  $parent_node = $head->xpath($path_parent);  
- 
+  $parent_node = $head->xpath($path_parent);
+
   $path_child = '//frx:parm';
   $child_nodes = $head->xpath($path_child);
-  
-  $parm_name = 'parm';  
-  //loop through the data block parameters  
-  foreach ($data_block_parms as $index => $id) {  	
+
+  $parm_name = 'parm';
+  //loop through the data block parameters
+  foreach ($data_block_parms as $index => $id) {
   	//check if rpt_params exist
   	if ($child_nodes) {
   		$path_id = '//frx:parm[@id="'. $id .'"]';
   		$found_rpt_param = $child_nodes[0]->xpath($path_id);
-  	}    
+  	}
   	//add block params if none are found in report
   	if(!$found_rpt_param) {
   		if ($parent_node) {
   			$parm = $parent_node[0]->addChild($parm_name);
-  			$parm->addAttribute('id', $id);  				
+  			$parm->addAttribute('id', $id);
   		}
   	}
   }
- 
 
-  
+
+
   $main_report = forena_inner_xml($r->rpt_xml, 'body');
-  $added_report = forena_clean_xhtml($added_report);  
+  $added_report = forena_clean_xhtml($added_report);
   $new_report =  '<html xmlns:frx="urn:FrxReports">'. $head->asXML() .'<body>'. $main_report . $added_report .'</body></html>';
- 
+
 
   if (forena_save_report($report_name, $new_report, TRUE) == 1) {
     drupal_set_message('Your report has been saved');
-  }  
+  }
 }
 
 /**
@@ -1117,58 +1117,58 @@ function forena_data_block_delete($form, &$form_state) {
   $report_name = $values['report_name'];
   $r = forena_get_report($report_name);
 
-  //find the datablocks in the existing report  
-  if ($r) $r->get_attributes_by_id(); 
-  $body = $r->body;   
-  
+  //find the datablocks in the existing report
+  if ($r) $r->get_attributes_by_id();
+  $body = $r->body;
+
   foreach ($delete_blocks as $id) {
     if ($r) $r->deleteNode($id);
   }
-  
+
  if (forena_save_report($report_name, $r->rpt_xml, TRUE) == 1) {
-    drupal_set_message(t('Your report has been saved.')); 
+    drupal_set_message(t('Your report has been saved.'));
   }
 }
 
 /**
- * Form to confirm the delete of a form. 
+ * Form to confirm the delete of a form.
  * @param $form_state
  * @return unknown_type
  */
 function forena_delete_form() {
 	// Parse names from url
 	$desc = forena_report_desc();
-  $report_name = $desc['name']; 
-  $link = $desc['link']; 
+  $report_name = $desc['name'];
+  $link = $desc['link'];
   $form['report_name'] = array(
     '#type' => 'value',
     '#value' => $report_name
-  ); 	
-  return confirm_form($form, 
-    t('Are you sure you want to delete %title?', array('%title' => $report_name)), 
-    isset($_GET['destination']) ? $_GET['destination'] : $link, 
-    t('This action cannot be undone.'), 
-    t('Delete'), 
+  );
+  return confirm_form($form,
+    t('Are you sure you want to delete %title?', array('%title' => $report_name)),
+    isset($_GET['destination']) ? $_GET['destination'] : $link,
+    t('This action cannot be undone.'),
+    t('Delete'),
     t('Cancel')
-  );  
-  return $form;  	
+  );
+  return $form;
 }
 
 function forena_delete_form_submit($form, &$form_state) {
-	$report_name = $form_state['values']['report_name']; 
-	
-	drupal_set_message('Deleted ' . $report_name); 
-	forena_delete_report($report_name); 
-	$form_state['redirect'] = 'forena'; 
+	$report_name = $form_state['values']['report_name'];
+
+	drupal_set_message('Deleted ' . $report_name);
+	forena_delete_report($report_name);
+	$form_state['redirect'] = 'forena';
 }
 /**
- * Handle delete buttons from edit forms. 
+ * Handle delete buttons from edit forms.
  * @return unknown_type
  */
 function forena_edit_delete_submit($form, &$form_state) {
 	$desc = forena_report_desc();
-	$link = $desc['link']; 
-  $report_name = $form_state['values']['report_name']; 
+	$link = $desc['link'];
+  $report_name = $form_state['values']['report_name'];
   $destination = '';
   if (isset($_REQUEST['destination'])) {
     $destination = drupal_get_destination();
@@ -1178,67 +1178,67 @@ function forena_edit_delete_submit($form, &$form_state) {
 }
 
 /**
- * Clean xhtml 
+ * Clean xhtml
  *
  * @param unknown_type $xhtml
  * @return unknown
  */
-function forena_clean_xhtml($xhtml) { 
-  $ret = $xhtml; 
-  // If tidy is installed lets clean the html using that. 
-  if (is_callable('tidy_repair_string')) { 
+function forena_clean_xhtml($xhtml) {
+  $ret = $xhtml;
+  // If tidy is installed lets clean the html using that.
+  if (is_callable('tidy_repair_string')) {
     $config = array(
-      'doctype'            => 'omit', 
+      'doctype'            => 'omit',
       'indent-spaces'             => 2,
-      'indent' => 'auto', 
-      'input-xml'          => TRUE, 
-      'output-xml'         => TRUE, 
+      'indent' => 'auto',
+      'input-xml'          => TRUE,
+      'output-xml'         => TRUE,
       'indent-attributes'  => FALSE,
       'indent-spaces'      => 2,
-      'add_xml_space'      => TRUE, 
+      'add_xml_space'      => TRUE,
       'wrap'               => 135 );
     $ret = tidy_repair_string($xhtml, $config, 'utf8');
-  }    
-  else { 
+  }
+  else {
     $ret = str_replace('&nbsp;', '&#160;', $ret);
   }
-  return $ret; 
+  return $ret;
 }
 
 /**
- * Provides list of blocks that a user has access to that are in any repository matching 
+ * Provides list of blocks that a user has access to that are in any repository matching
  * a specified search string
  *
- * @param string $search block to search for. 
- * @return array list of blocks the user has access to. 
+ * @param string $search block to search for.
+ * @return array list of blocks the user has access to.
  */
-function forena_user_data_blocks($search) { 
+function forena_user_data_blocks($search) {
   $repos = forena_repository();
   foreach ($repos as $name => $r) {
-	  
+
     // Make really sure the data provider objects have been instantiated
-    $provider = $r;  
-    if (!$provider['data']) { 
-      $provider = forena_repository($name);      
+    $provider = $r;
+    if (!$provider['data']) {
+      $provider = forena_repository($name);
     }
-    $repos[$name] = $provider; 
-    // Invoke the list block function to find out all of the block names    
-    $o = $provider['data']; 
-    if (method_exists($o, 'list_blocks')) { 
-      $blocks = $o->list_blocks($search);      
-      foreach ($blocks as $block) { 
-        $block_info = $o->load_block($block); 	  	
-        if (method_exists($o, 'access')) { 
+    $repos[$name] = $provider;
+    // Invoke the list block function to find out all of the block names
+    $o = $provider['data'];
+    if (method_exists($o, 'list_blocks')) {
+      $blocks = $o->list_blocks($search);
+      foreach ($blocks as $block) {
+        $block_info = $o->load_block($block);
+        if (method_exists($o, 'access')) {
           $allow = $o->access($block_info['access']);
-          if ($allow) $user_blocks[] = $name . '/' . $block; 
+          if ($allow) $user_blocks[] = $name . '/' . $block;
         }
       }
     }
   }
-  return $user_blocks;  
+  return $user_blocks;
 }
 
-/** 
+/**
  *  Prettifies an XML string into a human-readable and indented work of art
  *  @param string $xml The XML as a string
  *  @param boolean $html_output True if the output should be escaped (for use in HTML)
@@ -1248,7 +1248,7 @@ function forena_xmlpp($xml, $html_output=false) {
     $level = 4;
     $indent = 0; // current indentation level
     $pretty = array();
-    
+
     // get an array containing each XML element
     $xml = explode("\n", preg_replace('/>\s*</', ">\n<", $xml_obj->asXML()));
 
@@ -1263,7 +1263,7 @@ function forena_xmlpp($xml, $html_output=false) {
           $pretty[] = str_repeat(' ', $indent) . $el;
           $indent += $level;
       } else {
-        if (preg_match('/^<\/.+>$/', $el)) {            
+        if (preg_match('/^<\/.+>$/', $el)) {
           $indent -= $level;  // closing tag, decrease indent
         }
         if ($indent < 0) {
@@ -1271,89 +1271,89 @@ function forena_xmlpp($xml, $html_output=false) {
         }
         $pretty[] = str_repeat(' ', $indent) . $el;
       }
-    }   
-    $xml = implode("\n", $pretty);   
+    }
+    $xml = implode("\n", $pretty);
     return ($html_output) ? htmlentities($xml) : $xml;
 }
 
 function forena_admin_params_form($form_state) {
-	
+
   $desc = forena_report_desc();
-  $name = $desc['name']; 
-  $filename = $desc['filename']; 
+  $name = $desc['name'];
+  $filename = $desc['filename'];
   $format = $desc['format'];
-  if ($desc['exists'] && $name) {   	
+  if ($desc['exists'] && $name) {
 		$r = forena_get_report($name);
 	  drupal_set_title($r->title);
-    $form = array();   
-    
+    $form = array();
+
     $form['rpt_name'] = array (
       '#type' => 'value',
       '#value' => $name,
     );
-    
+
 	  if ($r) $nodes = $r->rpt_xml->head->xpath('frx:parameters/frx:parm');
-	  if ($nodes) {        
+	  if ($nodes) {
 	    $form['params'] = array('#tree' => TRUE, );
-	      
+
 	    foreach ($nodes as $node) {
 	    	$attrs = $node->attributes();
 	      $id = (string)$attrs['id'];
 	      $label = (string)$attrs['label'];
 	      $value = (string)$attrs['value'] ? (string)$attrs['value'] : (string)$node;
 	      $require = (string)$attrs['require'];
-	      $data_source = (string)$attrs['data_source']; 
-	      $data_field = (string)$attrs['data_field']; 
+	      $data_source = (string)$attrs['data_source'];
+	      $data_field = (string)$attrs['data_field'];
 	      $desc = (string)$attrs['desc'];
 	      $type = (string)$attrs['type'];
-	                
+
 	      //make a subtree for each param
 	      $form['params'][$id] = array(
-	        '#tree' => TRUE, 
-	        '#type' => 'fieldset', 
+	        '#tree' => TRUE,
+	        '#type' => 'fieldset',
 	        '#title' => ($label) ? $label : $id,
-	        '#collapsible' => TRUE, 
-	        '#collapsed' => TRUE 
+	        '#collapsible' => TRUE,
+	        '#collapsed' => TRUE
 	      );
-	                    
+
 	      $form['params'][$id]['id'] = array(
 	        '#type' => 'textfield',
 	        '#title' => t('id'),
 	        '#default_value' => $id,
-	        '#required' => TRUE,     
-	        '#description' => t('The name of the parameter to be filtered against.')       
-	      );          
-	          
+	        '#required' => TRUE,
+	        '#description' => t('The name of the parameter to be filtered against.')
+	      );
+
 	      $form['params'][$id]['label'] = array(
 	        '#type' => 'textfield',
 	        '#title' => t('label'),
 	        '#default_value' => $label,
-	        '#required' => FALSE,            
-	        '#description' => t('A descriptive name of the parameter to be displayed on a form.')       
-	      );         
-     
+	        '#required' => FALSE,
+	        '#description' => t('A descriptive name of the parameter to be displayed on a form.')
+	      );
+
 	      $form['params'][$id]['require'] = array(
 	        '#type' => 'radios',
 	        '#title' => t('require'),
 	        '#default_value' => ($require) ? $require : "0",
-	        '#options' => array("1" => t('Yes'), "0" => t('No')),                      
-	        '#description' => t('Requires a value for this parameter to display the report. If there is not a default value, the user will be prompted to enter a value.')       
+	        '#options' => array("1" => t('Yes'), "0" => t('No')),
+	        '#description' => t('Requires a value for this parameter to display the report. If there is not a default value, the user will be prompted to enter a value.')
 	      );
 
 	      $form['params'][$id]['value'] = array(
 	        '#type' => 'textfield',
 	        '#title' => 'default value',
-	        '#default_value' => $value,            
-	        '#description' => t('The value of the parameter for the initial view of the report.')       
+	        '#default_value' => $value,
+	        '#description' => t('The value of the parameter for the initial view of the report.')
 	      );
-	          
+
 	      $form['params'][$id]['desc'] = array(
 	        '#type' => 'textfield',
 	        '#title' => t('description'),
-	        '#default_value' => $desc,                             
-	        '#description' => t('Enter a helpful description about this parameter. This will display on the form when the user is prompted to enter a parameter.'),       
+	        '#default_value' => $desc,
+	        '#description' => t('Enter a helpful description about this parameter. This will display on the form when the user is prompted to enter a parameter.'),
 	      );
-	      
+
 	      $form['params'][$id]['data_source'] = array(
 	        '#type' => 'textfield',
           '#title' => t('Data Source'),
@@ -1361,24 +1361,27 @@ function forena_admin_params_form($form_state) {
           '#autocomplete_path' => 'forena/data_block/autocomplete',
           '#description' => t('Data block to be used for list of values'),
 	      );
-	       
+
         $form['params'][$id]['data_field'] = array(
           '#type' => 'textfield',
           '#title' => t('Data Field'),
           '#default_value' => $data_field,
           '#description' => t('Column in data block to be used for ID'),
-        ); 
-	      
-	       $form['params'][$id]['type'] = array(
+        );
+
+	    $form['params'][$id]['type'] = array(
           '#type' => 'radios',
           '#title' => t('description'),
           '#default_value' => $type,
-	        '#options' => array('textfield'=>'Text', 'radios' => 'Radios', 'select' => 'Select'),                              
-          '#description' => t('Enter a helpful description about this parameter. This will display on the form when the user is prompted to enter a parameter.'),       
+	        '#options' => array('textfield'=>'Text', 'radios' => 'Radios', 'select' => 'Select'),
+          '#description' => t('Enter a helpful description about this parameter. This will display on the form when the user is prompted to enter a parameter.'),
         );
-	      
-	      
-	    }
+
+        $form['params'][$id]['delete_ind'] = array(
+          '#type' => 'checkbox',
+          '#title' => 'Remove this parameter',
+          '#description' => t('Check to remove this parameter, then save'),
+        );
 
 	    $form['submit'] = array(
 	     '#type' => 'submit',
@@ -1396,32 +1399,34 @@ function forena_admin_params_form_submit($form, &$form_state) {
 	$values = $form_state['values'];
 	$name = $values['rpt_name'];
 	$params = $values['params'];
-	
+
 	$r = forena_get_report($name);
   if ($r) $head = $r->rpt_xml->head;
   if ($r) $body = $r->body;
   //delete the previous parms
   unset($head->parameters->parm);
- 
-  if($r) $parent = $head->xpath('frx:parameters');  
+
+  if($r) $parent = $head->xpath('frx:parameters');
   //add the new parms
-  foreach ($params as $parm) {  	
-  	$p = $parent[0]->addChild('parm');    
-  	foreach ($parm as $n => $v) {
-  		$p->addAttribute($n, $v);
+  foreach ($params as $parm) {
+  	if (!$parm['delete_ind']) {
+	  	$p = $parent[0]->addChild('parm');
+	  	foreach ($parm as $n => $v) {
+	  		if ($n!='delete_ind') $p->addAttribute($n, $v);
+	  	}
   	}
-  }    
+  }
   $new_report =  '<html xmlns:frx="urn:FrxReports">'. $head->asXML() .'<body>'. $body->asXML() .'</body></html>';
 
   if (forena_save_report($name, $new_report, TRUE) == 1) {
     drupal_set_message('Your report has been saved');
-  }  
+  }
 }
 
 /**
  * Auto complete function for categories
  * Checks access for security as well.
- * 
+ *
  * @param $string = string to be matched against categories
  * @return An array containing all matching categories
  */
@@ -1429,30 +1434,30 @@ function forena_get_categories($string='') {
   $result = db_query("SELECT * FROM {forena_reports} where hidden=0 AND category LIKE '%%%s%%' ORDER BY category, title asc", $string);
   $categories = array();
   while ($row = db_fetch_object($result)) {
-      $access = TRUE; 
-      $cache = $row->cache; 
-       
-      if ($cache) {            
+      $access = TRUE;
+      $cache = $row->cache;
+
+      if ($cache) {
         $cache = unserialize($cache);
-        
-        // Check each callback function to see if we have an error. 
+
+        // Check each callback function to see if we have an error.
         if ($cache['access']) foreach ($cache['access'] as $callback => $args) {
           if ($callback) foreach ($args as $arg) {
-            $access = FALSE;            
-            if (function_exists($callback)) { 
-              $a = $callback($arg); 
+            $access = FALSE;
+            if (function_exists($callback)) {
+              $a = $callback($arg);
             }
-            if ($a) $access = TRUE;           
-          } 
-          else {          
-            $access = TRUE; 
+            if ($a) $access = TRUE;
+          }
+          else {
+            $access = TRUE;
           }
         }
-      }    
-      if ($access && !$categories[$row->category]) {      
-        $categories[$row->category] = $row->category;          
-      }   
-    }    
+      }
+      if ($access && !$categories[$row->category]) {
+        $categories[$row->category] = $row->category;
+      }
+    }
     return $categories;
 }
 
