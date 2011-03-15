@@ -1417,7 +1417,11 @@ function forena_admin_params_form($form_state) {
           '#description' => t('Enter a helpful description about this parameter. This will display on the form when the user is prompted to enter a parameter.'),
         );
 
-
+	      $form['params'][$id]['delete_ind'] = array(
+	        '#type' => 'checkbox',
+	        '#title' => 'Remove this parameter',
+	        '#description' => t('Check to remove this parameter, then save'),
+	      );
       }
 
       $form['submit'] = array(
@@ -1446,9 +1450,11 @@ function forena_admin_params_form_submit($form, &$form_state) {
   if ($r) $parent = $head->xpath('frx:parameters');
   //add the new parms
   foreach ($params as $parm) {
-    $p = $parent[0]->addChild('parm');
-    foreach ($parm as $n => $v) {
-      $p->addAttribute($n, $v);
+    if (!$parm['delete_ind']) {
+      $p = $parent[0]->addChild('parm');
+      foreach ($parm as $n => $v) {
+        if ($n!='delete_ind') $p->addAttribute($n, $v);
+      }
     }
   }
   $new_report =  '<html xmlns:frx="urn:FrxReports">' . $head->asXML() . '<body>' . $body->asXML() . '</body></html>';
