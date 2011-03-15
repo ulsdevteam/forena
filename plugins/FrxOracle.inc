@@ -1,4 +1,5 @@
 <?php
+// $Id$
 /**
  * @file
  * Oracle specific driver that takes advantage of oracles native XML support
@@ -35,12 +36,12 @@ class FrxOracle extends FrxDataProvider {
         $db = oci_connect($conf['user'], $conf['password'], $uri, $conf['character_set']);
         $this->db = $db;
       } catch (Exception $e) {
-        forena_error('Unable to connect to database '. $conf['title'], $e->getMessage());
+        forena_error('Unable to connect to database ' . $conf['title'], $e->getMessage());
       }
 
     }
     else {
-      forena_error('No database connection string specified', 'No database connection: '. print_r($conf,1));
+      forena_error('No database connection string specified', 'No database connection: ' . print_r($conf, 1));
     }
 
     // Set up the stuff required to translate.
@@ -61,7 +62,7 @@ class FrxOracle extends FrxDataProvider {
     if ($block['source'] && $this->access($block['access']) && $db) {
       $sql = $block['source'];
       if ($clause) {
-        $sql = 'SELECT * FROM ('. trim($sql, ' ;') . ') '. $clause;
+        $sql = 'SELECT * FROM (' . trim($sql, ' ;') . ') ' . $clause;
       }
       $sql = $this->te->replace($sql, $params);
 
@@ -73,7 +74,7 @@ class FrxOracle extends FrxDataProvider {
       }
       if ($this->debug) {
         if ($xml) $d = htmlspecialchars($xml->asXML());
-        forena_debug('SQL: '. $sql, '<pre> SQL:'. $sql . "\n XML: ". $d . "\n</pre>");
+        forena_debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "\n</pre>");
       }
       return $xml;
     }
@@ -104,16 +105,16 @@ class FrxOracle extends FrxDataProvider {
         $msg .= htmlentities($e['sqltext']);
         //printf("\n%".($e['offset']+1)."s", "^");
         $msg .= "\n</pre>\n";
-        forena_error('Database error in '. $block. ' see logs for info', $msg);
-        return null;
+        forena_error('Database error in ' . $block . ' see logs for info', $msg);
+        return NULL;
       }
 
       $xml_text = $ret->load();
       if ($xml_text) {
         $xml = new SimpleXMLElement($xml_text);
-        if ($xml->getName() == 'error'){
-          $msg = (string)$xml . ' in '. $block .'.sql. ';
-          forena_error($msg .'See logs for more info', $msg. ' in <pre> '.$sql. '</pre>');
+        if ($xml->getName() == 'error') {
+          $msg = (string)$xml . ' in ' . $block . '.sql. ';
+          forena_error($msg . 'See logs for more info', $msg . ' in <pre> ' . $sql . '</pre>');
         }
       }
       oci_free_statement($stmt);
@@ -148,7 +149,7 @@ class FrxOracle extends FrxDataProvider {
    * @param unknown_type $data
    */
   public function format($value, $key, $data) {
-    if ($value=='') $value = 'NULL'; else $value =  "'".  str_replace("'", "''", $value) ."'";
+    if ($value=='') $value = 'NULL'; else $value = "'" . str_replace("'", "''", $value) . "'";
     return $value;
   }
 

@@ -1,4 +1,5 @@
 <?php
+// $Id$
 /**
  * @file
  * Oracle specific driver that takes advantage of oracles native XML support
@@ -26,22 +27,22 @@ class FrxPostgres extends FrxDataProvider {
     $this->debug = $conf['debug'];
     if ($conf['postgres_xml']) $this->use_postgres_xml = TRUE;
     if ($uri) {
-    	// Test for postgres suport
-    	if (!is_callable('pg_connect')) {
-    		forena_error('PHP Postgres support not installed.', 'PHP Postgres support not installed.');
-    		return;
-    	}
+      // Test for postgres suport
+      if (!is_callable('pg_connect')) {
+        forena_error('PHP Postgres support not installed.', 'PHP Postgres support not installed.');
+        return;
+      }
       try {
         $db = pg_connect($uri);
-        pg_query($db,"SET search_path=". $conf['search path']);
+        pg_query($db, "SET search_path=" . $conf['search path']);
         $this->db = $db;
       } catch (Exception $e) {
-        forena_error('Unable to connect to database '. $conf['title'], $e->getMessage());
+        forena_error('Unable to connect to database ' . $conf['title'], $e->getMessage());
       }
 
     }
     else {
-      forena_error('No database connection string specified', 'No database connection: '. print_r($conf,1));
+      forena_error('No database connection string specified', 'No database connection: ' . print_r($conf, 1));
     }
 
     // Set up the stuff required to translate.
@@ -62,7 +63,7 @@ class FrxPostgres extends FrxDataProvider {
     if ($block['source'] && $this->access($block['access']) && $db) {
       $sql = $block['source'];
       if ($clause) {
-        $sql = 'SELECT * FROM ('. trim($sql, ' ;') . ') '. $clause;
+        $sql = 'SELECT * FROM (' . trim($sql, ' ;') . ') ' . $clause;
       }
       $sql = $this->te->replace($sql, $params);
 
@@ -74,7 +75,7 @@ class FrxPostgres extends FrxDataProvider {
       }
       if ($this->debug) {
         if ($xml) $d = htmlspecialchars($xml->asXML());
-        forena_debug('SQL: '. $sql, '<pre> SQL:'. $sql . "\n XML: ". $d . "\n</pre>");
+        forena_debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "\n</pre>");
       }
       return $xml;
     }
@@ -92,16 +93,16 @@ class FrxPostgres extends FrxDataProvider {
 
       //$rs->debugDumpParams();
       $fsql = 'select query_to_xml($1,true,false,$2);';
-      $rs = pg_query_params($db,$fsql,array($sql,''));
-		  if ($rs) {
-		    $row = pg_fetch_row($rs);
-		    $xml_text = $row[0];
-		  }
+      $rs = pg_query_params($db, $fsql, array($sql, ''));
+      if ($rs) {
+        $row = pg_fetch_row($rs);
+        $xml_text = $row[0];
+      }
       if ($xml_text) {
         $xml = new SimpleXMLElement($xml_text);
-        if ($xml->getName() == 'error'){
-          $msg = (string)$xml . ' in '. $block .'.sql. ';
-          forena_error($msg .'See logs for more info', $msg. ' in <pre> '.$sql. '</pre>');
+        if ($xml->getName() == 'error') {
+          $msg = (string)$xml . ' in ' . $block . '.sql. ';
+          forena_error($msg . 'See logs for more info', $msg . ' in <pre> ' . $sql . '</pre>');
         }
       }
       if ($rs) pg_free_result($rs);
@@ -134,7 +135,7 @@ class FrxPostgres extends FrxDataProvider {
    * @param unknown_type $data
    */
   public function format($value, $key, $data) {
-    if ($value=='') $value = 'NULL'; else $value =  "'".  pg_escape_string($value) ."'";
+    if ($value=='') $value = 'NULL'; else $value =  "'" . pg_escape_string($value) . "'";
     return $value;
   }
 
