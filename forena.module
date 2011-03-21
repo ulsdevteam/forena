@@ -141,7 +141,7 @@ function forena_menu() {
 function forena_block_info() {
 	  $blocks['forena_reports'] = array('info' => t('My reports'),
       'status' => 1,
-      'region' => 'right',
+      'region' => 'sidebar_first',
       'visibility' => 1,
       'pages' => 'forena',
     );
