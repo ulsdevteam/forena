@@ -271,7 +271,8 @@ function forena_parameters_report() {
   $report = forena_get_report($name);
   if ($report) {
     $r = forena_report_object();
-    return drupal_get_form('forena_parameters_form');
+    $o = drupal_get_form('forena_parameters_form');
+    return $o;
   }
   else {
     drupal_not_found();

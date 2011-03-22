@@ -156,7 +156,7 @@ function forena_report($name_in, $parms = array()) {
 
       // Get data from the report;
       $r_parms = $r->parameters;
-      $form = $r->options['form'];
+      $form = isset($r->options['form']) ? $r->options['form'] : '';
       $rpt_xml = $r->rpt_xml;
 
       // Default the form
@@ -186,7 +186,10 @@ function forena_report($name_in, $parms = array()) {
       }
       else {
         // We've got parameters so display the parameters form
-        if ($r_parms) $output = drupal_get_form('forena_parameters_form') . $output;
+        if ($r_parms) {
+        	$f = drupal_get_form('forena_parameter_form');
+        	$output = drupal_render($f) . $output ;
+        }
         //set the title
         $title = $r->title;
         drupal_set_title(filter_xss($title));
@@ -456,12 +459,12 @@ function forena_load_block($data_block, $clause='') {
 function forena_get_formatter($fkey) {
   // Get all repositories
   $repos = forena_repository();
-
+  $formats = array();
   foreach ($repos as $k => $r) {
-    $provider = $r['data'];
+    $provider = isset($r['data']) ? $r['data'] : NULL;
     if ($provider && method_exists($provider, 'formats'))  {
       $f = $provider->formats();
-    if ($f[$fkey] && method_exists($provider, $fkey)) {
+    if (isset($f[$fkey]) && method_exists($provider, $fkey)) {
         // We found an object with the advertised method return it
         return $provider;
       }
@@ -474,7 +477,7 @@ function forena_get_formatter($fkey) {
     $provider = $r;
     if ($provider && method_exists($provider, 'formats'))  {
       $f = $provider->formats();
-    if ($f[$fkey] && method_exists($provider, $fkey)) {
+    if (isset($f[$fkey]) && method_exists($provider, $fkey)) {
         // We found an object with the advertised method return it
         return $provider;
       }
@@ -777,9 +780,10 @@ function forena_get_data_block_params($data_block, $field, $label, $params=array
  * and display those values appropriately.
  *
  */
-function forena_parameters_form($form_state) {
+function forena_parameter_form($formid, &$form_state) {
   $parms = $_GET;
   unset($parms['q']);
+  $form = array();
 
   $r = forena_report_object();
 
@@ -787,7 +791,7 @@ function forena_parameters_form($form_state) {
       drupal_set_title($r->title);
       $head = $r->rpt_xml->head;
 
-      $form = array();
+
       $form['params'] = array(
         '#tree' => TRUE,
         '#title' => 'Parameters',
@@ -844,6 +848,7 @@ function forena_parameters_form($form_state) {
         if ($type != 'textfield') {
           $form['params'][$id]['#options'] = $list;
         }
+
       }
 
       $form['params']['submit'] = array(
@@ -861,13 +866,14 @@ function forena_parameters_form($form_state) {
  * redirects to the report page with the values in
  * the querystring.
  */
-function forena_parameters_form_submit($form, &$form_state) {
+function forena_parameter_form_submit($form, &$form_state) {
   $values = $form_state['values'];
+  $q='';
   foreach ($values['params'] as $key => $value) {
     $q .= '&' . $key . '=' . urlencode($value);
   }
   $q = trim($q, '&');
-  $form_state['redirect']= array($_GET['q'], $q);
+  $form_state['redirect']= array($_GET['q'], array('query' => $values['params']));
 }
 
 /**

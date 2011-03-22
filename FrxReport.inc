@@ -238,8 +238,9 @@ class FrxReport {
     if ($link) {
       $link = $this->teng->replace($link,  $data, TRUE);
       @list($url, $query) = explode('?', $link);
-      drupal_set_message($url);
-      $value = l(htmlspecialchars_decode($value), $url, array('query' => $query, 'attributes' => array('target' => $target)));
+      $data = array();
+      parse_str($query, $data);
+      $value = l(htmlspecialchars_decode($value), $url, array('query' => $data, 'attributes' => array('target' => $target)));
     }
     return $value;
   }

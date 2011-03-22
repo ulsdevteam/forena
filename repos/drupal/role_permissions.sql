@@ -1,3 +1,3 @@
 --ACCESS=administer permissions
-SELECT * FROM permission P
+SELECT * FROM role_permission P
   WHERE p.rid = :role

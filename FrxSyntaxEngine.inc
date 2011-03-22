@@ -117,7 +117,7 @@ class FrxSyntaxEngine {
       }
       else {
         $rows = $data->xpath($key);
-
+        $x ='';
         if ($rows) $x = $rows[0];
 
         if ($x) $retvar = $x->asXML();

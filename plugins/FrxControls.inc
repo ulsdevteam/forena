@@ -102,7 +102,7 @@ class FrxControls {
           // Determine if it contains +- in the interior
           // Zero is ok here bu
           $inner_symbols = FALSE;
-          if (strpos($tval, '+') || strpos($tval, '-') || strpos($tval, ' ')) $inner_symbols =  TRUE;
+          if (strpos($value, '+') || strpos($value, '-') || strpos($value, ' ')) $inner_symbols =  TRUE;
           return (empty($non_numeric_chars) && trim($value)!=='' && !$inner_symbols) ? TRUE : FALSE;
   }
 

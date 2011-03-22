@@ -28,7 +28,7 @@ class FrxFiles extends FrxDataProvider {
 
      $block = $this->load_block($block_name);
     $xml ='';
-    if ($block['source'] && $this->access($block['access'])) {
+    if (isset($block['source']) && $this->access($block['access'])) {
       try {
         $xmlData = $block['source'];
         $xml = new SimpleXMLElement($xmlData);

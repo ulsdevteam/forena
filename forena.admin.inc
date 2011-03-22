@@ -782,7 +782,7 @@ function forena_fields_form($formid, $form_state) {
         $form['fields'][$i]['default'] = array(
           '#type' => 'textfield',
           '#title' => t('default value'),
-          '#default_value' => @$attr,
+          '#default_value' => @(string)$attr,
           '#size' => 30,
           '#description' => t('The value to be displayed in the report in the place of the field.')
         );
