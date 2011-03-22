@@ -70,7 +70,7 @@ class FrxDataProvider{
         $temp = array_merge($tokens, $clause_tokens);
         //check for duplicates in block tokens
         if ($clause_tokens) foreach ($clause_tokens as $ct) {
-          if (!$temp[$ct]) {
+          if (!isset($temp[$ct])) {
             array_push($tokens, $ct);
           }
         }

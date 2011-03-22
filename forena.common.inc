@@ -123,6 +123,8 @@ function forena_report($name_in, $parms = array()) {
   $name = $desc['name'];
   $format = isset($desc['format']) ? $desc['format'] : '';
   $filename = $desc['filename'];
+  $css_files = array();
+
   // Determine the data to get.
   if (!$parms) $parms = $_GET; else $parms = (array)$parms;
   unset($parms['q']);
@@ -136,13 +138,13 @@ function forena_report($name_in, $parms = array()) {
       if ($r_params) {
         //put default parameters in parms array
         foreach ($r_params as $key => $parm) {
-          if (!$parms[$key] && $parm['value']) {
+          if (@!$parms[$key] && @$parm['value']) {
             $parms[$key] = $parm['value'];
             $reload_params = TRUE;
           }
           //do not show report if a required parameter does not have a value
           //force the user to input a parameter
-          if ((!$parms[$key]) && (strcmp($parm['require'], "1") == 0) && (!$parm['value'])) {
+          if ((@!$parms[$key]) && (@strcmp($parm['require'], "1") == 0) && (!$parm['value'])) {
             $missing_parms = TRUE;
           }
         }
@@ -187,7 +189,7 @@ function forena_report($name_in, $parms = array()) {
         if ($r_parms) $output = drupal_get_form('forena_parameters_form') . $output;
         //set the title
         $title = $r->title;
-        drupal_set_title($title);
+        drupal_set_title(filter_xss($title));
         //Creating links for downloadable documents.
         //build querystring for document href
         $q='';
@@ -271,14 +273,18 @@ function __forena_load_repository(&$repo) {
  * @return object The data provider object
  */
 function __forena_load_provider($conf, $repo_path) {
-  @$name = isset($conf['data provider'])? $conf['data_provider'] : $conf['data_engine'];
+  @$name = isset($conf['data provider'])? $conf['data provider'] : $conf['data_engine'];
 
   forena_define_plugins();
   // Instantiate the path
   //drupal_set_message("conf: <pre>". print_r($conf, 1) ."</pre>  repo_path: <pre>". print_r($repo_path,1) ."</pre>");
   if (class_exists($name)) {
+
     $o = new $name($conf, $repo_path);
     return $o;
+  }
+  else {
+  	drupal_set_message(t('Data provider %s not found', array('%s' => $name)) , 'error');
   }
 
 }
@@ -399,7 +405,6 @@ function forena_invoke_data_provider($data_block, $parameters=array(), $clause='
    list($provider, $block) = explode('/', $data_block, 2);
    // Get the data
    $repos = forena_repository($provider);
-
    if (isset($repos['user callback'])) {
      $user_fn = $repos['user callback'];
      if (is_callable($user_fn)) $parameters['current_user'] = $user_fn();
@@ -516,6 +521,7 @@ function forena_get_report($report_name, $data=array()) {
         forena_save_report($report_name, $r_text, FALSE);
       }
     }
+
     return $r;
   }
 }
@@ -798,7 +804,7 @@ function forena_parameters_form($form_state) {
         $data_source = (string)$node['data_source'];
         $data_field = (string)$node['data_field'];
         $type = (string)$node['type'];
-        $value = ($parms[$id]) ? $parms[$id] : (string)$node['value'];
+        $value = (isset($parms[$id])) ? $parms[$id] : (string)$node['value'];
         $desc =  (string)$node['desc'];
         $label_field = (string)$node['label_field'];
 

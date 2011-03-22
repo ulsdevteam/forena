@@ -46,7 +46,7 @@ class FrxDrupal extends FrxDataProvider {
       $rs = db_query($sql);
 
       $xml = new SimpleXMLElement('<table/>');
-      while ($data = db_fetch_object($rs)) {
+      foreach ($rs as $data) {
           $row_node = $xml->addChild('row');
 
           foreach ($data as $key => $value) {
@@ -70,7 +70,10 @@ class FrxDrupal extends FrxDataProvider {
    * @param unknown_type $data
    */
   public function format($value, $key, $data) {
-    $value =  "'" . db_escape_string($value) . "'";
+    $db = Database::getConnection('default');
+    if ($db) {
+      if ($value=='') $value = 'NULL'; else  $value =  $db -> quote($value);
+    }
     return $value;
   }
 
