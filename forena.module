@@ -139,7 +139,7 @@ function forena_menu() {
  * Implementation of hook_block_info
  */
 function forena_block_info() {
-	  $blocks['forena_reports'] = array('info' => t('My reports'),
+    $blocks['forena_reports'] = array('info' => t('My reports'),
       'status' => 1,
       'region' => 'sidebar_first',
       'visibility' => 1,
@@ -172,7 +172,7 @@ function forena_block_view($delta = 0) {
 function forena_categories_autocomplete($string='') {
   require_once('forena.admin.inc');
   $categories = forena_get_categories($string);
-  print drupal_json($categories);
+  print drupal_json_output($categories);
 }
 
 
@@ -195,7 +195,7 @@ function forena_data_block_autocomplete($string='') {
     $data_blocks = array();
   }
 
-  print drupal_json($data_blocks);
+  print drupal_json_output($data_blocks);
 }
 
 /**
@@ -210,7 +210,7 @@ function forena_fields_format_autocomplete($string='') {
 
   if ($string == "*") {
     $matches = $formats;
-    print drupal_json($matches);
+    print drupal_json_output($matches);
     return;
   }
 
@@ -219,7 +219,7 @@ function forena_fields_format_autocomplete($string='') {
       $matches[$name] = $value;
     }
   }
-  print drupal_json($matches);
+  print drupal_json_output($matches);
 }
 /**
  *  Calls forena_layout_form
@@ -246,7 +246,7 @@ function forena_admin_params() {
  */
 function forena_add_report($new_report) {
   require_once('forena.admin.inc');
-  return drupal_get_form('forena_layout_form', $new_report);
+  return drupal_get_form('forena_layout_form', TRUE);
 }
 
 /**
@@ -423,12 +423,12 @@ function forena_current_user_name() {
  */
 function forena_filter_info() {
 
-	$filters['forena_report'] = array(
-	  'title' => t('Embed Forena Reports'),
-	  'description' => t('Allows you to embed a report in a text'),
-	  'process_callback' => '_forena_filter_process',
-	  'cache' => FALSE,
-	);
+  $filters['forena_report'] = array(
+    'title' => t('Embed Forena Reports'),
+    'description' => t('Allows you to embed a report in a text'),
+    'process_callback' => '_forena_filter_process',
+    'cache' => FALSE,
+  );
 
   return $filters;
 }

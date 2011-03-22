@@ -108,7 +108,7 @@ class FrxSyntaxEngine {
 
 
     if (is_array($data)) {
-      $retvar = $data[$key];
+      $retvar = @$data[$key];
     }
     elseif (is_object($data)) {
 

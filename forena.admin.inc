@@ -186,7 +186,7 @@ function forena_delete_report($report_name) {
     $do = unlink($info['basename']);
     if ($do) {
       db_delete('forenea_reports')
-        ->condition('report_name',$report_name)
+        ->condition('report_name', $report_name)
         ->execute();
     }
     else {
@@ -246,14 +246,14 @@ function forena_db_sync($subdir='') {
 }
 
 function forena_filter_element($fmt) {
-	global $user;
-	$element['format'] =  array(
-	  '#type' => 'fieldset',
-	  '#collapsible' => TRUE,
-	  '#collapsed' => TRUE,
-	  '#title' => t('Input formats'),
-	);
-	  // Get a list of formats that the current user has access to.
+  global $user;
+  $element['format'] =  array(
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#title' => t('Input formats'),
+  );
+    // Get a list of formats that the current user has access to.
   $formats = filter_formats($user);
   foreach ($formats as $format) {
     $options[$format->format] = $format->name;
@@ -280,7 +280,7 @@ function forena_filter_element($fmt) {
     '#attributes' => array('class' => array('filter-help')),
     '#weight' => 11,
   );
-	return $element['format'];
+  return $element['format'];
 }
 
 /**
@@ -353,12 +353,12 @@ function forena_settings_submit($form, &$form_state) {
   }
   $save_count = forena_db_sync();
 
-  drupal_set_message(t(' Imported %s forms into the database', array('%s' => $save_count)));
+  drupal_set_message(t('Imported %s forms into the database', array('%s' => $save_count)));
   menu_cache_clear();
 }
 
 
-function forenea_general_form($form_state, $new_report='') {
+function forenea_general_form($formid, $form_state, $new_report='') {
   $desc = forena_report_desc();
   $name = $desc['name'];
   $add_new_rpt;
@@ -377,35 +377,44 @@ function forenea_general_form($form_state, $new_report='') {
  * @param $form_state
  * @return the form
  */
-function forena_layout_form($form_state, $new_report='') {
+function forena_layout_form($formid, $form_state, $new_report='') {
   $desc = forena_report_desc();
   $name = $desc['name'];
-  $add_new_rpt;
   //determine if this is an add new report request
-  if ($new_report == 'add') {
+  if ($new_report) {
     $add_new_rpt = TRUE;
   }
   else $add_new_rpt = FALSE;
 
   $filename = $desc['filename'];
   $format = @$desc['format'];
-  //drupal_set_message("name: ". $name);
   if ($name) {
-    if ($desc['exists'] || $add_new_rpt) {
+    if ((isset($desc['exists']) && $desc['exists']) || $add_new_rpt) {
       //set the name to empty string for new reports
       if ($add_new_rpt) $name = '';
-
       $r = forena_get_report($name);
-      drupal_set_title($r->title);
+
+      if ($add_new_rpt) {
+        $title = '';
+        $options = '';
+        $attributes ='';
+        $frx_options = array('form' => '');
+        $category='';
+        $head = '';
+        $body = '';
+
+      }
+      else {
+        $title = (string)$r->title;
+        drupal_set_title(filter_xss($r->title));
+        $frx_options = isset($r->options) ? $r->options : array('form' => '');
+        $attributes = isset($r->attributes) ?   $r->get_attributes_by_id(): '';
+        $category = isset($r->category) ? (string)$r->category : '' ;
+        $body = isset($r->body) ? $r->body->asXML() : '';
+        $head = isset($r->rpt_xml) ? $r->rpt_xml->head : '';
+      }
       $form = array();
-      $title = (string)$r->title;
 
-      // Get the attributes to save them away
-      if ($r) $attributes = $r->get_attributes_by_id();
-
-      if ($r) $frx_options = $r->options;
-      $category = (string)$r->category;
-      if ($r) $body = $r->body->asXML();
 
       //array of xml attributes that are required to have a value
       $required = array('id' => TRUE, 'label' => TRUE);
@@ -420,7 +429,7 @@ function forena_layout_form($form_state, $new_report='') {
 
       $form['head'] = array(
         '#type' => 'value',
-        '#value' => $r->rpt_xml->head,
+        '#value' => $head,
       );
 
       $form['attributes'] = array(
@@ -490,7 +499,7 @@ function forena_layout_form($form_state, $new_report='') {
         foreach ($doclist as $key => $value) {
           if (is_object(forena_get_doctypes($value))) {
             $options[$value] = strtoupper($value);
-            if ($r) $doc =  $r->rpt_xml->head->xpath('frx:docgen/frx:doc[@type="' . $value . '"]');
+            $doc =  isset($r) ? $r->rpt_xml->head->xpath('frx:docgen/frx:doc[@type="' . $value . '"]') : '';
             if ($doc && $doclist[$value]) {
               $default[$value] = $value;
             }
@@ -567,6 +576,7 @@ function forena_layout_form_validate($form, &$form_state) {
  * submits it to forena_save_report.
  */
 function forena_layout_form_submit($form, &$form_state) {
+  $nodes = array();
   $values = $form_state['values'];
   $report_name = $values['report_name'];
 
@@ -585,7 +595,7 @@ function forena_layout_form_submit($form, &$form_state) {
   $xml .= '/>' . "\n";
 
   $xml .= '    <frx:parameters>' . "\n";
-  if ($h) $parms = $h->xpath('//frx:parm');
+  $parms = $h ?  $h->xpath('//frx:parm') : array();
   if ($parms) foreach ($parms as $parm) {
     $xml .= '      ' . $parm[0]->asXML() . "\n";
   }
@@ -669,7 +679,7 @@ function forena_doc_formats_settings() {
  * @param $form_state
  * @return a form to edit the fields of the report
  */
-function forena_fields_form($form_state) {
+function forena_fields_form($formid, $form_state) {
   $desc = forena_report_desc();
   $name = $desc['name'];
   $filename = $desc['filename'];
@@ -850,7 +860,7 @@ function forena_fields_form_submit($form, &$form_state) {
  * @param unknown_type $form_state
  * @return unknown_type
  */
-function forena_data_block_form($form_state) {
+function forena_data_block_form($formid, $form_state) {
   $desc = forena_report_desc();
   $name = $desc['name'];
   $filename = $desc['filename'];
@@ -1316,7 +1326,7 @@ function forena_xmlpp($xml, $html_output=FALSE) {
     return ($html_output) ? htmlentities($xml) : $xml;
 }
 
-function forena_admin_params_form($form_state) {
+function forena_admin_params_form($formid, $form_state) {
 
   $desc = forena_report_desc();
   $name = $desc['name'];
@@ -1472,9 +1482,10 @@ function forena_admin_params_form_submit($form, &$form_state) {
  * @return An array containing all matching categories
  */
 function forena_get_categories($string='') {
-  $result = db_query("SELECT * FROM {forena_reports} where hidden=0 AND category LIKE '%%%s%%' ORDER BY category, title asc", $string);
+  $result = db_query("SELECT * FROM {forena_reports} where hidden=0 AND category LIKE :category ORDER BY category, title asc",
+    array(':category' => $string . '%'));
   $categories = array();
-  while ($row = db_fetch_object($result)) {
+  foreach ($result as $row)  {
       $access = TRUE;
       $cache = $row->cache;
 

@@ -213,7 +213,7 @@ class FrxReport {
       $path = 'frx:field[@id="' . $key . '"]';
       $formatters = $this->fields->xpath($path);
       if ($formatters) foreach ($formatters as $formatter) {
-        if (((string)$formatter['block'] == $this->block) || (!(string)$formatter['block'])) {
+        if ((isset($formatter['block']) &&(string)$formatter['block'] == $this->block) || (!(string)$formatter['block'])) {
 
            //@TODO: Replace the default extraction with something that will get sub elements of the string
            $default = (string)$formatter;
@@ -237,7 +237,8 @@ class FrxReport {
 
     if ($link) {
       $link = $this->teng->replace($link,  $data, TRUE);
-      list($url, $query) = explode('?', $link);
+      @list($url, $query) = explode('?', $link);
+      drupal_set_message($url);
       $value = l(htmlspecialchars_decode($value), $url, array('query' => $query, 'attributes' => array('target' => $target)));
     }
     return $value;
