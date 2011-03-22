@@ -1195,7 +1195,7 @@ function forena_clean_xhtml($xhtml) {
       'output-xml'         => TRUE,
       'indent-attributes'  => FALSE,
       'indent-spaces'      => 2,
-      'add_xml_space'      => TRUE,
+      'add-xml-space'      => TRUE,
       'wrap'               => 135 );
     $ret = tidy_repair_string($xhtml, $config, 'utf8');
   }
