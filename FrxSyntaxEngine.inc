@@ -1,4 +1,5 @@
 <?php
+// $Id$
 /**
  * @file
  * FrXSytnaxEngine defines how regular expression procesing/token substitution takes place.
@@ -39,11 +40,11 @@ class FrxSyntaxEngine {
    * @return unknown_type
    */
   public function push_data($data, $id='') {
-  	$this->data_stack[]=$data;
+    $this->data_stack[] = $data;
 
-  	if ($id) {
-  	  $this->data_sources[$id] = $data;
-  	}
+    if ($id) {
+      $this->data_sources[$id] = $data;
+    }
   }
 
   /**
@@ -53,10 +54,10 @@ class FrxSyntaxEngine {
    * @return unknown_type
    */
   public function pop_data($id='') {
-  	array_pop($this->data_stack);
-  	if ($id) {
-  		unset($this->data_stack[$id]);
-  	}
+    array_pop($this->data_stack);
+    if ($id) {
+      unset($this->data_stack[$id]);
+    }
   }
 
   /**
@@ -92,14 +93,14 @@ class FrxSyntaxEngine {
     $retvar = '';
     // Determne which $data var we're going to get
     if ($this->data_stack) {
-    	$i = count($this->data_stack) - 1;
-    	$data = $this->data_stack[$i];
+      $i = count($this->data_stack) - 1;
+      $data = $this->data_stack[$i];
     }
 
     // Determine if we have a . syntax for the id.
     if ($key) {
-      list($id,$path) = explode('.',$key,2);
-      if ($data && $this->data_sources[$id]) {
+      @list($id, $path) = explode('.', $key, 2);
+      if ($data && isset($this->data_sources[$id])) {
         $data = $this->data_sources[$id];
         $key = $path;
       }
@@ -107,16 +108,16 @@ class FrxSyntaxEngine {
 
 
     if (is_array($data)) {
-      $retvar = $data[$key];
+      $retvar = @$data[$key];
     }
     elseif (is_object($data)) {
 
-      if (strpos($key,'=')===0) {
-        $retvar = $this->simplexml_evaluate($data,ltrim($key,'='));
+      if (strpos($key, '=')===0) {
+        $retvar = $this->simplexml_evaluate($data, ltrim($key, '='));
       }
       else {
         $rows = $data->xpath($key);
-
+        $x ='';
         if ($rows) $x = $rows[0];
 
         if ($x) $retvar = $x->asXML();
@@ -131,7 +132,7 @@ class FrxSyntaxEngine {
 
         }
         else {
-        	$retvar = (string)$x;
+          $retvar = (string)$x;
         }
       }
 
@@ -165,7 +166,11 @@ class FrxSyntaxEngine {
       foreach ($match[0] as $match_num => $token) {
          $path = trim($token, $this->trim_chars);
          $value = $this->get_value($path, $raw);
-         $text = str_replace($token, $value, $text);
+
+		      $pos = strpos($text, $token);
+		      if ($pos !== false) {
+		        $text = substr_replace($text,$value,$pos,strlen($token));
+		      }
       }
     }
     if ($data) $this->pop_data();
