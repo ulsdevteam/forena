@@ -166,11 +166,10 @@ class FrxSyntaxEngine {
       foreach ($match[0] as $match_num => $token) {
          $path = trim($token, $this->trim_chars);
          $value = $this->get_value($path, $raw);
-
-		      $pos = strpos($text, $token);
-		      if ($pos !== false) {
-		        $text = substr_replace($text,$value,$pos,strlen($token));
-		      }
+		     $pos = strpos($text, $token);
+		     if ($pos !== false) {
+		       $text = substr_replace($text,$value,$pos,strlen($token));
+		     }
       }
     }
     if ($data) $this->pop_data();
