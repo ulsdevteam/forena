@@ -644,11 +644,15 @@ function forena_layout_form_submit($form, &$form_state) {
   if (!file_exists($filename)) {
     $new_rpt = TRUE;
   }
+  else {
+  	$new_rpt = FALSE;
+  }
 
 
   if (forena_save_report($file, $o->rpt_xml, TRUE) == 1) {
     drupal_set_message(t('Your report, %s has been saved.', array($file)));
     //if this is a new report then redirect to data blocks
+
     if ($new_rpt) {
       $form_state['redirect']= 'reports/' . str_replace('/', '.', $file) . '/data';
     }
@@ -860,7 +864,7 @@ function forena_fields_form_submit($form, &$form_state) {
  * @param unknown_type $form_state
  * @return unknown_type
  */
-function forena_data_block_form($formid, $form_state) {
+function forena_data_block_form($formid, &$form_state) {
   $desc = forena_report_desc();
   $name = $desc['name'];
   $filename = $desc['filename'];
@@ -968,18 +972,21 @@ function forena_data_block_form($formid, $form_state) {
       );
 
       foreach ($params as $param) {
+      	$p_val = isset($rpt_params[$param]) ? $rpt_params[$param]: '';
         $form['params'][$param] = array(
           '#type' => 'textfield',
           '#title' => t($param),
-          '#default_value' => ($param_values[$param]) ? $param_values[$param] : $rpt_params[$param]['value'],
+          '#default_value' => (isset($param_values[$param])) ? $param_values[$param] : $p_val,
         );
       }
     }
 
-    $form['output'] = array(
-      '#type' => 'markup',
-      '#value' => '</p>' . @$form_state['storage']['output'] . '</p>',
-    );
+    if (isset($form_state['storage']['output'])) {
+	    $form['output_text'] = array(
+	      '#type' => 'markup',
+	      '#markup' => '</p>' . $form_state['storage']['output'] . '</p>',
+	    );
+    }
 
     $form['preview'] = array(
       '#type' => 'submit',
@@ -1034,18 +1041,18 @@ function forena_data_block_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   $data_block = $values['data_block'];
   $template = $values['templates'];
-  $params = $values['params'];
+  $params = isset($values['params']) ? $values['params'] : array();
   $name = $values['report_name'];
   $where_clause = $values['where_clause'];
   $r = forena_get_report($name);
 
-  $form_state['storage']['param_values'] = $values['params'];
+  $form_state['storage']['param_values'] = $params;
   $form_state['storage']['data_block'] = $data_block;
   $form_state['storage']['template'] = $template;
   $form_state['storage']['where_clause'] = $where_clause;
-
+  $form_state['rebuild'] = TRUE;
   if ($data_block)  {
-    //get xml from data block
+     //get xml from data block
     //check for and store parameters
     $block_info = forena_load_block($data_block, $where_clause);
     if ($block_info) {
@@ -1099,13 +1106,13 @@ function forena_data_block_form_submit($form, &$form_state) {
  *
  */
 function forena_data_block_add($form, &$form_state) {
+  $form_state['rebuild'] = TRUE;
   $values = $form_state['values'];
   $report_name = $values['report_name'];
   $data_block = $values['data_block'];
   $template = $values['templates'];
   $form_params = $values['params'];
   $where_clause = $values['where_clause'];
-
   $r = forena_get_report($report_name);
   $head = $r->rpt_xml->head;
 
@@ -1123,6 +1130,7 @@ function forena_data_block_add($form, &$form_state) {
 
   $path_child = '//frx:parm';
   $child_nodes = $head->xpath($path_child);
+  $found_rpt_param = FALSE;
 
   $parm_name = 'parm';
   //loop through the data block parameters
@@ -1244,7 +1252,7 @@ function forena_clean_xhtml($xhtml) {
       'output-xml'         => TRUE,
       'indent-attributes'  => FALSE,
       'indent-spaces'      => 2,
-      'add_xml_space'      => TRUE,
+      'add-xml-space'      => TRUE,
       'wrap'               => 135 );
     $ret = tidy_repair_string($xhtml, $config, 'utf8');
   }

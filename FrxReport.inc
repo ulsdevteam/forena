@@ -68,7 +68,8 @@ class FrxReport {
                   $parm[$akey] = (string)$attr;
                 }
                 $id = $parm['id'];
-                $parm['value']= ((string)$node) ? (string)$node : $parm['value'];
+                $val = isset($parm['value']) ? $parm['value'] : '';
+                $parm['value']= ((string)$node) ? (string)$node : $val;
                 $this->parameters[$id] = $parm;
               }
               break;

@@ -210,7 +210,7 @@ class FrxControls {
  //template methods
   public function table($columns, $data_block, $clause='') {
     if ($clause) $clause = 'frx:clause ="' . $clause . '"';
-    $xml .= '<div frx:block="' . $data_block . '" ' . $clause . '>';
+    $xml = '<div frx:block="' . $data_block . '" ' . $clause . '>';
     $xml .= '<table>';
     $xml .= '<thead>';
     $xml .= '<tr>';
@@ -229,7 +229,6 @@ class FrxControls {
     $xml .= '</tbody>';
     $xml .= '</table>';
     $xml .= '</div>';
-
     return $xml;
   }
 

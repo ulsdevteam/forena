@@ -436,12 +436,12 @@ function forena_invoke_data_provider($data_block, $parameters=array(), $clause='
  */
 function forena_load_block($data_block, $clause='') {
 
-   list($provider, $block) = explode('/', $data_block, 2);
+   @list($provider, $block) = explode('/', $data_block, 2);
    // Get the data
 
    $repos = forena_repository($provider);
 
-   if ($repos['data']) {
+   if (isset($repos['data'])) {
      $provider = $repos['data'];
      if (method_exists($provider, 'load_block')) {
        $block_info = $provider->load_block($block, $clause);
