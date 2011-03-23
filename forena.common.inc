@@ -352,6 +352,7 @@ function forena_load_cache($r_xhtml) {
   $conf=array();
   $cache = array();
   $blocks = array();
+  $repos = array();
   if (is_object($r_xhtml)) {
 
     $block_xml = $r_xhtml->xpath('//*[@frx:block]');

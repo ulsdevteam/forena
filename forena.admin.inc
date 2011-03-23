@@ -602,7 +602,7 @@ function forena_layout_form_submit($form, &$form_state) {
   $xml .= '    </frx:parameters>' . "\n";
 
   //check if docgen is avaialable for report
-  if ($values['docgen']) {
+  if (isset($values['docgen'])) {
     $xml .= '    <frx:docgen>' . "\n";
     //if no options were checked, default to select all of them
     if ($selected = array_filter($values['docgen']['docs'])) {
