@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Provides data blocks for native drupal connections using the default 
+ * Provides data blocks for native drupal connections using the default
  * drupal connections.
  *
  */
@@ -9,9 +9,9 @@ class FrxDrupal extends FrxDataProvider {
   /**
 	 * Implements hooks into the drupal applications
 	 */
- 
+
   private $db;
-  
+
   /**
    * Object constructor
    *
@@ -20,12 +20,13 @@ class FrxDrupal extends FrxDataProvider {
    */
   public function __construct($conf, $repos_path) {
     parent::__construct($conf, $repos_path);
-     
-    // Set up the stuff required to translate. 
-    $this->te = new FrxSyntaxEngine(FRX_SQL_TOKEN, ':', $this); 
+
+    // Set up the stuff required to translate.
+    $this->te = new FrxSyntaxEngine(FRX_SQL_TOKEN, ':', $this);
   }
+
   /**
-   * Get data based on file data block in the repository. 
+   * Get data based on file data block in the repository.
    *
    * @param String $block_name
    * @param Array $parm_data
@@ -34,57 +35,57 @@ class FrxDrupal extends FrxDataProvider {
   public function data($block_name, $params=array(), $clause='') {
     // Load the block from the file
 
-    $block = $this->load_block($block_name, $clause); 
-    $xml =''; 
-    if ($block['source'] && $this->access($block['access'])) { 
-      $sql = $block['source']; 
+    $block = $this->load_block($block_name, $clause);
+    $xml ='';
+    if ($block['source'] && $this->access($block['access'])) {
+      $sql = $block['source'];
       if ($clause) {
-        $sql = 'SELECT * FROM ('. trim($sql, ' ;') . ') forena_table '. $clause; 
-      }      
-      $sql = $this->te->replace($sql, $params);       
+        $sql = 'SELECT * FROM ('. trim($sql, ' ;') . ') forena_table '. $clause;
+      }
+      $sql = $this->te->replace($sql, $params);
       $rs = db_query($sql);
-      	
-      $xml = new SimpleXMLElement('<table/>'); 
+
+      $xml = new SimpleXMLElement('<table/>');
       while ($data = db_fetch_object($rs)) {
-          $row_node = $xml->addChild('row'); 
-          
+          $row_node = $xml->addChild('row');
+
           foreach ($data as $key => $value) {
-            $row_node->addChild($key, htmlspecialchars($value)); 
-            //$row_node->$key = $value; 
+            $row_node->addChild($key, htmlspecialchars($value));
+            //$row_node->$key = $value;
           }
       }
-        
+
     }
 
-    return $xml;   
+    return $xml;
   }
-  
+
   /**
    * Implement custom SQL formatter to make sure that strings are properly escaped.
-   * Ideally we'd replace this with something that handles prepared statements, but it 
-   * wouldn't work for  
+   * Ideally we'd replace this with something that handles prepared statements, but it
+   * wouldn't work for
    *
    * @param unknown_type $value
    * @param unknown_type $key
    * @param unknown_type $data
    */
-  public function format($value, $key, $data) { 
-    $value =  "'". db_escape_string($value) ."'"; 
-    return $value; 
+  public function format($value, $key, $data) {
+    if ($value=='') $value = 'NULL'; else $value =  "'". db_escape_string($value) ."'";
+  	return $value;
   }
-  
+
   /**
-   * @section 
-   * Formatters 
+   * @section
+   * Formatters
    * Below here are formatting types
    */
   public function formats() {
-    $formats = array('drupal_filter' => 'Drupal Input Filter' 
-                     ); 
-    return $formats; 
+    $formats = array('drupal_filter' => 'Drupal Input Filter'
+                     );
+    return $formats;
   }
 
-  
+
   public function drupal_filter($nid, $format) {
     $node = node_load($nid, NULL, TRUE);
     if (!$node) {
@@ -100,21 +101,21 @@ class FrxDrupal extends FrxDataProvider {
     //else render the body
     $node = node_prepare($node, $bool);
     if ($bool) {
-      return $node->teaser;  
+      return $node->teaser;
     }
     return $node->body;
-  }  
+  }
 }
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
+
+
+
+
+
+
+
