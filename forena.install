@@ -12,11 +12,11 @@
 function forena_schema() {
   $schema['forena_reports'] = array(
     'fields' => array(
-       'report_name' => array('type' => 'varchar', 'length' => 255, 'NOT NULL' => TRUE),
-       'title' => array('type' => 'varchar', 'length' => 63, 'NOT NULL' => TRUE),
-       'file_name' => array('type' => 'varchar', 'length' => 255, 'NOT NULL' => TRUE),
-       'category' => array('type' => 'varchar', 'length' => 255, 'NOT NULL' => FALSE),
-       'hidden' => array('type' => 'int', 'NOT NULL' => FALSE, ),
+       'report_name' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE),
+       'title' => array('type' => 'varchar', 'length' => 63, 'not null' => TRUE),
+       'file_name' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE),
+       'category' => array('type' => 'varchar', 'length' => 255, 'not null' => FALSE),
+       'hidden' => array('type' => 'int', 'not null' => FALSE, ),
        'cache' => array('type' => 'text'),
        'modified' => array('type' => 'int'),
     ),
