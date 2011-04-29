@@ -12,6 +12,7 @@ class FrxOracle extends FrxDataProvider {
 
   private $db;
   private $use_oracle_xml;
+  private $schema;
 
   /**
    * Object constructor
@@ -25,6 +26,7 @@ class FrxOracle extends FrxDataProvider {
     $this->use_oracle_xml = FALSE;
     $uri = $conf['uri'];
     $this->debug = $conf['debug'];
+    if (isset($conf['schema'])) $this->schema = $conf['schema'];
     if ($conf['oracle_xml']) $this->use_oracle_xml = TRUE;
     if ($uri) {
          // Test for postgres suport
@@ -47,6 +49,7 @@ class FrxOracle extends FrxDataProvider {
     // Set up the stuff required to translate.
     $this->te = new FrxSyntaxEngine(FRX_SQL_TOKEN, ':', $this);
   }
+
   /**
    * Get data based on file data block in the repository.
    *
@@ -61,16 +64,24 @@ class FrxOracle extends FrxDataProvider {
     $xml ='';
     if ($block['source'] && $this->access($block['access']) && $db) {
       $sql = $block['source'];
-      if ($clause) {
-        $sql = 'SELECT * FROM (' . trim($sql, ' ;') . ') ' . $clause;
-      }
-      $sql = $this->te->replace($sql, $params);
-
-      if ($this->use_oracle_xml) {
-        $xml = $this->oracle_xml($sql, $block_name);
+      // See if this block matches a declare begin end; syntax.
+      if (stripos($sql,'end;')>= stripos($sql,'begin') && stripos($sql,'begin')!==FALSE) {
+      	$this->call($sql, $params, array('return' => 'clob'));
+      	$xml = $params['return'];
+      	if ($xml) $xml = new SimpleXMLElement($xml);
       }
       else {
-        $xml = $this->php_xml($sql);
+	      if ($clause) {
+	        $sql = 'SELECT * FROM (' . trim($sql, ' ;') . ') ' . $clause;
+	      }
+	      $sql = $this->te->replace($sql, $params);
+
+	      if ($this->use_oracle_xml) {
+	        $xml = $this->oracle_xml($sql, $block_name);
+	      }
+	      else {
+	        $xml = $this->php_xml($sql);
+	      }
       }
       if ($this->debug) {
         $d = ($xml) ? htmlspecialchars($xml->asXML()) : '';
@@ -138,6 +149,123 @@ class FrxOracle extends FrxDataProvider {
       oci_free_statement($stmt);
       return $xml;
   }
+
+    /**
+   * @param $sql string sql script containing function
+   * @param $data array parameter array.
+   * @param $types array containting types
+   * @return oci statement
+   * Call a pl/sql block of code.
+   * The code snippet is expected to contain a begin/end data block as well as
+   * any variable binding that is necessary.  Note that bind variables should appear
+   * only once in the calling code.
+   */
+  public function call($sql, &$data, $types = array()) {
+    $db = $this->db;
+    $begin_end_block = stripos($sql,'begin')===FALSE? FALSE : TRUE;
+    $match=array();
+    if ($db) $stmt = oci_parse($db, $sql);
+    if ($stmt) {
+      if (preg_match_all(FRX_SQL_TOKEN, $sql, $match)) {
+        //list($params) = $match[1];
+        $i=0;
+        foreach ($match[0] as $match_num => $token) {
+           $name = trim($token, ':');
+           $value = $data[$name];
+
+           list($type, $subtype) = explode(' of ', $types[$name], 2);
+           // Default varchar
+           if (!$type )$type = 'varchar';
+           switch (strtolower($type)) {
+             // Handle arrays based on subtype.
+             case 'array':
+               $value = (array) $value;
+               $bind_type = $this->oci_bind_type($subtype);
+               $entries = count($value);
+               if (!count($value)) {
+                  $entries = 255;
+               }
+               oci_bind_array_by_name($stmt, $token, $value, $entries, -1, $bind_type);
+               break;
+
+             case 'clob':
+               $c = oci_new_descriptor($db, OCI_D_LOB);
+               $lobs[$name] = $c;
+               oci_bind_by_name($stmt, $token, $lobs[$name], -1, OCI_B_CLOB);
+               if (is_object($c)) {
+                 $c->writeTemporary($value);
+               }
+               break;
+             case 'number':
+             case 'numeric':
+             case 'varchar':
+               oci_bind_by_name($stmt,$token, $data[$name], 32767);
+               break;
+             default:
+
+               $o = oci_new_collection($db, strtoupper($type), $this->schema);
+               $value = (array)$value;
+               $collections[$name] = $o;
+               if ($value && $o) foreach ($value as $element) {
+                 $o->append($element);
+               }
+               oci_bind_by_name($stmt, $token, $o, -1, OCI_B_NTY);
+               break;
+           }
+        }
+      }
+
+      // putting the @ operator before the oci_execute call will suppress php warnings.
+      try {
+       $r = @oci_execute($stmt, OCI_DEFAULT);
+
+       // Report errors
+       if (!$r) {
+        $e = oci_error($stmt);  // For oci_execute errors pass the statement handle
+        //drupal_set_message(e_display_array($e));
+        if ($e['code'] != '1403') {
+         $msg .=  htmlentities($e['message']);
+         $msg .= "\n<pre>\n";
+         $msg .= htmlentities($e['sqltext']);
+         $msg .= "\n</pre>\n";
+         ora_error('', $msg);
+        }
+       }
+      }
+      catch (Exception $e) {
+         $msg .=  htmlentities($e['message']);
+         $msg .= "\n<pre>\n";
+         $msg .= htmlentities($e['sqltext']);
+         //printf("\n%".($e['offset']+1)."s", "^");
+         $msg .= "\n</pre>\n";
+         ora_error('Database error, see logs for info', $msg);
+       }
+
+      // Retrieve any clob data.
+      if ($lobs) foreach ($lobs as $name=>$lob) {
+        if (is_object($lob)) {
+          $data[$name] = $lob->load();
+          $lob->free();
+        }
+      }
+
+      // Free any collections
+      if ($collections) foreach ($collections as $col) {
+        if ($col) $col->free();
+      }
+      if (!$begin_end_block) {
+        $rows = array();
+        $rows = oci_fetch_all($stmt, $return, null, null, OCI_FETCHSTATEMENT_BY_ROW );
+      }
+
+      oci_free_statement($stmt);
+    }
+
+    return $return;
+  }
+
+
+
 
   /**
    * Implement custom SQL formatter to make sure that strings are properly escaped.
