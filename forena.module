@@ -335,7 +335,7 @@ function forena_user_reports() {
 function forena_report($name_in, $parms = array()) {
   require_once('forena.common.inc');
   $output = '';
-  $desc = forena_report_desc();
+  $desc = forena_report_desc($name_in);
   $name = $desc['name'];
   $format = isset($desc['format']) ? $desc['format'] : '';
   $filename = $desc['filename'];
