@@ -177,14 +177,15 @@ function forena_save_report($report_name, $report, $save_file = FALSE) {
  * Remove the report from the database and file system.
  * @param string $report_name
  */
-function forena_delete_report($report_name) {
+function forena_delete_report($report_name, $delete_file = TRUE) {
   $report_path = forena_report_path();
   $filepath = $report_path .'/'. $report_name .'.frx';
   $info = pathinfo($filepath);
 
   if (file_exists($filepath)) {
     chdir($info['dirname']);
-    $do = unlink($info['basename']);
+    $do = TRUE;
+    if ($delete_file) $do = unlink($info['basename']);
     if ($do) {
       DB_QUERY("DELETE FROM {forena_reports} WHERE report_name='%s'", array($report_name));
     }
