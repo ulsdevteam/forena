@@ -609,7 +609,7 @@ function forena_get_data_block_params($data_block, $field, $label, $params=array
   if ($xml) {
     $path = ($field) ? $field : '*[1]';
     $label_path = ($label) ? $label : '*[2]';
-    drupal_set_message($label);
+
 
     //walk through the $xml.
     $rows = $xml->xpath('*');

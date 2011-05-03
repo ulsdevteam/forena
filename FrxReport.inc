@@ -216,7 +216,6 @@ class FrxReport {
         }
       }
     }
-
     if ($format) {
       $value = forena_format_data($value, $format, $format_str);
     }
@@ -362,11 +361,9 @@ class FrxReport {
    */
   public function set_value($xpath, $value) {
   $xml = $this->rpt_xml;
-  drupal_set_message($xpath);
   $i = strrpos($xpath,'/');
   $path = substr($xpath,0,$i);
   $key = substr($xpath,$i+1);
-  drupal_set_message($path. '-' .$key);
   $nodes = $xml->xpath($path);
   if ($nodes) {
     // if the last part of the xpath is a key then assume the key
