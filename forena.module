@@ -602,9 +602,9 @@ function _forena_filter_process($text='') {
       $parms = array_merge($parms, $in_parms);
       // Debug the result
       $output = '';
-      $r = forena_get_report($report_name);
+      $r = forena_get_report($report_name, $in_parms);
       if ($r) {
-        $output .= forena_render_report($r, NULL, $parms);
+        $output .= $r->render(null);
       }
 
       // Finally replace the parameters
