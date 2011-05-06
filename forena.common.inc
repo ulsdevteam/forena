@@ -746,7 +746,7 @@ function forena_get_doctypes($fkey) {
     $provider = $r;
     if ($provider && method_exists($provider, 'doc_types'))  {
       $f = $provider->doc_types();
-      if ($f[$fkey] && method_exists($provider, $f[$fkey])) {
+      if (isset($f[$fkey]) && method_exists($provider, $f[$fkey])) {
         // We found an object with the advertised method return it
         return $provider;
       }
@@ -852,6 +852,7 @@ function  forena_generate_doc($format, $output, $options = array()) {
         header('Cache-Control:');
         header('Pragma:');
         header("Cache-Control: must-revalidate");
+        print $ret;
         break;
       case 'pdf':
         header('Content-Type: application/pdf');
@@ -859,6 +860,7 @@ function  forena_generate_doc($format, $output, $options = array()) {
         header('Pragma:');
         header("Cache-Control: must-revalidate");
         header("Content-Disposition: attachment; filename=report.pdf");
+        print $ret;
         break;
 
       case 'xls':
@@ -867,6 +869,7 @@ function  forena_generate_doc($format, $output, $options = array()) {
         header('Pragma:');
         header("Cache-Control: must-revalidate");
         header("Content-Disposition: attachment; filename=report.xls");
+        print $ret;
         break;
      case 'csv':
         header('Content-Type: application/csv');
@@ -874,14 +877,16 @@ function  forena_generate_doc($format, $output, $options = array()) {
         header('Pragma:');
         header("Cache-Control: must-revalidate");
         header("Content-Disposition: attachment; filename=report.csv");
+        print $ret;
         break;
+     default:
+     	  return $ret;
+     	  break;
 
     }
-    // Print the output.
-    print $ret;
   }
   else {
-    print $output;
+    return $ret;
   }
 }
 
@@ -932,4 +937,25 @@ function forena_my_reports_block() {
   }
   $output .= '</ul>';
   return $output;
+}
+
+/**
+ * Email confirmation form.   Confirms an email send based on mail merge
+ * @param array $docs An array of SimpleXML email documents to send
+ * @param integer $count Number of documents to send.
+ */
+function forena_confirm_email(&$form_state, $docs, $count) {
+  if ($docs) {
+    foreach ($docs as $doc) {
+      $form_state['storage']['docs'] = $docs;
+      $form_state['storage']['count'] = $count;
+    }
+  }
+  return confirm_form($form, t('Send mail to users'), 'forena', t('Send email to %count users?', array('%count' => $count)));
+}
+
+function forena_confirm_email_submit($form, &$form_state) {
+  foreach ($form_state['storage']['docs'] as $doc) {
+    drupal_mail('forena', 'mailmerge', $doc['to'], language_default(), $doc['parms'], $doc['from'], TRUE);
+  }
 }

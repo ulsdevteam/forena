@@ -617,8 +617,16 @@ function forena_doc_formats_settings() {
 
   $form['forena_doc_formats'] = array(
     '#type' => 'checkboxes',
-    '#title' => t('Document Formats'),
+    '#title' => t('Allowed Document Formats'),
     '#default_value' => variable_get('forena_doc_formats', $supported_doctypes),
+    '#description' => t('check your desired document format'),
+    '#options' => $supported_doctypes,
+  );
+
+  $form['forena_doc_defaults'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Default Document Formats'),
+    '#default_value' => variable_get('forena_doc_defaults', $supported_doctypes),
     '#description' => t('check your desired document format'),
     '#options' => $supported_doctypes,
   );

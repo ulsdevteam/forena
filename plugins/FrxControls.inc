@@ -27,6 +27,7 @@ class FrxControls {
                        'html' => 'htmldocument',
                        'csv' => 'csvdocument',
                        'xls' => 'xlsdocument',
+                       'email' => 'emaildocument',
     );
     return $doc_types;
   }
@@ -64,7 +65,7 @@ class FrxControls {
   }
 
   public function iso_date($value, $format_str) {
-  	if ($value) $date = strtotime($value);
+    if ($value) $date = strtotime($value);
     return $this->drupal_date_format($date, $format_str);
   }
 
@@ -80,20 +81,20 @@ class FrxControls {
     $dec= 2;
     $dec_sep='.';
     $th_sep = ',';
-  	if ($format_str && !trim($format_str,'9.,$')) {
-  	  	// Determine the decimal places.
+    if ($format_str && !trim($format_str,'9.,$')) {
+        // Determine the decimal places.
         $dec_pos = strrpos($format_str, $dec_sep);
         if ($dec_pos) {
-        	$dec = strlen($format_str) - $dec_pos -1;
+          $dec = strlen($format_str) - $dec_pos -1;
         }
         else {
-        	$dec = 0;
-        	$dec_sep = '';
+          $dec = 0;
+          $dec_sep = '';
         }
-  	}
+    }
 
-  	if ($value && $this->is_number($value)) $value = number_format($value, $dec, $dec_sep, $th_sep);
-  	return $value;
+    if ($value && $this->is_number($value)) $value = number_format($value, $dec, $dec_sep, $th_sep);
+    return $value;
 
   }
 
@@ -187,7 +188,7 @@ class FrxControls {
           $inner_symbols = FALSE;
           if (strpos($tval,'+') || strpos($tval,'-') || strpos($tval,' ')) $inner_symbols =  TRUE;
           if (empty($non_numeric_chars) && trim($value)!=='' && !$inner_symbols) {
-          	$output .= '      <Cell><Data ss:Type="Number">' . $tval . '</Data></Cell>' . "\n";
+            $output .= '      <Cell><Data ss:Type="Number">' . $tval . '</Data></Cell>' . "\n";
           }
           else {
             $output .= '      <Cell><Data ss:Type="String">' . $value . '</Data></Cell>' . "\n";
@@ -207,9 +208,44 @@ class FrxControls {
     return $output;
  }
 
+ public function emaildocument($body, $options) {
+   $doc = new DOMDocument();
+   $doc->strictErrorChecking = FALSE;
+   $doc->loadHTML($body);
+   $xml = simplexml_import_dom($doc);
+   $docs = $xml->xpath('.//*[@class="email-document"]');
+   foreach ($docs as $doc) {
+      $from = $doc->xpath('.//*[@class="email-header-from"]');
+      $from = $from ? (string)$from[0] : '';
+      $subject = $doc->xpath('.//*[@class="email-header-subject"]');
+      $subject = $subject ? (string)$subject[0] : '';
+      $to = $doc->xpath('.//*[@class="email-header-to"]');
+      $to = $to ? (string)$to[0] : '';
+      $body = $doc->xpath('.//*[@class="email-body"]');
+      $body = $body ? $body[0]->asXML() : $body;
+      $email = array(
+        'to' => $to,
+        'from' => $from,
+        'parms' => array('subject' => $subject,
+           'body' =>$body),
+         );
+      $emails [] = $email;
+   }
+   $count = count($docs);
+   if ($count) {
+     $output = drupal_get_form('forena_confirm_email', $emails, $count);
+   }
+   else {
+      $output = $body;
+   }
+   return $output;
+ }
+
+
+
  //template methods
   public function table($columns, $data_block, $clause='') {
-  	if ($clause) $clause = 'frx:clause ="'. $clause .'"';
+    if ($clause) $clause = 'frx:clause ="' . $clause . '"';
     $xml .= '<div frx:block="'. $data_block .'" '. $clause .'>';
     $xml .= '<table>';
     $xml .= '<thead>';
