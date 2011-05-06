@@ -450,7 +450,7 @@ function forena_report($name_in, $parms = array()) {
               $type = (string)$arr['type'];
               if ($doctypes[$type]) {
                 if (is_object(forena_get_doctypes($type))) {
-                  $div .= '<a class="doclinks" href="'  . $base . '/report_doc/' . $name_in . '.' . $type . '?' . $q . '">' . strtoupper($type) . '</a>';
+                  $div .= '<a class="doclinks" href="' . $base . '/report_doc/' . $name_in . '.' . $type . '?' . $q . '">' . strtoupper($type) . '</a>';
                 }
               }
             }
@@ -631,12 +631,12 @@ function _forena_filter_process($text='') {
  * Builds an email to send when mailing large numbers of users.
  */
 function forena_mail($key, &$message, $parms) {
-	switch ($key) {
-		case 'mailmerge':
+  switch ($key) {
+    case 'mailmerge':
       $message['subject'] = $parms['subject'];
       $body = $parms['body'];
       $message['body'][] = $body;
       $htmlmail = FALSE;
-			break;
-	}
+      break;
+  }
 }

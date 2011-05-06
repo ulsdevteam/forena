@@ -65,23 +65,23 @@ class FrxOracle extends FrxDataProvider {
     if ($block['source'] && $this->access($block['access']) && $db) {
       $sql = $block['source'];
       // See if this block matches a declare begin end; syntax.
-      if (stripos($sql,'end;')>= stripos($sql,'begin') && stripos($sql,'begin')!==FALSE) {
-      	$this->call($sql, $params, array('return' => 'clob'));
-      	$xml = $params['return'];
-      	if ($xml) $xml = new SimpleXMLElement($xml);
+      if (stripos($sql, 'end;')>= stripos($sql, 'begin') && stripos($sql, 'begin')!==FALSE) {
+        $this->call($sql, $params, array('return' => 'clob'));
+        $xml = $params['return'];
+        if ($xml) $xml = new SimpleXMLElement($xml);
       }
       else {
-	      if ($clause) {
-	        $sql = 'SELECT * FROM (' . trim($sql, ' ;') . ') ' . $clause;
-	      }
-	      $sql = $this->te->replace($sql, $params);
+        if ($clause) {
+          $sql = 'SELECT * FROM (' . trim($sql, ' ;') . ') ' . $clause;
+        }
+        $sql = $this->te->replace($sql, $params);
 
-	      if ($this->use_oracle_xml) {
-	        $xml = $this->oracle_xml($sql, $block_name);
-	      }
-	      else {
-	        $xml = $this->php_xml($sql);
-	      }
+        if ($this->use_oracle_xml) {
+          $xml = $this->oracle_xml($sql, $block_name);
+        }
+        else {
+          $xml = $this->php_xml($sql);
+        }
       }
       if ($this->debug) {
         $d = ($xml) ? htmlspecialchars($xml->asXML()) : '';
@@ -162,7 +162,7 @@ class FrxOracle extends FrxDataProvider {
    */
   public function call($sql, &$data, $types = array()) {
     $db = $this->db;
-    $begin_end_block = stripos($sql,'begin')===FALSE? FALSE : TRUE;
+    $begin_end_block = stripos($sql, 'begin')===FALSE ? FALSE : TRUE;
     $match=array();
     if ($db) $stmt = oci_parse($db, $sql);
     if ($stmt) {
@@ -199,7 +199,7 @@ class FrxOracle extends FrxDataProvider {
              case 'number':
              case 'numeric':
              case 'varchar':
-               oci_bind_by_name($stmt,$token, $data[$name], 32767);
+               oci_bind_by_name($stmt, $token, $data[$name], 32767);
                break;
              default:
 
@@ -242,7 +242,7 @@ class FrxOracle extends FrxDataProvider {
        }
 
       // Retrieve any clob data.
-      if ($lobs) foreach ($lobs as $name=>$lob) {
+      if ($lobs) foreach ($lobs as $name => $lob) {
         if (is_object($lob)) {
           $data[$name] = $lob->load();
           $lob->free();
@@ -255,7 +255,7 @@ class FrxOracle extends FrxDataProvider {
       }
       if (!$begin_end_block) {
         $rows = array();
-        $rows = oci_fetch_all($stmt, $return, null, null, OCI_FETCHSTATEMENT_BY_ROW );
+        $rows = oci_fetch_all($stmt, $return, NULL, NULL, OCI_FETCHSTATEMENT_BY_ROW );
       }
 
       oci_free_statement($stmt);

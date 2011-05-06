@@ -148,7 +148,7 @@ function __forena_load_provider($conf, $repo_path) {
     return $o;
   }
   else {
-  	drupal_set_message(t('Data provider %s not found', array('%s' => $name)) , 'error');
+    drupal_set_message(t('Data provider %s not found', array('%s' => $name)) , 'error');
   }
 
 }
@@ -886,7 +886,7 @@ function  forena_generate_doc($format, $output, $options = array()) {
         print $ret;
         break;
      default:
-     	  return $ret;
+         return $ret;
 
     }
     // Print the output.
@@ -952,16 +952,16 @@ function forena_my_reports_block() {
  * @param integer $count Number of documents to send.
  */
 function forena_confirm_email($form, &$form_state, $docs, $count) {
-	if ($docs) {
-		$form_state['storage']['docs'] = $docs;
-		$form_state['storage']['count'] = $count;
-	}
-	return confirm_form($form, t('Send mail to users'), 'forena', t('Send email to %count users?', array('%count' => $count)));
+  if ($docs) {
+    $form_state['storage']['docs'] = $docs;
+    $form_state['storage']['count'] = $count;
+  }
+  return confirm_form($form, t('Send mail to users'), 'forena', t('Send email to %count users?', array('%count' => $count)));
 }
 
 function forena_confirm_email_submit($form, &$form_state) {
-  foreach($form_state['storage']['docs'] as $doc) {
-  	$from = $doc->xpath('.//*[@class="email-header-from"]');
+  foreach ($form_state['storage']['docs'] as $doc) {
+    $from = $doc->xpath('.//*[@class="email-header-from"]');
     $from = $from ? (string)$from[0] : '';
     $subject = $doc->xpath('.//*[@class="email-header-subject"]');
     $subject = $subject ? (string)$subject[0] : '';

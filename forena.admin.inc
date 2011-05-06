@@ -646,7 +646,7 @@ function forena_layout_form_submit($form, &$form_state) {
     $new_rpt = TRUE;
   }
   else {
-  	$new_rpt = FALSE;
+    $new_rpt = FALSE;
   }
 
 
@@ -981,7 +981,7 @@ function forena_data_block_form($formid, &$form_state) {
       );
 
       foreach ($params as $param) {
-      	$p_val = isset($rpt_params[$param]) ? $rpt_params[$param]: '';
+        $p_val = isset($rpt_params[$param]) ? $rpt_params[$param]: '';
         $form['params'][$param] = array(
           '#type' => 'textfield',
           '#title' => t($param),
@@ -991,10 +991,10 @@ function forena_data_block_form($formid, &$form_state) {
     }
 
     if (isset($form_state['storage']['output'])) {
-	    $form['output_text'] = array(
-	      '#type' => 'markup',
-	      '#markup' => '</p>' . $form_state['storage']['output'] . '</p>',
-	    );
+      $form['output_text'] = array(
+        '#type' => 'markup',
+        '#markup' => '</p>' . $form_state['storage']['output'] . '</p>',
+      );
     }
 
     $form['preview'] = array(
@@ -1444,11 +1444,11 @@ function forena_admin_params_form($formid, $form_state) {
           '#description' => t('Enter a helpful description about this parameter. This will display on the form when the user is prompted to enter a parameter.'),
         );
 
-	      $form['params'][$id]['delete_ind'] = array(
-	        '#type' => 'checkbox',
-	        '#title' => 'Remove this parameter',
-	        '#description' => t('Check to remove this parameter, then save'),
-	      );
+        $form['params'][$id]['delete_ind'] = array(
+          '#type' => 'checkbox',
+          '#title' => 'Remove this parameter',
+          '#description' => t('Check to remove this parameter, then save'),
+        );
       }
 
       $form['submit'] = array(

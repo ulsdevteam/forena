@@ -209,18 +209,19 @@ class FrxControls {
 
  public function emaildocument($body, $options) {
    $doc = new DOMDocument();
- 	 $doc->strictErrorChecking = FALSE;
+   $doc->strictErrorChecking = FALSE;
    $doc->loadHTML($body);
    $xml = simplexml_import_dom($doc);
    $docs = $xml->xpath('.//*[@class="email-document"]');
    $count = count($docs);
    if ($count) {
-   	 $form = drupal_get_form('forena_confirm_email', $docs, $count);
+      $form = drupal_get_form('forena_confirm_email', $docs, $count);
      $output = drupal_render($form);
-   } else {
-   	 $output = $body;
    }
- 	 return $output;
+   else {
+      $output = $body;
+   }
+   return $output;
  }
 
  //template methods
