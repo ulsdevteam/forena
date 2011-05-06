@@ -28,6 +28,7 @@ class FrxControls {
                        'html' => 'htmldocument',
                        'csv' => 'csvdocument',
                        'xls' => 'xlsdocument',
+                       'email' => 'emaildocument',
     );
     return $doc_types;
   }
@@ -141,7 +142,6 @@ class FrxControls {
   }
 
 
-
   public function xlsdocument($body, $options) {
     $output .= '<?xml version="1.0"?>' . "\n";
     $output .= '<?mso-application progid="Excel.Sheet"?>' . "\n";
@@ -205,6 +205,22 @@ class FrxControls {
     }
     $output .= '</Workbook>';
     return $output;
+ }
+
+ public function emaildocument($body, $options) {
+   $doc = new DOMDocument();
+ 	 $doc->strictErrorChecking = FALSE;
+   $doc->loadHTML($body);
+   $xml = simplexml_import_dom($doc);
+   $docs = $xml->xpath('.//*[@class="email-document"]');
+   $count = count($docs);
+   if ($count) {
+   	 $form = drupal_get_form('forena_confirm_email', $docs, $count);
+     $output = drupal_render($form);
+   } else {
+   	 $output = $body;
+   }
+ 	 return $output;
  }
 
  //template methods

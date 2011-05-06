@@ -42,6 +42,14 @@ function forena_menu() {
     'file' => 'forena.common.inc',
      );
 
+ $items['report_doc/%'] = array(
+    'page callback' => 'forena_report',
+    'page arguments' => array(1),
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+    'file' => 'forena.common.inc',
+     );
+
 
    $items['reports/%/view'] = array(
     'title' => 'View',
@@ -301,6 +309,7 @@ function forena_permission() {
     'create any report' => array('title' => t('Create a report')),
     'design any report' => array('title' => t('Design reports')),
     'delete report' => array('title' => t('Delete reports')),
+    'perform email merge' => array('title' => t('Peform email merge')),
     );
   //@TODO: Add the ability to create subrepositories with different permissions.
   return $perms;
@@ -389,6 +398,8 @@ function forena_report($name_in, $parms = array()) {
       if ($format) { //a format was requested
         $header = '<h1>' . $title . '</h1>';
         $output = $header . $output;
+        $css_text = '';
+        $r_text = '';
         if ($css_files) foreach ($css_files as $css_file) {
           $css_text .= file_get_contents($css_file);
         }
@@ -398,7 +409,8 @@ function forena_report($name_in, $parms = array()) {
                          'title' => $title[0],
                    );
 
-        forena_generate_doc($format, $output, $options);
+        $output = forena_generate_doc($format, $output, $options);
+        return $output;
       }
       else {
         // We've got parameters so display the parameters form
@@ -421,12 +433,13 @@ function forena_report($name_in, $parms = array()) {
         $rpt_xml = $r->rpt_xml;
         $nodes = $rpt_xml->xpath('//frx:docgen/frx:doc');
         $div = '<div class="doclinks">';
-        $default_doctypes = variable_get('forena_doc_formats', array());
+        $default_doctypes = variable_get('forena_doc_defaults', array());
+        $base = base_path();
         if (!$missing_parms) {
           if (!$nodes) {
             //show the default. All supported links
             foreach ($default_doctypes as $value) if (is_object(forena_get_doctypes($value))) {
-              $div .= '<a class="doclinks" href="' . $name_in . '.' . $value . '?' . $q . '">' . strtoupper($value) . '</a>';
+              $div .= '<a class="doclinks" href="' . $base . '/report_doc/' . $name_in . '.' . $value . '?' . $q . '">' . strtoupper($value) . '</a>';
             }
           }
           else {
@@ -437,7 +450,7 @@ function forena_report($name_in, $parms = array()) {
               $type = (string)$arr['type'];
               if ($doctypes[$type]) {
                 if (is_object(forena_get_doctypes($type))) {
-                  $div .= '<a class="doclinks" href="' . $name_in . '.' . $type . '?' . $q . '">' . strtoupper($type) . '</a>';
+                  $div .= '<a class="doclinks" href="'  . $base . '/report_doc/' . $name_in . '.' . $type . '?' . $q . '">' . strtoupper($type) . '</a>';
                 }
               }
             }
@@ -465,7 +478,6 @@ function forena_report($name_in, $parms = array()) {
   }
 }
 
-
 /**
  * Render report with some data
  *
@@ -481,12 +493,9 @@ function forena_render_report($report, $format='', $data='', $options= array()) 
 
   //If a format was requested render a custom non-drupal document
   if ($format) {
-    forena_generate_doc($format, $output, $options);
+    $output = forena_generate_doc($format, $output, $options);
   }
-  else {
-    return $output;
-  }
-
+  return $output;
 }
 
 /**
@@ -615,4 +624,19 @@ function _forena_filter_process($text='') {
   }
   // If we didn't find anything return the text.
   return $text;
+}
+
+/**
+ * Impementation of hook_mail
+ * Builds an email to send when mailing large numbers of users.
+ */
+function forena_mail($key, &$message, $parms) {
+	switch ($key) {
+		case 'mailmerge':
+      $message['subject'] = $parms['subject'];
+      $body = $parms['body'];
+      $message['body'][] = $body;
+      $htmlmail = FALSE;
+			break;
+	}
 }
