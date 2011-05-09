@@ -15,7 +15,7 @@
 <body>
     <div frx:block="drupal/active_users" id="forena-1" frx:foreach="*">
         <div class="email-document">
-        <div class="email-header">
+        <div >
           <table>
             <tbody>         
             <tr>
@@ -28,7 +28,7 @@
             </tr>
             <tr>
               <th>Subject</th>
-              <td class="email-header-subject">Sample Active User Email</td>
+              <td class="email-header-subject">Sample Email</td>
             </tr>
               </tbody>
           </table>

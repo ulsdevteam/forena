@@ -37,6 +37,7 @@ class FrxControls {
   public function templates() {
     $templates = array('table' => 'table',
                        'vertical_list' => 'list',
+                       'email_merge' => 'email merge',
                       );
 
     return $templates;
@@ -267,4 +268,39 @@ class FrxControls {
 
     return $xml;
   }
+
+  public function email_merge($columns, $data_block, $clause) {
+    if ($clause) $clause = 'frx:clause ="'. $clause .'"';
+    $xml = '<div frx:block="'. $data_block .'" '. $clause .' frx:foreach="*">';
+    $xml .='<div class="email-document">';
+    $xml .='<div class="email-header">
+    <table>
+      <tbody>
+        <tr>
+          <th>From</th>
+          <td class="email-header-from">metzlerd@evergreen.edu</td>
+        </tr>
+       <tr>
+         <th>To</th>
+         <td class="email-header-to">{email}</td>
+       </tr>
+       <tr>
+         <th>Subject</th>
+         <td class="email-header-subject"></td>
+       </tr>
+     </tbody>
+    </table>
+   </div>';
+   $xml .= '<div class="email-body"><p>';
+
+   foreach ($columns as $column) {
+    $xml .= '{' . $column . '} ';
+   }
+
+   $xml .= '</p></div>';
+   $xml .= '</div>';
+   $xml .= '</div>';
+   return $xml;
+  }
+
 }
