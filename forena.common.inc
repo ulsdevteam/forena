@@ -955,7 +955,9 @@ function forena_confirm_email(&$form_state, $docs, $count) {
 }
 
 function forena_confirm_email_submit($form, &$form_state) {
+	global $user;
   foreach ($form_state['storage']['docs'] as $doc) {
-    drupal_mail('forena', 'mailmerge', $doc['to'], language_default(), $doc['parms'], $doc['from'], TRUE);
+  	$to = variable_get('forena_email_override', FALSE) ? $user->mail : $doc['to'];
+    drupal_mail('forena', 'mailmerge', $to, language_default(), $doc['parms'], $doc['from'], TRUE);
   }
 }

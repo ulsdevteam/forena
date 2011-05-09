@@ -630,6 +630,14 @@ function forena_doc_formats_settings() {
     '#description' => t('check your desired document format'),
     '#options' => $supported_doctypes,
   );
+
+  $form['forena_email_override'] = array(
+    '#type' => 'checkbox',
+    '#title' => 'Run email merges in test mode' ,
+    '#default_value' => variable_get('forena_email_override',FALSE),
+    '#description' => t('When this box is checked emails are sent to the currently logged in user.  Useful for testing environments.'),
+  );
+
   return system_settings_form($form);
 }
 
@@ -1209,6 +1217,7 @@ function forena_clean_xhtml($xhtml) {
     $ret = tidy_repair_string($xhtml, $config, 'utf8');
   }
   else {
+  	drupal_set_message('replace');
     $ret = str_replace('&nbsp;', '&#160;', $ret);
   }
   return $ret;

@@ -162,7 +162,7 @@ class FrxControls {
     $output .= '  </Style>' . "\n";
     $output .= '</Styles>' . "\n";
 
-    $doc = new DOMDocument();
+    $doc = new DOMDocument('1.0', 'UTF-8');
     $doc->strictErrorChecking = FALSE;
     $doc->loadHTML($body);
     $xml = simplexml_import_dom($doc);
@@ -209,7 +209,7 @@ class FrxControls {
  }
 
  public function emaildocument($body, $options) {
-   $doc = new DOMDocument();
+   $doc = new DOMDocument('1.0', 'UTF-8');
    $doc->strictErrorChecking = FALSE;
    $doc->loadHTML($body);
    $xml = simplexml_import_dom($doc);
