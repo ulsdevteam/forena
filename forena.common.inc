@@ -960,6 +960,7 @@ function forena_confirm_email($form, &$form_state, $docs, $count) {
 }
 
 function forena_confirm_email_submit($form, &$form_state) {
+	global $user;
   foreach ($form_state['storage']['docs'] as $doc) {
     $from = $doc->xpath('.//*[@class="email-header-from"]');
     $from = $from ? (string)$from[0] : '';
@@ -973,6 +974,9 @@ function forena_confirm_email_submit($form, &$form_state) {
       'body' => $body,
       'subject' => $subject,
     );
+    if (variable_get('forena_email_override', FALSE)) {
+    	$to = $user->mail;
+    }
     drupal_mail('forena', 'mailmerge', $to, language_default(), $parms, $from, TRUE);
   }
 }
