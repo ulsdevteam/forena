@@ -92,6 +92,7 @@ class FrxSyntaxEngine {
   protected function get_value( $key, $raw=FALSE) {
     $retvar = '';
     // Determne which $data var we're going to get
+    $data = array();
     if ($this->data_stack) {
       $i = count($this->data_stack) - 1;
       $data = $this->data_stack[$i];

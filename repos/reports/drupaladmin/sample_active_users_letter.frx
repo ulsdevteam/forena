@@ -9,13 +9,12 @@
     <frx:docgen>
       <frx:doc type="email"/>
     </frx:docgen>
-<frx:fields>
-    </frx:fields>
+<frx:fields><frx:field id="mail" link="" format="" format-string="" target=""/><frx:field id="name" link="" format="" format-string="" target=""/></frx:fields>
   </head>
 <body>
     <div frx:block="drupal/active_users" id="forena-1" frx:foreach="*">
         <div class="email-document">
-        <div >
+        <div>
           <table>
             <tbody>         
             <tr>
