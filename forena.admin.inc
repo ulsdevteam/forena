@@ -572,7 +572,7 @@ function forena_layout_form_submit($form, &$form_state) {
   $docgen = array();
   if($selected = array_filter($values['docgen']['docs'])) {
     foreach ($selected as $key => $value) {
-     if ($value) $docgen[] = $key;
+     if ($value) $docgen[] = array('type' => $key);
     }
   }
   $r->setDocgen($docgen);
