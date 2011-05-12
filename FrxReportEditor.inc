@@ -30,10 +30,10 @@ class FrxReportEditor {
     // Load a new one or build the empty XML Document
     if ($xml_string) {
     	// Eliminate the xml headers that don't have encoding info
-    	$xml_string = str_ireplace('</<xml verion="1.0"?>','',$xml_string);
+    	$xml_string = str_ireplace('<?xml version="1.0"?>','',$xml_string);
       // If the <?xml code is missing assume UTF-8
       if (strpos($xml_string, '<?xml')===FALSE) {
-        $xml_string = '<?xml version="1.0" encoding="UTF-8"?>';
+        $xml_string = $this->doc_prefix . "\n" . $xml_string;
       }
     }
     else {
