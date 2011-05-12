@@ -181,17 +181,16 @@ function forena_delete_report($report_name, $delete_file = TRUE) {
   $report_path = forena_report_path();
   $filepath = $report_path .'/'. $report_name .'.frx';
   $info = pathinfo($filepath);
-
+  $do = TRUE;
   if (file_exists($filepath)) {
     chdir($info['dirname']);
-    $do = TRUE;
     if ($delete_file) $do = unlink($info['basename']);
-    if ($do) {
-      DB_QUERY("DELETE FROM {forena_reports} WHERE report_name='%s'", array($report_name));
-    }
-    else {
-      drupal_set_message('Unable to delete file '. $info['basename'],'error');
-    }
+  }
+  if ($do) {
+    DB_QUERY("DELETE FROM {forena_reports} WHERE report_name='%s'", array($report_name));
+  }
+  else {
+    drupal_set_message('Unable to delete file '. $info['basename'],'error');
   }
 }
 
