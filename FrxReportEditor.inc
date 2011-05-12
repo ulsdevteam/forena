@@ -239,6 +239,12 @@ class FrxReportEditor {
    * @param unknown_type $docgenElements
    */
   public function setDocgen($docgenElements) {
+  	$dom = $this->dom;
+    $newDocs = $dom->createElementNS($this->xmlns, 'docgen');
+    $this->verifyHeaderElements(array('docgen'));
+    $dnode = $dom->getElementsByTagNameNS($this->xmlns, 'docgen')->item(0);
+    $p = $dnode->parentNode;
+    $p->replaceChild($newDocs, $dnode);
     $this->setFrxHeader('docgen', 'doc',
       $docgenElements,
       array('type'),
