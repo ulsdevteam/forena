@@ -176,23 +176,20 @@ function forena_save_report($report_name, $report, $save_file = FALSE) {
  * Remove the report from the database and file system.
  * @param string $report_name
  */
-function forena_delete_report($report_name, $delete_file=TRUE) {
+function forena_delete_report($report_name, $delete_file = TRUE) {
   $report_path = forena_report_path();
-  $filepath = $report_path . '/' . $report_name . '.frx';
+  $filepath = $report_path .'/'. $report_name .'.frx';
   $info = pathinfo($filepath);
-
+  $do = TRUE;
   if (file_exists($filepath)) {
     chdir($info['dirname']);
-    $do=TRUE;
     if ($delete_file) $do = unlink($info['basename']);
-    if ($do) {
-      db_delete('forenea_reports')
-        ->condition('report_name', $report_name)
-        ->execute();
-    }
-    else {
-      drupal_set_message(t('Unable to delete file %s', array($info['basename'])), 'error');
-    }
+  }
+  if ($do) {
+    DB_QUERY("DELETE FROM {forena_reports} WHERE report_name='%s'", array($report_name));
+  }
+  else {
+    drupal_set_message('Unable to delete file '. $info['basename'],'error');
   }
 }
 
