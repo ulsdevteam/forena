@@ -814,7 +814,6 @@ function forena_fields_form_submit($form, &$form_state) {
 
   if (forena_save_report($name, $r->asXML(), TRUE) == 1) {
     drupal_set_message(t('Your report, %s has been saved.', array('%s' => $name)));
-    $form_state['redirect']= 'reports/' . arg(1);
   }
   else {
     drupal_set_message(t('There was an error saving your report, %s to the database.', array('%s' => $name)));

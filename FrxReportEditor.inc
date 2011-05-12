@@ -184,7 +184,7 @@ class FrxReportEditor {
   	// Iterate through all child arrays in the header
   	foreach ($element_array as $element_data) {
       $id = $element_data[$id_field];
-      $path = 'frx:' . $parent . '/frx:' . $element . '[' . $id_field . '="' . $id . '"]';
+      $path = '//frx:' . $parent . '/frx:' . $element . '[@' . $id_field . '="' . $id . '"]';
       $nodes = $xpq->query($path);
   	  $value = null;
       if ($element && isset($element_data[$element_field])) {
@@ -336,8 +336,11 @@ class FrxReportEditor {
 
   	$pnode = $dom->getElementsByTagNameNS($this->xmlns, 'parameters')->item(0);
     $path = '//frx:parameters/frx:parm[@id="' . $id . '"]';
+
     $nodes = $xpq->query($path);
-    if ($nodes->length) $pnode->removeChild($nodes->item(0));
+    if ($nodes->length) {
+      foreach ($nodes as $node) $pnode->removeChild($node);
+    }
   }
 
   /**
