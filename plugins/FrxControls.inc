@@ -145,7 +145,7 @@ class FrxControls {
 
 
   public function xlsdocument($body, $options) {
-    $output .= '<?xml version="1.0"?>' . "\n";
+    $output .= '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
     $output .= '<?mso-application progid="Excel.Sheet"?>' . "\n";
     $output .= '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"' . "\n";
     $output .= '  xmlns:o="urn:schemas-microsoft-com:office:office"' . "\n";
