@@ -595,7 +595,6 @@ function forena_layout_form_submit($form, &$form_state) {
     $new_rpt = FALSE;
   }
 
-  drupal_set_message(htmlspecialchars($r->asXML()));
   if (forena_save_report($report_name, $r->asXML(), TRUE) == 1) {
       drupal_set_message('Your report, "' . $report_name . '" has been saved.');
     //if this is a new report then redirect to data blocks
