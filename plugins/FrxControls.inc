@@ -6,7 +6,8 @@
  */
 
 class FrxControls {
-  /**
+
+	/**
    * @section
    * Below here are advertising methods
    */
@@ -124,7 +125,8 @@ class FrxControls {
   public function csvdocument($body, $options) {
     $doc = new DOMDocument();
     $doc->strictErrorChecking = FALSE;
-    $doc->loadHTML($body);
+    $xmlBody = '<?xml version="1.0" encoding="UTF-8"?>' . $body;
+    $doc->loadHTML($xmlBody);
     $xml = simplexml_import_dom($doc);
 
     $rows = $xml->xpath('//tr');
