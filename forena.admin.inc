@@ -375,7 +375,7 @@ function forena_settings_submit($form, &$form_state) {
   }
   $save_count = forena_db_sync();
 
-  drupal_set_message(t('Imported %s forms into the database', array('%s' => $save_count)));
+  drupal_set_message(t('Imported %s reports into the database', array('%s' => $save_count)));
   menu_cache_clear();
 }
 

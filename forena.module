@@ -322,6 +322,9 @@ function forena_user_reports() {
   $output='';
   $reports = forena_get_user_reports();
   $report_repos = variable_get('forena_path', 'reports');
+  if (!$reports) {
+    $output = 'No Reports Found';
+  }
   $links = '';
   foreach ($reports as $category => $reports) {
     $links .= '<li><a href="#' . urlencode($category) . '">' . $category . '</a></li> ';
