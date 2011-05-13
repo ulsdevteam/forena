@@ -32,6 +32,12 @@ function forena_update_6001() {
   return $ret;
 }
 
+function forena_update_6002() {
+  $ret = array();
+  db_drop_field($ret, 'forena_reports', 'file_name');
+  return $ret;
+}
+
 /**
  * Basic install and uninstall hooks. 
  *
