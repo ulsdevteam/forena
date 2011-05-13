@@ -13,7 +13,6 @@ function forena_schema() {
     'fields' => array(
        'report_name' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE),
        'title' => array('type' => 'varchar', 'length' => 63, 'not null' => TRUE),
-       'file_name' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE),
        'category' => array('type' => 'varchar', 'length' => 255, 'not null' => FALSE),
        'hidden' => array('type' => 'int', 'not null' => FALSE, ),
        'cache' => array('type' => 'text'),
