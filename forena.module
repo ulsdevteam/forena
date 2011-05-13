@@ -317,6 +317,9 @@ function forena_perm() {
 function forena_user_reports() {
   require_once('forena.common.inc');
   $reports = forena_get_user_reports();
+  if (!$reports) {
+  	$output = 'No Reports Found';
+  }
   $report_repos = variable_get('forena_path', 'reports');
   foreach ($reports as $category => $reports) {
     $links .= '<li><a href="#'. urlencode($category) .'">'. $category . '</a></li> ';
