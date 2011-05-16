@@ -121,6 +121,14 @@ function forena_menu() {
     'type' => MENU_NORMAL_ITEM,
    );
 
+   $items['forena/xml/%'] = array(
+   	'page callback' => 'forena_block_xml',
+    'page arguments' => array(2),
+   	'access callback' => TRUE,
+    'file' => 'forena.common.inc',
+   	'type' => MENU_CALLBACK,
+   );
+
    $items['forena/fields/format/autocomplete'] = array(
      'page callback' => 'forena_fields_format_autocomplete',
      'access callback' => TRUE,
