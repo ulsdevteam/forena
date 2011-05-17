@@ -210,22 +210,37 @@ class FrxControls {
  }
 
  public function emaildocument($body, $options) {
-   $doc = new DOMDocument();
+   $doc = new DOMDocument('1.0', 'UTF-8');
    $doc->strictErrorChecking = FALSE;
    $doc->loadHTML($body);
    $xml = simplexml_import_dom($doc);
    $docs = $xml->xpath('.//*[@class="email-document"]');
+   foreach ($docs as $doc) {
+      $from = $doc->xpath('.//*[@class="email-header-from"]');
+      $from = $from ? (string)$from[0] : '';
+      $subject = $doc->xpath('.//*[@class="email-header-subject"]');
+      $subject = $subject ? (string)$subject[0] : '';
+      $to = $doc->xpath('.//*[@class="email-header-to"]');
+      $to = $to ? (string)$to[0] : '';
+      $body = $doc->xpath('.//*[@class="email-body"]');
+      $body = $body ? $body[0]->asXML() : $body;
+      $email = array(
+        'to' => $to,
+        'from' => $from,
+        'parms' => array('subject' => $subject,
+        'body' => $body),
+         );
+      $emails [] = $email;
+   }
    $count = count($docs);
    if ($count) {
-      $form = drupal_get_form('forena_confirm_email', $docs, $count);
-     $output = drupal_render($form);
+     $output = drupal_get_form('forena_confirm_email', $emails, $count);
    }
    else {
       $output = $body;
    }
    return $output;
  }
-
  //template methods
   public function table($columns, $data_block, $clause='') {
     if ($clause) $clause = 'frx:clause ="' . $clause . '"';

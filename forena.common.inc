@@ -953,6 +953,20 @@ function forena_my_reports_block() {
  */
 function forena_confirm_email($form, &$form_state, $docs, $count) {
   if ($docs) {
+    $form['send'] = array(
+      '#type' => 'radios',
+      '#title' => 'Send Email',
+      '#options' => array('send' => 'email to users',
+        'test' => 'emails to me (test mode)'),
+      '#required' => TRUE,
+    );
+    $form['max'] = array(
+      '#type' => 'textfield',
+      '#title' => 'Only send first',
+      '#description' => 'In test mode only, limits the number of meesages to send',
+      '#default_value' => 10,
+      '#size' => 3,
+    );
     $form_state['storage']['docs'] = $docs;
     $form_state['storage']['count'] = $count;
   }
@@ -961,23 +975,14 @@ function forena_confirm_email($form, &$form_state, $docs, $count) {
 
 function forena_confirm_email_submit($form, &$form_state) {
 	global $user;
+  $test_send = $form_state['values']['send']=='test' ? TRUE : variable_get('forena_email_override', FALSE);
+  $max = (integer)$form_state['values']['max'];
+  $i = 0;
   foreach ($form_state['storage']['docs'] as $doc) {
-    $from = $doc->xpath('.//*[@class="email-header-from"]');
-    $from = $from ? (string)$from[0] : '';
-    $subject = $doc->xpath('.//*[@class="email-header-subject"]');
-    $subject = $subject ? (string)$subject[0] : '';
-    $to = $doc->xpath('.//*[@class="email-header-to"]');
-    $to = $to ? (string)$to[0] : '';
-    $body = $doc->xpath('.//*[@class="email-body"]');
-    $body = $body ? $body[0]->asXML() : $body;
-    $parms = array(
-      'body' => $body,
-      'subject' => $subject,
-    );
-    if (variable_get('forena_email_override', FALSE)) {
-    	$to = $user->mail;
-    }
-    drupal_mail('forena', 'mailmerge', $to, language_default(), $parms, $from, TRUE);
+    $to = $test_send ? $user->mail : $doc['to'];
+    $from = $doc['from'];
+    if ($test_send) $i++;
+    if ($i <= $max) drupal_mail('forena', 'mailmerge', $to, language_default(), $doc['parms'], $from, TRUE);
   }
 }
 
