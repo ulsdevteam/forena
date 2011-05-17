@@ -946,13 +946,15 @@ function forena_my_reports_block() {
  */
 function forena_confirm_email(&$form_state, $docs, $count) {
   if ($docs) {
-  	$form['send'] = array(
-  	  '#type' => 'radios',
-  	  '#title' => 'Send Email',
-  	  '#options' => array('send' => 'email to users',
-  	    'test' => 'emails to me (test mode)'),
-  	  '#required' => TRUE,
-  	);
+  	if (!variable_get('forena_email_override', FALSE)) {
+    	$form['send'] = array(
+    	  '#type' => 'radios',
+    	  '#title' => 'Send Email',
+    	  '#options' => array('send' => 'email to users',
+    	    'test' => 'emails to me (test mode)'),
+    	  '#required' => TRUE,
+    	);
+  	}
   	$form['max'] = array(
   	  '#type' => 'textfield',
   	  '#title' => 'Only send first',
