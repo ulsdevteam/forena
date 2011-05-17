@@ -230,7 +230,7 @@ class FrxControls {
         'to' => $to,
         'from' => $from,
         'parms' => array('subject' => $subject,
-           'body' =>$body),
+        'body' => $body),
          );
       $emails [] = $email;
    }

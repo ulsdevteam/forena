@@ -946,19 +946,35 @@ function forena_my_reports_block() {
  */
 function forena_confirm_email(&$form_state, $docs, $count) {
   if ($docs) {
-    foreach ($docs as $doc) {
-      $form_state['storage']['docs'] = $docs;
-      $form_state['storage']['count'] = $count;
-    }
+  	$form['send'] = array(
+  	  '#type' => 'radios',
+  	  '#title' => 'Send Email',
+  	  '#options' => array('send' => 'email to users',
+  	    'test' => 'emails to me (test mode)'),
+  	  '#required' => TRUE,
+  	);
+  	$form['max'] = array(
+  	  '#type' => 'textfield',
+  	  '#title' => 'Only send first',
+  	  '#description' => 'In test mode only, limits the number of meesages to send',
+  	  '#default_value' => 10,
+  	  '#size' => 3,
+  	);
+    $form_state['storage']['docs'] = $docs;
+    $form_state['storage']['count'] = $count;
   }
   return confirm_form($form, t('Send mail to users'), 'forena', t('Send email to %count users?', array('%count' => $count)));
 }
 
 function forena_confirm_email_submit($form, &$form_state) {
 	global $user;
+	$test_send = $form_state['values']['send']=='test' ? TRUE : variable_get('forena_email_override', FALSE);
+  $max = (integer)$form_state['values']['max'];
+	$i = 0;
   foreach ($form_state['storage']['docs'] as $doc) {
-  	$to = variable_get('forena_email_override', FALSE) ? $user->mail : $doc['to'];
-    drupal_mail('forena', 'mailmerge', $to, language_default(), $doc['parms'], $doc['from'], TRUE);
+  	$to = $test_send ? $user->mail : $doc['to'];
+  	if ($test_send) $i++;
+    if ($i <= $max) drupal_mail('forena', 'mailmerge', $to, language_default(), $doc['parms'], $doc['from'], TRUE);
   }
 }
 
