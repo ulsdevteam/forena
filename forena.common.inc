@@ -958,7 +958,7 @@ function forena_confirm_email(&$form_state, $docs, $count) {
   	$form['max'] = array(
   	  '#type' => 'textfield',
   	  '#title' => 'Only send first',
-  	  '#description' => 'In test mode only, limits the number of meesages to send',
+  	  '#description' => 'In test mode only, limits the number of messages to send',
   	  '#default_value' => 1,
   	  '#size' => 3,
   	);
