@@ -1,4 +1,5 @@
 <?php
+// $Id$
 /**
  * @file
  * Basic report provider.  Controls the rendering of the report.
@@ -21,6 +22,7 @@ class FrxReport {
   private $output;
   private $teng;
   private $root_data;
+  private $dom;
 
 
   public function __construct($xhtml, $data=array()) {
@@ -30,16 +32,19 @@ class FrxReport {
     $this->options = array();
     $this->root_data = $data;
     if ($xhtml) {
-      if (!is_object($xhtml)) {
-        $this->rpt_xml = new SimpleXMLElement($xhtml);
-      }
-      else {
-        $this->rpt_xml = $xhtml;
-      }
+      $dom = $this->dom = new DOMDocument('1.0', 'UTF-8');
+      // Old assumption is an ojbect is a simplexml one
+      if (is_object($xhtml)) $xhtml = $xhtml->asXML();
+
+      // Load document and simplexml representation
+      $dom->loadXML($xhtml);
+      $dom->formatOutput = TRUE;
+      $rpt_xml = $this->rpt_xml = simplexml_import_dom($dom);
+
+      // Loaod data if its there.
       $this->cur_data = $data;
-      $this->teng->push_data($data,'parm');
+      $this->teng->push_data($data, 'parm');
       // Load header data
-      $rpt_xml = $this->rpt_xml;
       $this->body = $rpt_xml->body;
       if ($rpt_xml->head) {
         $this->title = (string)$rpt_xml->head->title;
@@ -67,7 +72,8 @@ class FrxReport {
                   $parm[$akey] = (string)$attr;
                 }
                 $id = $parm['id'];
-                $parm['value']= ((string)$node) ? (string)$node : $parm['value'];
+                $val = isset($parm['value']) ? $parm['value'] : '';
+                $parm['value']= ((string)$node) ? (string)$node : $val;
                 $this->parameters[$id] = $parm;
               }
               break;
@@ -85,11 +91,11 @@ class FrxReport {
    * @param $block
    * @return unknown_type
    */
-  private function get_data($block, $clause='',$id='') {
+  private function get_data($block, $clause='', $id='') {
     //@TODO: Merge xml data parameters into the report paramters
     $this->cur_data = forena_invoke_data_provider($block, $this->cur_data, $clause);
 
-    $this->teng->push_data($this->cur_data,$id);
+    $this->teng->push_data($this->cur_data, $id);
     if ($this->cur_data) $this->blocks_loaded = TRUE;
   }
 
@@ -98,12 +104,26 @@ class FrxReport {
    * Recursive report renderer
    * Walks the nodes rendering the report.
    */
-  public function render_section(SimpleXMLElement $node) {
+  public function render_section(DOMNode $dom_node) {
     $cur_data = $this->cur_data;
-    $elements = count($node->xpath('*'));
     $continue = TRUE;
     $is_data_block = FALSE;
+    $node_type = $dom_node->nodeType;
+    $o = '';
+
+    // Shortcut process a text node
+    if ($node_type == XML_TEXT_NODE) {
+    	$text = $dom_node->textContent;
+      $o .= $this->teng->replace($text, $this->cur_data);
+      return $o;
+    }
+
+    // Continue processing non text nodes
+    $node = simplexml_import_dom($dom_node);
     $frx = $node->attributes(FRX_NS);
+    $elements = $dom_node->childNodes->length;
+
+
     // Test to see if we have any nodes that are contains data url
     if ($node->xpath('*//@frx:*') || $frx) {
       $attrs = $node->attributes();
@@ -116,14 +136,16 @@ class FrxReport {
         $this->get_data((string)$frx['block'], (string)$frx['clause'], $id);
         if (!$this->cur_data) $continue = FALSE;
       }
+
+      // Preserve non frx attributes
       $attr_text='';
       $tmp_attrs = array();
       if ($attrs) foreach ($attrs as $key => $value) {
-        $attr_text =  ' '. $key .'="'. (string)$value .'"';
+        $attr_text =  ' ' . $key . '="' . (string)$value . '"';
         $tmp_attr[$key] = (string)$value;
       }
 
-
+       // if we have a foreach in this node, we need to iterate the children
       if ((string)$frx['foreach'] ) {
         // Save xml
         $path = (string)$frx['foreach'];
@@ -133,37 +155,40 @@ class FrxReport {
         $i=0;
 
         //$tmp_attrs = (array)$attrs;
-
         if ($nodes) foreach ($nodes as $x) {
           $this->cur_data = $x;
 
-          $this->teng->push_data($x,$id);
+          $this->teng->push_data($x, $id);
           $i++;
           $odd = $i & 1;
           $row_class = $odd ? 'odd' : 'even';
-          $tmp_attrs['class'] = trim($attrs['class'] .' '. $row_class);
+          $tmp_attrs['class'] = trim($attrs['class'] . ' ' . $row_class);
           $r_attr_text = '';
 
           foreach ($tmp_attrs as $key => $value) {
-             $r_attr_text .=  ' '. $key .'="'. (string)$value .'"';
+             $r_attr_text .=  ' ' . $key . '="' . (string)$value . '"';
           }
-          $o .= $this->teng->replace('<'. $tag . $r_attr_text .'>', $cur_data);
-          foreach ($node->children() as $child) {
+          $o .= $this->teng->replace('<' . $tag . $r_attr_text . '>', $cur_data);
+          foreach ($dom_node->childNodes as $child) {
             $o .= $this->render_section($child);
           }
-          $o .= '</'. $tag .'>';
+          $o .= '</' . $tag . '>';
         }
 
         $this->cur_data = $data;
         $this->teng->pop_data($id);
       }
       elseif ($continue) {
+      	$renderer = (string)$frx['renderer'];
+        if (!$renderer) $o .= $this->teng->replace('<' . $tag . $attr_text . '>');
 
-        $o .= $this->teng->replace('<'. $tag . $attr_text .'>');
-        foreach ($node->children() as $child) {
+        // @TODO: Determine if there is a custom renderer
+
+        // None found, so render children
+        foreach ($dom_node->childNodes as $child) {
           $o .= $this->render_section($child);
         }
-        $o .= '</'. $tag .'>';
+        if (!$renderer) $o .= '</' . $tag . '>';
       }
     }
     else {
@@ -184,12 +209,11 @@ class FrxReport {
    * @return unknown_type
    */
   public function render($format) {
-    $rpt_xml = $this->rpt_xml;
+    $dom = $this->dom;
+    $o='';
+    $body = $dom->getElementsByTagName('body')->item(0);
 
-    if ($rpt_xml->body) $rpt_xml = $rpt_xml->body;
-    $body_xml = $rpt_xml;
-
-    if ($body_xml && $body_xml->children()) foreach ($body_xml->children() as $node) {
+    foreach ($body->childNodes as $node) {
       $o .= $this->render_section($node);
     }
     return $o ;
@@ -200,12 +224,17 @@ class FrxReport {
    */
   public function format($value, $key, $data) {
     // Determine if there is a field overide entry
+    $default='';
+    $link ='';
+    $format='';
+    $format_str='';
+    $target='';
     if ($this->fields) {
 
-      $path = 'frx:field[@id="'. $key .'"]';
+      $path = 'frx:field[@id="' . $key . '"]';
       $formatters = $this->fields->xpath($path);
       if ($formatters) foreach ($formatters as $formatter) {
-        if (((string)$formatter['block'] == $this->block) || (!(string)$formatter['block'])) {
+        if ((isset($formatter['block']) &&(string)$formatter['block'] == $this->block) || (!(string)$formatter['block'])) {
 
            //@TODO: Replace the default extraction with something that will get sub elements of the string
            $default = (string)$formatter;
@@ -216,6 +245,7 @@ class FrxReport {
         }
       }
     }
+
     if ($format) {
       $value = forena_format_data($value, $format, $format_str);
     }
@@ -228,8 +258,10 @@ class FrxReport {
 
     if ($link) {
       $link = $this->teng->replace($link,  $data, TRUE);
-      list($url, $query) = explode('?', $link);
-      $value = l(htmlspecialchars_decode($value), $url, array('query' => $query, 'attributes'=> array('target' => $target)));
+      @list($url, $query) = explode('?', $link);
+      $data = array();
+      parse_str($query, $data);
+      $value = l(htmlspecialchars_decode($value), $url, array('query' => $data, 'attributes' => array('target' => $target)));
     }
     return $value;
   }
@@ -240,7 +272,7 @@ class FrxReport {
    * @return unknown_type
    */
   public function deleteNode($id) {
-    $path = '//*[@id="'. $id .'"]';
+    $path = '//*[@id="' . $id . '"]';
     $nodes = $this->rpt_xml->xpath($path);
     $node = $nodes[0];
     $dom=dom_import_simplexml($node);
@@ -275,7 +307,7 @@ class FrxReport {
           if ($attr_nodes) {
             // Make sure every element has an id
             $i++;
-            $id = 'forena-'. $i;
+            $id = 'forena-' . $i;
 
             if (!(string)$node['id']) {
               $node->addAttribute('id', $id);
@@ -332,7 +364,7 @@ class FrxReport {
   public function save_attributes_by_id($attributes) {
     $rpt_xml = $this->rpt_xml;
     if ($attributes) foreach ($attributes as $id => $att_list) {
-      $id_search_path = '//*[@id="'. $id . '"]';
+      $id_search_path = '//*[@id="' . $id . '"]';
       $fnd = $rpt_xml->xpath($id_search_path);
       if ($fnd) {
         $node = $fnd[0];
@@ -342,11 +374,11 @@ class FrxReport {
 
         foreach ($att_list as $key => $value) {
           if (!$frx_attributes[$key]) {
-            $node['frx:'. $key] = $value;
+            $node['frx:' . $key] = $value;
           }
           else {
             unset($frx_attributes[$key]);
-            $node['frx:'. $key] = $value;
+            $node['frx:' . $key] = $value;
           }
         }
       }
@@ -359,16 +391,16 @@ class FrxReport {
    * @param string $value Value to be saved.
    * @return unknown_type
    */
-  public function set_value($xpath, $value) {
+public function set_value($xpath, $value) {
   $xml = $this->rpt_xml;
-  $i = strrpos($xpath,'/');
-  $path = substr($xpath,0,$i);
-  $key = substr($xpath,$i+1);
+  $i = strrpos($xpath, '/');
+  $path = substr($xpath, 0, $i);
+  $key = substr($xpath, $i+1);
   $nodes = $xml->xpath($path);
   if ($nodes) {
     // if the last part of the xpath is a key then assume the key
-    if (strpos($key,'@')===0) {
-      $key = trim($key,'@');
+    if (strpos($key, '@')===0) {
+      $key = trim($key, '@');
       if (is_null($value)) {
         unset($nodes[0][$key]);
       }
