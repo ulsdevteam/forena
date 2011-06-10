@@ -916,7 +916,7 @@ function forena_data_block_form($formid, &$form_state) {
     if ($params) {
       $rpt_params = array();
       //returns a 2 dimensional array of report parameters from the report
-      if ($r) $rpt_params = $r->parameters;
+      if ($r) $rpt_params = @$r->parameters;
 
       $form['params'] = array(
         '#tree' => TRUE,
@@ -1103,10 +1103,9 @@ function forena_data_block_add($form, &$form_state) {
     }
   }
 
-
-
   $main_report = forena_inner_xml($r->simplexml, 'body');
   $added_report = forena_clean_xhtml($added_report);
+
   $r->setBody($main_report . "\n" . $added_report);
 
   if (forena_save_report($report_name, $r->asXML(), TRUE) == 1) {

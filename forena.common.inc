@@ -357,6 +357,7 @@ function forena_get_formatter($fkey) {
  *
 */
 function forena_get_report($report_name, $data=array()) {
+	$r=null;
   if ($report_name) {
     $report_path = forena_report_path();
     $filename = $report_path . '/' . $report_name . '.frx';
@@ -977,7 +978,7 @@ function forena_confirm_email($form, &$form_state, $docs, $count) {
 
 function forena_confirm_email_submit($form, &$form_state) {
 	global $user;
-  $test_send = $form_state['values']['send']=='test' ? TRUE : variable_get('forena_email_override', FALSE);
+  $test_send = @$form_state['values']['send']=='test' ? TRUE : variable_get('forena_email_override', FALSE);
   $max = (integer)$form_state['values']['max'];
   $i = 0;
   foreach ($form_state['storage']['docs'] as $doc) {

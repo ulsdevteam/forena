@@ -22,6 +22,7 @@ class FrxReport {
   private $output;
   private $teng;
   private $root_data;
+  private $dom;
 
 
   public function __construct($xhtml, $data=array()) {
@@ -31,16 +32,19 @@ class FrxReport {
     $this->options = array();
     $this->root_data = $data;
     if ($xhtml) {
-      if (!is_object($xhtml)) {
-        $this->rpt_xml = new SimpleXMLElement($xhtml);
-      }
-      else {
-        $this->rpt_xml = $xhtml;
-      }
+      $dom = $this->dom = new DOMDocument('1.0', 'UTF-8');
+      // Old assumption is an ojbect is a simplexml one
+      if (is_object($xhtml)) $xhtml = $xhtml->asXML();
+
+      // Load document and simplexml representation
+      $dom->loadXML($xhtml);
+      $dom->formatOutput = TRUE;
+      $rpt_xml = $this->rpt_xml = simplexml_import_dom($dom);
+
+      // Loaod data if its there.
       $this->cur_data = $data;
       $this->teng->push_data($data, 'parm');
       // Load header data
-      $rpt_xml = $this->rpt_xml;
       $this->body = $rpt_xml->body;
       if ($rpt_xml->head) {
         $this->title = (string)$rpt_xml->head->title;
@@ -100,13 +104,26 @@ class FrxReport {
    * Recursive report renderer
    * Walks the nodes rendering the report.
    */
-  public function render_section(SimpleXMLElement $node) {
+  public function render_section(DOMNode $dom_node) {
     $cur_data = $this->cur_data;
-    $elements = count($node->xpath('*'));
     $continue = TRUE;
     $is_data_block = FALSE;
-    $frx = $node->attributes(FRX_NS);
+    $node_type = $dom_node->nodeType;
     $o = '';
+
+    // Shortcut process a text node
+    if ($node_type == XML_TEXT_NODE) {
+    	$text = $dom_node->textContent;
+      $o .= $this->teng->replace($text, $this->cur_data);
+      return $o;
+    }
+
+    // Continue processing non text nodes
+    $node = simplexml_import_dom($dom_node);
+    $frx = $node->attributes(FRX_NS);
+    $elements = $dom_node->childNodes->length;
+
+
     // Test to see if we have any nodes that are contains data url
     if ($node->xpath('*//@frx:*') || $frx) {
       $attrs = $node->attributes();
@@ -119,6 +136,8 @@ class FrxReport {
         $this->get_data((string)$frx['block'], (string)$frx['clause'], $id);
         if (!$this->cur_data) $continue = FALSE;
       }
+
+      // Preserve non frx attributes
       $attr_text='';
       $tmp_attrs = array();
       if ($attrs) foreach ($attrs as $key => $value) {
@@ -126,7 +145,7 @@ class FrxReport {
         $tmp_attr[$key] = (string)$value;
       }
 
-
+       // if we have a foreach in this node, we need to iterate the children
       if ((string)$frx['foreach'] ) {
         // Save xml
         $path = (string)$frx['foreach'];
@@ -136,7 +155,6 @@ class FrxReport {
         $i=0;
 
         //$tmp_attrs = (array)$attrs;
-
         if ($nodes) foreach ($nodes as $x) {
           $this->cur_data = $x;
 
@@ -151,7 +169,7 @@ class FrxReport {
              $r_attr_text .=  ' ' . $key . '="' . (string)$value . '"';
           }
           $o .= $this->teng->replace('<' . $tag . $r_attr_text . '>', $cur_data);
-          foreach ($node->children() as $child) {
+          foreach ($dom_node->childNodes as $child) {
             $o .= $this->render_section($child);
           }
           $o .= '</' . $tag . '>';
@@ -161,12 +179,16 @@ class FrxReport {
         $this->teng->pop_data($id);
       }
       elseif ($continue) {
+      	$renderer = (string)$frx['renderer'];
+        if (!$renderer) $o .= $this->teng->replace('<' . $tag . $attr_text . '>');
 
-        $o .= $this->teng->replace('<' . $tag . $attr_text . '>');
-        foreach ($node->children() as $child) {
+        // @TODO: Determine if there is a custom renderer
+
+        // None found, so render children
+        foreach ($dom_node->childNodes as $child) {
           $o .= $this->render_section($child);
         }
-        $o .= '</' . $tag . '>';
+        if (!$renderer) $o .= '</' . $tag . '>';
       }
     }
     else {
@@ -187,13 +209,11 @@ class FrxReport {
    * @return unknown_type
    */
   public function render($format) {
-    $rpt_xml = $this->rpt_xml;
+    $dom = $this->dom;
     $o='';
+    $body = $dom->getElementsByTagName('body')->item(0);
 
-    if ($rpt_xml->body) $rpt_xml = $rpt_xml->body;
-    $body_xml = $rpt_xml;
-
-    if ($body_xml && $body_xml->children()) foreach ($body_xml->children() as $node) {
+    foreach ($body->childNodes as $node) {
       $o .= $this->render_section($node);
     }
     return $o ;

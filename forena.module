@@ -459,7 +459,7 @@ function forena_report($name_in, $parms = array()) {
             foreach ($nodes as $value) {
               $arr = $value->attributes();
               $type = (string)$arr['type'];
-              if ($doctypes[$type]) {
+              if (@$doctypes[$type]) {
                 if (is_object(forena_get_doctypes($type))) {
                   $div .= '<a class="doclinks" href="' . $base . '/report_doc/' . $name_in . '.' . $type . '?' . $q . '">' . strtoupper($type) . '</a>';
                 }
