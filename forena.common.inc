@@ -413,6 +413,7 @@ function forena_report_object($report='', $data='') {
  * @return string
  */
 function forena_inner_xml($xml, $tag) {
+
   if (is_object($xml) && is_object($xml->$tag)) {
     $xml_data = $xml->$tag->asXML();
     $xml_data = preg_replace("/<\/?" . $tag . "(.|\s)*?>/", "", $xml_data);

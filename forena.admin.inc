@@ -971,7 +971,7 @@ function forena_data_block_form_submit($form, &$form_state) {
     $block_info = forena_load_block($data_block, $where_clause);
     if ($block_info) {
       //if there were not any parameters passed. Use the report parameters
-      if(!$params) {
+      if (!$params) {
         $rpt_params = $r->parameters;
         if ($rpt_params) foreach ($block_info['tokens'] as $index => $id) {
           $params[$id] = $rpt_params[$id]['value'];
@@ -1062,8 +1062,7 @@ function forena_data_block_add($form, &$form_state) {
   }
 
 
-
-  $main_report = forena_inner_xml($r->simple_xml, 'body');
+  $main_report = forena_inner_xml($r->simplexml, 'body');
   $added_report = forena_clean_xhtml($added_report);
   $r->setBody($main_report . "\n" . $added_report);
 
