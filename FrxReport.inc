@@ -120,6 +120,11 @@ class FrxReport {
       return $o;
     }
 
+    //Ignore certain node types
+    if ($node_type == XML_COMMENT_NODE) {
+      return '';
+    }
+
     // Continue processing non text nodes
     $node = simplexml_import_dom($dom_node);
     // Special catch to make sure we don't process bad nodes
