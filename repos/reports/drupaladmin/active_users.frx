@@ -1,4 +1,7 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE root [
+<!ENTITY nbsp "&#160;">
+]>
 <html xmlns:frx="urn:FrxReports">
   <head>
     <title>Active Users </title>
@@ -8,9 +11,7 @@
     </frx:parameters>
     <frx:docgen>
     </frx:docgen>
-<frx:fields>
-      <frx:field id="name" link="user/{uid}/edit"/>
-    </frx:fields>
+<frx:fields><frx:field id="name" link="user/{uid}/edit" format="" format-string="" target=""/><frx:field id="mail" link="" format="" format-string="" target=""/><frx:field id="login" link="" format="drupal_date_format" format-string="small" target=""/></frx:fields>
   </head>
 <body>
       <div frx:block="drupal/active_users" id="forena-1"><table id="forena-2">

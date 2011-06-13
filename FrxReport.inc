@@ -120,10 +120,19 @@ class FrxReport {
       return $o;
     }
 
+    //Ignore certain node types
+    if ($node_type == XML_COMMENT_NODE) {
+      return '';
+    }
+
     // Continue processing non text nodes
     $node = simplexml_import_dom($dom_node);
     // Special catch to make sure we don't process bad nodes
-    if (!$node) return '';
+    if (!$node) {
+    	drupal_set_message('Invalid Node Type: ' . $node_type, 'error');
+	    return '';
+    }
+
     $frx = $node->attributes(FRX_NS);
     $elements = $dom_node->childNodes->length;
 
