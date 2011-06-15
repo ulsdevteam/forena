@@ -941,7 +941,7 @@ function forena_my_reports_block() {
   if (!$reports) return '';
   $output = '<ul>';
   foreach ($reports as $category => $reports) {
-    $output .= '<li>' . l($category, 'forena', array(fragment => urlencode($category))) . '</li>';
+    $output .= '<li>' . l($category, 'forena', array('fragment' => urlencode($category))) . '</li>';
   }
   $output .= '</ul>';
   return $output;
