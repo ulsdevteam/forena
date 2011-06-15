@@ -114,7 +114,7 @@ class FrxReport {
     // Shortcut process a text node
     if ($node_type == XML_TEXT_NODE
         || $node_type == XML_ENTITY_REF_NODE
-        || $node_type == XML_ENDITY_NODE
+        || $node_type == XML_ENTITY_NODE
         ) {     $text = $dom_node->textContent;
       $o .= $this->teng->replace($text, $this->cur_data);
       return $o;
@@ -129,7 +129,6 @@ class FrxReport {
     $node = simplexml_import_dom($dom_node);
     // Special catch to make sure we don't process bad nodes
     if (!$node) {
-    	drupal_set_message('Invalid Node Type: ' . $node_type, 'error');
 	    return '';
     }
 
