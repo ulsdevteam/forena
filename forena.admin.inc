@@ -286,7 +286,7 @@ function forena_filter_element($fmt) {
   }
   $element['format']['guidelines']['#weight']=12;
 
-  $element['format']['format'] = array(
+  $element['format']['forena_input_format'] = array(
     '#type' => 'select',
     '#title' => t('Text format'),
     '#options' => $options,
@@ -351,6 +351,7 @@ function forena_settings() {
  */
 function forena_settings_submit($form, &$form_state) {
   $values = $form_state['values'];
+  drupal_set_message('values:' . print_r($values,1));
   $path = $values['forena_report_repos'];
   $src_dir = drupal_get_path('module', 'forena') . '/repos/reports';
   if (!file_exists($path)) {
@@ -375,7 +376,6 @@ function forena_settings_submit($form, &$form_state) {
   }
   $save_count = forena_db_sync();
 
-  drupal_set_message(t('Imported %s reports into the database', array('%s' => $save_count)));
   menu_cache_clear();
 }
 
@@ -538,7 +538,7 @@ function forena_layout_form($formid, $form_state, $new_report='') {
         '#default_value' => $body,
 
         '#rows' => 25,
-      '#format' => variable_get('forena_input_format', FILTER_DEFAULT)
+      '#format' => variable_get('forena_input_format', filter_default_format())
       );
 
 //      $form['format'] = forena_filter_element(variable_get('forena_input_format', FILTER_DEFAULT));
