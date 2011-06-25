@@ -138,6 +138,7 @@ function forena_save_report($report_name, $report, $save_file = FALSE) {
       db_update('forena_reports')
         -> condition('report_name', $name)
         ->fields(array(
+          'title' => $data['title'],
           'category' => $data['category'],
           'hidden' => $data['hidden'],
           'cache' => $rpt_cache,
