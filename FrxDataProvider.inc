@@ -29,12 +29,13 @@ class FrxDataProvider{
    * @return unknown
    */
   public function access($arg) {
-    $f = $this->conf['access callback'];
+    $f = @$this->conf['access callback'];
     if ($f && is_callable($f)) {
       return $f($arg);
     }
     elseif (isset($this->conf['access block'])) {
-      $block = $this->conf['access block'];
+      $block = @$this->conf['access block'];
+      $path='';
       if (isset($this->conf['access path'])) $path = $this->conf['access path'];
       return forena_block_access($block, $path, $arg);
     }
