@@ -84,7 +84,7 @@ function forena_report_css($desc, $form,  $format = '') {
  * @param $access Access to test
  * @return unknown_type
  */
-function forena_block_access($block, $path, $access, $cache=FALSE) {
+function forena_block_access($block, $path, $access, $cache=TRUE) {
   if ($access=='PUBLIC') return TRUE;
   if (!isset($_SESSION['forena_access'])) $_SESSION['forena_access'] = array();
   if ($cache && isset($_SESSION['forena_access'][$block])) {
