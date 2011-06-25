@@ -533,13 +533,15 @@ function forena_layout_form($formid, $form_state, $new_report='') {
       );
 
       $form['body'] = array(
-        '#type' => 'textarea',
+        '#type' => 'text_format',
         '#title' => t('Body'),
         '#default_value' => $body,
+
         '#rows' => 25,
+      '#format' => variable_get('forena_input_format', FILTER_DEFAULT)
       );
 
-      $form['format'] = forena_filter_element(variable_get('forena_input_format', FILTER_DEFAULT));
+//      $form['format'] = forena_filter_element(variable_get('forena_input_format', FILTER_DEFAULT));
       $form['#validate'][]='forena_layout_form_validate';
       $form['buttons']['save'] = array(
         '#type' => 'submit',
@@ -606,16 +608,18 @@ function forena_layout_form_submit($form, &$form_state) {
   $r->setOptions($options);
 
   // Doc gen settings.
-  $docgen = array();
-  if($selected = array_filter($values['docgen']['docs'])) {
-    foreach ($selected as $key => $value) {
-     if ($value) $docgen[] = array('type' => $key);
-    }
+  if (isset($form['docgen'])) {
+	  $docgen = array();
+	  if($selected == array_filter($values['docgen']['docs'])) {
+	    foreach ($selected as $key => $value) {
+	     if ($value) $docgen[] = array('type' => $key);
+	    }
+	  }
+	  $r->setDocgen($docgen);
   }
-  $r->setDocgen($docgen);
 
   // Body
-  $r->setBody($values['body']);
+  $r->setBody($values['body']['value']);
   // If there are no frx attributes in the body then replace them with the old values.
   $frx_nodes = $r->simplexml->xpath('body//*[@frx:block]');
   if (!$frx_nodes) {
