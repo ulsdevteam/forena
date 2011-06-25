@@ -115,7 +115,6 @@ class FrxReportEditor {
    * @param html $body
    */
   public function setBody($body) {
-  	print ('body'. htmlspecialchars(print_r($body,1)));
   	$dom = $this->dom;
   	$nodes = $dom->getElementsByTagName('body');
   	$cur_body = $nodes->item(0);
