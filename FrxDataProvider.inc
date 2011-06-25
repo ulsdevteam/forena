@@ -61,7 +61,7 @@ class FrxDataProvider{
     // If we have a regular expression token parser, then get the tokens out of the block.
 
     if ($this->te) {
-      $tokens = $this->te->tokens($block['source']);
+      $tokens = @$this->te->tokens($block['source']);
       //drupal_set_message("tokens: ". print_r($tokens, 1));
       //check tokens in the where clause
       if ($clause) {

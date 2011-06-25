@@ -60,7 +60,7 @@ class FrxPostgres extends FrxDataProvider {
     $db = $this->db;
     $block = $this->load_block($block_name);
     $xml ='';
-    if ($block['source'] && $this->access($block['access']) && $db) {
+    if (@$block['source'] && $this->access($block['access']) && $db) {
       $sql = $block['source'];
       if ($clause) {
         $sql = 'SELECT * FROM (' . trim($sql, ' ;') . ') ' . $clause;
