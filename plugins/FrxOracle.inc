@@ -37,7 +37,12 @@ class FrxOracle extends FrxDataProvider {
       try {
         $db = oci_connect($conf['user'], $conf['password'], $uri, $conf['character_set']);
         $this->db = $db;
-      } catch (Exception $e) {
+        if ($db) {
+          $stmt = oci_parse($db,"ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD HH24:MI:SS'");
+          oci_execute($stmt);
+        }
+      }
+      catch (Exception $e) {
         forena_error('Unable to connect to database ' . $conf['title'], $e->getMessage());
       }
 
