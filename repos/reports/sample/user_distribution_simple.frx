@@ -8,7 +8,7 @@
     <frx:category>Sample</frx:category>
     <frx:options hidden="0" form=""/>
     <frx:parameters>
-      <frx:parm id="state" label="State" require="1" desc="See the parameters tab to understand how this dropdown was created from a data block. " data_source="sampledb/states" data_field="" type="select"/>
+      <frx:parm id="state" label="State" require="1" desc="See the parameters tab to understand how this dropdown was created from a data block. " data_source="sampledb/states" data_field="" type="select">WA</frx:parm>
     </frx:parameters>
     <frx:docgen>
     </frx:docgen>
