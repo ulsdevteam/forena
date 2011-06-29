@@ -667,7 +667,7 @@ function forena_parameters_form($form_state) {
         $data_source = (string)$node['data_source'];
         $data_field = (string)$node['data_field'];
         $type = (string)$node['type'];
-        $value = ($parms[$id]) ? $parms[$id] : (string)$node['value'];
+        $value = ($parms[$id]) ? $parms[$id] : (string)$node;
         $desc =  (string)$node['desc'];
         $label_field = (string)$node['label_field'];
 
