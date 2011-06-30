@@ -6,29 +6,10 @@
   <head>
     <title>Active Users </title>
     <frx:category>Drupal Administration</frx:category>
-    <frx:options hidden="0" form=""/>
+    <frx:options/>
     <frx:parameters>
     </frx:parameters>
-    <frx:docgen>
-    </frx:docgen>
+    <frx:docgen/>
 <frx:fields><frx:field id="name" link="user/{uid}/edit" format="" format-string="" target=""/><frx:field id="mail" link="" format="" format-string="" target=""/><frx:field id="login" link="" format="drupal_date_format" format-string="small" target=""/></frx:fields>
   </head>
-<body>
-      <div frx:block="drupal/active_users" id="forena-1"><table id="forena-2">
-          <thead>
-            <tr>
-              <td>User</td>
-              <td>Email</td>
-              <td>Last Logged in</td>
-            </tr>
-          </thead>
-          <tbody>
-            <tr frx:foreach="*">
-              <td>{name}</td>
-              <td>{mail}</td>
-              <td>{login}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-  </body></html>
+<body><div id="forena-1" frx:block="drupal/active_users"><table id="forena-2" frx:foreach="*"><thead><tr><td>User</td><td>Email</td><td>Last Logged in</td><td>&nbsp;</td></tr></thead><tbody><tr id="forena-2"><td>{name}</td><td>{mail}</td><td>{login}</td><td>{logs}</td></tr></tbody></table></div></body></html>

@@ -259,6 +259,13 @@ class FrxReportEditor {
    * @param array $parmElements array
    */
   public function setParameters($parmElements) {
+  	$dom = $this->dom;
+    $newParms = $dom->createElementNS($this->xmlns, 'parameters');
+  	$this->verifyHeaderElements(array('parameters'));
+  	$fnode = $dom->getElementsByTagNameNS($this->xmlns, 'parameters')->item(0);
+  	$p = $fnode->parentNode;
+  	$p->replaceChild($newParms, $fnode);
+
   	$this->setFrxHeader('parameters', 'parm',
       $parmElements,
       array('id', 'label', 'require', 'desc', 'data_source', 'data_field', 'type'),
