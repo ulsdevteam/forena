@@ -598,7 +598,7 @@ function forena_layout_form_submit($form, &$form_state) {
   $nodes = array();
   $values = $form_state['values'];
   $report_name = $values['save_report_name'];
-  $r = forena_get_report_editor($report_name);
+  $r = forena_get_report_editor($values['report_name']);
   // Title and category
   $r->setTitle($values['title']);
   $r->setCategory($values['category']);
