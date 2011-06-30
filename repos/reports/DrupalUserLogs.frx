@@ -1,24 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE root [
+<!ENTITY nbsp "&#160;">
+]>
 <html xmlns:frx="urn:FrxReports">
 	<head>
 		<title>User logs</title>
         <frx:category>Drupal Administration</frx:category>
-        <frx:options  /> 
-		<frx:parameters >
+        <frx:options/> 
+		<frx:parameters>
 			<frx:parm id="name" require="1" label="User Name">3</frx:parm>
 		</frx:parameters>
-		<frx:parameters >
+		<frx:parameters>
 			<frx:parm id="search" require="0" label="Search">school</frx:parm>
 		</frx:parameters>
-		<frx:fields>
-			<frx:field id="details" link="admin/reports/event/{wid}">Details</frx:field>
-			<frx:field id="total"  link="reports/DrupalUserLogs?name={name}" format="date" format_string=""></frx:field>
-			<frx:field id="name">Anonymous</frx:field>
-			<frx:field id="timestamp" format="drupal_date_format" format-string="small"></frx:field>
-			<frx:field id="created" format="drupal_date_format" format-string="small"></frx:field>
-		</frx:fields>
-	</head>
+		<frx:fields><frx:field id="name" link="" format="" format-string="" target="">Anonymous</frx:field><frx:field id="total" link="reports/DrupalUserLogs?name={name}" format="date" format-string="" target=""/><frx:field id="type" link="" format="" format-string="" target=""/><frx:field id="location" link="" format="" format-string="" target=""/><frx:field id="timestamp" link="" format="drupal_date_format" format-string="small" target=""/><frx:field id="details" link="admin/reports/event/{wid}" format="" format-string="" target="">Details</frx:field></frx:fields>
+	<frx:docgen/></head>
 	<body>
-		<div frx:block="drupal/users_in_logs" >
+		<div frx:block="drupal/users_in_logs">
 			<h4>Users Appearing in Logs</h4>
 			<table>
 				<thead>
@@ -26,9 +24,9 @@
 				</thead>
 				<tbody>
 					<tr frx:foreach="*">
-						<td >{name}</td>
+						<td>{name}</td>
 						<td>{total}</td>
-						<td></td>
+						<td/>
 					</tr>
 				</tbody>
 			</table>			
@@ -44,7 +42,7 @@
 						<td>{location}</td>
 						<td>{timestamp}</td>
 						<td>{details}</td>
-						<td></td>
+						<td/>
 					</tr>
 				</tbody>
 		  </table>
