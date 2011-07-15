@@ -97,6 +97,7 @@ class FrxSyntaxEngine {
       $i = count($this->data_stack) - 1;
       $data = $this->data_stack[$i];
     }
+    if ($key=='variables') drupal_set_message(print_r($data,1));
     // Determine if we have a . syntax for the id.
     if ($key) {
       @list($id, $path) = explode('.', $key, 2);
@@ -166,10 +167,11 @@ class FrxSyntaxEngine {
       foreach ($match[0] as $match_num => $token) {
          $path = trim($token, $this->trim_chars);
          $value = $this->get_value($path, $raw);
-		     $pos = strpos($text, $token);
-		     if ($pos !== false) {
-		       $text = substr_replace($text,$value,$pos,strlen($token));
-		     }
+
+          $pos = strpos($text, $token);
+          if ($pos !== FALSE) {
+            $text = substr_replace($text, $value, $pos, strlen($token));
+          }
       }
     }
     if ($data) $this->pop_data();

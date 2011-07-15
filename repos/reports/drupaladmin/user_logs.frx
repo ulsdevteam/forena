@@ -7,10 +7,7 @@
                 <title>Logs for User</title>
                 <frx:category>Drupal Administration</frx:category>
                 <frx:options/>
-                <frx:parameters>
-                        <frx:parm id="name" label="User Name" require="1" desc="" data_source="" data_field="" type=""/>
-                        <frx:parm id="search" label="Search" require="0" desc="" data_source="" data_field="" type="">school</frx:parm>
-                </frx:parameters>
+                <frx:parameters><frx:parm id="name" label="User Name" require="1" desc="" data_source="" data_field="" type=""/><frx:parm id="search" label="Search" require="0" desc="" data_source="" data_field="" type=""/></frx:parameters>
                 <frx:fields>
                         <frx:field id="details" link="admin/reports/event/{wid}">Details</frx:field>
                         <frx:field id="total" link="reports/DrupalUserLogs?name={name}" format="date" format_string=""/>
