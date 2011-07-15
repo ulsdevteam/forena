@@ -18,6 +18,7 @@ class FrxControls {
                      'iso_date' => 'ISO Date',
                      'sprintf' => 'PHP sprintf()',
                      'number' => 'Number',
+                     'drupal_translation' => 'Translatable Text'
                      );
     return $formats;
   }
@@ -42,9 +43,20 @@ class FrxControls {
 
     return $templates;
   }
+  // Custom formats based on translation string
+  public function drupal_translation($value, $format_str, $teng) {
+  	 $field = '';
+     if ($format_str) $field = '{' . $format_str . '}';
+     $field = $teng->replace($field, null, TRUE);
+     $vars = array();
+     if ($field) {
+     	$vars = @unserialize($field);
+     }
+     return t($value, $vars);
+  }
 
   //Date format methods
-  public function drupal_date_format($value, $format_str) {
+  public function drupal_date_format($value, $format_str, $teng) {
      if (!$format_str) $format_str = 'small';
      switch ($format_str) {
        case 'medium':
@@ -66,19 +78,19 @@ class FrxControls {
      return $value ? format_date($value, $type, $format): '';
   }
 
-  public function iso_date($value, $format_str) {
+  public function iso_date($value, $format_str, $teng) {
     if ($value) $date = strtotime($value);
     return $this->drupal_date_format($date, $format_str);
   }
 
-  public function sprintf($value, $format_str) {
+  public function sprintf($value, $format_str, $teng) {
     if ($value) {
       $value = sprintf($format_str, $value);
     }
     return $value;
   }
 
-  public function number($value, $format_str) {
+  public function number($value, $format_str, $data='') {
 
     $dec= 2;
     $dec_sep='.';

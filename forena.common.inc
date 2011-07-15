@@ -438,10 +438,10 @@ function forena_get_html($tag, $r_text) {
   return $str;
 }
 
-function forena_format_data($value, $format, $format_str) {
+function forena_format_data($value, $format, $format_str, $teng='') {
   $fo = forena_get_formatter($format);
   if ($fo) {
-    $ret = $fo->$format($value, $format_str);
+    $ret = $fo->$format($value, $format_str, $teng);
   }
   else {
     $ret = $value;

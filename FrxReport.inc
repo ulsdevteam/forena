@@ -258,7 +258,7 @@ class FrxReport {
     }
 
     if ($format) {
-      $value = forena_format_data($value, $format, $format_str);
+      $value = forena_format_data($value, $format, $format_str, $this->teng);
     }
 
 
