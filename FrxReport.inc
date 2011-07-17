@@ -17,9 +17,9 @@ class FrxReport {
   public $parameters;
   public $options;
   public $body;
+  public $html;
   private $ids;
   private $cur_data;
-  private $output;
   private $teng;
   private $root_data;
   private $dom;
@@ -93,7 +93,7 @@ class FrxReport {
    */
   private function get_data($block, $clause='', $id='') {
     //@TODO: Merge xml data parameters into the report paramters
-    $this->cur_data = forena_invoke_data_provider($block, $this->cur_data, $clause);
+    $this->cur_data = FrxReportGenerator::instance()->invoke_data_provider($block, $this->cur_data, $clause);
 
     $this->teng->push_data($this->cur_data, $id);
     if ($this->cur_data) $this->blocks_loaded = TRUE;
@@ -227,6 +227,7 @@ class FrxReport {
     foreach ($body->childNodes as $node) {
       $o .= $this->render_section($node);
     }
+    $this->html = $o;
     return $o ;
   }
   /*
@@ -258,7 +259,7 @@ class FrxReport {
     }
 
     if ($format) {
-      $value = forena_format_data($value, $format, $format_str, $this->teng);
+      $value = FrxReportGenerator::$instance->format_data($value, $format, $format_str, $this->teng);
     }
 
 

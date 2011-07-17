@@ -57,7 +57,7 @@ class FrxDataProvider{
   public function load_block($block_name, $clause='') {
 
     $filename = $this->block_path . '/' . $block_name . '.' . $this->block_ext;
-    $block = forena_load_block_file($filename, $this->comment_prefix, $this->comment_suffix);
+    $block = FrxReportGenerator::instance()->load_block_file($filename, $this->comment_prefix, $this->comment_suffix);
     // If we have a regular expression token parser, then get the tokens out of the block.
 
     if ($this->te) {
