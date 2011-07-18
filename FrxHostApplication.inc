@@ -29,7 +29,7 @@ class FrxHostApplication {
 	 */
   public function configuration($var_name) {
   	 global $forena_conf;
-     return $forena_conf;
+     return $forena_conf[$var_name];
   }
 
 
@@ -47,8 +47,8 @@ class FrxHostApplication {
    * @param unknown_type $output
    * @param unknown_type $doc_type
    */
-  public function theme($output, $doc_type, $title) {
-    return $output;
+  public function theme($r, $doc_type, $title) {
+    return $r->html;
   }
 
   /**
@@ -82,7 +82,7 @@ class FrxHostApplication {
    * Error Reporting
    */
  public function error($short, $long) {
-
+   print('Error: ' . $short . $long);
  }
 
 
@@ -120,135 +120,6 @@ function report_css($desc, $form,  $format = '') {
   return $css_files;
 }
 
-/**
- * Load and render a report based on a drupal path.
- * In this function the arglist is used to get the full path to the report.
- *
- * @return unknown
- */
-function forena_report($name_in, $parms = array()) {
-
-  $desc = forena_report_desc();
-  $name = $desc['name'];
-  $format = $desc['format'];
-  $filename = $desc['filename'];
-  // Determine the data to get.
-  if (!$parms) $parms = $_GET; else $parms = (array)$parms;
-  unset($parms['q']);
-  if ($name) {
-    $r = forena_get_report($name, $parms);
-    if ($r) {
-    //check for default parameters
-    $r_params = $r->parameters;
-
-      if ($r_params) {
-        //put default parameters in parms array
-        foreach ($r_params as $key => $parm) {
-          if (!$parms[$key] && $parm['value']) {
-            $parms[$key] = $parm['value'];
-            $reload_params = TRUE;
-          }
-          //do not show report if a required parameter does not have a value
-          //force the user to input a parameter
-          if ((!$parms[$key]) && (strcmp($parm['require'], "1") == 0) && (!$parm['value'])) {
-            $missing_parms = TRUE;
-          }
-        }
-      }
-      //Reload report if parameters were missing
-      if ($reload_params) {
-        $r = forena_get_report($name, $parms);
-      }
-
-      // Get data from the report;
-      $r_parms = $r->parameters;
-      $form = $r->options['form'];
-      $rpt_xml = $r->rpt_xml;
-
-      // Default the form
-      if (!$form) $form = variable_get('forena_default_form', 'letter');
-      $q;
-
-      //put title on top of report
-      $title = $r->title;
-      if (!$missing_parms) {
-        $output .= $r->render($format);
-        $css_files = forena_report_css($desc, $form, $format);
-      }
-
-      if ($format) { //a format was requested
-        $header = '<h1>' . $title . '</h1>';
-        $output = $header . $output;
-        if ($css_files) foreach ($css_files as $css_file) {
-          $css_text .= file_get_contents($css_file);
-        }
-        $options = array('css' => $css_text,
-                         'docname' => str_replace(' ', '_', $title),
-                         'xml' => $r_text,
-                         'title' => $title[0],
-                   );
-
-        $this->generate_doc($format, $output, $options);
-      }
-      else {
-        // We've got parameters so display the parameters form
-        if ($r_parms) $output = drupal_get_form('forena_parameters_form') . $output;
-        //set the title
-        $title = $r->title;
-        drupal_set_title($title);
-        //Creating links for downloadable documents.
-        //build querystring for document href
-        foreach ($parms as $key => $value) {
-          $q .= "&". $key . '='. $value;
-        }
-        $q = trim($q, '&');
-
-        //Building the document links
-        $rpt_xml = $r->rpt_xml;
-        $nodes = $rpt_xml->xpath('//frx:docgen/frx:doc');
-        $div .= '<div class="doclinks">';
-        $default_doctypes = $this->configuration('forena_doc_formats');
-        if (!$missing_parms) {
-          if (!$nodes) {
-            //show the default. All supported links
-            foreach ($default_doctypes as $value) if (is_object(forena_get_doctypes($value))) {
-              $div .= '<a class="doclinks" href="'. $name_in . '.'. $value .'?'. $q .'">'. strtoupper($value) .'</a>';
-            }
-          }
-          else {
-            //There were nodes. show the prefered doc types
-            $doctypes = $this->configuration('supported_doctypes');
-            foreach ($nodes as $value) {
-              $arr = $value->attributes();
-              $type = (string)$arr['type'];
-              if ($doctypes[$type]) {
-                if (is_object(forena_get_doctypes($type))) {
-                  $div .= '<a class="doclinks" href="'. $name_in . '.'. $type .'?'. $q .'">'. strtoupper($type) .'</a>';
-                }
-              }
-            }
-          }
-          $div .= '</div>';
-          $output = $div . '<div class="forena-report">'. $output .'</div>';
-          $output = $this->app->theme($output, $title, $format);
-        }
-        $this->add_css($this->forena_path(). '/forena.css');
-        if ($css_files) foreach ($css_files as $css_file) {
-          $this->add_css($css_file, 'module');
-        }
-        return $output;
-      }
-    }
-    else {
-    	// Didn't find it so assume we've got a stale cache entry and delete it.
-      return $this->not_found();
-    }
-  }
-  else {
-    return $this->not_found();
-  }
-}
-
 public function forena_path() {
 	return 'forena';
 }
@@ -261,5 +132,75 @@ public function repositories() {
 	global $_forena_repositories;
 	return $_forena_repositories;
 }
+
+/**
+ * Accepts the name of a file
+ *
+ * Returns a xml object of the file.
+ *
+*/
+function load_report($report_name) {
+  $r=null;
+  if ($report_name) {
+    $report_path =  $this->configuration('report_repos');
+    $filename = 'reports/' . $report_name . '.frx';
+    if (file_exists($filename)) {
+      $r_text = file_get_contents($filename);
+    }
+    return $r_text;
+  }
+}
+
+/**
+ * Self register controls with forena.
+ *
+ */
+function controls() {
+  $controls[] = array('file' => 'plugins/FrxControls.inc',
+                      'class' => 'FrxControls',
+                     );
+  return $controls;
+}
+
+
+	function url($path, $options) {
+		if ($options['query']) {
+      $query = $options['query'];
+      if (is_array($query)) {
+      	$q='';
+      	foreach ($query as $key => $value) {
+      		$q .= '&' . urlencode($key) . '=' . urlencode($value);
+      	}
+      	$query = trim($q,'&');
+      }
+			if ($query) $path .= '?'. $query;
+		}
+
+		return $path;
+	}
+
+	function plugins() {
+	  $plugins[] = array('file' => 'plugins/FrxPDO.inc',
+	                     'class' => 'FrxPDO',
+	                     );
+	  $plugins[] = array('file' => 'plugins/FrxOracle.inc',
+	                     'class' => 'FrxOracle',
+	                     );
+	  $plugins[] = array('file' => 'plugins/FrxFiles.inc',
+	                     'class' => 'FrxFiles',
+	                     );
+	  $plugins[] = array('file' => 'plugins/FrxPostgres.inc',
+	                     'class' => 'FrxPostgres',
+	                     );
+	  $plugins[] = array('file' => 'plugins/FrxMSSQL.inc',
+	                     'class' => 'FrxMSSQL',
+	                     );
+	  return $plugins;
+	}
+
+
+
+
+
 
 }

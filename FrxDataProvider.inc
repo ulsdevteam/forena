@@ -37,7 +37,7 @@ class FrxDataProvider{
       $block = @$this->conf['access block'];
       $path='';
       if (isset($this->conf['access path'])) $path = $this->conf['access path'];
-      return forena_block_access($block, $path, $arg);
+      return FrxReportGenerator::instance()->block_access($block, $path, $arg);
     }
     else {
       return user_access('access content');

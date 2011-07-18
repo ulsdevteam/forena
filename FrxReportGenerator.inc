@@ -14,6 +14,8 @@ class FrxReportGenerator {
   private $app;
   private $repositories = array();
   static $instance='';
+  public $title;
+  public $content;
 
   static public function instance() {
     global $forena_application_class;
@@ -229,7 +231,6 @@ class FrxReportGenerator {
        $user_fn = $repos['user callback'];
        if (is_callable($user_fn)) $parameters['current_user'] = $user_fn();
      }
-
      if ($repos['data']) {
        $provider = $repos['data'];
        $access = TRUE;
@@ -239,12 +240,7 @@ class FrxReportGenerator {
        return $xml;
      }
   }
-  /**
-   * Load information about a data block
-   *
-   * @param string $data_block provider/blockpath to use for the load.
-   * @return unknown
-   */
+
   /**
    * Returns an array of information about the data block
    * @param $data_block
@@ -477,7 +473,7 @@ function load_block($data_block, $clause='') {
    */
 
   function get_doctypes($fkey) {
-    $controls = forena_define_controls();
+    $controls = $this->define_controls();
     foreach ($controls as $k => $r) {
       $provider = $r;
       if ($provider && method_exists($provider, 'doc_types'))  {
@@ -573,7 +569,7 @@ function load_block($data_block, $clause='') {
    */
   function  generate_doc($format, $output, $options = array()) {
 
-    $doc = $this->doctypes($format);
+    $doc = $this->get_doctypes($format);
     if ($doc) {
       $all_methods = $doc->doc_types();
       $method = $all_methods[$format];
@@ -636,7 +632,6 @@ function load_block($data_block, $clause='') {
   function block_xml($block_name='') {
     $block_name = str_replace('.', '/', $block_name);
     $parms = $_GET;
-    unset($parms['q']);
     $xml = $this->invoke_data_provider($block_name, $parms);
     if (is_object($xml)){
       header('Content-Type: text/xml');
@@ -712,6 +707,7 @@ function report($name_in, $parms = array()) {
 
     //put title on top of report
     $title = (string)$r->title;
+    $this->title = $title;
 
     if ($format) { //a format was requested
         $header = '<h1>' . $title . '</h1>';
@@ -728,7 +724,7 @@ function report($name_in, $parms = array()) {
                    );
 
         $output = $this->generate_doc($format, $output, $options);
-        return $output;
+        print $output;
       }
       else {
         //Creating links for downloadable documents.
@@ -745,12 +741,12 @@ function report($name_in, $parms = array()) {
         $nodes = $rpt_xml->xpath('//frx:docgen/frx:doc');
         $div = '<div class="doclinks">';
         $default_doctypes = $this->app->configuration('doc_defaults', array());
-        $base = base_path();
+
         if (!$missing_parms) {
           if (!$nodes) {
             //show the default.
             foreach ($default_doctypes as $value) if (is_object($this->get_doctypes($value))) {
-              $div .= '<a class="doclinks" href="' . $base . '/report_doc/' . $name_in . '.' . $value . '?' . $q . '">' . strtoupper($value) . '</a>';
+              $div .= $this->link(strtoupper($value) . ' ', 'report_doc/' . $name_in . '.' . $value, array('query' => $parms, 'class' => 'doclinks'));
             }
           }
           else {
@@ -761,7 +757,7 @@ function report($name_in, $parms = array()) {
               $type = (string)$arr['type'];
               if (@$doctypes[$type]) {
                 if (is_object($this->get_doctypes($type))) {
-                  $div .= '<a class="doclinks" href="' . $base . '/report_doc/' . $name_in . '.' . $type . '?' . $q . '">' . strtoupper($type) . '</a>';
+                  $div .= $this->link(strtoupper($type) . ' ', 'report_doc/' . $name_in . '.' . $type, array('query' => $parms, 'class' => 'doclinks'));
                 }
               }
             }
@@ -817,5 +813,9 @@ function data_block_params($data_block, $field, $label, $params=array(), $clause
 public function report_path() {
 	return $this->app->configuration('report_repos');
 }
+
+  public function link($title, $path, $options=array()) {
+    return $this->app->link($title, $path, $options);
+  }
 
 }

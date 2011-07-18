@@ -273,7 +273,7 @@ class FrxReport {
       @list($url, $query) = explode('?', $link);
       $data = array();
       parse_str($query, $data);
-      $value = l(htmlspecialchars_decode($value), $url, array('query' => $data, 'attributes' => array('target' => $target)));
+      $value = FrxReportGenerator::instance()->link(htmlspecialchars_decode($value), $url, array('query' => $data, 'attributes' => array('target' => $target)));
     }
     return $value;
   }

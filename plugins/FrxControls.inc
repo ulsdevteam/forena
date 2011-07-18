@@ -122,7 +122,7 @@ class FrxControls {
 
   //Document transformation methods
   public function htmldocument($body, $options) {
-    $output .= '<html><head>';
+    $output = '<html><head>';
 
     if ($options['css']) {
       $output .= '<style type="text/css">';
@@ -139,7 +139,7 @@ class FrxControls {
     $xmlBody = '<?xml version="1.0" encoding="UTF-8"?>' . $body;
     $doc->loadHTML($xmlBody);
     $xml = simplexml_import_dom($doc);
-
+    $output = '';
     $rows = $xml->xpath('//tr');
     if ($rows) foreach ($rows as $row) {
       foreach ($row as $column) {
@@ -157,7 +157,7 @@ class FrxControls {
 
 
   public function xlsdocument($body, $options) {
-    $output .= '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+    $output = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
     $output .= '<?mso-application progid="Excel.Sheet"?>' . "\n";
     $output .= '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"' . "\n";
     $output .= '  xmlns:o="urn:schemas-microsoft-com:office:office"' . "\n";
@@ -280,7 +280,7 @@ class FrxControls {
 
   public function vertical_list($columns, $data_block, $clause) {
     if ($clause) $clause = 'frx:clause ="' . $clause . '"';
-    $xml .= '<div frx:block="' . $data_block . '" ' . $clause . '>';
+    $xml = '<div frx:block="' . $data_block . '" ' . $clause . '>';
     $xml .= '<table frx:foreach="*">';
     $xml .= '<tbody>';
 
