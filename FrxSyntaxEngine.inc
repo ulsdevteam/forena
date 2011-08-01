@@ -97,7 +97,7 @@ class FrxSyntaxEngine {
       $i = count($this->data_stack) - 1;
       $data = $this->data_stack[$i];
     }
-
+    if ($key=='variables') drupal_set_message(print_r($data,1));
     // Determine if we have a . syntax for the id.
     if ($key) {
       @list($id, $path) = explode('.', $key, 2);
