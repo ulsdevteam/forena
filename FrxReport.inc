@@ -180,7 +180,7 @@ class FrxReport {
           foreach ($tmp_attrs as $key => $value) {
              $r_attr_text .=  ' ' . $key . '="' . (string)$value . '"';
           }
-          $o .= $this->teng->replace('<' . $tag . $r_attr_text . '>', $cur_data);
+          $o .= $this->teng->replace('<' . $tag . $r_attr_text . '>', $this->cur_data);
           foreach ($dom_node->childNodes as $child) {
             $o .= $this->render_section($child);
           }
