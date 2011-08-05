@@ -106,8 +106,6 @@ class FrxDataProvider{
       	$ext = '';
       	$block_name = $file_name;
       }
-
-      list($block_name, $ext) = explode('.', $file_name);
       $block_list[] = str_replace($this->block_path .'/', '', $block_name);
     }
 
