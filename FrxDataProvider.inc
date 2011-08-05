@@ -96,6 +96,17 @@ class FrxDataProvider{
     // Find sql files
     $d = glob($block_path);
     foreach ($d as $file_name) {
+    	// Split off the extention
+    	$p = strripos($file_name, '.');
+      if ($p!==FALSE) {
+  	    $ext = substr($file_name, $p+1);
+  	    $block_name = substr($file_name, 0, $p);
+      }
+      else {
+      	$ext = '';
+      	$block_name = $file_name;
+      }
+
       list($block_name, $ext) = explode('.', $file_name);
       $block_list[] = str_replace($this->block_path .'/', '', $block_name);
     }
