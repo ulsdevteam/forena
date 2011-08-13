@@ -495,7 +495,7 @@ function load_block($data_block, $clause='') {
   function supported_doctypes() {
     $controls = $this->define_controls();
     $supported_doctypes = array();
-    foreach ($controls as $k => $r) {
+    if ($controls) foreach ($controls as $k => $r) {
       $provider = $r;
       if ($provider && method_exists($provider, 'doc_types'))  {
         $f = $provider->doc_types();
@@ -503,7 +503,7 @@ function load_block($data_block, $clause='') {
       }
     }
     $temp = array_keys($supported_doctypes);
-    $supported_doctypes = array_combine($temp, $temp);
+    if ($supported_doctypes) $supported_doctypes = array_combine($temp, $temp);
     return $supported_doctypes;
   }
 
@@ -745,7 +745,7 @@ function report($name_in, $parms = array()) {
         if (!$missing_parms) {
           if (!$nodes) {
             //show the default.
-            foreach ($default_doctypes as $value) if (is_object($this->get_doctypes($value))) {
+            if ($default_doctypes) foreach ($default_doctypes as $value) if (is_object($this->get_doctypes($value))) {
               $div .= $this->link(strtoupper($value) . ' ', 'report_doc/' . $name_in . '.' . $value, array('query' => $parms, 'class' => 'doclinks'));
             }
           }
