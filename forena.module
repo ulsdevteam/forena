@@ -354,7 +354,9 @@ function forena_user_reports() {
  */
 function forena_report($name_in, $parms = array()) {
   require_once('forena.common.inc');
-  return FrxReportGenerator::instance()->report($name_in, $parms); 
+  $output = FrxReportGenerator::instance()->report($name_in, $parms);
+  $output = check_markup($output, variable_get('forena_input_format', filter_default_format()));
+  return $output;
 }
 
 /**
