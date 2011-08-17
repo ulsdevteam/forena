@@ -461,6 +461,7 @@ function forena_report($name_in, $parms = array()) {
         if ($css_files) foreach ($css_files as $css_file) {
           drupal_add_css($css_file, 'module');
         }
+        $output = check_markup($output, variable_get('forena_input_format', FILTER_FORMAT_DEFAULT), FALSE);
         return $output;
       }
     }
