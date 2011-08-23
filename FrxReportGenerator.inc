@@ -189,9 +189,12 @@ class FrxReportGenerator {
       $path = $this->app->forena_path();
       $repos = array();
       // Load the repository list from the global settings.php file.
+
+      $repos = $this->app->repositories();
       if ($_forena_repositories) {
-        $repos = $this->app->repositories();
+      	array_merge($repos, $forena_repositories);
       }
+
 
 
     }

@@ -237,6 +237,7 @@ public function repositories() {
                              'title' => 'Drupal Reports');
   $repos['sampledb'] = array('path' => $path . '/repos/sample',
                              'title' => 'Sample DB Repository');
+
   return $repos;
 }
 
