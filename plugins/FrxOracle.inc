@@ -90,7 +90,7 @@ class FrxOracle extends FrxDataProvider {
       }
       if ($this->debug) {
         $d = ($xml) ? htmlspecialchars($xml->asXML()) : '';
-        forena_debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "\n</pre>");
+        $this->app->debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "\n</pre>");
       }
       return $xml;
     }

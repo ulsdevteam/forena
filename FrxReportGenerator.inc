@@ -11,7 +11,7 @@ require_once('FrxDataProvider.inc');
 
 class FrxReportGenerator {
 
-  private $app;
+  public $app;
   private $repositories = array();
   static $instance='';
   public $title;

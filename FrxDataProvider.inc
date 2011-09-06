@@ -19,6 +19,7 @@ class FrxDataProvider{
     $this->comment_prefix = '--';
     $this->block_ext = 'sql';
     $this->block_path = $repos_path;
+    $this->app = FrxReportGenerator::instance()->app;
   }
 
   /**
