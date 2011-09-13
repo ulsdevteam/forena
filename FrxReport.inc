@@ -269,11 +269,24 @@ class FrxReport {
     }
 
     if ($link) {
+    	$target = $this->teng->replace($target,  $data, TRUE);
+    	// use the target attribute to open links in new tabs or as popups.
+      if (@strpos(strtolower($target),'popup')===0) {
+        $opts = 'status=1';
+
+
+      	$options = "status=1";
+        $attributes = array('onclick' =>
+          'window.open(this.href,\''. $target . '\', "' . $options . '"); return false;');
+      }
+      else {
+      	$attributes = array('target' => $target);
+      }
       $link = $this->teng->replace($link,  $data, TRUE);
       @list($url, $query) = explode('?', $link);
       $data = array();
       parse_str($query, $data);
-      $value = FrxReportGenerator::instance()->link(htmlspecialchars_decode($value), $url, array('query' => $data, 'attributes' => array('target' => $target)));
+      $value = FrxReportGenerator::instance()->link(htmlspecialchars_decode($value), $url, array('query' => $data, 'attributes' => $attributes));
     }
     return $value;
   }
