@@ -981,17 +981,3 @@ function forena_confirm_email_submit($form, &$form_state) {
   }
 }
 
-/**
- * Send report block XML
- * @param string $block_name
- */
-function forena_block_xml($block_name='') {
-  $block_name = str_replace('.', '/', $block_name);
-  $parms = $_GET;
-  unset($parms['q']);
-  $xml = forena_invoke_data_provider($block_name, $parms);
-  if (is_object($xml)){
-    header('Content-Type: text/xml');
-    print $xml->asXML();
-  }
-}

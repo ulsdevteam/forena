@@ -320,6 +320,30 @@ function forena_perm() {
   return $perms;
 }
 
+/**
+ * Send report block XML
+ * @param string $block_name
+ */
+function forena_block_xml($block_name='') {
+	$parms = $_GET;
+  unset($parms['q']);
+  $block_name = str_replace('.', '/', $block_name);
+  $xml = forena_xml($block_name, $parms);
+  if (is_object($xml)){
+    header('Content-Type: text/xml');
+    print $xml->asXML();
+  }
+}
+
+/**
+ * Block XML page
+ * Enter description here ...
+ */
+function forena_xml($block_name, $parms=array()) {
+	require_once('forena.common.inc');
+  $xml = forena_invoke_data_provider($block_name, $parms);
+  return $xml;
+}
 
 
 function forena_user_reports() {
