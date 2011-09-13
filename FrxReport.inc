@@ -273,7 +273,18 @@ class FrxReport {
       @list($url, $query) = explode('?', $link);
       $data = array();
       parse_str($query, $data);
-      $value = l(htmlspecialchars_decode($value), $url, array('query' => $data, 'attributes' => array('target' => $target)));
+      if (strpos('popup', strtolower($target))===0) {
+        $opts = 'status=1';
+
+
+      	$options = "status=1";
+        $attributes = array('onclick' =>
+          'window.open(this.href,\''. $target . '\', "' . $options . '"); return false;');
+      }
+      else {
+      	$attributes = array('target' => $target);
+      }
+      $value = l(htmlspecialchars_decode($value), $url, array('query' => $data, 'attributes' => $attributes));
     }
     return $value;
   }
