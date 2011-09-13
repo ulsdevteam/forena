@@ -180,6 +180,7 @@ function forena_block_view($delta = 0) {
 
 }
 
+
 /**
  * Auto complete for categories
  *
@@ -212,6 +213,12 @@ function forena_data_block_autocomplete($string='') {
   }
 
   print drupal_json_output($data_blocks);
+}
+
+
+function forena_xml($block_name, $parms=array()) {
+	  include_once('forena.common.inc');
+		return FrxReportGenerator::instance()->block_xml($block_name, $parms);
 }
 
 /**

@@ -29,6 +29,7 @@ class FrxReportGenerator {
     return self::$instance;
   }
 
+
   public function __construct($application_class) {
 
     $app = $this->app = new $application_class();
@@ -217,6 +218,15 @@ class FrxReportGenerator {
     }
   }
 
+  /**
+   * Accessor function named more conveniently
+   * Enter description here ...
+   * @param unknown_type $block_name
+   * @param unknown_type $parms
+   */
+  public function block_xml($block_name, $parms=array()) {
+	 return $this->invoke_data_provider($block_name, $parms);
+  }
 
   /**
    * Extract the data by running a block
@@ -623,22 +633,6 @@ function load_block($data_block, $clause='') {
     }
     else {
       return $ret;
-    }
-  }
-
-
-  /**
-   * Send report block XML
-   * Enter description here ...
-   * @param unknown_type $block_name
-   */
-  function block_xml($block_name='') {
-    $block_name = str_replace('.', '/', $block_name);
-    $parms = $_GET;
-    $xml = $this->invoke_data_provider($block_name, $parms);
-    if (is_object($xml)){
-      header('Content-Type: text/xml');
-      print $xml->asXML();
     }
   }
 
