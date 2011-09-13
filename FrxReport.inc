@@ -269,11 +269,13 @@ class FrxReport {
     }
 
     if ($link) {
+    	$target = $this->teng->replace($target,  $data, TRUE);
       $link = $this->teng->replace($link,  $data, TRUE);
       @list($url, $query) = explode('?', $link);
       $data = array();
       parse_str($query, $data);
-      if (strpos('popup', strtolower($target))===0) {
+
+      if (strpos(strtolower($target), 'popup')===0) {
         $opts = 'status=1';
 
 
