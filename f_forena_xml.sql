@@ -27,7 +27,11 @@ BEGIN
             IF sql_err_no=4061 THEN 
              RAISE INVALID_PACKAGE_STATE; 
              END IF; 
-            SELECT XMLELEMENT("error",xmlattributes(sql_err_no "code"),sql_err_msg) INTO XMLDOC from dual; 
+            DBMS_OUTPUT.put_line(sqlerrm); 
+            IF sql_err_no = 0 THEN 
+              sql_err_msg := SQLERRM; 
+              END IF; 
+            SELECT XMLELEMENT("error",xmlattributes(sql_err_no "code"), sql_err_msg) INTO XMLDOC from dual; 
             RETURN xmldoc; 
 END f_forena_xml;
 /
