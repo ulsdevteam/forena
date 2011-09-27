@@ -193,7 +193,7 @@ class FrxReportGenerator {
 
       $repos = $this->app->repositories();
       if ($_forena_repositories) {
-      	array_merge($repos, $forena_repositories);
+      	array_merge($repos, $_forena_repositories);
       }
 
 

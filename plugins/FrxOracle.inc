@@ -79,7 +79,7 @@ class FrxOracle extends FrxDataProvider {
         if ($clause) {
           $sql = 'SELECT * FROM (' . trim($sql, ' ;') . ') ' . $clause;
         }
-        $sql = $this->te->replace($sql, $params);
+        $sql = $this->te->replace($sql);
 
         if ($this->use_oracle_xml) {
           $xml = $this->oracle_xml($sql, $block_name);

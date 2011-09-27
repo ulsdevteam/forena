@@ -10,6 +10,7 @@ require_once('FrxReport.inc');
 require_once('FrxDataProvider.inc');
 require_once('FrxReportGenerator.inc');
 require_once('FrxDrupalApplication.inc');
+require_once('frxData.inc');
 
 /**
  * Get name from argument 1 or alterntaively from a file name

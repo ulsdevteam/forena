@@ -38,7 +38,7 @@ class FrxHostApplication {
    * return html A properly formatted anchor tag
    */
   public function link($title, $path, $options=array()) {
-    return $title;
+    return '<a href="'. $path . '">' . $title . '</a>';
   }
 
   /**

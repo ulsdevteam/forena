@@ -65,7 +65,7 @@ class FrxMSSQL extends FrxDataProvider {
       if ($clause) {
         $sql = 'SELECT * FROM (' . trim($sql, ' ;') . ') ' . $clause;
       }
-      $sql = $this->te->replace($sql, $params);
+      $sql = $this->te->replace($sql);
 
       if ($this->use_mssql_xml) {
         $xml = $this->mssql_xml($sql, $block_name);

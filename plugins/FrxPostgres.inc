@@ -65,7 +65,7 @@ class FrxPostgres extends FrxDataProvider {
       if ($clause) {
         $sql = 'SELECT * FROM (' . trim($sql, ' ;') . ') vvv ' . $clause;
       }
-      $sql = $this->te->replace($sql, $params);
+      $sql = $this->te->replace($sql);
 
       if ($this->use_postgres_xml) {
         $xml = $this->postgres_xml($sql, $block_name);
