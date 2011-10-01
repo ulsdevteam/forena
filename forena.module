@@ -420,7 +420,10 @@ function forena_forena_controls() {
   $controls[] = array('file' => 'plugins/FrxControls.inc',
                       'class' => 'FrxControls',
                      );
-  return $controls;
+  $controls[] = array('file' => 'plugins/FrxSampleRenderer.inc',
+                      'class' => 'FrxSampleRenderer',
+                     );
+                     return $controls;
 }
 
 /**

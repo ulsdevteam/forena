@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE root [
+<!ENTITY nbsp "&#160;">
+]>
+<html xmlns:frx="urn:FrxReports">
+  <head>
+    <title>5. Report with Custom Control</title>
+    <frx:category>Sample</frx:category>
+    <frx:options/>
+    <frx:fields/>
+    <frx:parameters/>
+    <frx:docgen/>
+  </head>
+  <body>
+    <div>
+      <p>This sample report demonstrates the use of a custom control.</p>
+    </div>
+    <div frx:renderer="FrxSampleRenderer"></div>
+  </body>
+</html>

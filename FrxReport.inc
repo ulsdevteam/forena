@@ -6,6 +6,7 @@
  */
 define('FRX_NS', 'urn:FrxReports');
 require_once('FrxSyntaxEngine.inc');
+require_once('FrxRenderer.inc');
 
 class FrxReport {
   public $blocks_loaded;
@@ -127,18 +128,17 @@ class FrxReport {
     if ($node_type == XML_COMMENT_NODE) {
       return '';
     }
-
     // Continue processing non text nodes
     $node = simplexml_import_dom($dom_node);
     // Special catch to make sure we don't process bad nodes
-    if (!$node) {
+    if (!is_object($node)) {
 	    return '';
     }
 
+
     $frx = $node->attributes(FRX_NS);
     $elements = $dom_node->childNodes->length;
-
-    // Test to see if we have any nodes that are contains data url
+    // Test to see if we have any nodes that contain data url
     if ($node->xpath('*//@frx:*') || $frx) {
       $attrs = $node->attributes();
       $id = (string)$attrs['id'];
@@ -161,7 +161,6 @@ class FrxReport {
 
       // Determine if we have a custom renderer
       $renderer = (string)$frx['renderer'];
-
        // if we have a foreach in this node, we need to iterate the children
       if ((string)$frx['foreach'] ) {
         // Save xml
@@ -193,7 +192,10 @@ class FrxReport {
         }
       }
       elseif ($continue) {
-
+      	if ($renderer) {
+          $co = FrxReportGenerator::instance()->define_controls($renderer);
+      	  if ($co) $o = $co->render($dom_node, $this->teng);
+      	}
         if (!$renderer) $o .= $this->teng->replace('<' . $tag . $attr_text . '>');
 
         // @TODO: Determine if there is a custom renderer
@@ -210,7 +212,6 @@ class FrxReport {
     }
     else {
 
-      $tag = $node->getName();
       // We can render so lets do it.
       $text = $node->asXML();
       $o .= $this->teng->replace($text);

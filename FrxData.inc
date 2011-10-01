@@ -27,7 +27,11 @@ class FrxData {
 		return self::$instance;
 	}
 
-
+  /**
+   * Instantiate teh object and get a new connection
+   * @param unknown_type $data
+   * @param unknown_type $id
+   */
 	public function __construct($data = array(), $id='parm') {
 		if ($data) {
 			$this->push($data, $id);
