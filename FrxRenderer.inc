@@ -5,34 +5,40 @@
  *
  */
 class FrxRenderer {
-	public $domNode;
-	public $teng;
-	public $xmlNode;
-	public $frxAttributes;
-	public $htmlAttributes;
-	public $attrib_text;    //Property of
-	public $dataProvider;
+	public $teng;           // Token replacement engine.
+	public $reportDocDomNode; //A Dom node version of the element.  This is important if you want to walk text nodes.
+	public $reportDocNode;  // SimpleXML Report Document Node -- The node of the report we are rendering
+	public $frxAttributes;  // Frx Attributes of the node we are rendering.
+	public $htmlAttributes;  // Html attributes of the node that we are rendering
+	public $dataProvider;   // An FrxData instance that provides the data assiated with the report.
 	public $name;
 	public $id;
 
 
-	public function initNode($domNode, $teng) {
-		$this->domNode = $domNode;
+	public function __construct($domNode = null, $teng = null, $frxReport = null) {
+		if ($domNode) {
+      $this->initReportNode($domNode, $teng);
+		}
+	}
+
+	public function initReportNode($domNode, $frxReport) {
+		$this->reportDocDomNode = $domNode;
     $this->dataProvider = FrxData::instance();
-    $this->xmlNode = simplexml_import_dom($domNode);
-    $node = $this->xmlNode;
+    $this->reportDocNode = simplexml_import_dom($domNode);
+    $node = $this->reportDocNode;
     $this->name = $node->getName();
     $this->htmlAttributes = $node->attributes();
     $this->id = (string)$this->htmlAttributes['id'];
     $this->frxAttributes = $node->attributes(FRX_NS);
-    $this->teng = $teng;
+    $this->teng = $frxReport->teng;
+    $this->frxReport = $frxReport;
 	}
 
 	public function replaceTokens($text, $raw_mode=FALSE) {
 		return $this->teng->replace($text, $raw_mode);
 	}
 
-	public function render($domNode, $teng) {
+	public function render() {
 		$this->initNode($domNode, $teng);
 		// Get the data that we're working with
 		$xml = $this->dataProvider->getCurrentContext();

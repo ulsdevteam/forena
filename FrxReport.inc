@@ -20,8 +20,8 @@ class FrxReport {
   public $body;
   public $html;
   private $ids;
-  private $teng;
-  private $frx_data; // Data object
+  public $teng;
+  public $frx_data; // Data object
   private $root_data;
   private $dom;
 
@@ -194,7 +194,8 @@ class FrxReport {
       elseif ($continue) {
       	if ($renderer) {
           $co = FrxReportGenerator::instance()->define_controls($renderer);
-      	  if ($co) $o = $co->render($dom_node, $this->teng);
+          $co->initReportNode($dom_node, $this);
+      	  if ($co) $o = $co->render();
       	}
         if (!$renderer) $o .= $this->teng->replace('<' . $tag . $attr_text . '>');
 
