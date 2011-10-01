@@ -462,7 +462,7 @@ function load_block($data_block, $clause='') {
       $classes = $this->app->controls();
       foreach ($classes as $c) {
         if (($class=='' || $class==$c['class'])) {
-          if ($c['file'] && $c['module']) {
+          if ($c['file']) {
             include_once($c['file'] );
             if (class_exists($c['class'])) {
               $instances[$c['class']] =  new $c['class'];
