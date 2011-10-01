@@ -5,7 +5,8 @@
   */
 class FrxSource extends FrxRenderer {
 	public function render() {
-		$output = htmlspecialchars($this->reportDocNode->asXML());
+		$node = $this->reportDocNode;
+		$output = htmlspecialchars($node->asXML());
 		return $output;
 	}
 }
