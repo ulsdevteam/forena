@@ -156,9 +156,12 @@ function load_report($report_name) {
  *
  */
 function controls() {
+	$controls = array();
   $controls[] = array('file' => 'plugins/FrxControls.inc',
                       'class' => 'FrxControls',
                      );
+  $controls[] = array('file' => 'plugins/FrxSource.inc',
+                      'class' => 'FrxSource');
   return $controls;
 }
 
