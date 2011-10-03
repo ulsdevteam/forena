@@ -658,8 +658,9 @@ function report($name_in, $parms = array()) {
   else $parms = (array)$parms;
   if ($name) {
     $r = $this->get_report($name, $parms);
-    if (!$r) {
-    	$this->app->error('Could not load report');
+    if (!$r || !$r->rpt_xml) {
+    	$this->app->error('Could not load report. Check for invalid XML.');
+    	return '';
     }
 
 
