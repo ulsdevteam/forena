@@ -81,8 +81,12 @@ class FrxHostApplication {
   /**
    * Error Reporting
    */
- public function error($short, $long) {
+ public function error($short='', $long='') {
    print('Error: ' . $short . $long);
+ }
+
+ public function debug($short_message='', $log='') {
+ 	 print('Debug:' . $message . $log);
  }
 
 

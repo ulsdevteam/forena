@@ -29,7 +29,7 @@ class FrxPostgres extends FrxDataProvider {
     if ($uri) {
       // Test for postgres suport
       if (!is_callable('pg_connect')) {
-        forena_error('PHP Postgres support not installed.', 'PHP Postgres support not installed.');
+        FrxReportGenerator::instance()->error('PHP Postgres support not installed.', 'PHP Postgres support not installed.');
         return;
       }
       try {
@@ -37,12 +37,12 @@ class FrxPostgres extends FrxDataProvider {
         if (isset($conf['search path'])) pg_query($db, "SET search_path=" . $conf['search path']);
         $this->db = $db;
       } catch (Exception $e) {
-        forena_error('Unable to connect to database ' . $conf['title'], $e->getMessage());
+        FrxReportGenerator::instance()->error('Unable to connect to database ' . $conf['title'], $e->getMessage());
       }
 
     }
     else {
-      forena_error('No database connection string specified', 'No database connection: ' . print_r($conf, 1));
+      FrxReportGenerator::instance()->error('No database connection string specified', 'No database connection: ' . print_r($conf, 1));
     }
 
     // Set up the stuff required to translate.
@@ -75,7 +75,7 @@ class FrxPostgres extends FrxDataProvider {
       }
       if ($this->debug) {
         if ($xml) $d = htmlspecialchars($xml->asXML());
-        forena_debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "\n</pre>");
+        FrxReportGenerator::instance()->debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "\n</pre>");
       }
       return $xml;
     }
@@ -102,7 +102,7 @@ class FrxPostgres extends FrxDataProvider {
         $xml = new SimpleXMLElement($xml_text);
         if ($xml->getName() == 'error') {
           $msg = (string)$xml . ' in ' . $block . '.sql. ';
-          forena_error($msg . 'See logs for more info', $msg . ' in <pre> ' . $sql . '</pre>');
+          FrxReportGenerator::instance()->error($msg . 'See logs for more info', $msg . ' in <pre> ' . $sql . '</pre>');
         }
       }
       if ($rs) pg_free_result($rs);

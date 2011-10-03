@@ -29,7 +29,7 @@ class FrxMSSQL extends FrxDataProvider {
     if ($uri) {
       // Test for mssql suport
       if (!is_callable('mssql_connect')) {
-        forena_error('MSSQL support not installed.', 'MSSQL mssql support not installed.');
+        FrxReportGenerator::instance()->error('MSSQL support not installed.', 'MSSQL mssql support not installed.');
         return;
       }
       try {
@@ -37,12 +37,12 @@ class FrxMSSQL extends FrxDataProvider {
         $this->db = $db;
         if ($db) mssql_select_db($conf['database'], $db);
       } catch (Exception $e) {
-        forena_error('Unable to connect to database ' . $conf['title'], $e->getMessage());
+        FrxReportGenerator::instance()->error('Unable to connect to database ' . $conf['title'], $e->getMessage());
       }
 
     }
     else {
-      forena_error('No database connection string specified', 'No database connection: ' . print_r($conf, 1));
+      FrxReportGenerator::instance()->error('No database connection string specified', 'No database connection: ' . print_r($conf, 1));
     }
 
     // Set up the stuff required to translate.
@@ -75,7 +75,7 @@ class FrxMSSQL extends FrxDataProvider {
       }
       if ($this->debug) {
         if ($xml) $d = htmlspecialchars($xml->asXML());
-        forena_debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "\n</pre>");
+        FrxReportGenerator::instance()->debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "\n</pre>");
       }
       return $xml;
     }
@@ -102,7 +102,7 @@ class FrxMSSQL extends FrxDataProvider {
         $xml = new SimpleXMLElement($xml_text);
         if ($xml->getName() == 'error') {
           $msg = (string)$xml . ' in ' . $block . '.sql. ';
-          forena_error($msg . 'See logs for more info', $msg . ' in <pre> ' . $sql . '</pre>');
+          FrxReportGenerator::instance()->error($msg . 'See logs for more info', $msg . ' in <pre> ' . $sql . '</pre>');
         }
       }
       if ($rs) mssql_free_result($rs);

@@ -157,7 +157,7 @@ function error($short_message='', $log='') {
  * @param unknown_type $short_message
  * @param unknown_type $log
  */
-function debug($short_message, $log) {
+function debug($short_message='', $log='') {
   if ($log) {
     watchdog('forena debug', $log, NULL);
   }

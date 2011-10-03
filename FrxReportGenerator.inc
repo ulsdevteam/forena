@@ -808,6 +808,14 @@ function data_block_params($data_block, $field, $label, $params=array(), $clause
   return $list;
 }
 
+public function debug($short_message='', $log='') {
+	$this->app->debug($short_message, $log);
+}
+
+public function error($short_message='', $log='') {
+	$this->app->error($short_message, $log);
+}
+
 public function report_path() {
 	return $this->app->configuration('report_repos');
 }

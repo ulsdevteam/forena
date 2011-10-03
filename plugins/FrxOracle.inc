@@ -31,7 +31,7 @@ class FrxOracle extends FrxDataProvider {
     if ($uri) {
          // Test for postgres suport
       if (!is_callable('oci_connect')) {
-        forena_error('OCI support not installed.', 'OCI support not installed.');
+        FrxReportGenerator::instance()->error('OCI support not installed.', 'OCI support not installed.');
         return;
       }
       try {
@@ -43,12 +43,12 @@ class FrxOracle extends FrxDataProvider {
         }
       }
       catch (Exception $e) {
-        forena_error('Unable to connect to database ' . $conf['title'], $e->getMessage());
+        FrxReportGenerator::instance()->error('Unable to connect to database ' . $conf['title'], $e->getMessage());
       }
 
     }
     else {
-      forena_error('No database connection string specified', 'No database connection: ' . print_r($conf, 1));
+      FrxReportGenerator::instance()->error('No database connection string specified', 'No database connection: ' . print_r($conf, 1));
     }
 
     // Set up the stuff required to translate.
@@ -121,7 +121,7 @@ class FrxOracle extends FrxDataProvider {
         $msg .= htmlentities($e['sqltext']);
         //printf("\n%".($e['offset']+1)."s", "^");
         $msg .= "\n</pre>\n";
-        forena_error('Database error in ' . $block . ' see logs for info', $msg);
+        FrxReportGenerator::instance()->error('Database error in ' . $block . ' see logs for info', $msg);
         return NULL;
       }
 
@@ -130,7 +130,7 @@ class FrxOracle extends FrxDataProvider {
         $xml = new SimpleXMLElement($xml_text);
         if ($xml->getName() == 'error') {
           $msg = (string)$xml . ' in ' . $block . '.sql. ';
-          forena_error($msg . 'See logs for more info', $msg . ' in <pre> ' . $sql . '</pre>');
+          FrxReportGenerator::instance()->error($msg . 'See logs for more info', $msg . ' in <pre> ' . $sql . '</pre>');
         }
       }
       oci_free_statement($stmt);

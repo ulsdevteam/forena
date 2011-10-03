@@ -26,7 +26,7 @@ class FrxPDO extends FrxDataProvider {
     if ($uri) {
       // Test for PDO suport
       if (!class_exists('PDO')) {
-        forena_error('PDO support not installed.', 'PDO support not installed.');
+        FrxReportGenerator::instance()->error('PDO support not installed.', 'PDO support not installed.');
         return;
       }
 
@@ -35,7 +35,7 @@ class FrxPDO extends FrxDataProvider {
       $drivers = PDO::getAvailableDrivers();
       if ($drivers && (array_search($prot, $drivers)===FALSE)) {
         $msg = 'PDO driver support for ' . $prot . ' not installed';
-        forena_error($msg, $msg);
+        FrxReportGenerator::instance()->error($msg, $msg);
         return;
       }
       try {
@@ -47,15 +47,15 @@ class FrxPDO extends FrxDataProvider {
         }
         $this->db = $db;
         if (!is_object($db)) {
-          forena_error('Unknown error connecting to database ' . $uri);
+          FrxReportGenerator::instance()->error('Unknown error connecting to database ' . $uri);
         }
       } catch (PDOException $e) {
-        forena_error('Unable to connect to database', $e->getMessage());
+        FrxReportGenerator::instance()->error('Unable to connect to database', $e->getMessage());
       }
 
     }
     else {
-      forena_error('No database connection string specified');
+      FrxReportGenerator::instance()->error('No database connection string specified');
     }
 
     // Set up the stuff required to translate.
@@ -87,7 +87,7 @@ class FrxPDO extends FrxDataProvider {
       $e = $db->errorCode();
       if ($e != '00000') {
         $i = $db->errorInfo();
-        forena_error($i[2] . ':' . $sql, $i[2]);
+        FrxReportGenerator::instance()->error($i[2] . ':' . $sql, $i[2]);
       }
       else {
 
@@ -104,7 +104,7 @@ class FrxPDO extends FrxDataProvider {
 
       if ($this->debug) {
         if ($xml) $d = htmlspecialchars($xml->asXML);
-        forena_debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "/n</pre>");
+        FrxReportGenerator::instance()->debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "/n</pre>");
       }
       return $xml;
     }
