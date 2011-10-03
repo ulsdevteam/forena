@@ -46,6 +46,25 @@ class FrxData {
 		return $this->cur_context;
 	}
 
+	/**
+	 * Allows override of a value for the current context.
+	 * @param String $key
+	 * @param String $value
+	 */
+  public function setValue($key, $value) {
+     if (is_array($this->cur_context)) {
+       $this->cur_context[$key] = $value;
+     }
+     elseif (is_object($parameters)) {
+     	 if (strpos($key, '@')===0) {
+     	   $this->cur_context[$key] = $value;
+     	 }
+     	 else {
+         $parmeters->$key = $value;
+     	 }
+     }
+  }
+
   /**
    * Push a data context onto the data stacks
    * to make sure that we can address these using an

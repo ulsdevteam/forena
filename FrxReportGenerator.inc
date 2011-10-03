@@ -103,6 +103,13 @@ class FrxReportGenerator {
   }
 
   /**
+   * Clear session data because we want to reload.
+   */
+  public function clear_session() {
+  	if (isset($_SESSION['forena_access'])) unset($_SESSION['forena_access']);
+  }
+
+  /**
    * Check access control using the block in a data block.  In this case
    * public assess returns true.
    * @param $block  Repository block used to test access
@@ -111,6 +118,7 @@ class FrxReportGenerator {
    * @return unknown_type
    */
   function block_access($block, $path, $access, $cache=TRUE) {
+  	// PUBLIC always returns true.
     if ($access=='PUBLIC') return TRUE;
     if (!isset($_SESSION['forena_access'])) $_SESSION['forena_access'] = array();
     if ($cache && isset($_SESSION['forena_access'][$block])) {
@@ -119,7 +127,10 @@ class FrxReportGenerator {
     else {
       $rights = array();
       // Get the block from the repository
+      $frxData = FrxData::instance();
+      $frxData->push(array(), 'frx-block-access');
       $data = $this->invoke_data_provider($block, array(), NULL);
+      $frxData->pop();
       if ($data) {
         if (!$path) {
           $path ='*/*';
@@ -136,6 +147,7 @@ class FrxReportGenerator {
     }
     return FALSE;
   }
+
 
   // Putting this in a function to sandbox the repository settings
   function load_repository(&$repo) {
@@ -242,7 +254,10 @@ class FrxReportGenerator {
      $repos = $this->repository($provider);
      if (isset($repos['user callback'])) {
        $user_fn = $repos['user callback'];
-       if (is_callable($user_fn)) $parameters['current_user'] = $user_fn();
+       if (is_callable($user_fn)) {
+       	 $current_user =   $user_fn();
+         FrxData::instance()->setValue('current_user', $current_user);
+       }
      }
      if ($repos['data']) {
        $provider = $repos['data'];
