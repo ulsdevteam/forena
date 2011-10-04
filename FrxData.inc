@@ -10,7 +10,8 @@ class FrxData {
 	 * The static instance function of this object acts as a factory method that allows other code in forena to always be able to operate on the current context of the class.
 	 * @var unknown_type
 	 */
-	private static $instance;
+	public $id;
+	private static $instance='';
 	private $cur_context;  // The data of the xml;
 	private $data_sources = array();
   private $data_stack = array();
@@ -25,17 +26,6 @@ class FrxData {
 			self::$instance = new FrxData();
 		}
 		return self::$instance;
-	}
-
-  /**
-   * Instantiate teh object and get a new connection
-   * @param unknown_type $data
-   * @param unknown_type $id
-   */
-	public function __construct($data = array(), $id='parm') {
-		if ($data) {
-			$this->push($data, $id);
-		}
 	}
 
 	/**
@@ -75,9 +65,11 @@ class FrxData {
    * @return unknown_type
    */
   public function push($data, $id='') {
-    $this->data_stack[] = $data;
-    $this->id_stack[] = $id;
+  	$this->data_stack[] = $this->cur_context;
+  	$this->id_stack[] = $this->id;
+    $this->id = $id;
     $this->cur_context = $data;
+
     if ($id) {
       $this->data_sources[$id] = $data;
     }
@@ -90,11 +82,9 @@ class FrxData {
    * @return mixed
    */
   public function pop() {
-  	$id = array_pop($this->id_stack);
-    array_pop($this->data_stack);
-    if ($id) {
-      unset($this->data_sources[$id]);
-    }
+  	$this->id = array_pop($this->id_stack);
+    $this->cur_context = array_pop($this->data_stack);
+
   }
 
   /**

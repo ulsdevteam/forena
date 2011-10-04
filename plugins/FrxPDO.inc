@@ -72,8 +72,6 @@ class FrxPDO extends FrxDataProvider {
     // Load the block from the file
     $db = $this->db;
     $block = $this->load_block($block_name);
-
-
     $xml ='';
     if ($block['source'] && $this->access($block['access']) && $db) {
       $sql = $block['source'];
@@ -83,7 +81,6 @@ class FrxPDO extends FrxDataProvider {
       $sql = $this->te->replace($sql);
       $rs = $db->query($sql);
       $xml = new SimpleXMLElement('<table/>');
-
       $e = $db->errorCode();
       if ($e != '00000') {
         $i = $db->errorInfo();

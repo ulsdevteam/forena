@@ -99,8 +99,6 @@ class FrxReport {
 
     if ($xml) {
     	$this->blocks_loaded = TRUE;
-    	$this->frx_data->push($xml, $id);
-
     }
     return $xml;
   }
@@ -148,7 +146,10 @@ class FrxReport {
       if ((string)$frx['block']) {
         $is_data_block = TRUE;
         $xml = $this->get_data((string)$frx['block'], (string)$frx['clause'], $id);
-        if (!$xml) $continue = FALSE;
+        if ($xml) {
+          $this->frx_data->push($xml, $id);
+        }
+        else $continue = FALSE;
       }
 
       // Preserve non frx attributes
@@ -172,7 +173,6 @@ class FrxReport {
 
         //$tmp_attrs = (array)$attrs;
         if ($nodes) foreach ($nodes as $x) {
-
           $this->frx_data->push($x, $id);
           $i++;
           $odd = $i & 1;
@@ -207,7 +207,7 @@ class FrxReport {
         }
         if (!$renderer) $o .= '</' . $tag . '>';
       }
-      if ($is_data_block) {
+      if ($is_data_block && $continue) {
       	$this->frx_data->pop();
       }
     }

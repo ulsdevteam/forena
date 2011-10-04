@@ -70,13 +70,12 @@ class FrxSyntaxEngine {
     $data = $this->frxData->currentContext();
 
     // Determine if we have a . syntax for the id.
-    if ($key) {
+    if ($key && strpos($key, '.')) {
       @list($id, $path) = explode('.', $key, 2);
       if ($this->frxData->contextExists($id)) {
         $data = $this->frxData->getContext($id);
       }
     }
-
 
     if (is_array($data)) {
       $retvar = @$data[$key];
