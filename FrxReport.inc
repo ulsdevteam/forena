@@ -193,19 +193,23 @@ class FrxReport {
       }
       elseif ($continue) {
       	if ($renderer) {
+      		// Implement custom renderer.
           $co = FrxReportGenerator::instance()->define_controls($renderer);
-          $co->initReportNode($dom_node, $this);
-      	  if ($co) $o = $co->render();
+
+      	  if ($co) {
+      	  	$co->initReportNode($dom_node, $this);
+      	  	$o = $co->render();
+      	  }
       	}
-        if (!$renderer) $o .= $this->teng->replace('<' . $tag . $attr_text . '>');
+      	else {
+	        $o .= $this->teng->replace('<' . $tag . $attr_text . '>');
 
-        // @TODO: Determine if there is a custom renderer
-
-        // None found, so render children
-        foreach ($dom_node->childNodes as $child) {
-          $o .= $this->render_section($child);
-        }
-        if (!$renderer) $o .= '</' . $tag . '>';
+	        // None found, so render children
+	        foreach ($dom_node->childNodes as $child) {
+	          $o .= $this->render_section($child);
+	        }
+	        $o .= '</' . $tag . '>';
+      	}
       }
       if ($is_data_block && $continue) {
       	$this->frx_data->pop();

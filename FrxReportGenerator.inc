@@ -486,8 +486,8 @@ function load_block($data_block, $clause='') {
         }
       }
     }
-    if ($class && $instances[$class]) {
-      return $instances[$class];
+    if ($class) {
+      return @$instances[$class];
     }
     return $instances;
   }
