@@ -678,7 +678,6 @@ function report($name_in, $parms = array()) {
     	return '';
     }
 
-
     //check for default parameters
     $r_params = $r->parameters;
     $reload_params = FALSE;
@@ -702,7 +701,6 @@ function report($name_in, $parms = array()) {
     }
 
     //Reload report if parameters were missing
-    //@TODO: Change report to just change the data
     if ($reload_params) {
       $r = $this->get_report($name, $parms);
     }
@@ -738,6 +736,7 @@ function report($name_in, $parms = array()) {
 
         $output = $this->generate_doc($format, $output, $options);
         print $output;
+        exit;
       }
       else {
         //Creating links for downloadable documents.
