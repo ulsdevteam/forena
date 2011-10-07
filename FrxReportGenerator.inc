@@ -531,6 +531,7 @@ function load_block($data_block, $clause='') {
       }
     }
     $temp = array_keys($supported_doctypes);
+    $temp[]='web';
     if ($supported_doctypes) $supported_doctypes = array_combine($temp, $temp);
     return $supported_doctypes;
   }
@@ -720,7 +721,7 @@ function report($name_in, $parms = array()) {
     $title = (string)$r->title;
     $this->title = $title;
 
-    if ($format) { //a format was requested
+    if ($format && $format !='web') { //a format was requested
         $header = '<h1>' . $title . '</h1>';
         $output = $header . $output;
         $css_text = '';
