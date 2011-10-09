@@ -133,6 +133,24 @@ class FrxControls {
     return $output;
   }
 
+  /**
+   * Fill columns with rowspan tags.
+   * @param unknown_type $colspan
+   */
+  private function fillColumns($colspan) {
+  	$f = '';
+  	for ($i=2; $i<=$colspan; $i++) {
+  		$f .= ',';
+  	}
+  	return $f;
+  }
+
+
+  /**
+   * Generate the CSV document.
+   * @param XML $body
+   * @param unknown_type $options
+   */
   public function csvdocument($body, $options) {
     $doc = new DOMDocument();
     $doc->strictErrorChecking = FALSE;
@@ -141,14 +159,36 @@ class FrxControls {
     $xml = simplexml_import_dom($doc);
     $output = '';
     $rows = $xml->xpath('//tr');
+    $rowspans = array();
     if ($rows) foreach ($rows as $row) {
+    	$c = 0;
       foreach ($row as $column) {
+      	$c++;
+      	if ($rowspans[$c]) {
+      		$cont = true;
+      		while ($rowspans[$c] && $cont) {
+      			$rowspans[$c]--;
+      			$output .= ',';
+      			$c++;
+      		}
+      	}
         $value = $column->asXML();
         $value = strip_tags($value);
         $value = str_replace('"', '""', $value);
         $value = str_replace(array("\n"), '', $value);
         $value =  '"' . $value . '",';
         $output .= $value;
+        // Add Column span elements
+        if ((int)$column['colspan'] > 1) {
+          for ($i=2; $i<=(int)$column['colspan']; $i++) {
+          	$c++;
+  		      $output .= ',';
+  	      }
+        }
+        // Check to see if we have some rowspans that we need to save
+        if ((int)$column['rowspan'] > 1) {
+        	$rowspans[$c] = (int)$column['rowspan'] - 1;
+        }
       }
       $output .= "\n";
     }
