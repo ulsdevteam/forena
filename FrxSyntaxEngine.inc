@@ -74,6 +74,7 @@ class FrxSyntaxEngine {
       @list($id, $path) = explode('.', $key, 2);
       if ($this->frxData->contextExists($id)) {
         $data = $this->frxData->getContext($id);
+        $key = $path;
       }
     }
 
