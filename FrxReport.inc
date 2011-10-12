@@ -286,7 +286,12 @@ class FrxReport {
       else {
       	$attributes = array('target' => $target);
       }
-      $value = l(htmlspecialchars_decode($value), $url, array('query' => $data, 'attributes' => $attributes));
+      $value = l(
+        htmlspecialchars_decode($value),
+        $url,
+        array('query' => $data,
+          'attributes' => $attributes,
+          'absolute' => TRUE));
     }
     return $value;
   }
