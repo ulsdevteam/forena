@@ -80,7 +80,6 @@ class FrxSQLQueryBuilder {
 		$this->applied_filters = array();
 		$this->block=$block;
 		$this->data = $values;
-		drupal_set_message(print_r($values,1));
 		return $this;
 	}
 
@@ -91,7 +90,7 @@ class FrxSQLQueryBuilder {
 	public function execute() {
 		$where='';
 		if ($this->where_clause) {
-			$where  = 'WHERE 1=1 ' .$this->where_clause;
+			$where  = 'WHERE 1=1' .$this->where_clause;
 		}
     return forena_invoke_data_provider($this->block, $this->data, $where);
 
@@ -104,12 +103,9 @@ class FrxSQLQueryBuilder {
 	 * @param string $comparison
 	 */
   public function filter($field, $comparison) {
-    drupal_set_message(print_r($this->clauses,1));
   	if (@$this->clauses[$field][$comparison]) {
 	  	$this->where_clause .= ' AND ' . $this->clauses[$field][$comparison];
-	  	drupal_set_message('in here');
   	}
-  	drupal_set_message($this->block);
   	return $this;
   }
 }
