@@ -7,6 +7,7 @@
 // Include Report renderer.
 require_once('FrxReport.inc');
 require_once('FrxDataProvider.inc');
+require_once('FrxSQLQueryBuilder.inc');
 
 /**
  * Get name from argument 1 or alterntaively from a file name
