@@ -1042,14 +1042,15 @@ function forena_data_block_form_submit($form, &$form_state) {
     }
 
     //create xml from template object
-    $template_obj = forena_get_templates($template);
+    $template_obj = FrxReportGenerator::instance()->get_templates($template);
     if ($template_obj) {
       $body = $template_obj->$template($column_array, $data_block, $where_clause);
     }
     $rpt_xml =  '<html xmlns:frx="urn:FrxReports"><body>' . $body . '</body></html>';
 
     //render the xml
-    $output = $g->render_report($rpt_xml, NULL, $params);
+    $r = new FrxReport($rpt_xml, $params);
+    $output = $r->render('web');
     $form_state['storage']['output'] = $output;
     $form_state['storage']['template_body'] = $body;
 
