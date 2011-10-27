@@ -75,7 +75,10 @@ class FrxControls {
          $type = 'custom';
          $format = $format_str;
      }
-     return $value ? format_date($value, $type, $format): '';
+     if ($value) {
+     	  $value = function_exists('format_date') ? format_date($value, $type, $format) : date($format, $value);
+     }
+     return $value;
   }
 
   public function iso_date($value, $format_str, $teng) {
