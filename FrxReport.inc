@@ -153,7 +153,7 @@ class FrxReport {
       $attr_text='';
       $tmp_attrs = array();
       if ($attrs) foreach ($attrs as $key => $value) {
-        $attr_text =  ' ' . $key . '="' . (string)$value . '"';
+        $attr_text .=  ' ' . $key . '="' . (string)$value . '"';
         $tmp_attr[$key] = (string)$value;
       }
 
