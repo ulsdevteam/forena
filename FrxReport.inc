@@ -128,7 +128,7 @@ class FrxReport {
     // Continue processing non text nodes
     $node = simplexml_import_dom($dom_node);
     // Special catch to make sure we don't process bad nodes
-    if (!$node) {
+    if (!is_object($node)) {
     	return '';
     }
 
