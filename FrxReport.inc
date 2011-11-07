@@ -294,9 +294,14 @@ class FrxReport {
       }
       $link = $this->teng->replace($link, TRUE);
       @list($url, $query) = explode('?', $link);
+      @list($query, $queryFrag) = explode('#', $query);
+      @list($url, $fragment) = explode('#', $url);
+      $fragment = $fragment . $queryFrag;
       $data = array();
       parse_str($query, $data);
-      $value = FrxReportGenerator::instance()->link(htmlspecialchars_decode($value), $url, array('query' => $data, 'attributes' => $attributes, 'absolute' => TRUE));
+      $value = FrxReportGenerator::instance()->link(
+        htmlspecialchars_decode($value), $url,
+        array('fragment' => $fragment, 'query' => $data, 'attributes' => $attributes, 'absolute' => TRUE));
     }
     return $value;
   }
