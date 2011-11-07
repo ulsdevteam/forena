@@ -272,7 +272,9 @@ class FrxReport {
     	$target = $this->teng->replace($target,  $data, TRUE);
       $link = $this->teng->replace($link,  $data, TRUE);
       @list($url, $query) = explode('?', $link);
+      @list($query, $queryFrag) = explode('#', $query);
       @list($url, $fragment) = explode('#', $url);
+      $fragment = $fragment . $queryFrag;
       $data = array();
       parse_str($query, $data);
 
