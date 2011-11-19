@@ -134,10 +134,34 @@ class FrxPostgres extends FrxDataProvider {
    * @param unknown_type $data
    */
   public function format($value, $key, $data) {
-    if ($value=='') $value = 'NULL'; else $value =  "'".  pg_escape_string($value) ."'";
+    if ($value=='' )
+      $value = 'NULL';
+    else {
+      if (is_array($value)) {
+      		// Build a array of values string
+	      	$i=0;
+	      	$val ='';
+	      	foreach ($value as $v) {
+	      		$i++;
+	      	  if ($i!=1) {
+	    			  $val .= ',';
+	     		  }
+	     		  if ($value=='') {
+
+		     		  $val .= 'NULL';
+	     		  }
+	     		  else {
+			    		$val .=  $v;
+	     		  }
+	    	  }
+	    	$value = $val . '';
+      }
+	    $value = trim($value);
+	    $value =  "'".   pg_escape_string($value) ."'";
+    }
+
     return $value;
   }
-
     /**
    * Destructor - Closes database connections.
    *

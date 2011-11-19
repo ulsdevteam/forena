@@ -23,8 +23,8 @@ class FrxMSSQL extends FrxDataProvider {
     parent::__construct($conf, $repos_path);
     $this->use_oracle_xml = FALSE;
     $uri = $conf['uri'];
-    $this->debug = $conf['debug'];
-    if ($conf['mssql_xml']) $this->use_mssql_xml = TRUE;
+    $this->debug = @$conf['debug'];
+    if (isset($conf['mssql_xml'])) $this->use_mssql_xml = TRUE;
     if ($uri) {
     	// Test for mssql suport
     	if (!is_callable('mssql_connect')) {

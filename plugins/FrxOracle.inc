@@ -282,10 +282,36 @@ class FrxOracle extends FrxDataProvider {
    * @param unknown_type $data
    */
   public function format($value, $key, $data) {
-    if ($value=='') $value = 'NULL'; else $value = "'" . str_replace("'", "''", $value) . "'";
+    if ($value=='' || $value ==array())
+      $value = 'NULL';
+    else {
+      if (is_array($value)) {
+      	if ($value == array()) {
+      		$value = 'NULL';
+      	}
+      	else {
+      		// Build a array of values string
+	      	$i=0;
+	      	foreach ($value as $v) {
+	      		$i++;
+	      	  if ($i==1) {
+	      			$val .= '(';
+	      		}
+	     		  else {
+	    			  $val .= ',';
+	     		  }
+	    		$val .=  "'".  str_replace("'", "''", $v) ."'";
+	    	  }
+	    	$value = $val . ')';
+        }
+      }
+      else {
+        $value = trim($value);
+        $value =  "'".  str_replace("'", "''", $value) ."'";
+      }
+    }
     return $value;
   }
-
     /**
    * Destructor - Closes database connections.
    *
