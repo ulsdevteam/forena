@@ -31,19 +31,19 @@ class FrxOracle extends FrxDataProvider {
     if ($uri) {
          // Test for postgres suport
       if (!is_callable('oci_connect')) {
-        forena_error('OCI support not installed.', 'OCI support not installed.');
+        $this->error('OCI support not installed.', 'OCI support not installed.');
         return;
       }
       try {
         $db = oci_connect($conf['user'], $conf['password'], $uri, $conf['character_set']);
         $this->db = $db;
       } catch (Exception $e) {
-        forena_error('Unable to connect to database ' . $conf['title'], $e->getMessage());
+        $this->error('Unable to connect to database ' . $conf['title'], $e->getMessage());
       }
 
     }
     else {
-      forena_error('No database connection string specified', 'No database connection: ' . print_r($conf, 1));
+      $this->error('No database connection string specified', 'No database connection: ' . print_r($conf, 1));
     }
 
     // Set up the stuff required to translate.
@@ -85,7 +85,7 @@ class FrxOracle extends FrxDataProvider {
       }
       if ($this->debug) {
         $d = ($xml) ? htmlspecialchars($xml->asXML()) : '';
-        forena_debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "\n</pre>");
+        $this->debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "\n</pre>");
       }
       return $xml;
     }
@@ -116,7 +116,7 @@ class FrxOracle extends FrxDataProvider {
         $msg .= htmlentities($e['sqltext']);
         //printf("\n%".($e['offset']+1)."s", "^");
         $msg .= "\n</pre>\n";
-        forena_error('Database error in ' . $block . ' see logs for info', $msg);
+        $this->error('Database error in ' . $block . ' see logs for info', $msg);
         return NULL;
       }
 
@@ -125,7 +125,7 @@ class FrxOracle extends FrxDataProvider {
         $xml = new SimpleXMLElement($xml_text);
         if ($xml->getName() == 'error') {
           $msg = (string)$xml . ' in ' . $block . '.sql. ';
-          forena_error($msg . 'See logs for more info', $msg . ' in <pre> ' . $sql . '</pre>');
+          $this->error($msg . 'See logs for more info', $msg . ' in <pre> ' . $sql . '</pre>');
         }
       }
       oci_free_statement($stmt);
