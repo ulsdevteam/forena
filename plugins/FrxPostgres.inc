@@ -65,7 +65,7 @@ class FrxPostgres extends FrxDataProvider {
       if ($clause) {
         $sql = 'SELECT * FROM (' . trim($sql, ' ;') . ') ' . $clause;
       }
-      $sql = $this->te->replace($sql, $params);
+      $sql = $this->te->replace($sql);
 
       if ($this->use_postgres_xml) {
         $xml = $this->postgres_xml($sql, $block_name);
@@ -95,10 +95,12 @@ class FrxPostgres extends FrxDataProvider {
       //$rs->debugDumpParams();
       $fsql = 'select query_to_xml($1,true,false,$2);';
       $rs = pg_query_params($db, $fsql, array($sql, ''));
+      $xml_text='';
       if ($rs) {
         $row = pg_fetch_row($rs);
         $xml_text = $row[0];
       }
+      $xml = null;
       if ($xml_text) {
         $xml = new SimpleXMLElement($xml_text);
         if ($xml->getName() == 'error') {
@@ -136,7 +138,7 @@ class FrxPostgres extends FrxDataProvider {
    * @param unknown_type $data
    */
   public function format($value, $key, $data) {
-    if ($value=='' )
+    if (empty($value))
       $value = 'NULL';
     else {
       if (is_array($value)) {
