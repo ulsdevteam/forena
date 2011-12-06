@@ -31,24 +31,19 @@ class FrxOracle extends FrxDataProvider {
     if ($uri) {
          // Test for postgres suport
       if (!is_callable('oci_connect')) {
-        FrxReportGenerator::instance()->error('OCI support not installed.', 'OCI support not installed.');
+        $this->error('OCI support not installed.', 'OCI support not installed.');
         return;
       }
       try {
         $db = oci_connect($conf['user'], $conf['password'], $uri, $conf['character_set']);
         $this->db = $db;
-        if ($db) {
-          $stmt = oci_parse($db,"ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD HH24:MI:SS'");
-          oci_execute($stmt);
-        }
-      }
-      catch (Exception $e) {
-        FrxReportGenerator::instance()->error('Unable to connect to database ' . $conf['title'], $e->getMessage());
+      } catch (Exception $e) {
+        $this->error('Unable to connect to database ' . $conf['title'], $e->getMessage());
       }
 
     }
     else {
-      FrxReportGenerator::instance()->error('No database connection string specified', 'No database connection: ' . print_r($conf, 1));
+      $this->error('No database connection string specified', 'No database connection: ' . print_r($conf, 1));
     }
 
     // Set up the stuff required to translate.
@@ -90,7 +85,7 @@ class FrxOracle extends FrxDataProvider {
       }
       if ($this->debug) {
         $d = ($xml) ? htmlspecialchars($xml->asXML()) : '';
-        $this->app->debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "\n</pre>");
+        $this->debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "\n</pre>");
       }
       return $xml;
     }
@@ -121,7 +116,7 @@ class FrxOracle extends FrxDataProvider {
         $msg .= htmlentities($e['sqltext']);
         //printf("\n%".($e['offset']+1)."s", "^");
         $msg .= "\n</pre>\n";
-        FrxReportGenerator::instance()->error('Database error in ' . $block . ' see logs for info', $msg);
+        $this->error('Database error in ' . $block . ' see logs for info', $msg);
         return NULL;
       }
 
@@ -130,7 +125,7 @@ class FrxOracle extends FrxDataProvider {
         $xml = new SimpleXMLElement($xml_text);
         if ($xml->getName() == 'error') {
           $msg = (string)$xml . ' in ' . $block . '.sql. ';
-          FrxReportGenerator::instance()->error($msg . 'See logs for more info', $msg . ' in <pre> ' . $sql . '</pre>');
+          $this->error($msg . 'See logs for more info', $msg . ' in <pre> ' . $sql . '</pre>');
         }
       }
       oci_free_statement($stmt);
@@ -282,7 +277,34 @@ class FrxOracle extends FrxDataProvider {
    * @param unknown_type $data
    */
   public function format($value, $key, $data) {
-    if ($value=='') $value = 'NULL'; else $value = "'" . str_replace("'", "''", $value) . "'";
+    if ($value=='' || $value ==array())
+      $value = 'NULL';
+    else {
+      if (is_array($value)) {
+      	if ($value == array()) {
+      		$value = 'NULL';
+      	}
+      	else {
+      		// Build a array of values string
+	      	$i=0;
+	      	foreach ($value as $v) {
+	      		$i++;
+	      	  if ($i==1) {
+	      			$val .= '(';
+	      		}
+	     		  else {
+	    			  $val .= ',';
+	     		  }
+	    		$val .=  "'".  str_replace("'", "''", $v) ."'";
+	    	  }
+	    	$value = $val . ')';
+        }
+      }
+      else {
+        $value = trim($value);
+        $value =  "'".  str_replace("'", "''", $value) ."'";
+      }
+    }
     return $value;
   }
 

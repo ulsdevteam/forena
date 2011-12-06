@@ -11,7 +11,7 @@
     </frx:parameters>
     <frx:docgen>
     </frx:docgen>
-    <frx:fields><frx:field id="state" link="" format="" format-string="" target=""/><frx:field id="name" link="" format="" format-string="" target=""/><frx:field id="total" link="reports/sample.user_distribution_simple?state={state}" format="" format-string="" target=""/></frx:fields>
+    <frx:fields><frx:field id="state" link="" format="" format-string="" target=""/><frx:field id="name" link="" format="" format-string="" target=""/><frx:field id="total" link="reports/sample.user_distribution_simple?state={state}#test" format="" format-string="" target=""/></frx:fields>
   </head>
 <body>
 <div><p>This report links back to the sample report 2.  You can begin to see the possibilities for

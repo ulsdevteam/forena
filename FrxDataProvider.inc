@@ -124,7 +124,13 @@ class FrxDataProvider{
     return $block_list;
   }
 
+  public function debug($msg='', $log='') {
+  	FrxReportGenerator::instance()->app->debug($msg, $log);
+  }
 
+  public function error() {
+  	FrxReportGenerator::$instance()->app->error($msg, $log);
+  }
 
 
 

@@ -37,7 +37,7 @@ function _forena_copy_reports($src_dir) {
   static $dest_dir = '';
   static $i = 0;
   if (!$dest_dir) {
-    $dest_dir = FrxReportGenerator::instance()->report_path();
+    $dest_dir = forena_report_path();
   }
   if (!file_exists($dest_dir)) {
     mkdir($dest_dir);
@@ -91,7 +91,7 @@ function forena_save_report($report_name, $report, $save_file = FALSE) {
   }
 
   _forena_verify_directory($report_name);
-  $report_path = FrxReportGenerator::instance()->report_path();
+  $report_path = forena_report_path();
   $r = new FrxReport($report);
   $data['title'] = $r->title;
   $data['category'] = $r->category;
@@ -178,7 +178,7 @@ function forena_save_report($report_name, $report, $save_file = FALSE) {
  * @param string $report_name
  */
 function forena_delete_report($report_name, $delete_file = TRUE) {
-  $report_path = FrxReportGenerator::instance()->report_path();
+  $report_path = forena_report_path();
   $filepath = $report_path .'/'. $report_name .'.frx';
   $info = pathinfo($filepath);
   $do = TRUE;
@@ -205,7 +205,7 @@ function forena_db_sync($subdir='') {
      db_delete('forena_reports')
        ->execute();
   }
-  $path = FrxReportGenerator::instance()->report_path() . '/' . $subdir;
+  $path =forena_report_path() . '/' . $subdir;
   $d = dir($path);
   if ($d) while (false !== ($rpt_file = $d->read())) {
     $src_file = trim($d->path, '/') . '/' . trim($rpt_file, '/');
@@ -254,7 +254,7 @@ function forena_get_report_editor($report_name) {
   require_once('FrxReportEditor.inc');
   if ($report_name) {
   	$r_text='';
-    $report_path = FrxReportGenerator::instance()->report_path();
+    $report_path = forena_report_path();
     $filename = $report_path . '/' . $report_name . '.frx';
     if (file_exists($filename)) {
       $r_text = file_get_contents($filename);
@@ -311,7 +311,7 @@ function forena_filter_element($fmt) {
  *
  */
 function forena_settings() {
-  $report_path = FrxReportGenerator::instance()->report_path();
+  $report_path = forena_report_path();
 
 
   $form['forena_report_repos'] = array(
@@ -445,7 +445,7 @@ function forena_layout_form($formid, $form_state, $new_report='') {
       //array of xml attributes that are required to have a value
       $required = array('id' => TRUE, 'label' => TRUE);
       //list of supported document formats
-      $supported = FrxReportGenerator::instance()->supported_doctypes();
+      $supported = forena_supported_doctypes();
       $doclist = variable_get('forena_doc_formats', array());
 
       $form['report_name'] = array(
@@ -511,7 +511,7 @@ function forena_layout_form($formid, $form_state, $new_report='') {
         $options = array();
         $default = array();
         foreach ($doclist as $key => $value) {
-          if (is_object(FrxReportGenerator::instance()->get_doctypes($value))) {
+          if (is_object(forena_get_doctypes($value))) {
             $options[$value] = strtoupper($value);
             $doc =  isset($r) ? $r->simplexml->head->xpath('frx:docgen/frx:doc[@type="' . $value . '"]') : '';
             if ($doc && $doclist[$value]) {
@@ -582,7 +582,7 @@ function forena_layout_form_validate($form, &$form_state) {
   //comparing the report names to see if they have changed.
   //If they have, making sure the new name does not already exist.
   if ($report_name != $save_report_name) {
-    $report_path = FrxReportGenerator::instance()->report_path();
+    $report_path = forena_report_path();
     $filename = $report_path . '/' . $save_report_name . '.frx';
     if (file_exists($filename)) {
       form_set_error('save_report_name', t('The file ' . $save_report_name . ' already exists. Please enter another name.'));
@@ -598,7 +598,7 @@ function forena_layout_form_submit($form, &$form_state) {
   $nodes = array();
   $values = $form_state['values'];
   $report_name = $values['save_report_name'];
-  $r = forena_get_report_editor($values['report_name']);
+  $r = forena_get_report_editor($report_name);
   // Title and category
   $r->setTitle($values['title']);
   $r->setCategory($values['category']);
@@ -611,8 +611,8 @@ function forena_layout_form_submit($form, &$form_state) {
   // Doc gen settings.
   if (isset($form['docgen'])) {
 	  $docgen = array();
-	  if($selected = array_filter($values['docgen']['docs'])) {
-	    foreach ($selected as $key => $value) {
+	  if($selected = array_filter(@$values['docgen']['docs'])) {
+	    if ($selected) foreach ($selected as $key => $value) {
 	     if ($value) $docgen[] = array('type' => $key);
 	    }
 	  }
@@ -628,7 +628,7 @@ function forena_layout_form_submit($form, &$form_state) {
   }
 
   //determine redirection.
-  $report_path = FrxReportGenerator::instance()->report_path();
+  $report_path = forena_report_path();
   $filename = $report_path . '/' . $report_name . '.frx';
   if (!file_exists($filename)) {
     $new_rpt = TRUE;
@@ -655,7 +655,7 @@ function forena_layout_form_submit($form, &$form_state) {
  * administer the settings for document format options
  */
 function forena_doc_formats_settings() {
-  $supported_doctypes = FrxReportGenerator::instance()->supported_doctypes();
+  $supported_doctypes = forena_supported_doctypes();
   $form['forena_doc_formats'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Allowed Document Formats'),
@@ -839,7 +839,7 @@ function forena_data_block_form($formid, &$form_state) {
     $form = array();
     $title = (string)$r->title;
 
-    $template_array = FrxReportGenerator::instance()->supported_templates();
+    $template_array = forena_supported_templates();
     @$default_template = $form_state['storage']['template'];
     @$params = $form_state['storage']['parameters'];
     @$param_values = $form_state['storage']['param_values'];
@@ -872,7 +872,7 @@ function forena_data_block_form($formid, &$form_state) {
       $id = (string)$node['id'];
       $block = (string)$attrs['block'];
       $clause = ($attrs['clause']) ?  "(" . (string)$attrs['clause'] . ")" : '';
-      $block_info = FrxReportGenerator::instance()->load_block($block, $clause);
+      $block_info = forena_load_block($block, $clause);
       $access = $block_info['access'];
       $data_block_array[$id] = $block . ": <i>" . $clause . ' security "' . $access . '"</i>';
     }
@@ -981,7 +981,7 @@ function forena_data_block_form_validate($form, &$form_state) {
 
   //validate the data block only if delete block was not chosen
   if (!$delete_blocks) {
-    $block_info = FrxReportGenerator::instance()->load_block($data_block);
+    $block_info = forena_load_block($data_block);
     if (!$block_info) {
       form_set_error('data_block', t('Invalid data block.'));
     }
@@ -1004,8 +1004,7 @@ function forena_data_block_form_submit($form, &$form_state) {
   $params = isset($values['params']) ? $values['params'] : array();
   $name = $values['report_name'];
   $where_clause = $values['where_clause'];
-  $g = FrxReportGenerator::instance();
-  $r = $g->get_report($name);
+  $r = forena_get_report($name);
 
   $form_state['storage']['param_values'] = $params;
   $form_state['storage']['data_block'] = $data_block;
@@ -1015,7 +1014,7 @@ function forena_data_block_form_submit($form, &$form_state) {
   if ($data_block)  {
      //get xml from data block
     //check for and store parameters
-    $block_info = $g->load_block($data_block, $where_clause);
+    $block_info = forena_load_block($data_block, $where_clause);
     if ($block_info) {
       //if there were not any parameters passed. Use the report parameters
       if (!$params) {
@@ -1026,7 +1025,7 @@ function forena_data_block_form_submit($form, &$form_state) {
       }
 
       //now invoke the data provider with the correct params
-      $xml = $g->invoke_data_provider($data_block, $params, $where_clause);
+      $xml = forena_invoke_data_provider($data_block, $params, $where_clause);
     }
   }
   if ($xml) {
@@ -1042,15 +1041,14 @@ function forena_data_block_form_submit($form, &$form_state) {
     }
 
     //create xml from template object
-    $template_obj = FrxReportGenerator::instance()->get_templates($template);
+    $template_obj = forena_get_templates($template);
     if ($template_obj) {
       $body = $template_obj->$template($column_array, $data_block, $where_clause);
     }
     $rpt_xml =  '<html xmlns:frx="urn:FrxReports"><body>' . $body . '</body></html>';
 
     //render the xml
-    $r = new FrxReport($rpt_xml, $params);
-    $output = $r->render('web');
+    $output = forena_render_report($rpt_xml, NULL, $params);
     $form_state['storage']['output'] = $output;
     $form_state['storage']['template_body'] = $body;
 
@@ -1081,7 +1079,7 @@ function forena_data_block_add($form, &$form_state) {
   $added_report = $form_state['storage']['template_body'];
 
   //Get the data block parameters
-  $block_info = FrxReportGenerator::instance()->load_block($data_block, $where_clause);
+  $block_info = forena_load_block($data_block, $where_clause);
   $data_block_parms = $block_info['tokens'];
 
   //Build the parameters
@@ -1131,7 +1129,7 @@ function forena_data_block_delete($form, &$form_state) {
   $delete_blocks = array_filter($values['delete_blocks']);
 
   $report_name = $values['report_name'];
-  $r = FrxReportGenerator::instance()->get_report($report_name);
+  $r = forena_get_report($report_name);
 
   //find the datablocks in the existing report
   if ($r) $r->get_attributes_by_id();
@@ -1229,13 +1227,13 @@ function forena_clean_xhtml($xhtml) {
  * @return array list of blocks the user has access to.
  */
 function forena_user_data_blocks($search) {
-  $repos = FrxReportGenerator::instance()->repository();
+  $repos = forena_repository();
   foreach ($repos as $name => $r) {
 
     // Make really sure the data provider objects have been instantiated
     $provider = $r;
     if (!$provider['data']) {
-      $provider = FrxReportGenerator::instance()->repository($name);
+      $provider = forena_repository($name);
     }
     $repos[$name] = $provider;
     // Invoke the list block function to find out all of the block names

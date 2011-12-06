@@ -24,12 +24,12 @@ class FrxPostgres extends FrxDataProvider {
     parent::__construct($conf, $repos_path);
     $this->use_oracle_xml = FALSE;
     $uri = $conf['uri'];
-    $this->debug = $conf['debug'];
-    if ($conf['postgres_xml']) $this->use_postgres_xml = TRUE;
+    $this->debug = @$conf['debug'];
+    if (isset($conf['postgres_xml'])) $this->use_postgres_xml = $conf['postgres_xml'];
     if ($uri) {
       // Test for postgres suport
       if (!is_callable('pg_connect')) {
-        FrxReportGenerator::instance()->error('PHP Postgres support not installed.', 'PHP Postgres support not installed.');
+        $this->error('PHP Postgres support not installed.', 'PHP Postgres support not installed.');
         return;
       }
       try {
@@ -37,12 +37,12 @@ class FrxPostgres extends FrxDataProvider {
         if (isset($conf['search path'])) pg_query($db, "SET search_path=" . $conf['search path']);
         $this->db = $db;
       } catch (Exception $e) {
-        FrxReportGenerator::instance()->error('Unable to connect to database ' . $conf['title'], $e->getMessage());
+        $this->error('Unable to connect to database ' . $conf['title'], $e->getMessage());
       }
 
     }
     else {
-      FrxReportGenerator::instance()->error('No database connection string specified', 'No database connection: ' . print_r($conf, 1));
+      $this->error('No database connection string specified', 'No database connection: ' . print_r($conf, 1));
     }
 
     // Set up the stuff required to translate.
@@ -63,7 +63,7 @@ class FrxPostgres extends FrxDataProvider {
     if (@$block['source'] && $this->access($block['access']) && $db) {
       $sql = $block['source'];
       if ($clause) {
-        $sql = 'SELECT * FROM (' . trim($sql, ' ;') . ') vvv ' . $clause;
+        $sql = 'SELECT * FROM (' . trim($sql, ' ;') . ') ' . $clause;
       }
       $sql = $this->te->replace($sql);
 
@@ -74,8 +74,9 @@ class FrxPostgres extends FrxDataProvider {
         $xml = $this->php_xml($sql);
       }
       if ($this->debug) {
+      	$d = '';
         if ($xml) $d = htmlspecialchars($xml->asXML());
-        FrxReportGenerator::instance()->debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "\n</pre>");
+        $this->debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "\n</pre>");
       }
       return $xml;
     }
@@ -94,15 +95,17 @@ class FrxPostgres extends FrxDataProvider {
       //$rs->debugDumpParams();
       $fsql = 'select query_to_xml($1,true,false,$2);';
       $rs = pg_query_params($db, $fsql, array($sql, ''));
+      $xml_text='';
       if ($rs) {
         $row = pg_fetch_row($rs);
         $xml_text = $row[0];
       }
+      $xml = null;
       if ($xml_text) {
         $xml = new SimpleXMLElement($xml_text);
         if ($xml->getName() == 'error') {
           $msg = (string)$xml . ' in ' . $block . '.sql. ';
-          FrxReportGenerator::instance()->error($msg . 'See logs for more info', $msg . ' in <pre> ' . $sql . '</pre>');
+          $this->error($msg . 'See logs for more info', $msg . ' in <pre> ' . $sql . '</pre>');
         }
       }
       if ($rs) pg_free_result($rs);
@@ -135,11 +138,35 @@ class FrxPostgres extends FrxDataProvider {
    * @param unknown_type $data
    */
   public function format($value, $key, $data) {
-    if ($value=='') $value = 'NULL'; else $value =  "'" . pg_escape_string($value) . "'";
+    if (empty($value))
+      $value = 'NULL';
+    else {
+      if (is_array($value)) {
+      		// Build a array of values string
+	      	$i=0;
+	      	$val ='';
+	      	foreach ($value as $v) {
+	      		$i++;
+	      	  if ($i!=1) {
+	    			  $val .= ',';
+	     		  }
+	     		  if ($value=='') {
+
+		     		  $val .= 'NULL';
+	     		  }
+	     		  else {
+			    		$val .=  $v;
+	     		  }
+	    	  }
+	    	$value = $val;
+      }
+	    $value = trim($value);
+	    $value =  "'".   pg_escape_string($value) ."'";
+    }
+
     return $value;
   }
-
-    /**
+  /**
    * Destructor - Closes database connections.
    *
    */

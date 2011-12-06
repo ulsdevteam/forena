@@ -156,7 +156,7 @@ class FrxReport {
       $attr_text='';
       $tmp_attrs = array();
       if ($attrs) foreach ($attrs as $key => $value) {
-        $attr_text =  ' ' . $key . '="' . (string)$value . '"';
+        $attr_text .=  ' ' . $key . '="' . (string)$value . '"';
         $tmp_attr[$key] = (string)$value;
       }
 
@@ -294,9 +294,14 @@ class FrxReport {
       }
       $link = $this->teng->replace($link, TRUE);
       @list($url, $query) = explode('?', $link);
+      @list($query, $queryFrag) = explode('#', $query);
+      @list($url, $fragment) = explode('#', $url);
+      $fragment = $fragment . $queryFrag;
       $data = array();
       parse_str($query, $data);
-      $value = FrxReportGenerator::instance()->link(htmlspecialchars_decode($value), $url, array('query' => $data, 'attributes' => $attributes, 'absolute' => TRUE));
+      $value = FrxReportGenerator::instance()->link(
+        htmlspecialchars_decode($value), $url,
+        array('fragment' => $fragment, 'query' => $data, 'attributes' => $attributes, 'absolute' => TRUE));
     }
     return $value;
   }
