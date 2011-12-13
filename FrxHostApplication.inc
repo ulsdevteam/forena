@@ -166,6 +166,8 @@ function controls() {
                      );
   $controls[] = array('file' => 'plugins/FrxSource.inc',
                       'class' => 'FrxSource');
+  $controls[] = array('file' => 'plugins/FrxXMLSource.inc',
+                      'class' => 'FrxXMLSource');
   return $controls;
 }
 
