@@ -97,7 +97,7 @@ class FrxSyntaxEngine {
       $i = count($this->data_stack) - 1;
       $data = $this->data_stack[$i];
     }
-    if ($key=='variables') drupal_set_message(print_r($data,1));
+    $raw_key=$key;
     // Determine if we have a . syntax for the id.
     if ($key) {
       @list($id, $path) = explode('.', $key, 2);
@@ -141,7 +141,7 @@ class FrxSyntaxEngine {
     // Call the formatter object if neccessary
     $f = $this->formatter;
     if (!$raw && is_object($f) && method_exists($f, 'format')) {
-      $retvar = $f->format($retvar, $key, $data);
+      $retvar = $f->format($retvar, $raw_key, $data);
     }
 
     $retvar = trim($retvar);
