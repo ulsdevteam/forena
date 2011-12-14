@@ -70,6 +70,7 @@ class FrxSyntaxEngine {
     $data = $this->frxData->currentContext();
 
     // Determine if we have a . syntax for the id.
+    $raw_key=$key;
     if ($key && strpos($key, '.')) {
       @list($id, $path) = explode('.', $key, 2);
       if ($this->frxData->contextExists($id)) {
@@ -111,7 +112,7 @@ class FrxSyntaxEngine {
     // Call the formatter object if neccessary
     $f = $this->formatter;
     if (!$raw && is_object($f) && method_exists($f, 'format')) {
-      $retvar = $f->format($retvar, $key, $data);
+      $retvar = $f->format($retvar, $raw_key, $data);
     }
 
     $retvar = trim($retvar);
