@@ -24,7 +24,7 @@ class FrxPostgres extends FrxDataProvider {
     $this->use_oracle_xml = FALSE;
     $uri = $conf['uri'];
     $this->debug = $conf['debug'];
-    if ($conf['postgres_xml']) $this->use_postgres_xml = TRUE;
+    if (isset($conf['postgres_xml'])) $this->use_postgres_xml = $conf['postgres_xml'];
     if ($uri) {
     	// Test for postgres suport
     	if (!is_callable('pg_connect')) {
@@ -139,7 +139,7 @@ class FrxPostgres extends FrxDataProvider {
     else {
       if (is_array($value)) {
       		// Build a array of values string
-	      	$i=0;
+        	$i=0;
 	      	$val ='';
 	      	foreach ($value as $v) {
 	      		$i++;
@@ -147,14 +147,13 @@ class FrxPostgres extends FrxDataProvider {
 	    			  $val .= ',';
 	     		  }
 	     		  if ($value=='') {
-
 		     		  $val .= 'NULL';
 	     		  }
 	     		  else {
 			    		$val .=  $v;
 	     		  }
 	    	  }
-	    	$value = $val . '';
+	    	$value = $val;
       }
 	    $value = trim($value);
 	    $value =  "'".   pg_escape_string($value) ."'";
