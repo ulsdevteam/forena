@@ -138,7 +138,7 @@ class FrxPostgres extends FrxDataProvider {
    * @param unknown_type $data
    */
   public function format($value, $key, $data) {
-    if (empty($value))
+    if ($value =='')
       $value = 'NULL';
     else {
       if (is_array($value)) {
