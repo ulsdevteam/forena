@@ -15,11 +15,11 @@ class FrxHostApplication {
 
 	// A factory method that is used to generate the instance of the application.
 	static public function instance() {
-		if (self::instance) {
+		if (self::$instance) {
 			return new Application();
 		}
 		else
-		  return self::instance;
+		  return self::$instance;
 	}
 
 	/**
@@ -208,6 +208,68 @@ function controls() {
 	}
 
 
+/**
+ * Gets the correct format function
+ * to render the document and returns an
+ * object of that class.
+ *
+ * If it fails it returns a 0;
+ */
+
+function get_doctypes($fkey) {
+  $controls = $this->controls();
+  foreach ($controls as $k => $r) {
+    $provider = $r;
+    if ($provider && method_exists($provider, 'doc_types'))  {
+      $f = $provider->doc_types();
+      if (isset($f[$fkey]) && method_exists($provider, $f[$fkey])) {
+        // We found an object with the advertised method return it
+        return $provider;
+      }
+    }
+  }
+  return 0;
+}
+
+
+/**
+ *
+ * @return returns an array of supported templates
+ *
+ */
+function supported_templates() {
+  $controls = $this->controls();
+  $supported_templates = array();
+  foreach ($controls as $k => $r) {
+    $provider = $r;
+    if ($provider && method_exists($provider, 'templates'))  {
+      $f = $provider->templates();
+      $supported_templates = array_merge($supported_templates, $f);
+    }
+  }
+  return $supported_templates;
+}
+
+
+/**
+ *
+ * @return returns an array of supported document format extensions
+ *
+ */
+function supported_doctypes() {
+  $controls = $this->controls();
+  $supported_doctypes = array();
+  foreach ($controls as $k => $r) {
+    $provider = $r;
+    if ($provider && method_exists($provider, 'doc_types'))  {
+      $f = $provider->doc_types();
+      $supported_doctypes = array_merge($supported_doctypes, $f);
+    }
+  }
+  $temp = array_keys($supported_doctypes);
+  $supported_doctypes = array_combine($temp, $temp);
+  return $supported_doctypes;
+}
 
 
 

@@ -445,7 +445,7 @@ function forena_layout_form($formid, $form_state, $new_report='') {
       //array of xml attributes that are required to have a value
       $required = array('id' => TRUE, 'label' => TRUE);
       //list of supported document formats
-      $supported = forena_supported_doctypes();
+      $supported = FrxReportGenerator::instance()->supported_doctypes();
       $doclist = variable_get('forena_doc_formats', array());
 
       $form['report_name'] = array(
@@ -511,7 +511,7 @@ function forena_layout_form($formid, $form_state, $new_report='') {
         $options = array();
         $default = array();
         foreach ($doclist as $key => $value) {
-          if (is_object(forena_get_doctypes($value))) {
+          if (is_object(FrxReportGenerator::instance()->get_doctypes($value))) {
             $options[$value] = strtoupper($value);
             $doc =  isset($r) ? $r->simplexml->head->xpath('frx:docgen/frx:doc[@type="' . $value . '"]') : '';
             if ($doc && $doclist[$value]) {
@@ -839,7 +839,7 @@ function forena_data_block_form($formid, &$form_state) {
     $form = array();
     $title = (string)$r->title;
 
-    $template_array = forena_supported_templates();
+    $template_array = FrxReportGenerator::instance()->supported_templates();
     @$default_template = $form_state['storage']['template'];
     @$params = $form_state['storage']['parameters'];
     @$param_values = $form_state['storage']['param_values'];
@@ -872,7 +872,7 @@ function forena_data_block_form($formid, &$form_state) {
       $id = (string)$node['id'];
       $block = (string)$attrs['block'];
       $clause = ($attrs['clause']) ?  "(" . (string)$attrs['clause'] . ")" : '';
-      $block_info = forena_load_block($block, $clause);
+      $block_info = FrxReportGenerator::instance()->load_block($block, $clause);
       $access = $block_info['access'];
       $data_block_array[$id] = $block . ": <i>" . $clause . ' security "' . $access . '"</i>';
     }
