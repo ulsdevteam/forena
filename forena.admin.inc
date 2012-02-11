@@ -76,7 +76,7 @@ function _forena_copy_reports($src_dir) {
  * @param string $name File name  to save report to
  * @param unknown_type $data
  */
-function forena_save_report($report_name, $report, $save_file = FALSE) {
+function forena_save_report($report_name, $report, $save_file = FALSE, $altered = 0) {
   static $save_count=0;
 
   if ($report && !is_object($report)) {
@@ -96,7 +96,10 @@ function forena_save_report($report_name, $report, $save_file = FALSE) {
   $data['title'] = $r->title;
   $data['category'] = $r->category;
   $data['options'] = $r->options;
+  $data['descriptor'] = $r->descriptor;
   $data['name'] = $report_name;
+  $data['altered'] = $altered;
+  $r_xml = $report->asXML();
   //@TODO: Clean up filename to make sure
   $name = $data['name'];
   $filepath = $report_path . '/' . $report_name . '.frx';
@@ -104,9 +107,6 @@ function forena_save_report($report_name, $report, $save_file = FALSE) {
 
   if ($save_file) {
     // Serialize the report for saving
-    if (is_object($report)) {
-      $r_xml = $report->asXML();
-    }
 
     try {
       file_put_contents($filepath, $r_xml);
@@ -139,9 +139,12 @@ function forena_save_report($report_name, $report, $save_file = FALSE) {
         -> condition('report_name', $name)
         ->fields(array(
           'title' => $data['title'],
+          'descriptor' => $data['descriptor'],
           'category' => $data['category'],
           'hidden' => $data['hidden'],
           'cache' => $rpt_cache,
+          'src' => $r_xml,
+          'altered' => $data['altered'],
           'modified' => $modified))
         ->execute();
     }
@@ -149,9 +152,12 @@ function forena_save_report($report_name, $report, $save_file = FALSE) {
       db_insert('forena_reports')->
         fields( array('report_name' => $name,
           'title' => $data['title'],
+          'descriptor' => $data['descriptor'],
           'category' => $data['category'],
           'hidden' => $data['hidden'],
           'cache' => $rpt_cache,
+          'src' => $r_xml,
+          'altered' => $data['altered'],
           'modified' => $modified,
           ))
         ->execute();
@@ -253,7 +259,7 @@ function forena_db_sync($subdir='') {
 function forena_get_report_editor($report_name) {
   require_once('FrxReportEditor.inc');
   if ($report_name) {
-  	$r_text='';
+    $r_text='';
     $report_path = forena_report_path();
     $filename = $report_path . '/' . $report_name . '.frx';
     if (file_exists($filename)) {
@@ -263,7 +269,7 @@ function forena_get_report_editor($report_name) {
     return $r;
   }
   else {
-  	return new FrxReportEditor();
+    return new FrxReportEditor();
   }
 }
 
@@ -610,13 +616,13 @@ function forena_layout_form_submit($form, &$form_state) {
 
   // Doc gen settings.
   if (isset($form['docgen'])) {
-	  $docgen = array();
-	  if($selected = array_filter(@$values['docgen']['docs'])) {
-	    if ($selected) foreach ($selected as $key => $value) {
-	     if ($value) $docgen[] = array('type' => $key);
-	    }
-	  }
-	  $r->setDocgen($docgen);
+    $docgen = array();
+    if($selected = array_filter(@$values['docgen']['docs'])) {
+      if ($selected) foreach ($selected as $key => $value) {
+       if ($value) $docgen[] = array('type' => $key);
+      }
+    }
+    $r->setDocgen($docgen);
   }
 
   // Body
@@ -738,8 +744,8 @@ function forena_fields_form($formid, $form_state) {
         $attr= array();
         $default = '';
         if ($node) {
-        	$attr = $node[0];
-        	$default = (string) $node[0];
+          $attr = $node[0];
+          $default = (string) $node[0];
         }
 
         $form['fields'][$i]['id'] = array(

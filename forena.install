@@ -10,19 +10,93 @@
  * @return unknown
  */
 function forena_schema() {
+  /*
+  * Table to store Reports
+  */
   $schema['forena_reports'] = array(
     'fields' => array(
        'report_name' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE),
        'title' => array('type' => 'varchar', 'length' => 63, 'not null' => TRUE),
+       'descriptor' => array('type' => 'text'),
        'category' => array('type' => 'varchar', 'length' => 255, 'not null' => FALSE),
        'hidden' => array('type' => 'int', 'not null' => FALSE, ),
        'cache' => array('type' => 'text'),
+       'src' => array('type' => 'text'),
        'modified' => array('type' => 'int'),
+       'altered' => array('type' => 'int'),
     ),
     'primary key' => array('report_name'),
     'indexes' => array(
       'category' => array('category'),
     ),
-  ); 
-  return $schema;  
+  );
+
+  $schema['forena_repositories'] = array(
+    'fields' => array(
+       'repository' => array('type' => 'varchar', 'length' => '63', 'not null' => TRUE),
+       'title' => array('type' => 'varchar', 'length' => '63'),
+       'locked' => array('type' => 'int',  'not null' => TRUE),
+       'enabled' => array('type' => 'int', 'not null' => TRUE),
+       'config' => array('type' => 'text'),
+    ),
+    'primary_key' => array('repository'),
+  );
+
+  $schema['forena_data_blocks'] = array(
+    'fields' => array(
+       'repository' => array('type' => 'varchar', 'length' => '63', 'not null' => TRUE),
+       'block_name' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE),
+       'title' => array('type' => 'varchar', 'length' => 63, 'not null' => FALSE),
+       'descriptor' => array('type' => 'varchar', 'length' => '255'),
+       'category' => array('type' => 'varchar', 'length' => 255, 'not null' => FALSE),
+       'modified' => array('type' => 'int'),
+       'src' => array('type' => 'text'),
+       'locked' => array('type' => 'int', 'not null' => TRUE),
+    ),
+    'primary key' => array('block_name'),
+    'indexes' => array(
+      'category' => array('category'),
+      'repository' => array('repository'),
+    ),
+  );
+  return $schema;
+}
+
+/**
+ * Updating database schema
+ */
+function forena_update_7201() {
+  $schema = array();
+  $schema['forena_repositories'] = array(
+    'fields' => array(
+       'repository' => array('type' => 'varchar', 'length' => '63', 'not null' => TRUE),
+       'title' => array('type' => 'varchar', 'length' => '63'),
+       'locked' => array('type' => 'int',  'not null' => TRUE),
+       'enabled' => array('type' => 'int', 'not null' => TRUE),
+       'config' => array('type' => 'text'),
+    ),
+    'primary_key' => array('repository'),
+  );
+
+  $schema['forena_data_blocks'] = array(
+    'fields' => array(
+       'repository' => array('type' => 'varchar', 'length' => '63', 'not null' => TRUE),
+       'block_name' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE),
+       'title' => array('type' => 'varchar', 'length' => 63, 'not null' => FALSE),
+       'descriptor' => array('type' => 'varchar', 'length' => '255'),
+       'category' => array('type' => 'varchar', 'length' => 255, 'not null' => FALSE),
+       'modified' => array('type' => 'int'),
+       'src' => array('type' => 'text'),
+       'locked' => array('type' => 'int', 'not null' => TRUE),
+    ),
+    'primary key' => array('block_name'),
+    'indexes' => array(
+      'category' => array('category'),
+      'repository' => array('repository'),
+    ),
+  );
+  db_add_field('forena_reports', 'src', array('type' => 'text'));
+  db_add_field('forena_reports', 'altered', array('type' => 'int'));
+  db_create_table('forena_repositories', $schema['forena_repositories']);
+  db_create_table('forena_data_blocks', $schema['forena_data_blocks']);
 }

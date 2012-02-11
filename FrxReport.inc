@@ -13,6 +13,7 @@ class FrxReport {
   public $rpt_xml;
   public $fields;
   public $category;
+  public $descriptor;
   public $form;
   public $access;
   public $parameters;
@@ -59,6 +60,9 @@ class FrxReport {
             case 'category':
               $this->category = (string)$node;
               break;
+            case 'descriptor':
+            	$this->descriptor = (string)$node;
+            	break;
             case 'options':
               foreach ($node->attributes() as $key => $value) {
                 $this->options[$key] = (string)$value;

@@ -114,23 +114,29 @@ function load_report($report_name) {
     if (file_exists($filename)) {
       $r_text = file_get_contents($filename);
       $modified = filemtime($filename);
-      $result = db_query("SELECT report_name, modified FROM {forena_reports} WHERE report_name=:report_name",
-        array(':report_name' => $report_name));
-      $save = FALSE;
-      // If the file modification time has changed then save.
-      if ($rpt = $result->fetchObject()) {
-        if ($rpt->modified != $modified) {
+    }
+    $result = db_query("SELECT * FROM {forena_reports} WHERE report_name=:report_name",
+      array(':report_name' => $report_name));
+    $save = FALSE;
+    if ($rpt = $result->fetchObject()) {
+		    // If the file modification time has changed then save.
+        if ($modified && $rpt->modified != $modified) {
           $save = TRUE;
         }
-      }
-      else {
+        // If the report has been altered by a user then use that.
+	      if ($rpt->altered == -1) {
+	        if ($rpt->src) {
+	          $r_text = $rpt->src;
+	        }
+	      }
+    }
+    else if ($r_text) {
         $save = TRUE;
-      }
+    }
 
-      if ($save) {
-        require_once('forena.admin.inc');
-        forena_save_report($report_name, $r_text, FALSE);
-      }
+    if ($save) {
+      require_once('forena.admin.inc');
+      forena_save_report($report_name, $r_text, FALSE);
     }
     return $r_text;
   }
