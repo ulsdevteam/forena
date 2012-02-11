@@ -235,19 +235,40 @@ public function repositories() {
     $repos = $_forena_repositories;
   }
 
+  // Retrieve the repositories defined in the database;
+  $results = db_query('SELECT * FROM {forena_repositories}');
+  foreach ($results as $r) {
+  	if ($r->config) {
+  		$new_r = unserialize($r->config);
+  	}
+  	else {
+  		$new_r = array();
+  	}
+  	$r_name = $r->repository;
+  	if (is_array(@$repos[$r_name])) {
+  		$new_r = array_merge($new_r, $repos[$r_name]);
+  	}
+  	$repos[$r_name] = $new_r;
+  }
+
   $path = $this->forena_path();
   // Overide difinitions of the sample and drupal repositories.
-  $repos['forena_help'] = array('path' => $path .'/repos/forena_help',
-                             'title' => 'Forena Sample Reports');
-  $repos['drupal'] = array('path' => $path .'/repos/drupal',
-                             'title' => 'Drupal Reports');
-  $repos['sampledb'] = array('path' => $path . '/repos/sample',
-                             'title' => 'Sample DB Repository');
+  $repos['forena_help'] = array(
+    'path' => $path .'/repos/forena_help',
+    'title' => 'Forena Help Reports',
+  );
+  $repos['drupal'] = array(
+    'path' => $path .'/repos/drupal',
+    'title' => 'Drupal Reports',
+  );
+  $repos['sampledb'] = array(
+    'path' => $path . '/repos/sample',
+    'title' => 'Sample DB Repository'
+  );
+
+  module_invoke_all('forena_repos_alter', $repos);
 
   return $repos;
 }
-
-
-
 
 }
