@@ -35,7 +35,6 @@ function forena_schema() {
     'fields' => array(
        'repository' => array('type' => 'varchar', 'length' => '63', 'not null' => TRUE),
        'title' => array('type' => 'varchar', 'length' => '63'),
-       'locked' => array('type' => 'int',  'not null' => TRUE),
        'enabled' => array('type' => 'int', 'not null' => TRUE),
        'config' => array('type' => 'text'),
     ),
@@ -71,7 +70,6 @@ function forena_update_7201() {
     'fields' => array(
        'repository' => array('type' => 'varchar', 'length' => '63', 'not null' => TRUE),
        'title' => array('type' => 'varchar', 'length' => '63'),
-       'locked' => array('type' => 'int',  'not null' => TRUE),
        'enabled' => array('type' => 'int', 'not null' => TRUE),
        'config' => array('type' => 'text'),
     ),

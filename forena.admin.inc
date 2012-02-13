@@ -730,6 +730,8 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
       $repos = FrxReportGenerator::instance()->app->repositories();
       $r = $repos[$source];
       $load = FrxReportGenerator::instance()->repository($source);
+      // Remove teh object from the data.
+      unset($load['data']);
       $form_state['storage'] = array(
         'name' => $source,
         'title' => $r['title'],
@@ -741,6 +743,7 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
   }
   $data = $form_state['storage'];
   $config = $data['config'];
+
   $locked = !$adding || !(@$config['source']=='user');
   $values = @$form_state['values'];
 
@@ -875,12 +878,28 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
 function forena_data_settings_edit_submit($form, &$form_state) {
   $values = $form_state['values'];
   $name = $values['name'];
-  $result = db_query('SELECT * FROM {forena_repositories} WHERE repository = :name', array(':name' => $name));
-  if ($result->fetchObject()) {
+  $config = serialize($form_state['storage']['config']);
 
+  $result = db_query('SELECT * FROM {forena_repositories} WHERE repository = :name', array(':name' => $name));
+  if ($repos = $result->fetchObject()) {
+    db_update('forena_repositories')
+      ->fields(array(
+        'title' => $values['title'],
+        'enabled' => $values['enabled'],
+        'config' => $config,
+       ))
+      ->condition('repository', $name, '=')
+      ->execute();
   }
   else {
-
+    db_insert('forena_repositories')
+      ->fields(array(
+        'repository' => $name,
+        'title' => $values['title'],
+        'enabled' => $values['enabled'],
+        'config' => $config,
+      ))
+      ->execute();
   }
 }
 
