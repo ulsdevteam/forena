@@ -251,6 +251,9 @@ public function repositories() {
   	else {
   		$new_r['source'] = 'user';
   	}
+  	$new_r ['title'] = $r->title;
+  	$new_r ['enabled'] = $r->enabled;
+
   	$repos[$r_name] = $new_r;
   }
 
