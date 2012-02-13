@@ -661,7 +661,7 @@ function forena_layout_form_submit($form, &$form_state) {
  * administer the settings for document format options
  */
 function forena_doc_formats_settings() {
-  $supported_doctypes = forena_supported_doctypes();
+  $supported_doctypes = FrxReportGenerator::instance()->supported_doctypes();
   $form['forena_doc_formats'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Allowed Document Formats'),
@@ -687,6 +687,216 @@ function forena_doc_formats_settings() {
 
   return system_settings_form($form);
 }
+
+/*
+ * administer the settings for document format options
+ */
+function forena_data_settings() {
+  $repos = FrxReportGenerator::instance()->app->repositories();
+  $r_list = array();
+  $headers = array('Name','Description', 'Path', 'Operation');
+  foreach ($repos as $name=>$r) {
+    $r_list[] = array(
+      $name,
+      $r['title'],
+      $r['path'],
+      l('configure', 'admin/config/content/forena/data/configure/'. $name)
+    );
+
+  }
+
+  $output = '<ul class="action-links"><li>' . l('Add data source', 'admin/config/content/forena/data/add') . '</li></ul>';
+  $output .= theme_table(array('header' => $headers, 'rows' => $r_list, 'attributes' => array(), 'caption' => '', 'sticky' => true, 'colgroups' => array(), 'empty' => ''));
+  return $output;
+}
+
+function forena_data_settings_edit($form, &$form_state, $source=-1) {
+  $adding = ($source === -1);
+  if (!@$form_state['storage']) {
+    if ($adding) {
+      $form_state['storage'] = array(
+        'name' => '',
+        'title' => '',
+        'path' => '',
+        'config' => array(
+          'source' => 'user',
+          'data_engine' => 'FrxDrupal',
+          'access callback' => 'user_access',
+          'user callback' => 'forena_current_user_id'
+        ),
+      );
+    }
+    else {
+      $repos = FrxReportGenerator::instance()->app->repositories();
+      $r = $repos[$source];
+      $load = FrxReportGenerator::instance()->repository($source);
+      $form_state['storage'] = array(
+        'name' => $source,
+        'title' => $r['title'],
+        'path' => $r['path'],
+        'config' => $load,
+      );
+
+    }
+  }
+  $data = $form_state['storage'];
+  $config = $data['config'];
+  $locked = !$adding || !(@$config['source']=='user');
+  $values = @$form_state['values'];
+
+  $form['name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Name'),
+    '#description' => t('Machine readable name.  Used in referencing all data used by this source. must should not contain any special characters or spaces.'),
+    '#disabled' => !$adding,
+    '#default_value' => $data['name'],
+    '#required' => TRUE,
+   );
+
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Title'),
+    '#description' => t('Human readable name that describes the data source.  This primarily occurs in error messages where the data source cannot be accessed.'),
+    '#default_value' => $data['title'],
+  );
+
+  $form['enabled'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enabled'),
+    '#description' => t('Disabling will cause all queries to return no data.'),
+    '#default_value' => @$data['enabled']!==0,
+  );
+
+  $form['path'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Path'),
+    '#description' => t('Directory containing data block files.'),
+    '#default_value' => @$data['path'],
+  );
+
+  // Access method list
+  $access = array(
+    'callback' => 'Drupal Security',
+    'block' => 'Data Block',
+  );
+
+  $form['access_method'] = array(
+    '#type' => 'select',
+    '#options' => $access,
+    '#default_value' => empty($config['access callback']) ? 'block' : 'callback',
+    '#ajax' => array(
+      'callback' => 'forena_access_info_callback',
+      'wrapper' => 'access-details',
+    ),
+  );
+
+  $form['access_details'] = array(
+    '#type' => 'fieldset',
+    '#prefix' => '<div id="access-details">',
+    '#suffix' => '</div>',
+    '#title' => t('Details')
+  ) ;
+
+  switch (!empty($values['access_method']) ? $values['access_method'] : $form['access_method']['#default_value']) {
+	  case 'block':
+	  	$form['access_details']['access block'] = array(
+	  	  '#type' => 'textfield',
+	  	  '#title' => 'Access Block',
+	  	  '#default_value' => @$config['access block'],
+
+	  	);
+	  	break;
+	  default:
+	  	$form['access_details']['access callback'] = array(
+	  	  '#type' => 'item',
+	  	  '#title' => 'Access callback',
+	  	  '#markup' => $config['access callback'],
+	  	);
+  }
+
+
+
+  // Driver list
+  $drivers = array(
+    'FrxDrupal' => t('Drupal'),
+    'FrxOracle' => t('Oracle Database'),
+    'FrxPDO' => t('PDO other than Drupal '),
+    'FrxPostgres' => t('Postgres Database'),
+    'FrxMSSQL' => t('MSSQL Database'),
+    'FrxFiles' => t('XML Files'),
+  );
+
+  $form['data_engine'] = array(
+    '#type' => 'select',
+    '#title' => t('Driver'),
+    '#description' => t('Forena data connection type'),
+    '#options' => $drivers,
+    '#disabled' => $locked,
+    '#default_value' => $config['data_engine'],
+    '#ajax' => array(
+      'callback' => 'forena_connection_info_callback',
+      'wrapper' => 'conn-div',
+    ),
+  );
+
+  $form['connection'] = array(
+    '#type' => 'fieldset',
+    '#title' => 'Connection info',
+   '#prefix' =>  '<div id="conn-div">',
+   '#suffix' => '</div>',
+  );
+  $data_engine = (!empty($form_state['values']['data_engine']) ? $form_state['values']['data_engine'] : $config['data_engine']);
+
+  switch ($data_engine) {
+     case 'FrxDrupal':
+       $form['connection']['uri'] = array(
+         '#type' => 'item',
+         '#title' => t('URI'),
+         '#markup' => 'Determined by Drupal settings.php file',
+       );
+       break;
+     default:
+       $form['connection']['uri'] = array(
+         '#type' => 'textfield',
+        '#default_value' => !empty($form_state['values']['uri']) ? $form_state['values']['uri'] : $config['uri'],
+        '#title' => t('URI'),
+        '#description' => t('Description depenedent on driver information.  See forena help for additional info. '),
+     );
+  }
+
+  $form['save'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+  );
+
+  return $form;
+}
+
+function forena_data_settings_edit_submit($form, &$form_state) {
+  $values = $form_state['values'];
+  $name = $values['name'];
+  $result = db_query('SELECT * FROM {forena_repositories} WHERE repository = :name', array(':name' => $name));
+  if ($result->fetchObject()) {
+
+  }
+  else {
+
+  }
+}
+
+/**
+ * Generates the controls for external databases.
+ * Enter description here ...
+ */
+function forena_connection_info_callback($form, $form_state) {
+  return $form['connection'];
+
+}
+
+function forena_access_info_callback($form, $form_state) {
+	return $form['access_details'];
+}
+
 
 /**
  *

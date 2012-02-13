@@ -248,6 +248,9 @@ public function repositories() {
   	if (is_array(@$repos[$r_name])) {
   		$new_r = array_merge($new_r, $repos[$r_name]);
   	}
+  	else {
+  		$new_r['source'] = 'user';
+  	}
   	$repos[$r_name] = $new_r;
   }
 
