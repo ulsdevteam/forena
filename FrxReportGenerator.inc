@@ -446,12 +446,7 @@ function load_block($data_block, $clause='') {
       $i++;
     }
     return array('access' => $access, 'source' => $data);
-
   }
-
-
-
-
 
   /**
    * Loads all of the include files that
