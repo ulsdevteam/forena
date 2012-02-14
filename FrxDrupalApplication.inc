@@ -10,29 +10,29 @@ class FrxDrupalApplication extends FrxHostApplication {
    * The base class here is drupal, so those
    */
 
- private $default_config = array();
- public function __construct() {
-   $this->default_config['report_repos'] = drupal_get_path('forena', 'module') . '/repos/reports';
-   $this->default_config['default_form'] = 'letter';
-   $this->default_config['doc_defaults'] = array();
- }
+	private $default_config = array();
+	public function __construct() {
+	  $this->default_config['report_repos'] = drupal_get_path('forena', 'module') . '/repos/reports';
+	  $this->default_config['default_form'] = 'letter';
+	  $this->default_config['doc_defaults'] = array();
+	}
 
-  /**
-   * Configuration retrieval method
-   * Returns configuration varialbes used by forena.
-   * @param unknown_type $var_name
-   */
-  public function configuration($var_name) {
-    $v = variable_get('forena_' . $var_name, $this->default_config[$var_name]);
-    return $v;
-  }
+	/**
+	 * Configuration retrieval method
+	 * Returns configuration varialbes used by forena.
+	 * @param unknown_type $var_name
+	 */
+	public function configuration($var_name) {
+	  $v = variable_get('forena_' . $var_name, $this->default_config[$var_name]);
+	  return $v;
+	}
 
 
-  /**
-   * Convert a relative link to appropriately rendered html
-   * return html A properly formatted anchor tag
-   */
-  public function link($title, $path, $options=array()) {
+	/**
+	 * Convert a relative link to appropriately rendered html
+	 * return html A properly formatted anchor tag
+	*/
+	public function link($title, $path, $options=array()) {
     return l($title, $path, $options);
   }
 
