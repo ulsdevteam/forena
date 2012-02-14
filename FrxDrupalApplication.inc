@@ -108,10 +108,17 @@ class FrxDrupalApplication extends FrxHostApplication {
 */
 function load_report($report_name) {
   $r=null;
+  global $language;
   if ($report_name) {
     $report_path =  $this->configuration('report_repos');
+    $int_filename = $report_path . '/' . $report_name . '-' . $language->language . '.frx';
     $filename = $report_path . '/' . $report_name . '.frx';
-    if (file_exists($filename)) {
+    if (file_exists($int_filename)) {
+      $r_text = file_get_contents($int_filename);
+      $modified = filemtime($int_filename);
+      $filename = $int_filename;
+    }
+    elseif (file_exists($filename)) {
       $r_text = file_get_contents($filename);
       $modified = filemtime($filename);
     }
