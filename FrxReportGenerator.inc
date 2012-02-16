@@ -152,7 +152,7 @@ class FrxReportGenerator {
   // Putting this in a function to sandbox the repository settings
   function load_repository(&$repo) {
     // First determine if the class file exisits
-    $path = $repo['path'];
+    $path = @$repo['path'];
     $conf = array();
 
     if (file_exists($path . '/settings.php')) {
@@ -162,7 +162,7 @@ class FrxReportGenerator {
 
     $repo = array_merge($conf, $repo);
     // $repo['user callback'] = $conf['user callback'];
-    if (!isset($repos['data'])||!is_object($repo['data'])) $repo['data'] = $this->load_provider($repo, $repo['path']);
+    if (!isset($repos['data'])||!is_object($repo['data'])) $repo['data'] = $this->load_provider($repo, $path);
 
     //$repo['auth'] = __forena_load_auth($security_provider);
 
@@ -176,7 +176,6 @@ class FrxReportGenerator {
    */
   function load_provider($conf, $repo_path) {
     @$name = isset($conf['data provider'])? $conf['data provider'] : $conf['data_engine'];
-
     $this->define_plugins();
     // Instantiate the path
     if (class_exists($name)) {
@@ -207,8 +206,6 @@ class FrxReportGenerator {
       if ($_forena_repositories) {
       	array_merge($repos, $_forena_repositories);
       }
-
-
 
     }
 
@@ -252,6 +249,9 @@ class FrxReportGenerator {
      list($provider, $block) = explode('/', $data_block, 2);
      // Get the data
      $repos = $this->repository($provider);
+     if (isset($repos['enabled']) && !$repos['enabled']) {
+     	return '';
+     }
      if (isset($repos['user callback'])) {
        $user_fn = $repos['user callback'];
        if (is_callable($user_fn)) {

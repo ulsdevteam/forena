@@ -34,7 +34,6 @@ class FrxDrupal extends FrxDataProvider {
    */
   public function data($block_name, $params=array(), $clause='') {
     // Load the block from the file
-
     $block = $this->load_block($block_name, $clause);
     $xml ='';
     if ($block['source'] && $this->access($block['access'])) {
@@ -42,7 +41,7 @@ class FrxDrupal extends FrxDataProvider {
       if ($clause) {
         $sql = 'SELECT * FROM (' . trim($sql, ' ;') . ') forena_table ' . $clause;
       }
-      $sql = $this->te->replace($sql);
+      $sql = $this->te->replace($sql, $params);
       $rs = db_query($sql);
 
       $xml = new SimpleXMLElement('<table/>');

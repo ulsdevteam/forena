@@ -129,7 +129,7 @@ class FrxDataProvider{
   }
 
   public function error() {
-  	FrxReportGenerator::$instance()->app->error($msg, $log);
+  	FrxReportGenerator::instance()->app->error($msg, $log);
   }
 
 

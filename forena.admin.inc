@@ -720,7 +720,7 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
         'path' => '',
         'config' => array(
           'source' => 'user',
-          'data_engine' => 'FrxDrupal',
+          'data provider' => 'FrxDrupal',
           'access callback' => 'user_access',
           'user callback' => 'forena_current_user_id'
         ),
@@ -735,7 +735,7 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
       $form_state['storage'] = array(
         'name' => $source,
         'title' => $r['title'],
-        'path' => $r['path'],
+        'path' => @$r['path'],
         'config' => $load,
       );
 
@@ -744,7 +744,7 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
   $data = $form_state['storage'];
   $config = $data['config'];
 
-  $locked = !$adding || !(@$config['source']=='user');
+  $locked = !($adding || (@$config['source'] == 'user'));
   $values = @$form_state['values'];
 
   $form['name'] = array(
@@ -759,6 +759,7 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
   $form['title'] = array(
     '#type' => 'textfield',
     '#title' => t('Title'),
+    '#required' => TRUE,
     '#description' => t('Human readable name that describes the data source.  This primarily occurs in error messages where the data source cannot be accessed.'),
     '#default_value' => $data['title'],
   );
@@ -773,20 +774,39 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
   $form['path'] = array(
     '#type' => 'textfield',
     '#title' => t('Path'),
+    '#required' => TRUE,
     '#description' => t('Directory containing data block files.'),
     '#default_value' => @$data['path'],
   );
 
+  $user_options = array(
+    '' => 'None',
+    'forena_current_user_id' => 'UID',
+    'forena_current_user_name' => 'User name',
+  );
+
+  $form['user_callback'] = array(
+    '#type' => 'select',
+    '#title' =>  'Current user',
+    '#description' => t('Can be refererenced as :current_user in each data block.'),
+    '#options' => $user_options,
+    '#default_value' => $config['user callback'],
+    '#disabled' => $locked,
+  );
+
+
   // Access method list
   $access = array(
-    'callback' => 'Drupal Security',
-    'block' => 'Data Block',
+    'callback' => t('Use drupal permissions'),
+    'block' => t('Match values provided by a data block. '),
   );
 
   $form['access_method'] = array(
     '#type' => 'select',
     '#options' => $access,
-    '#default_value' => empty($config['access callback']) ? 'block' : 'callback',
+    '#title' => t('Data security method'),
+    '#default_value' => empty($config['access block']) ? 'callback' : 'block',
+    '#description' => t('Specify how the ACCESS defined for a data block is to be interpreted. '),
     '#ajax' => array(
       'callback' => 'forena_access_info_callback',
       'wrapper' => 'access-details',
@@ -797,23 +817,24 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
     '#type' => 'fieldset',
     '#prefix' => '<div id="access-details">',
     '#suffix' => '</div>',
-    '#title' => t('Details')
+    '#title' => t('Details'),
   ) ;
 
   switch (!empty($values['access_method']) ? $values['access_method'] : $form['access_method']['#default_value']) {
 	  case 'block':
-	  	$form['access_details']['access block'] = array(
+	  	$form['access_details']['access_block'] = array(
 	  	  '#type' => 'textfield',
-	  	  '#title' => 'Access Block',
+	  	  '#title' => 'Data block providing permissions list',
+	  	  '#autocomplete_path' => 'forena/data_block/autocomplete',
+	  	  '#description' => t('The datablock to be used to interpret permissions.  This should return a single column of permissions based on the current user.   May be provided by another repository.'),
 	  	  '#default_value' => @$config['access block'],
-
 	  	);
 	  	break;
 	  default:
-	  	$form['access_details']['access callback'] = array(
+	  	$form['access_details']['access_callback'] = array(
 	  	  '#type' => 'item',
 	  	  '#title' => 'Access callback',
-	  	  '#markup' => $config['access callback'],
+	  	  '#markup' => @$config['access callback'],
 	  	);
   }
 
@@ -829,13 +850,13 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
     'FrxFiles' => t('XML Files'),
   );
 
-  $form['data_engine'] = array(
+  $form['data_provider'] = array(
     '#type' => 'select',
     '#title' => t('Driver'),
     '#description' => t('Forena data connection type'),
     '#options' => $drivers,
     '#disabled' => $locked,
-    '#default_value' => $config['data_engine'],
+    '#default_value' => $config['data provider'],
     '#ajax' => array(
       'callback' => 'forena_connection_info_callback',
       'wrapper' => 'conn-div',
@@ -848,9 +869,9 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
    '#prefix' =>  '<div id="conn-div">',
    '#suffix' => '</div>',
   );
-  $data_engine = (!empty($form_state['values']['data_engine']) ? $form_state['values']['data_engine'] : $config['data_engine']);
+  $data_provider = (!empty($form_state['values']['data_provider']) ? $form_state['values']['data_provider'] : $config['data provider']);
 
-  switch ($data_engine) {
+  switch ($data_provider) {
      case 'FrxDrupal':
        $form['connection']['uri'] = array(
          '#type' => 'item',
@@ -860,47 +881,87 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
        break;
      default:
        $form['connection']['uri'] = array(
-         '#type' => 'textfield',
+        '#type' => 'textfield',
         '#default_value' => !empty($form_state['values']['uri']) ? $form_state['values']['uri'] : $config['uri'],
         '#title' => t('URI'),
-        '#description' => t('Description depenedent on driver information.  See forena help for additional info. '),
+        '#description' => t('Description depenedent on driver information.  See forena help for additional info.'),
      );
   }
 
   $form['save'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
+    '#submit' => array('forena_data_settings_save'),
+  );
+
+  $form['delete'] = array(
+    "#type" => 'submit',
+    '#value' => t('Delete'),
+    '#submit' => array('forena_data_settings_delete'),
   );
 
   return $form;
 }
 
-function forena_data_settings_edit_submit($form, &$form_state) {
+/**
+ * Submit handler to cause save events to happen.
+ * Enter description here ...
+ */
+function forena_data_settings_save($form, &$form_state) {
   $values = $form_state['values'];
   $name = $values['name'];
-  $config = serialize($form_state['storage']['config']);
-
+  $form_state['storage']['config'];
+  $config['path'] = @$values['path'];
+  $config['data provider'] = $values['data_provider'];
+  $config['user callback'] = $values['user_callback'];
+  if (empty($values['access_block'])) {
+  	$config['access callback'] = empty($values['access_callback']) ? 'user_access' : $values['access_callback'];
+  }
+  else {
+  	$config['access block'] = $values['access_block'];
+  }
+  $config_str = serialize($config);
   $result = db_query('SELECT * FROM {forena_repositories} WHERE repository = :name', array(':name' => $name));
+
+  if ($result) drupal_set_message(t('Data connection settings saved'));
   if ($repos = $result->fetchObject()) {
     db_update('forena_repositories')
       ->fields(array(
         'title' => $values['title'],
         'enabled' => $values['enabled'],
-        'config' => $config,
+        'config' => $config_str,
        ))
       ->condition('repository', $name, '=')
       ->execute();
   }
   else {
+  	$form_state['#redirect'] = 'admin/forena/content/data';
     db_insert('forena_repositories')
       ->fields(array(
         'repository' => $name,
         'title' => $values['title'],
         'enabled' => $values['enabled'],
-        'config' => $config,
+        'config' => $config_str,
       ))
       ->execute();
   }
+  $form_state['redirect'] = 'admin/config/content/forena/data';
+}
+
+/**
+ * Delete the function
+ * Enter description here ...
+ * @param unknown_type $form
+ * @param unknown_type $form_state
+ */
+function forena_data_settings_delete($form, &$form_state) {
+	if (!@$form_state['storage]']['locked']) {
+		$form_state['redirect'] = 'admin/config/content/forena/data';
+		db_delete('forena_repositories')
+		 ->condition('repository', $form_state['values']['name'], '=')
+		 ->execute();
+	}
+
 }
 
 /**
@@ -1216,7 +1277,7 @@ function forena_data_block_form_validate($form, &$form_state) {
 
   //validate the data block only if delete block was not chosen
   if (!$delete_blocks) {
-    $block_info = forena_load_block($data_block);
+    $block_info = FrxReportGenerator::instance()->load_block($data_block);
     if (!$block_info) {
       form_set_error('data_block', t('Invalid data block.'));
     }
@@ -1239,7 +1300,7 @@ function forena_data_block_form_submit($form, &$form_state) {
   $params = isset($values['params']) ? $values['params'] : array();
   $name = $values['report_name'];
   $where_clause = $values['where_clause'];
-  $r = forena_get_report($name);
+  $r = FrxReportGenerator::instance()->get_report($name);
 
   $form_state['storage']['param_values'] = $params;
   $form_state['storage']['data_block'] = $data_block;
@@ -1249,7 +1310,7 @@ function forena_data_block_form_submit($form, &$form_state) {
   if ($data_block)  {
      //get xml from data block
     //check for and store parameters
-    $block_info = forena_load_block($data_block, $where_clause);
+    $block_info = FrxReportGenerator::instance()->load_block($data_block, $where_clause);
     if ($block_info) {
       //if there were not any parameters passed. Use the report parameters
       if (!$params) {
@@ -1260,7 +1321,8 @@ function forena_data_block_form_submit($form, &$form_state) {
       }
 
       //now invoke the data provider with the correct params
-      $xml = forena_invoke_data_provider($data_block, $params, $where_clause);
+      FrxData::instance()->push($params, 'parm');
+      $xml = FrxReportGenerator::instance()->invoke_data_provider($data_block, $params, $where_clause);
     }
   }
   if ($xml) {
@@ -1276,7 +1338,7 @@ function forena_data_block_form_submit($form, &$form_state) {
     }
 
     //create xml from template object
-    $template_obj = forena_get_templates($template);
+    $template_obj = FrxReportGenerator::instance()->get_templates($template);
     if ($template_obj) {
       $body = $template_obj->$template($column_array, $data_block, $where_clause);
     }
@@ -1314,7 +1376,7 @@ function forena_data_block_add($form, &$form_state) {
   $added_report = $form_state['storage']['template_body'];
 
   //Get the data block parameters
-  $block_info = forena_load_block($data_block, $where_clause);
+  $block_info = FrxReportGenerator::instance()->load_block($data_block, $where_clause);
   $data_block_parms = $block_info['tokens'];
 
   //Build the parameters
@@ -1364,7 +1426,7 @@ function forena_data_block_delete($form, &$form_state) {
   $delete_blocks = array_filter($values['delete_blocks']);
 
   $report_name = $values['report_name'];
-  $r = forena_get_report($report_name);
+  $r = FrxReportGenerator::instance()->get_report($report_name);
 
   //find the datablocks in the existing report
   if ($r) $r->get_attributes_by_id();
@@ -1462,13 +1524,13 @@ function forena_clean_xhtml($xhtml) {
  * @return array list of blocks the user has access to.
  */
 function forena_user_data_blocks($search) {
-  $repos = forena_repository();
+  $repos = FrxReportGenerator::instance()->app->repositories();
   foreach ($repos as $name => $r) {
 
     // Make really sure the data provider objects have been instantiated
     $provider = $r;
-    if (!$provider['data']) {
-      $provider = forena_repository($name);
+    if (!@$provider['data']) {
+      $provider = FrxReportGenerator::instance()->repository($name);
     }
     $repos[$name] = $provider;
     // Invoke the list block function to find out all of the block names
