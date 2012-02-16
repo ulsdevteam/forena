@@ -775,6 +775,7 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
     '#type' => 'textfield',
     '#title' => t('Path'),
     '#required' => TRUE,
+    '#disabled' => $locked,
     '#description' => t('Directory containing data block files.'),
     '#default_value' => @$data['path'],
   );
@@ -788,9 +789,10 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
   $form['user_callback'] = array(
     '#type' => 'select',
     '#title' =>  'Current user',
+    '#disabled' => $locked,
     '#description' => t('Can be refererenced as :current_user in each data block.'),
     '#options' => $user_options,
-    '#default_value' => $config['user callback'],
+    '#default_value' => @$config['user callback'],
     '#disabled' => $locked,
   );
 
@@ -804,6 +806,7 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
   $form['access_method'] = array(
     '#type' => 'select',
     '#options' => $access,
+    '#disabled' => $locked,
     '#title' => t('Data security method'),
     '#default_value' => empty($config['access block']) ? 'callback' : 'block',
     '#description' => t('Specify how the ACCESS defined for a data block is to be interpreted. '),
@@ -825,6 +828,7 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
 	  	$form['access_details']['access_block'] = array(
 	  	  '#type' => 'textfield',
 	  	  '#title' => 'Data block providing permissions list',
+	  	  '#disabled' => $locked,
 	  	  '#autocomplete_path' => 'forena/data_block/autocomplete',
 	  	  '#description' => t('The datablock to be used to interpret permissions.  This should return a single column of permissions based on the current user.   May be provided by another repository.'),
 	  	  '#default_value' => @$config['access block'],
@@ -834,6 +838,7 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
 	  	$form['access_details']['access_callback'] = array(
 	  	  '#type' => 'item',
 	  	  '#title' => 'Access callback',
+	  	  '#disabled' => $locked,
 	  	  '#markup' => @$config['access callback'],
 	  	);
   }
@@ -876,6 +881,7 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
        $form['connection']['uri'] = array(
          '#type' => 'item',
          '#title' => t('URI'),
+         '#disabled' => $locked,
          '#markup' => 'Determined by Drupal settings.php file',
        );
        break;
@@ -884,6 +890,7 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
         '#type' => 'textfield',
         '#default_value' => !empty($form_state['values']['uri']) ? $form_state['values']['uri'] : $config['uri'],
         '#title' => t('URI'),
+        '#disabled' => $locked,
         '#description' => t('Description depenedent on driver information.  See forena help for additional info.'),
      );
   }
