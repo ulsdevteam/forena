@@ -22,8 +22,8 @@ $conf['data provider'] = 'FrxPDO';
  * In database engines it might be the connection string to the db.  In the file
  * engine it would be the path to the directory containting the files
  */
-$path = realpath(dirname(drupal_get_path('module','forena').'/forena.info'));
-$conf['uri'] = 'sqlite:'. $path . '/repos/sample/sample.db';
+$local_path = realpath(dirname(drupal_get_path('module','forena').'/forena.info'));
+$conf['uri'] = 'sqlite:'. $local_path . '/repos/sample/sample.db';
 $conf['debug'] = FALSE;
 /**
  * Uncomment the following line to specify a particular path in which to save reports.

@@ -248,14 +248,13 @@ public function repositories() {
     'title' => 'Forena Help Reports',
   );
   $repos['drupal'] = array(
-    'path' => $path .'/repos/drupal',
+    'path' => $path . '/repos/drupal',
     'title' => 'Drupal Reports',
   );
   $repos['sampledb'] = array(
     'path' => $path . '/repos/sample',
     'title' => 'Sample DB Repository'
   );
-
   // Retrieve the repositories defined in the database;
   $results = db_query('SELECT * FROM {forena_repositories}');
   foreach ($results as $r) {
@@ -280,7 +279,6 @@ public function repositories() {
 
 
   module_invoke_all('forena_repos_alter', $repos);
-
   return $repos;
 }
 
