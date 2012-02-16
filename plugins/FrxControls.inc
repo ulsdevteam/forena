@@ -52,7 +52,7 @@ class FrxControls {
      if ($field) {
      	$vars = @unserialize($field);
      }
-     return t($value, $vars);
+     return t($value);
   }
 
   //Date format methods

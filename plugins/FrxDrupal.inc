@@ -41,7 +41,7 @@ class FrxDrupal extends FrxDataProvider {
       if ($clause) {
         $sql = 'SELECT * FROM (' . trim($sql, ' ;') . ') forena_table ' . $clause;
       }
-      $sql = $this->te->replace($sql, $params);
+      $sql = $this->te->replace($sql);
       $rs = db_query($sql);
 
       $xml = new SimpleXMLElement('<table/>');
@@ -71,7 +71,7 @@ class FrxDrupal extends FrxDataProvider {
   public function format($value, $key, $data) {
     $db = Database::getConnection('default');
     if ($db) {
-      if ($value=='') $value = 'NULL'; else  $value =  $db -> quote($value);
+      if ($value=='') $value = 'NULL'; else  $value =   $db -> quote($value);
     }
     return $value;
   }
