@@ -116,7 +116,6 @@ class FrxPostgres extends FrxDataProvider {
   private function php_xml($sql) {
       $db = $this->db;
       $xml = new SimpleXMLElement('<table/>');
-      drupal_set_message('SQL:' . $sql);
       $rs = pg_query($sql);
 
       if ($rs) while ($row = pg_fetch_assoc($rs)) {
