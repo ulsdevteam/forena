@@ -921,6 +921,7 @@ function forena_data_settings_save($form, &$form_state) {
   $config['path'] = @$values['path'];
   $config['data provider'] = $values['data_provider'];
   $config['user callback'] = $values['user_callback'];
+  $config['uri'] = $values['uri'];
   if (empty($values['access_block'])) {
   	$config['access callback'] = empty($values['access_callback']) ? 'user_access' : $values['access_callback'];
   }
@@ -1323,7 +1324,7 @@ function forena_data_block_form_submit($form, &$form_state) {
       if (!$params) {
         $rpt_params = $r->parameters;
         if ($rpt_params) foreach ($block_info['tokens'] as $index => $id) {
-          $params[$id] = $rpt_params[$id]['value'];
+          $params[$id] = @$rpt_params[$id]['value'];
         }
       }
 

@@ -11,7 +11,7 @@ class FrxPostgres extends FrxDataProvider {
 
 
   private $db;
-  private $use_postgres_xml;
+  private $use_postgres_xml=FALSE;
 
   /**
    * Object constructor
@@ -22,7 +22,7 @@ class FrxPostgres extends FrxDataProvider {
   public function __construct($conf, $repos_path) {
 
     parent::__construct($conf, $repos_path);
-    $this->use_oracle_xml = FALSE;
+    $this->use_postgres_xml = FALSE;
     $uri = $conf['uri'];
     $this->debug = @$conf['debug'];
     if (isset($conf['postgres_xml'])) $this->use_postgres_xml = $conf['postgres_xml'];
@@ -65,6 +65,7 @@ class FrxPostgres extends FrxDataProvider {
       if ($clause) {
         $sql = 'SELECT * FROM (' . trim($sql, ' ;') . ') ' . $clause;
       }
+
       $sql = $this->te->replace($sql);
 
       if ($this->use_postgres_xml) {
@@ -115,10 +116,10 @@ class FrxPostgres extends FrxDataProvider {
   private function php_xml($sql) {
       $db = $this->db;
       $xml = new SimpleXMLElement('<table/>');
-
+      drupal_set_message('SQL:' . $sql);
       $rs = pg_query($sql);
 
-      while ($row = pg_fetch_assoc($rs)) {
+      if ($rs) while ($row = pg_fetch_assoc($rs)) {
         $row_node = $xml->addChild('row');
         foreach ($row as $key => $value) {
           $row_node->addChild(strtolower($key), htmlspecialchars($value));
