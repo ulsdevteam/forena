@@ -10,7 +10,6 @@
     </frx:docgen>
     <frx:fields>
       <frx:field id="title" link="reports/{name}"/>
-      <frx:field id="first_name">{first_name}</frx:field>
     </frx:fields>
   </head>
 <body>
@@ -75,7 +74,7 @@
   <h3>Sample Reports</h3>
   <p>The following sample reports are provided to illustrate some of the more sophiticated things
   that you can do with reports: 
-  <ul id="sample-reports" frx:block="forena_help/sample_reports">
+  <ul id="sample-reports" frx:block="forena_help/design_topics">
     <li frx:foreach="*"><span>{title}</span></li>
   </ul>
   </p>

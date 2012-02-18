@@ -3,10 +3,12 @@
   <head>
     <title>Editing Existing Reports</title>
     <frx:category>Help</frx:category>
-    <frx:options hidden="0" form=""></frx:options>
+    <frx:options hidden="1" form=""></frx:options>
     <frx:parameters> </frx:parameters>
     <frx:docgen> </frx:docgen>
-
+<frx:fields>
+  <frx:field id="title" link="reports/{name}" />
+</frx:fields>
   </head>
   <body>
     <div id="forena-1" frx:block="forena_help/design_topics"><p>All forena reports are stored as
