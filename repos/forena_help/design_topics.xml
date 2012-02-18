@@ -3,6 +3,6 @@
 <root>
   <row><title>Overview</title><name>help.ReportWritersGuide</name></row>
   <row><title>Create a simple report</title><name>help.CreateReportSimple</name></row>
-  <row><title>Editing Using Forena</title><name>help.ReportEditing</name></row>
+  <row><title>Using the Forena Report Editor</title><name>help.ReportEditing</name></row>
   <row><title>Forena Report XML (frx) reference</title><name>help.design</name></row>
 </root>

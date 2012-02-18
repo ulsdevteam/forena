@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <html xmlns:frx="urn:FrxReports">
   <head>
-    <title>Report Design Language</title>
+    <title>Forena Report XML (frx) Reference</title>
     <frx:category>Help</frx:category>
-    <frx:options/>
+    <frx:options hidden="1"/>
     <frx:parameters>
     </frx:parameters>
     <frx:docgen>
@@ -70,12 +70,5 @@
   database, but when using more complex data sources, there is a lot that can be done using this syntax.
   In some cases, the field name may be used using a '.' syntax to reference fields in other blocks 
   as report parameters.   
-  </p>
-  <h3>Sample Reports</h3>
-  <p>The following sample reports are provided to illustrate some of the more sophiticated things
-  that you can do with reports: 
-  <ul id="sample-reports" frx:block="forena_help/design_topics">
-    <li frx:foreach="*"><span>{title}</span></li>
-  </ul>
   </p>
 </body></html>
