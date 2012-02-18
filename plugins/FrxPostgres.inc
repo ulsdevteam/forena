@@ -20,7 +20,6 @@ class FrxPostgres extends FrxDataProvider {
    * @param string $repos_path Path to location of data block definitions
    */
   public function __construct($conf, $repos_path) {
-
     parent::__construct($conf, $repos_path);
     $this->use_postgres_xml = FALSE;
     $uri = $conf['uri'];
@@ -92,7 +91,6 @@ class FrxPostgres extends FrxDataProvider {
    */
   private function postgres_xml($sql, $block) {
       $db = $this->db;
-
       //$rs->debugDumpParams();
       $fsql = 'select query_to_xml($1,true,false,$2);';
       $rs = pg_query_params($db, $fsql, array($sql, ''));
@@ -108,6 +106,7 @@ class FrxPostgres extends FrxDataProvider {
           $msg = (string)$xml . ' in ' . $block . '.sql. ';
           $this->error($msg . 'See logs for more info', $msg . ' in <pre> ' . $sql . '</pre>');
         }
+        if (!$xml->children()) $xml ='';
       }
       if ($rs) pg_free_result($rs);
       return $xml;
