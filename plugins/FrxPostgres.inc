@@ -103,6 +103,7 @@ class FrxPostgres extends FrxDataProvider {
           $msg = (string)$xml . ' in '. $block .'.sql. ';
           forena_error($msg .'See logs for more info', $msg. ' in <pre> '.$sql. '</pre>');
         }
+        if (!$xml->children()) $xml ='';
       }
       if ($rs) pg_free_result($rs);
       return $xml;
