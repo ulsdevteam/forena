@@ -493,7 +493,7 @@ function forena_filter_info() {
   $filters['forena_report'] = array(
     'title' => t('Embed Forena Reports'),
     'description' => t('Allows you to embed a report in a text'),
-    'process_callback' => '_forena_filter_process',
+    'process callback' => '_forena_filter_process',
     'cache' => FALSE,
   );
 
@@ -507,8 +507,7 @@ function _forena_filter_process($text='') {
   require_once('forena.admin.inc');
   // initial Parameters
   $in_parms = array();
-
-  $in_parms = array_merge((array)$_GET, (array)$parms);
+  $in_parms  = $_GET;
 
   // Find the instances of [xmlreport:view,
   if (preg_match_all("/\[report?:?([^\]]+)\]/i", $text, $match)) {
@@ -516,19 +515,20 @@ function _forena_filter_process($text='') {
     foreach ($match[1] as $idx => $value) {
       $parms=array();
       // Separate view from parmeters
-      list($report_name, $parmsStr)=explode(':', $value);
+      @list($report_name, $parmsStr) = explode(':', $value);
 
       // Get any static parmeters
-      $pairs = split(',', $parmsStr);
+      $pairs = explode(',', $parmsStr);
       if ($pairs) foreach ($pairs as $pair) {
-        list($key, $value)=explode('=', $pair);
+        @list($key, $value)=explode('=', $pair);
         $parms[$key]=$value;
       }
 
       $parms = array_merge($parms, $in_parms);
+
       // Debug the result
       $output = '';
-      $r = forena_get_report($report_name, $in_parms);
+      $r = FrxReportGenerator::instance()->get_report($report_name, $in_parms);
       if ($r) {
         $output .= $r->render(null);
       }
