@@ -167,7 +167,7 @@ class FrxControls {
     	$c = 0;
       foreach ($row as $column) {
       	$c++;
-      	if ($rowspans[$c]) {
+      	if (@$rowspans[$c]) {
       		$cont = true;
       		while ($rowspans[$c] && $cont) {
       			$rowspans[$c]--;

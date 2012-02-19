@@ -525,10 +525,8 @@ function _forena_filter_process($text='') {
       }
 
       $parms = array_merge($parms, $in_parms);
-
       // Debug the result
-      $output = '';
-      $r = FrxReportGenerator::instance()->get_report($report_name, $in_parms);
+      $r = FrxReportGenerator::instance()->get_report($report_name, $parms);
       if ($r) {
         $output .= $r->render(null);
       }
