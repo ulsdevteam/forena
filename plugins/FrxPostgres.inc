@@ -23,6 +23,7 @@ class FrxPostgres extends FrxDataProvider {
     parent::__construct($conf, $repos_path);
     $this->use_postgres_xml = FALSE;
     $uri = $conf['uri'];
+    if (!empty($conf['password'])) $uri = trim($uri) . ' password='. $conf['password'];
     $this->debug = @$conf['debug'];
     if (isset($conf['postgres_xml'])) $this->use_postgres_xml = $conf['postgres_xml'];
     if ($uri) {

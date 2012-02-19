@@ -11,7 +11,7 @@ class FrxMSSQL extends FrxDataProvider {
 
 
   private $db;
-  private $use_postgres_xml;
+  private $use_mssql_xml;
 
   /**
    * Object constructor
@@ -22,7 +22,7 @@ class FrxMSSQL extends FrxDataProvider {
   public function __construct($conf, $repos_path) {
 
     parent::__construct($conf, $repos_path);
-    $this->use_oracle_xml = FALSE;
+    $this->use_mssql_xml = FALSE;
     $uri = $conf['uri'];
     $this->debug = $conf['debug'];
     if ($conf['mssql_xml']) $this->use_mssql_xml = TRUE;

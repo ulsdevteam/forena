@@ -771,6 +771,13 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
     '#default_value' => @$data['enabled']!==0,
   );
 
+  $form['debug'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Debug'),
+    '#description' => t('Write information to the screen and logs for each query executed.'),
+    '#default_value' => @$config['debug'],
+  );
+
   $form['path'] = array(
     '#type' => 'textfield',
     '#title' => t('Path'),
@@ -870,29 +877,84 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
 
   $form['connection'] = array(
     '#type' => 'fieldset',
+    '#tree' => TRUE,
     '#title' => 'Connection info',
    '#prefix' =>  '<div id="conn-div">',
    '#suffix' => '</div>',
   );
   $data_provider = (!empty($form_state['values']['data_provider']) ? $form_state['values']['data_provider'] : $config['data provider']);
 
+  // Common controls used in mulitple providers.
+  $uri = array(
+    '#type' => 'textfield',
+    '#title' => t('uri'),
+    '#descripton' => t('Connection string: see appropriate php documentation for more details.'),
+    '#default_value' => $config['uri'],
+    '#required' => TRUE,
+    '#disabled' => $locked,
+  );
+
+  $user = array(
+    '#type' => 'textfield',
+    '#title' => t('User'),
+    '#default_value' => @$config['user'],
+  );
+  $password= array(
+    '#type' => 'password',
+    '#title' => t('Password'),
+    '#default_value' => @$config['password'],
+   );
+
   switch ($data_provider) {
-     case 'FrxDrupal':
-       $form['connection']['uri'] = array(
-         '#type' => 'item',
-         '#title' => t('URI'),
-         '#disabled' => $locked,
-         '#markup' => 'Determined by Drupal settings.php file',
-       );
-       break;
-     default:
-       $form['connection']['uri'] = array(
-        '#type' => 'textfield',
-        '#default_value' => !empty($form_state['values']['uri']) ? $form_state['values']['uri'] : $config['uri'],
+    case 'FrxDrupal':
+      $form['connection']['uri'] = array(
+        '#type' => 'item',
         '#title' => t('URI'),
         '#disabled' => $locked,
-        '#description' => t('Description depenedent on driver information.  See forena help for additional info.'),
-     );
+        '#markup' => 'Determined by Drupal settings.php file',
+      );
+      break;
+    case 'FrxMSSQL':
+    	$form['connection']['uri'] = $uri;
+    	$form['connection']['user'] = $user;
+    	$form['connection']['new_password'] = $password;
+      $form['connection']['mssql_xml'] = array(
+        '#type' => 'checkbox',
+        '#disabled' => $locked,
+        '#title' => t('Microsoft SQL native XML'),
+        '#description' => t('Use for XML auto queries to generate XML.'),
+        '#default_value' => $config['mssql_xml'],
+      );
+    	    	break;
+    case 'FrxOracle':
+      $form['connection']['user'] = $user;
+      $form['connection']['new_password'] = $password;
+      $form['connection']['oracle_xml'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Oracle native XML'),
+        '#disabled' => $locked,
+        '#description' => t('Use the function provided with Forena to generate XML.  Requires installing a function into the database'),
+        '#default_value' => $config['oracle_xml'],
+      );
+      break;
+    case 'FrxPDO':
+      $form['connection']['uri'] = $uri;
+     	$form['connection']['user'] = $user;
+     	$form['connection']['new_password'] = $password;
+     	break;
+    case 'FrxPostgres':
+    	$form['connection']['uri'] = $uri;
+    	$form['connection']['new_password'] = $password;
+      $form['connection']['postgres_xml'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Postgres native XML'),
+        '#disabled' => $locked,
+        '#default_value' => @$config['postgres_xml'],
+        '#description' => t('Use Postgres native XML support.  Requires Posgres 8.3 or better'),
+      );
+
+    default:
+      $form['connection']['uri'] = $uri;
   }
 
   $form['save'] = array(
@@ -917,11 +979,16 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
 function forena_data_settings_save($form, &$form_state) {
   $values = $form_state['values'];
   $name = $values['name'];
-  $form_state['storage']['config'];
+  $config = $form_state['storage']['config'];
   $config['path'] = @$values['path'];
   $config['data provider'] = $values['data_provider'];
   $config['user callback'] = $values['user_callback'];
-  $config['uri'] = $values['uri'];
+  $config['debug'] = $values['debug'];
+  if (@$values['connection']['new_password']) {
+	  $values['connection']['password'] = $values['connection']['new_password'];
+  }
+  if (isset($values['connection']['new_password'])) unset($values['connection']['new_password']);
+  if (is_array($values['connection'])) $config = array_merge($config, $values['connection']);
   if (empty($values['access_block'])) {
   	$config['access callback'] = empty($values['access_callback']) ? 'user_access' : $values['access_callback'];
   }
