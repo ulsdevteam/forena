@@ -50,9 +50,9 @@ class FrxControls {
      $field = $teng->replace($field, null, TRUE);
      $vars = array();
      if ($field) {
-     	$vars = @unserialize($field);
+     	$vars = (array) @unserialize($field);
      }
-     return t($value);
+     return t($value, $vars);
   }
 
   //Date format methods
