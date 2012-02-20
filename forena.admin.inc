@@ -414,11 +414,11 @@ function forena_layout_form($formid, $form_state, $new_report='') {
     $add_new_rpt = TRUE;
   }
   else $add_new_rpt = FALSE;
-
   $filename = $desc['filename'];
   $format = @$desc['format'];
   if ($name) {
     if ((isset($desc['exists']) && $desc['exists']) || $add_new_rpt) {
+    	$save_name = $name;
       //set the name to empty string for new reports
       if ($add_new_rpt) $name = '';
       $r = forena_get_report_editor($name);
@@ -432,10 +432,22 @@ function forena_layout_form($formid, $form_state, $new_report='') {
         $category='';
         $head = '';
         $body = '';
+        $lang = '';
 
       }
       else {
         $title = (string)$r->title;
+        if (module_exists('locale')) {
+	        @list($tlang,	$tsave_name) = explode('/', $name, 2);
+	        // FInd out if the starting name of the report is an installed language.
+	        if (array_key_exists($tlang, language_list() )) {
+	        	$lang = $tlang;
+	        	$save_name = $tsave_name;
+	        }
+	        else {
+	        	$lang = '';
+	        }
+        }
         drupal_set_title(filter_xss($r->title));
         // Need to get all option attributes
         $frx_options = $r->getOptions();
@@ -446,7 +458,6 @@ function forena_layout_form($formid, $form_state, $new_report='') {
         $body = $r->simplexml->body->asXML();
       }
       $form = array();
-
 
       //array of xml attributes that are required to have a value
       $required = array('id' => TRUE, 'label' => TRUE);
@@ -463,13 +474,31 @@ function forena_layout_form($formid, $form_state, $new_report='') {
       $form['save_report_name'] = array(
         '#type' => 'textfield',
         '#title' => t('Report Name'),
-        '#default_value' => $name,
+        '#default_value' => $save_name,
         '#description' => t('Enter only letters, numbers, and special characters:  - _ /
                              <br/>White space is not permitted.
                              Create a directory using the format: (directory name) / (report name). Save multiple reports to the same directory
                              by referencing the same name.'),
         '#required' => TRUE,
       );
+
+      $languages = array('' => t('Default'));
+      if (module_exists('locale')) {
+      	foreach (language_list() as $key=>$obj) {
+          $languages[$key] = $obj->native;
+      	}
+      	$form['report_lang'] = array(
+      	  '#type' => 'value',
+      	  '#value' => $lang,
+      	);
+      	$def_lang = isset($_GET['language']) ? $_GET['language'] : $lang;
+	      $form['save_report_language'] = array(
+	        '#type' => 'select',
+	        '#title' => t('Language'),
+	        '#options' => $languages,
+	        '#default_value' => $def_lang,
+	      );
+      }
 
       $form['title'] = array(
         '#type' => 'textfield',
@@ -499,15 +528,13 @@ function forena_layout_form($formid, $form_state, $new_report='') {
         '#description' => t('Hide your report from showing up on the report list.'),
       );
 
-
-
       //begin checking doc generation options
       if ($r) $nodes = $r->simplexml->head->xpath('frx:docgen/frx:doc');
       if ($doclist) {
         $form['docgen'] = array(
          '#tree' => TRUE,
          '#type' => 'fieldset',
-         '#title' => 'Document Options',
+         '#title' => t('Document Options'),
          '#collapsible' => TRUE,
          '#collapsed' => TRUE,
          '#description' => t('These are document transformation options. Options selected will display as links in your report view.')
@@ -528,7 +555,7 @@ function forena_layout_form($formid, $form_state, $new_report='') {
         //display checkboxes
         $form['docgen']['docs'] = array(
           '#type' => 'checkboxes',
-          '#description' => t('*If no options are selected, the system will display all of the above as available for this report.'),
+          '#description' => t('If no options are selected, the system will display all of the above as available for this report.'),
           '#options' => $options,
           '#default_value' => $default
         );
@@ -584,7 +611,7 @@ function forena_layout_form_validate($form, &$form_state) {
   if (!preg_match($regexp, $save_report_name)) {
     form_set_error('save_report_name', t('Invalid character entered in Report Name'));
   }
-
+  if (@$values['save_report_language']) $save_report_name = $values['save_report_language'] . '/' . $save_report_name;
   //comparing the report names to see if they have changed.
   //If they have, making sure the new name does not already exist.
   if ($report_name != $save_report_name) {
@@ -604,6 +631,7 @@ function forena_layout_form_submit($form, &$form_state) {
   $nodes = array();
   $values = $form_state['values'];
   $report_name = $values['save_report_name'];
+  if (@$values['save_report_language']) $report_name = $values['save_report_language'] . '/' . $report_name;
   $r = forena_get_report_editor($report_name);
   // Title and category
   $r->setTitle($values['title']);
@@ -694,7 +722,7 @@ function forena_doc_formats_settings() {
 function forena_data_settings() {
   $repos = FrxReportGenerator::instance()->app->repositories();
   $r_list = array();
-  $headers = array('Name','Description', 'Path', 'Operation');
+  $headers = array(t('Name'),t('Description'), t('Path'), t('Operation'));
   foreach ($repos as $name=>$r) {
     $r_list[] = array(
       $name,
@@ -1488,6 +1516,40 @@ function forena_data_block_add($form, &$form_state) {
   if (forena_save_report($report_name, $r->asXML(), TRUE) == 1) {
     drupal_set_message(t('Your report has been saved'));
   }
+}
+
+function forena_report_translations($name_in) {
+	$desc = forena_report_desc();
+  $name = $desc['name'];
+  $filename = $desc['filename'];
+	$languages = language_list();
+
+	@list($lang, $base_name) = explode('/', $name);
+	if (array_key_exists($lang, $languages)) {
+		$name = $base_name;
+	}
+	$data = array();
+	$headers = array(t('Language'), t('Title'), t('Last Modified'), t('Operation'));
+	// Generate list of all existing tranlsations and their status.
+	$report_path = FrxReportGenerator::instance()->report_path();
+	foreach ($languages as $key=>$language) {
+	  $i_name = $key . '/' . $name;
+    if (file_exists($report_path . '/' . $i_name . '.frx')) {
+      $modified = format_date(filemtime($report_path . '/' . $i_name . '.frx'));
+      $r = forena_get_report_editor($key . '/' . $name);
+      $title = $r->title;
+      $edit = l('Edit', 'reports/' . str_replace('/', '.', $i_name) . '/layout' );
+    }
+    else {
+    	$modified = '';
+    	$title ='';
+    	$edit = l('Add', 'reports/' . str_replace('/', '.', $name) . '/layout', array('query' => array('language' => $key)));
+    }
+    $data[] = array($language->native, $title, $modified, $edit);
+
+	}
+
+  return theme_table(array('header' => $headers, 'rows' => $data, 'attributes' => array(), 'caption' => '', 'sticky' => true, 'colgroups' => array(), 'empty' => ''));
 }
 
 /**
