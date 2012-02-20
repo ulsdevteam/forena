@@ -110,10 +110,12 @@ function load_report($report_name) {
   $r=null;
   global $language;
   if ($report_name) {
+  	$i_report_name = $report_name;
     $report_path =  $this->configuration('report_repos');
     $int_filename = $report_path . '/' . $language->language . '/' . $report_name . '.frx';
     $filename = $report_path . '/' . $report_name . '.frx';
     if (file_exists($int_filename)) {
+    	$i_report_name = $language->language . '/' . $report_name;
       $r_text = file_get_contents($int_filename);
       $modified = filemtime($int_filename);
       $filename = $int_filename;
@@ -122,8 +124,8 @@ function load_report($report_name) {
       $r_text = file_get_contents($filename);
       $modified = filemtime($filename);
     }
-    $result = db_query("SELECT * FROM {forena_reports} WHERE report_name=:report_name",
-      array(':report_name' => $report_name));
+    $result = db_query("SELECT * FROM {forena_reports} WHERE report_name=:report_name AND language=:language",
+      array(':report_name' => $report_name, ':language' => $language->language));
     $save = FALSE;
     if ($rpt = $result->fetchObject()) {
 		    // If the file modification time has changed then save.
@@ -143,7 +145,7 @@ function load_report($report_name) {
 
     if ($save) {
       require_once('forena.admin.inc');
-      forena_save_report($report_name, $r_text, FALSE);
+      forena_save_report($i_report_name, $r_text, FALSE);
     }
     return $r_text;
   }

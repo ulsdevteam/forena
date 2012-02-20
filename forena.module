@@ -97,7 +97,7 @@ function forena_menu() {
      $items['reports/%/translations'] = array(
        'page callback' => 'forena_report_translations',
        'page arguments' => array(1),
-       'title' => 'Translations',
+       'title' => 'Translation',
        'file' => 'forena.admin.inc',
        'access arguments' => array('design any report'),
        'type' => MENU_LOCAL_TASK,

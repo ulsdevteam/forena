@@ -240,7 +240,9 @@ function forena_parameter_form_submit($form, &$form_state) {
 }
 
 function forena_get_user_reports() {
-  $result = db_query('SELECT * FROM {forena_reports} where hidden=0 ORDER BY category,title asc');
+	GLOBAL $language;
+
+  $result = db_query('SELECT * FROM {forena_reports} where hidden=0 and language=:language ORDER BY category,title asc', array(':language' => $language->language));
   $reports = array();
   foreach ($result AS $row) {
     $access = TRUE;

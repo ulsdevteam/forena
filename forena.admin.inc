@@ -130,13 +130,26 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
     // Set hidden based on category
     $data['hidden'] = ($data['category'])? 0 : 1;
   }
+
+  // Save language info
+  $lang = 'en';
+  if (module_exists('locale')) {
+  	@list($tlang, $tname) = explode('/', $name);
+  	if (array_key_exists($tlang, language_list())) {
+  		$lang = $tlang;
+  		$name = $tname;
+  	}
+  }
+
+
   // Save to the Database
   if (file_exists($filepath)) {
     $modified = filemtime($filepath);
-    $result = db_query("SELECT report_name FROM {forena_reports} WHERE report_name=:report_name", array(':report_name' => $name) );
+    $result = db_query("SELECT report_name FROM {forena_reports} WHERE report_name=:report_name AND language=:language", array(':report_name' => $name, 'language' => $lang) );
     if ($rpt = $result->fetchObject() ) {
       db_update('forena_reports')
         -> condition('report_name', $name)
+        -> condition('language', $lang)
         ->fields(array(
           'title' => $data['title'],
           'descriptor' => $data['descriptor'],
@@ -151,6 +164,7 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
     else {
       db_insert('forena_reports')->
         fields( array('report_name' => $name,
+          'language' => $lang,
           'title' => $data['title'],
           'descriptor' => $data['descriptor'],
           'category' => $data['category'],
@@ -1523,7 +1537,6 @@ function forena_report_translations($name_in) {
   $name = $desc['name'];
   $filename = $desc['filename'];
 	$languages = language_list();
-
 	@list($lang, $base_name) = explode('/', $name);
 	if (array_key_exists($lang, $languages)) {
 		$name = $base_name;
@@ -1533,10 +1546,10 @@ function forena_report_translations($name_in) {
 	// Generate list of all existing tranlsations and their status.
 	$report_path = FrxReportGenerator::instance()->report_path();
 	foreach ($languages as $key=>$language) {
-	  $i_name = $key . '/' . $name;
+	  $i_name = ($key=='en') ? $name : $key . '/' . $name;
     if (file_exists($report_path . '/' . $i_name . '.frx')) {
       $modified = format_date(filemtime($report_path . '/' . $i_name . '.frx'));
-      $r = forena_get_report_editor($key . '/' . $name);
+      $r = forena_get_report_editor($i_name);
       $title = $r->title;
       $edit = l('Edit', 'reports/' . str_replace('/', '.', $i_name) . '/layout' );
     }
