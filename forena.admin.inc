@@ -1548,7 +1548,7 @@ function forena_report_translations($name_in) {
   $name = $desc['name'];
   $filename = $desc['filename'];
 	$languages = language_list();
-	@list($lang, $base_name) = explode('/', $name);
+	@list($lang, $base_name) = explode('/', $name, 2);
 	if (array_key_exists($lang, $languages)) {
 		$name = $base_name;
 	}
