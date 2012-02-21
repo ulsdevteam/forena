@@ -8,69 +8,16 @@
 class FrxSQLQueryBuilder {
 	private $clauses = array();
 	private $descriptions = array();
-	private $applied_filters = array();
-	private $where_clause = '';
+	private $where_clause = array();
 	private $comparison_operators= array(
 	  '<' => 'is less than',
 	  '>' => 'is greater than',
 	  '=' => 'is equal to',
 	  '<>' => 'is not equal to',
+	  '= any' => 'is one of',
 	  'LIKE' => 'is like',
 	);
 	private $data;
-	/**
-	 * Add a filter object
-	 * Enter description here ...
-	 * @param unknown_type $field
-	 * @param unknown_type $comparison
-	 * @param unknown_type $sql
-	 * @param unknown_type $title
-	 */
-	public function defineFilter($field, $comparison, $sql, $title='') {
-		// Intialise the field if not set
-		if (!isset($this->clauses[$field])) {
-			$this->clauses[$field] = array();
-		}
-
-		// Add the where clause from the lookup
-		$this->clauses[$field][$comparison] = $sql;;
-		// Add the title
-		$title = $title ? $title : $field . ' is ' . $comparison;
-		$this->descriptions[$field][$comparison] = $title;
-		return $this;
-	}
-
-
-  /**
-   * Set up common column filters
-   * This will set up all of the common filters on data ...
-   * @param unknown_type $columns
-   * @param unknown_type $comparisons
-   */
-	public function defineColumnFilters($columns, $comparisons=array()) {
-		$columns=(array)$columns;
-		if ($columns) foreach ($columns as $column ) {
-      if (!$comparisons) $comparisons = array_keys($this->comparison_operators);
-			if ($comparisons) foreach ($comparisons as $comparison) {
-				if (array_key_exists($comparison,$this->comparison_operators)) {
-				  $clause = $column . ' ' . $comparison . ' :'. $column;
-		      $this->defineFilter($column, $comparison, $clause, $this->comparison_operators[$comparison]);
-			  }
-			}
-
-		}
-		return $this;
-	}
-
-	/**
-	 * Helper functon to build common numeric filters.
-	 * Enter description here ...
-	 * @param unknown_type $columns
-	 */
-	public function defineNumericFilters($columns) {
-		$this->defineColumnFilters($columns, array('<','>','=','<>'));
-		return $this;
-	}
 
 	/**
 	 * Starts the query builder
@@ -91,23 +38,62 @@ class FrxSQLQueryBuilder {
     return FrxReportGenerator::instance()->invoke_data_provider($this->block, $this->data, $this->sql());
 	}
 
+	/**
+	 * Return the last where clause used for the data block.
+	 */
 	public function sql() {
-		$where = '';
-		if ($this->where_clause) {
-			$where  = 'WHERE 1=1' .$this->where_clause;
-		}
+    $where = '';
+    $i=0;
+    if (count($this->where_clause)>0) {
+			foreach($this->where_clause as $clause) {
+	    	$i++;
+	      $where .= $i==1 ? 'WHERE ' : ' AND ';
+				$where .= $clause;
+			}
+    }
 		return $where;
 	}
 
+	public function where($condition, $include = TRUE ) {
+		if ($include) $this->where_clause[] = $condition;
+		return $this;
+	}
+
 	/**
-	 * Filters the query that is being executeed
+	 * Filters the query that is being executed
 	 * Enter description here ...
 	 * @param string $field
 	 * @param string $comparison
 	 */
-  public function filter($field, $comparison) {
-  	if (@$this->clauses[$field][$comparison]) {
-	  	$this->where_clause .= ' AND ' . $this->clauses[$field][$comparison];
+  public function filter($field, $comparison, $include=TRUE) {
+  	if ($include===null) $include = (!empty($this->data[$field]));
+  	if ($include && @$this->comparison_operators[$comparison]) {
+	  	$this->where_clause[] = $field . ' ' . $comparison . ' :'.$field ;
+  	}
+  	return $this;
+  }
+
+  /**
+   * Removing
+   * Enter description here ...
+   * @param unknown_type $field
+   * @param unknown_type $comparison
+   * @param unknown_type $value
+   */
+  public function condition($field, $comparison, $value) {
+    $this->data[$field] = $value;
+    $this->filter($field, $comparison);
+  }
+
+  /**
+   * Filters the query if the value is present
+   * Enter description here ...
+   * @param string $field
+   * @param string $comparison
+   */
+  public function filter_when_present($field, $comparison) {
+  	if (!empty($this->data[$field])) {
+  		$this->filter($field, $comparison);
   	}
   	return $this;
   }
