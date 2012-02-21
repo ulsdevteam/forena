@@ -134,7 +134,7 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
   // Save language info
   $lang = 'en';
   if (module_exists('locale')) {
-  	@list($tlang, $tname) = explode('/', $name);
+  	@list($tlang, $tname) = explode('/', $name,2);
   	if (array_key_exists($tlang, language_list())) {
   		$lang = $tlang;
   		$name = $tname;
