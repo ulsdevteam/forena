@@ -156,7 +156,7 @@ function forena_parameter_form($formid, &$form_state, $r) {
 
       $form['params'] = array(
         '#tree' => TRUE,
-        '#title' => 'Parameters',
+        '#title' => t('Parameters'),
         '#type' => 'fieldset',
         '#collapsible' => TRUE,
         '#collapsed' => $r->blocks_loaded,
@@ -202,7 +202,7 @@ function forena_parameter_form($formid, &$form_state, $r) {
           '#title' => ($label) ? t($label) : t($id),
           '#default_value' => $value,
           '#required' => $required,
-          '#description' => $desc,
+          '#description' => t($desc),
         );
 
         //if $list is not empty then push options
@@ -216,7 +216,7 @@ function forena_parameter_form($formid, &$form_state, $r) {
 
       $form['params']['submit'] = array(
         '#type' => 'submit',
-        '#value' => 'Submit',
+        '#value' => t('Submit'),
       );
     }
 
@@ -231,12 +231,7 @@ function forena_parameter_form($formid, &$form_state, $r) {
  */
 function forena_parameter_form_submit($form, &$form_state) {
   $values = $form_state['values'];
-  $q='';
-  foreach ($values['params'] as $key => $value) {
-    $q .= '&' . $key . '=' . urlencode($value);
-  }
-  $q = trim($q, '&');
-  $form_state['redirect']= array($_GET['q'], array('query' => $values['params']));
+  //$form_state['redirect']= array($_GET['q'], array('query' => $values['params']));
 }
 
 function forena_get_user_reports() {

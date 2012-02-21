@@ -458,7 +458,7 @@ function forena_layout_form($formid, $form_state, $new_report='') {
         $category='';
         $head = '';
         $body = '';
-        $lang = '';
+        $lang = 'en';
 
       }
       else {
@@ -471,7 +471,7 @@ function forena_layout_form($formid, $form_state, $new_report='') {
 	        	$save_name = $tsave_name;
 	        }
 	        else {
-	        	$lang = '';
+	        	$lang = 'en';
 	        }
         }
         drupal_set_title(filter_xss($r->title));
@@ -508,7 +508,7 @@ function forena_layout_form($formid, $form_state, $new_report='') {
         '#required' => TRUE,
       );
 
-      $languages = array('' => t('Default'));
+      $languages = array();
       if (module_exists('locale')) {
       	foreach (language_list() as $key=>$obj) {
           $languages[$key] = $obj->native;
