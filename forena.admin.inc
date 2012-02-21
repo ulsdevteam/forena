@@ -199,6 +199,9 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
  */
 function forena_delete_report($report_name, $delete_file = TRUE) {
   $report_path = forena_report_path();
+  $language = 'en';
+
+
   $filepath = $report_path .'/'. $report_name .'.frx';
   $info = pathinfo($filepath);
   $do = TRUE;
@@ -206,8 +209,18 @@ function forena_delete_report($report_name, $delete_file = TRUE) {
     chdir($info['dirname']);
     if ($delete_file) $do = unlink($info['basename']);
   }
+  if (module_exists('locale')) {
+    @list($tlang, $tname) = explode('/', $report_name);
+    if (array_key_exists($tlang, language_list())) {
+    	$report_name = $tname;
+    	$language = $tlang;
+    }
+  }
   if ($do) {
-    DB_QUERY("DELETE FROM {forena_reports} WHERE report_name='%s'", array($report_name));
+    db_delete('forena_reports')
+      ->condition('report_name', $report_name)
+      ->condition('language', $language)
+      ->execute();
   }
   else {
     drupal_set_message('Unable to delete file '. $info['basename'],'error');
@@ -372,7 +385,6 @@ function forena_settings() {
  */
 function forena_settings_submit($form, &$form_state) {
   $values = $form_state['values'];
-  drupal_set_message('values:' . print_r($values,1));
   $path = $values['forena_report_repos'];
   $src_dir = drupal_get_path('module', 'forena') . '/repos/reports';
   if (!file_exists($path)) {
@@ -1635,7 +1647,7 @@ function forena_edit_delete_submit($form, &$form_state) {
     $destination = drupal_get_destination();
     unset($_REQUEST['destination']);
   }
-  $form_state['redirect'] = array($link . '/delete', $destination);
+  $form_state['redirect'] = array('path' => $link . '/delete', 'query' => array('destination' => $destination));
 }
 
 /**
