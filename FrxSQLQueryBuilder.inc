@@ -88,12 +88,15 @@ class FrxSQLQueryBuilder {
 	 * Enter description here ...
 	 */
 	public function execute() {
-		$where='';
+    return FrxReportGenerator::instance()->invoke_data_provider($this->block, $this->data, $this->sql());
+	}
+
+	public function sql() {
+		$where = '';
 		if ($this->where_clause) {
 			$where  = 'WHERE 1=1' .$this->where_clause;
 		}
-    return FrxReportGenerator::instance()->invoke_data_provider($this->block, $this->data, $where);
-
+		return $where;
 	}
 
 	/**
