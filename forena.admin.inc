@@ -489,7 +489,7 @@ function forena_layout_form($formid, $form_state, $new_report='') {
       $required = array('id' => TRUE, 'label' => TRUE);
       //list of supported document formats
       $supported = FrxReportGenerator::instance()->supported_doctypes();
-      $doclist = variable_get('forena_doc_formats', array());
+      $doclist = variable_get('forena_doc_formats', FrxReportGenerator::instance()->supported_doctypes());
 
       $form['report_name'] = array(
         '#type' => 'value',
@@ -727,7 +727,7 @@ function forena_doc_formats_settings() {
   $form['forena_doc_defaults'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Default Document Formats'),
-    '#default_value' => variable_get('forena_doc_defaults', $supported_doctypes),
+    '#default_value' => variable_get('forena_doc_defaults', array()),
     '#description' => t('check your desired document format'),
     '#options' => $supported_doctypes,
   );
