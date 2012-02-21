@@ -94,6 +94,7 @@ function forena_update_7201() {
       'repository' => array('repository'),
     ),
   );
+  db_add_field('forena_reports', 'descriptor', array('type' => 'text'));
   db_add_field('forena_reports', 'src', array('type' => 'text'));
   db_add_field('forena_reports', 'altered', array('type' => 'int'));
   db_create_table('forena_repositories', $schema['forena_repositories']);
