@@ -231,7 +231,7 @@ function forena_parameter_form($formid, &$form_state, $r) {
  */
 function forena_parameter_form_submit($form, &$form_state) {
   $values = $form_state['values'];
-  //$form_state['redirect']= array($_GET['q'], array('query' => $values['params']));
+  $form_state['redirect']= array($_GET['q'], array('query' => $values['params']));
 }
 
 function forena_get_user_reports() {
