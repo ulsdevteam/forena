@@ -91,7 +91,7 @@ class FrxSQLQueryBuilder {
    * @param string $field
    * @param string $comparison
    */
-  public function filter_when_present($field, $comparison) {
+  public function filter_not_null($field, $comparison) {
   	if (!empty($this->data[$field])) {
   		$this->filter($field, $comparison);
   	}
