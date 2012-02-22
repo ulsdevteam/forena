@@ -97,9 +97,19 @@ class FrxReport {
    * @param $block
    * @return unknown_type
    */
-  private function get_data($block, $clause='', $id='') {
+  private function get_data($block, $clause='', $id='', $data_uri='') {
     //@TODO: Merge xml data parameters into the report paramters
-    $xml = FrxReportGenerator::instance()->invoke_data_provider($block, $this->frx_data->currentContext(), $clause);
+    if ($data_uri) {
+    	parse_str($data_uri, $data);
+    	if (is_array($data)) foreach ($data as $key=>$value) {
+    		$data[$key] = $this->teng->replace($value);
+
+    	}
+    	$id .= '-parm';
+    	FrxData::instance()->push($data, $id);
+    }
+
+    $xml = FrxReportGenerator::instance()->invoke_data_provider($block, null, $clause);
 
     if ($xml) {
     	$this->blocks_loaded = TRUE;
@@ -149,7 +159,7 @@ class FrxReport {
 
       if ((string)$frx['block']) {
         $is_data_block = TRUE;
-        $xml = $this->get_data((string)$frx['block'], (string)$frx['clause'], $id);
+        $xml = $this->get_data((string)$frx['block'], (string)$frx['clause'], $id, (string)$frx['parameters']);
         if ($xml) {
           $this->frx_data->push($xml, $id);
         }
