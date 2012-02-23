@@ -1563,7 +1563,7 @@ function forena_report_translations($name_in) {
       $modified = format_date(filemtime($report_path . '/' . $i_name . '.frx'));
       $r = forena_get_report_editor($i_name);
       $title = $r->title;
-      $edit = l('Edit', 'reports/' . str_replace('/', '.', $i_name) . '/layout' );
+      $edit = l('Edit', 'reports/' . str_replace('/', '.', $i_name) . '/layout',array('query' => array('language' => $key)));
     }
     else {
     	$modified = '';

@@ -114,7 +114,7 @@ function load_report($report_name) {
     $report_path =  $this->configuration('report_repos');
     $int_filename = $report_path . '/' . $language->language . '/' . $report_name . '.frx';
     $filename = $report_path . '/' . $report_name . '.frx';
-    if (file_exists($int_filename)) {
+    if (file_exists($int_filename) && @$_GET['language']!= 'en') {
     	$i_report_name = $language->language . '/' . $report_name;
       $r_text = file_get_contents($int_filename);
       $modified = filemtime($int_filename);
