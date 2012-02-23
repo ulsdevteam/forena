@@ -435,6 +435,7 @@ function forenea_general_form($formid, $form_state, $new_report='') {
 function forena_layout_form($formid, $form_state, $new_report='') {
   $desc = forena_report_desc();
   $name = $desc['name'];
+  global $language;
   //determine if this is an add new report request
   if ($new_report) {
     $add_new_rpt = TRUE;
@@ -458,7 +459,7 @@ function forena_layout_form($formid, $form_state, $new_report='') {
         $category='';
         $head = '';
         $body = '';
-        $lang = 'en';
+        $lang = $language->language;
 
       }
       else {
@@ -657,7 +658,7 @@ function forena_layout_form_submit($form, &$form_state) {
   $nodes = array();
   $values = $form_state['values'];
   $report_name = $values['save_report_name'];
-  if (@$values['save_report_language']) $report_name = $values['save_report_language'] . '/' . $report_name;
+  if (@$values['save_report_language'] && @$values['save_report_language']!='en') $report_name = $values['save_report_language'] . '/' . $report_name;
   $r = forena_get_report_editor($values['report_name']);
   // Title and category
   $r->setTitle($values['title']);
@@ -1567,7 +1568,7 @@ function forena_report_translations($name_in) {
     else {
     	$modified = '';
     	$title ='';
-    	$edit = l('Add', 'reports/' . str_replace('/', '.', $name) . '/layout', array('query' => array('language' => $key)));
+    	$edit = l('Add', 'reports/' .$name_in. '/layout', array('query' => array('language' => $key)));
     }
     $data[] = array($language->native, $title, $modified, $edit);
 
