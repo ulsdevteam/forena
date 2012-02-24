@@ -35,7 +35,7 @@ class FrxOracle extends FrxDataProvider {
         return;
       }
       try {
-        $db = oci_connect($conf['user'], $conf['password'], $uri, $conf['character_set']);
+        $db = oci_connect($conf['user'], $conf['password'], $uri, @$conf['character_set']);
         $this->db = $db;
       } catch (Exception $e) {
         $this->error('Unable to connect to database ' . $conf['title'], $e->getMessage());

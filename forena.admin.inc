@@ -943,7 +943,7 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
     '#type' => 'textfield',
     '#title' => t('uri'),
     '#descripton' => t('Connection string: see appropriate php documentation for more details.'),
-    '#default_value' => $config['uri'],
+    '#default_value' => @$config['uri'],
     '#required' => TRUE,
     '#disabled' => $locked,
   );
@@ -981,8 +981,17 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
       );
     	    	break;
     case 'FrxOracle':
+    	$form['connection']['uri'] = $uri;
       $form['connection']['user'] = $user;
       $form['connection']['new_password'] = $password;
+      $form['connection']['character_set'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Character Set'),
+        '#disabled' => $locked,
+        '#description' => t('Leave blank for default character set'),
+        '#default_value' => @$config['character_set'],
+
+      );
       $form['connection']['oracle_xml'] = array(
         '#type' => 'checkbox',
         '#title' => t('Oracle native XML'),
