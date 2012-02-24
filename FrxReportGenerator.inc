@@ -418,34 +418,13 @@ function load_block($data_block, $clause='') {
    * @param unknown_type $filepath
    * @param unknown_type $comment
    */
-   function load_block_file($filepath, $comment='--', $trim) {
+   function load_block_file($filepath) {
     if (!file_exists($filepath)) {
       return array();
     }
 
     $block_data = file_get_contents($filepath);
-    $lines = explode("\n", $block_data);
-    $cnt = count($lines);
-    $access = '';
-    $i=0;
-    $block = '';
-    $data = '';
-    while ($i<$cnt) {
-      $l = trim($lines[$i], "\r");
-      @list($d, $c) = explode($comment, $l, 2);
-      if ($trim) $c = trim($c, $trim);
-      if  ($c) {
-        list($a, $o) = explode('=', $c, 2);
-        if (trim($a)=='ACCESS') {
-          $access = trim($o);
-        }
-      }
-      if (strpos($l, $comment)!==0) {
-        $data .= "$l\n";
-      }
-      $i++;
-    }
-    return array('access' => $access, 'source' => $data);
+    return $block_data;
   }
 
   /**

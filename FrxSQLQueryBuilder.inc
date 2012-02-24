@@ -97,4 +97,5 @@ class FrxSQLQueryBuilder {
   	}
   	return $this;
   }
+
 }

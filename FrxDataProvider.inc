@@ -58,7 +58,9 @@ class FrxDataProvider{
   public function load_block($block_name, $clause='') {
 
     $filename = $this->block_path . '/' . $block_name . '.' . $this->block_ext;
-    $block = FrxReportGenerator::instance()->load_block_file($filename, $this->comment_prefix, $this->comment_suffix);
+
+    $contents = FrxReportGenerator::instance()->load_block_file($filename);
+    $block = $this->parseXMLFile($contents);
     // If we have a regular expression token parser, then get the tokens out of the block.
 
     if ($this->te) {
@@ -132,6 +134,80 @@ class FrxDataProvider{
   	FrxReportGenerator::instance()->app->error($msg, $log);
   }
 
+  public function parseXMLFile($contents) {
+  	$comment = $this->comment_prefix;
+  	$trim = $this->comment_suffix;
+    $lines = explode("\n", $contents);
+    $cnt = count($lines);
+    $access = '';
+    $i=0;
+    $block = '';
+    $data = '';
+    while ($i<$cnt) {
+      $l = trim($lines[$i], "\r");
+      @list($d, $c) = explode($comment, $l, 2);
+      if ($trim) $c = trim($c, $trim);
+      if  ($c) {
+        list($a, $o) = explode('=', $c, 2);
+        $a = trim($a);
+        if ($a && $o) {
+	        switch ($a) {
+	        	case 'ACCESS':
+	        		$access = trim($a);
+	        		break;
+	        	default:
+
+
+        }
+
+        }
+
+      }
+      if (strpos($l, $comment)!==0) {
+        $data .= "$l\n";
+      }
+      $i++;
+    }
+    return array('access' => $access, 'source' => $data);
+  }
+
+  public function parseSQLFile($contents) {
+  	$comment = $this->comment_prefix;
+  	$trim = $this->comment_suffix;
+    $lines = explode("\n", $contents);
+    $cnt = count($lines);
+    $access = '';
+    $i=0;
+    $block = '';
+    $parms = FrxData::instance()->currentContext();
+    $data = '';
+    while ($i<$cnt) {
+      $l = trim($lines[$i], "\r");
+      @list($d, $c) = explode($comment, $l, 2);
+      if ($trim) $c = trim($c, $trim);
+      if  ($c) {
+        list($a, $o) = explode('=', $c, 2);
+        $a = trim($a);
+        if ($a && $o) {
+	        switch ($a) {
+	        	case 'ACCESS':
+	        		$access = trim($a);
+	        		break;
+	        	default:
+
+        }
+
+        }
+
+      }
+      if (strpos($l, $comment)!==0) {
+        $data .= "$l\n";
+      }
+      $i++;
+    }
+
+
+  }
 
 
 }
