@@ -1557,12 +1557,17 @@ function forena_data_block_add($form, &$form_state) {
 
 function forena_report_translations($name_in) {
 	$desc = forena_report_desc();
+	global $language;
+	$cur_lang = $language->language=='en' ? '' : $language->language;
   $name = $desc['name'];
   $filename = $desc['filename'];
 	$languages = language_list();
 	@list($lang, $base_name) = explode('/', $name, 2);
 	if (array_key_exists($lang, $languages)) {
 		$name = $base_name;
+	}
+	elseif ($cur_lang &&  file_exists(FrxReportGenerator::instance()->report_path() . '/' . $cur_lang . '/' . str_replace('.', '/', $name_in) . '.frx')) {
+		$name_in = $cur_lang . '.' . $name_in;
 	}
 	$data = array();
 	$headers = array(t('Language'), t('Title'), t('Last Modified'), t('Operation'));
