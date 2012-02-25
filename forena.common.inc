@@ -668,26 +668,33 @@ function forena_parameters_form($form_state) {
         $data_source = (string)$node['data_source'];
         $data_field = (string)$node['data_field'];
         $type = (string)$node['type'];
-        $value = ($parms[$id]) ? $parms[$id] : (string)$node;
-        $desc =  (string)$node['desc'];
+        if (isset($parms[$id])) {
+        	$value = $parms[$id];
+        }
+        else {
+        	$value = (string)$node;
+	        if (strpos($value, '|')!==FALSE) $value = explode('|', $value);
+        }
+                $desc =  (string)$node['desc'];
         $label_field = (string)$node['label_field'];
 
         (strcmp((string)$node['require'], "1") == 0) ? $required = TRUE : $required = FALSE;
 
         //Determine the form element type to be displayed
         //If select or radios is chosen then begin a $list array for display values.
-        switch ($type) {
-        	case 'select':
-        		$list = array('--select--');
+              switch ($type) {
+        	case 'multiselect':
+        		$type = 'select';
+        		$multiselect = TRUE;
         		break;
-        	case 'radios';
-        	 $list = array('--choose--');
-        	 break;
-        	default:
-        	 $type = 'textfield';
-        	 $list = '';
+        	case 'checkboxes':
+          case 'select':
+          case 'radios':
+           break;
+          default:
+           $type = 'textfield';
+           $list = '';
         }
-
         //If a data_source attr was found then create an array of
         //returned values filtered against data_field attr.
       	if ($data_source) {
@@ -707,6 +714,7 @@ function forena_parameters_form($form_state) {
         //textfield elements.
         if ($type != 'textfield') {
         	$form['params'][$id]['#options'] = $list;
+          $form['params'][$id]['#multiple'] = $multiselect;
         }
       }
 
@@ -727,11 +735,15 @@ function forena_parameters_form($form_state) {
  */
 function forena_parameters_form_submit($form, &$form_state) {
   $values = $form_state['values'];
-  foreach ($values['params'] as $key => $value) {
-    $q .= '&'. $key .'='. urlencode($value);
+  foreach($values['params'] as $key=>$value) {
+  	if (is_array($value)) {
+  		foreach ($value as $k => $val) {
+  			if (!$val) unset($values['params'][$key][$k]);
+  		}
+  	}
   }
-  $q = trim($q, '&');
-  $form_state['redirect']= array($_GET['q'], $q);
+  $q = http_build_query($values['params']);
+  $form_state['redirect']= array($_GET['q'], $values['params']);
 }
 
 /**

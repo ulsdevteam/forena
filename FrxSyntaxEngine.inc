@@ -144,7 +144,7 @@ class FrxSyntaxEngine {
       $retvar = $f->format($retvar, $raw_key, $data);
     }
 
-    $retvar = trim($retvar);
+    $retvar = trim((string)$retvar);
     return $retvar;
   }
 

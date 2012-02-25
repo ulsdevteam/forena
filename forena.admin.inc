@@ -1337,10 +1337,10 @@ function forena_admin_params_form($form_state) {
         );
 
          $form['params'][$id]['type'] = array(
-          '#type' => 'radios',
-          '#title' => t('description'),
+          '#type' => 'select',
+          '#title' => t('Input Control'),
           '#default_value' => $type,
-          '#options' => array('textfield' => 'Text', 'radios' => 'Radios', 'select' => 'Select'),
+          '#options' => array('textfield' => 'Text Input', 'radios' => 'Radios', 'select' => 'Select','multiselect' => 'Multi-Select', 'checkboxes' => 'Checkboxes'),
           '#description' => t('Enter a helpful description about this parameter. This will display on the form when the user is prompted to enter a parameter.'),
         );
 
