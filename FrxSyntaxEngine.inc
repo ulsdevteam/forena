@@ -99,13 +99,14 @@ class FrxSyntaxEngine {
     }
     $raw_key=$key;
     // Determine if we have a . syntax for the id.
-    if ($key) {
+    if ($key && strpos($key, '.')) {
       @list($id, $path) = explode('.', $key, 2);
       if ($data && isset($this->data_sources[$id])) {
         $data = $this->data_sources[$id];
         $key = $path;
       }
     }
+
 
 
     if (is_array($data)) {
@@ -165,7 +166,7 @@ class FrxSyntaxEngine {
       $i=0;
 
       foreach ($match[0] as $match_num => $token) {
-         $path = trim($token, $this->trim_chars);
+      	 $path = trim($token, $this->trim_chars);
          $value = $this->get_value($path, $raw);
 
           $pos = strpos($text, $token);

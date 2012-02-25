@@ -91,8 +91,18 @@ class FrxReport {
    * @param $block
    * @return unknown_type
    */
-  private function get_data($block, $clause='', $id='') {
+  private function get_data($block, $clause='', $id='', $data_uri='') {
     //@TODO: Merge xml data parameters into the report paramters
+    $data = $this->cur_data;
+    if ($data_uri) {
+    	$data = array();
+    	parse_str($data_uri, $data);
+    	if (is_array($data)) foreach ($data as $key=>$value) {
+    		$data[$key] = !empty($value) ? $this->teng->replace($value) : '';
+    	}
+
+    }
+
     $this->cur_data = forena_invoke_data_provider($block, $this->cur_data, $clause);
 
     $this->teng->push_data($this->cur_data, $id);
@@ -145,7 +155,7 @@ class FrxReport {
 
       if ((string)$frx['block']) {
         $is_data_block = TRUE;
-        $this->get_data((string)$frx['block'], (string)$frx['clause'], $id);
+        $this->get_data((string)$frx['block'], (string)$frx['clause'], $id, (string)$frx['parameters']);
         if (!$this->cur_data) $continue = FALSE;
       }
 
