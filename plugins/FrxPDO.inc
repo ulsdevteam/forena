@@ -120,9 +120,33 @@ class FrxPDO extends FrxDataProvider {
   public function format($value, $key, $data) {
     $db = $this->db;
     if ($db) {
-      if ($value=='') $value = 'NULL'; else  $value =  $db -> quote($value);
+      if ($value=='' || $value == array()) {
+	      $value = 'NULL';
+      }
+      elseif (is_array($value)) {
+      	if ($value == array()) {
+      		$value = 'NULL';
+      	}
+      	else {
+      		// Build a array of values string
+	      	$i=0;
+	      	$val ='';
+	      	foreach ($value as $v) {
+	      		$i++;
+	      	  if ($i==1) {
+	      			$val .= '(';
+	      		}
+	     		  else {
+	    			  $val .= ',';
+	     		  }
+	    		$val .= $db->quote($v);
+	    	  }
+	    	$value = $val . ')';
+        }
+      }
+      else  $value =  $db -> quote($value);
     }
-    return $value;
+    return (string)$value;
   }
 
 }

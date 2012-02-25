@@ -182,6 +182,8 @@ class FrxReportEditor {
   	$pnode = $dom->getElementsByTagNameNS($this->xmlns, $parent)->item(0);
 
   	// Iterate through all child arrays in the header
+  	$tnode = $dom->createTextNode("\n");
+    $pnode->appendChild($tnode);
   	foreach ($element_array as $element_data) {
       $id = $element_data[$id_field];
       $path = '//frx:' . $parent . '/frx:' . $element . '[@' . $id_field . '="' . $id . '"]';
@@ -190,9 +192,13 @@ class FrxReportEditor {
       if ($element && isset($element_data[$element_field])) {
         $value = $element_data[$element_field];
       }
-      $node = $dom->createElementNS($this->xmlns, $element, $value);
+
+      $node = $dom->createElementNS($this->xmlns, $element,trim($value,"|"));
       if ($nodes->length == 0) {
-      	$pnode->appendChild($node);
+      	$tnode = $dom->createTextNode("  ");
+      	$pnode->appendChild($tnode);      	$pnode->appendChild($node);
+      	$tnode = $dom->createTextNode("\n");
+      	$pnode->appendChild($tnode);
       }
       else {
       	$src_node = $nodes->item(0);
@@ -200,7 +206,7 @@ class FrxReportEditor {
       }
 
       foreach ($attributes as $attribute) {
-      	if (isset($element_data[$attribute])) {
+      	if (!empty($element_data[$attribute])) {
       		$node->setAttribute($attribute, $element_data[$attribute]);
       	}
       	else {
@@ -210,6 +216,8 @@ class FrxReportEditor {
       	}
       }
   	}
+
+
 
   }
 

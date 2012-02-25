@@ -26,7 +26,7 @@ function forena_report_desc($name='') {
 
 
 /**
- * Biuld cache
+ * Build cache
  *
  * @param xhtml $r_xhtml Forena XML report.
  * @return array data to be stored in the cache field for the report in the database.
@@ -171,7 +171,13 @@ function forena_parameter_form($formid, &$form_state, $r) {
         $data_field = (string)$node['data_field'];
 
         $type = (string)$node['type'];
-        $value = (isset($parms[$id])) ? $parms[$id] : (string)$node;
+        if (isset($parms[$id])) {
+        	$value = $parms[$id];
+        }
+        else {
+        	$value = (string)$node;
+	        if (strpos($value, '|')!==FALSE) $value = explode('|', $value);
+        }
         $desc =  (string)$node['desc'];
         $label_field = (string)$node['label_field'];
 
@@ -179,12 +185,16 @@ function forena_parameter_form($formid, &$form_state, $r) {
 
         //Determine the form element type to be displayed
         //If select or radios is chosen then begin a $list array for display values.
+        $multiselect = FALSE;
+        $list = array();
         switch ($type) {
+        	case 'multiselect':
+        		$type = 'select';
+        		$multiselect = TRUE;
+        		break;
+        	case 'checkboxes':
           case 'select':
-            $list = array('--select--');
-            break;
-          case 'radios';
-           $list = array('--choose--');
+          case 'radios':
            break;
           default:
            $type = 'textfield';
@@ -210,6 +220,7 @@ function forena_parameter_form($formid, &$form_state, $r) {
         //textfield elements.
         if ($type != 'textfield') {
           $form['params'][$id]['#options'] = $list;
+          $form['params'][$id]['#multiple'] = $multiselect;
         }
 
       }
@@ -231,6 +242,13 @@ function forena_parameter_form($formid, &$form_state, $r) {
  */
 function forena_parameter_form_submit($form, &$form_state) {
   $values = $form_state['values'];
+  foreach($values['params'] as $key=>$value) {
+  	if (is_array($value)) {
+  		foreach ($value as $k => $val) {
+  			if (!$val) unset($values['params'][$key][$k]);
+  		}
+  	}
+  }
   $form_state['redirect']= array($_GET['q'], array('query' => $values['params']));
 }
 

@@ -1432,6 +1432,8 @@ function forena_data_block_form_validate($form, &$form_state) {
  * @return unknown_type
  */
 function forena_data_block_form_submit($form, &$form_state) {
+	$xml='';
+	$block_info='';
   $values = $form_state['values'];
   $data_block = $values['data_block'];
   $template = $values['templates'];
@@ -1491,7 +1493,7 @@ function forena_data_block_form_submit($form, &$form_state) {
   else { //there wasn't any xml returned. clear the storage
     $form_state['storage']['output'] = '';
   }
-  $form_state['storage']['parameters'] = $block_info['tokens'];
+  $form_state['storage']['parameters'] = $block_info ? $block_info['tokens'] :array();
 }
 
 
@@ -1853,10 +1855,10 @@ function forena_admin_params_form($formid, $form_state) {
         );
 
          $form['params'][$id]['type'] = array(
-          '#type' => 'radios',
-          '#title' => t('description'),
+          '#type' => 'select',
+          '#title' => t('Input Control Type'),
           '#default_value' => $type,
-          '#options' => array('textfield' => 'Text', 'radios' => 'Radios', 'select' => 'Select'),
+          '#options' => array('textfield' => 'Text', 'radios' => 'Radios', 'select' => 'Select','multiselect' => 'Multi-Select', 'checkboxes' => 'Checkboxes'),
           '#description' => t('Enter a helpful description about this parameter. This will display on the form when the user is prompted to enter a parameter.'),
         );
 
