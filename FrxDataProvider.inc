@@ -153,7 +153,7 @@ class FrxDataProvider{
         if ($a && $o) {
 	        switch ($a) {
 	        	case 'ACCESS':
-	        		$access = trim($a);
+	        		$access = trim($o);
 	        		break;
 	        	default:
 
