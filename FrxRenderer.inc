@@ -49,5 +49,20 @@ class FrxRenderer {
     return $o;
 	}
 
+	/**
+	 * Standard php array containing merged attributes
+	 * Enter description here ...
+	 */
+	public function mergedAttributes() {
+		$attributes = array();
+		if (isset($this->frxAttributes)) foreach ($this->frxAttributes as $key=>$data) {
+			$attributes[$key] = (string)$data;
+		}
+		if (isset($this->htmlAttributes)) foreach ($this->htmlAttributes as $key=>$data) {
+			$attributes[$key] = (String)$data;
+		}
+    return $attributes;
+	}
+
 
 }

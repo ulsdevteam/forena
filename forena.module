@@ -455,13 +455,23 @@ function forena_forena_plugins() {
  *
  */
 function forena_forena_controls() {
-  $controls[] = array('file' => 'plugins/FrxControls.inc',
-                      'class' => 'FrxControls',
-                     );
-  $controls[] = array('file' => 'plugins/FrxSource.inc',
-                      'class' => 'FrxSource',
-                     );
-                     return $controls;
+  $controls[] = array(
+    'file' => 'plugins/FrxControls.inc',
+    'class' => 'FrxControls',
+  );
+  $controls[] = array(
+    'file' => 'plugins/FrxSource.inc',
+    'class' => 'FrxSource',
+  );
+  $controls[] = array(
+    'file' => 'plugins/FrxXMLSource.inc',
+    'class' => 'FrxXMLSource',
+  );
+  $controls[] = array(
+    'file' => 'plugins/FrxChart.inc',
+    'class' => 'FrxChart'
+  );
+  return $controls;
 }
 
 /**

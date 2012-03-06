@@ -15,6 +15,7 @@ class FrxDrupalApplication extends FrxHostApplication {
 	  $this->default_config['report_repos'] = drupal_get_path('forena', 'module') . '/repos/reports';
 	  $this->default_config['default_form'] = 'letter';
 	  $this->default_config['doc_defaults'] = array();
+	  $this->default_config['library_path'] = 'sites/all/libraries';
 	}
 
 	/**
