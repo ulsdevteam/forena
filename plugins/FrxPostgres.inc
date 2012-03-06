@@ -63,7 +63,7 @@ class FrxPostgres extends FrxDataProvider {
     if (@$block['source'] && $this->access($block['access']) && $db) {
       $sql = $block['source'];
       if ($clause) {
-        $sql = 'SELECT * FROM (' . trim($sql, ' ;') . ') ' . $clause;
+        $sql = 'SELECT * FROM (' . trim($sql, ' ;') . ') vvv ' . $clause;
       }
 
       $sql = $this->te->replace($sql);
