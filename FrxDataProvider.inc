@@ -101,7 +101,7 @@ class FrxDataProvider{
 
     // Find sql files
     $d = glob($block_path);
-    foreach ($d as $file_name) {
+    if ($d) foreach ($d as $file_name) {
     	// Split off the extention
     	$p = strripos($file_name, '.');
       if ($p!==FALSE) {
@@ -117,7 +117,7 @@ class FrxDataProvider{
 
     // Find directories
     $d = glob($path . '*');
-    foreach ($d as $dir_name) {
+    if ($d) foreach ($d as $dir_name) {
       if (is_dir($dir_name)) {
         $block_list += $this->list_blocks($search, $dir_name, $block_list);
       }
