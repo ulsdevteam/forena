@@ -299,7 +299,7 @@ class FrxReport {
       else {
       	$attributes = array('target' => $target);
       }
-      $value = l(
+      if (trim($url)) $value = l(
         htmlspecialchars_decode($value),
         $url,
         array(
