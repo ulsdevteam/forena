@@ -313,7 +313,7 @@ class FrxReport {
       $fragment = $fragment . $queryFrag;
       $data = array();
       parse_str($query, $data);
-      $value = FrxReportGenerator::instance()->link(
+      if (trim($url)) $value = FrxReportGenerator::instance()->link(
         htmlspecialchars_decode($value), $url,
         array('fragment' => $fragment, 'query' => $data, 'attributes' => $attributes, 'absolute' => TRUE));
     }
