@@ -25,11 +25,12 @@ class FrxControls {
 
   //document transformations
   public function doc_types() {
-    $doc_types = array('doc' => 'htmldocument',
-                       'html' => 'htmldocument',
-                       'csv' => 'csvdocument',
-                       'xls' => 'xlsdocument',
-                       'email' => 'emaildocument',
+    $doc_types = array('doc' => 'htmlDocument',
+                       'html' => 'htmlDocument',
+                       'csv' => 'csvDocument',
+                       'xls' => 'xlsDocument',
+                       'email' => 'emailDocument',
+                       'svg' => 'svgDocument'
     );
     return $doc_types;
   }
@@ -124,7 +125,7 @@ class FrxControls {
   }
 
   //Document transformation methods
-  public function htmldocument($body, $options) {
+  public function htmlDocument($body, $options) {
     $output = '<html><head>';
 
     if ($options['css']) {
@@ -154,7 +155,7 @@ class FrxControls {
    * @param XML $body
    * @param unknown_type $options
    */
-  public function csvdocument($body, $options) {
+  public function csvDocument($body, $options) {
     $doc = new DOMDocument();
     $doc->strictErrorChecking = FALSE;
     $xmlBody = '<?xml version="1.0" encoding="UTF-8"?>' . $body;
@@ -198,8 +199,21 @@ class FrxControls {
     return $output;
   }
 
+  public function svgDocument($body, $options) {
+  	$output = '<?xml version="1.0" encoding="UTF-8" standalone="no" ?>';
+  	$doc = new DomDocument();
+  	$doc->strictErrorChecking = FALSE;
+  	$doc->loadHTML($body);
+  	$xml = simplexml_import_dom($doc);
+  	$svg = $xml->xpath('//svg');
+  	if ($svg) foreach($svg as $graph) {
+  		$output .= $graph->asXML();
+  	}
+  	return $output;
+  }
 
-  public function xlsdocument($body, $options) {
+
+  public function xlsDocument($body, $options) {
     $output = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
     $output .= '<?mso-application progid="Excel.Sheet"?>' . "\n";
     $output .= '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"' . "\n";
@@ -264,7 +278,7 @@ class FrxControls {
     return $output;
  }
 
- public function emaildocument($body, $options) {
+ public function emailDocument($body, $options) {
    $doc = new DOMDocument('1.0', 'UTF-8');
    $doc->strictErrorChecking = FALSE;
    $doc->loadHTML($body);

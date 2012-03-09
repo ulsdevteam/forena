@@ -614,6 +614,13 @@ function load_block($data_block, $clause='') {
           header("Content-Disposition: attachment; filename=report.csv");
           print $ret;
           break;
+       case 'svg':
+       	  header('Conent-Type: image/svg+xml');
+       	  header('Cache-Control:');
+       	  header('Pragma:');
+       	  header('Cache-Control: must-revalidate');
+       	  print $ret;
+       	  break;
        default:
            return $ret;
 
