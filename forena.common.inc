@@ -205,6 +205,7 @@ function forena_parameter_form($formid, &$form_state, $r) {
         //returned values filtered against data_field attr.
         if ($data_source) {
           $list = FrxReportGenerator::instance()->data_block_params($data_source, $data_field, $label_field);
+          if (!$required) $list = array('' => '') + $list;
         }
 
         $form['params'][$id] = array(
