@@ -159,7 +159,7 @@ class FrxControls {
     $doc = new DOMDocument();
     $doc->strictErrorChecking = FALSE;
     $xmlBody = '<?xml version="1.0" encoding="UTF-8"?>' . $body;
-    $doc->loadHTML($xmlBody);
+    @$doc->loadHTML($xmlBody);
     $xml = simplexml_import_dom($doc);
     $output = '';
     $rows = $xml->xpath('//tr');
@@ -203,7 +203,7 @@ class FrxControls {
   	$output = '<?xml version="1.0" encoding="UTF-8" standalone="no" ?>';
   	$doc = new DomDocument();
   	$doc->strictErrorChecking = FALSE;
-  	$doc->loadHTML($body);
+  	@$doc->loadHTML($body);
   	$xml = simplexml_import_dom($doc);
   	$svg = $xml->xpath('//svg');
   	if ($svg) foreach($svg as $graph) {
