@@ -3,17 +3,43 @@
 <!ENTITY nbsp "&#160;">
 ]>
 <html xmlns:frx="urn:FrxReports">
-  <head>
-    <title>3. Master Summary with drill down</title>
-    <frx:category>Sample</frx:category>
-    <frx:options hidden="0" form=""/>
-    <frx:parameters>
-    </frx:parameters>
-    <frx:docgen>
-    </frx:docgen>
-    <frx:fields><frx:field id="state" link="" format="" format-string="" target=""/><frx:field id="name" link="" format="" format-string="" target=""/><frx:field id="total" link="reports/sample.user_distribution_simple?state={state}#test" format="" format-string="" target=""/></frx:fields>
-  </head>
+<head>
+<title>3. Master Summary with drill down</title>
+<frx:category>Sample</frx:category>
+<frx:options hidden="0" form="" />
+<frx:parameters>
+</frx:parameters>
+<frx:docgen>
+</frx:docgen>
+<frx:fields>
+	<frx:field id="state" link="" format="" format-string="" target="" />
+	<frx:field id="name" link="" format="" format-string="" target="" />
+	<frx:field id="total"
+		link="reports/sample.user_distribution_simple?state={state}#test"
+		format="" format-string="" target="" />
+</frx:fields>
+</head>
 <body>
-<div><p>This report links back to the sample report 2.  You can begin to see the possibilities for
-  inter-connecting reports</p></div>
-<div frx:block="sampledb/users_by_state"><table><thead><tr><th>name</th><th>total</th></tr></thead><tbody><tr frx:foreach="*"><td>{state} - {name}</td><td>{total}</td></tr></tbody></table></div></body></html>
+	<div>
+		<p>This report links back to the sample report 2. You can begin to
+			see the possibilities for inter-connecting reports</p>
+	</div>
+	<div frx:block="sampledb/users_by_state">
+    <embed src="reports/sample.state_graph.svg" type="image/svg+xml" width="640" height="480" style="margin:10px" />
+		<table>
+			<thead>
+				<tr>
+					<th>name</th>
+					<th>total</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr frx:foreach="*">
+					<td>{state} - {name}</td>
+					<td>{total}</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</body>
+</html>
