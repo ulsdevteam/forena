@@ -6,7 +6,7 @@
 <head>
 <title>3. Master Summary with drill down</title>
 <frx:category>Sample</frx:category>
-<frx:options hidden="0" form="" />
+<frx:options />
 <frx:parameters>
 </frx:parameters>
 <frx:docgen>
@@ -24,8 +24,10 @@
 		<p>This report links back to the sample report 2. You can begin to
 			see the possibilities for inter-connecting reports</p>
 	</div>
-	<div frx:block="sampledb/users_by_state">
-    <embed src="reports/sample.state_graph.svg" type="image/svg+xml" width="640" height="480" style="margin:10px" />
+	<div frx:block="sampledb/users_by_state" id="forena-1">
+	  <div frx:src="reports/sample.state_graph.svg?height=480&amp;width=640" frx:renderer="FrxInclude" frx:height="480" frx:width="640">
+	    <p>To see an example SVG Graph install SVGGraph into your sites/all libaries folder and then enable the SVG docoument type in forena configuration.</p>
+	  </div>
 		<table>
 			<thead>
 				<tr>
@@ -34,7 +36,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				<tr frx:foreach="*">
+				<tr frx:foreach="*" id="forena-2">
 					<td>{state} - {name}</td>
 					<td>{total}</td>
 				</tr>
