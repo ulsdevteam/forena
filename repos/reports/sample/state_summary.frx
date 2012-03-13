@@ -26,7 +26,8 @@
 	</div>
 	<div frx:block="sampledb/users_by_state" id="forena-1">
 	  <div frx:src="reports/sample.state_graph.svg?height=400&amp;width=600" frx:renderer="FrxInclude" frx:height="480" frx:width="640">
-	    <p>SVG Graphing Disabled</p>
+	    <p>To see a sample graph embedded in this report.  Install SVGGraph into  your sites/all/libraries folder and enable the SVG document type in
+	      the forena document types configuration.</p>
 	  </div>
 		<table>
 			<thead>
