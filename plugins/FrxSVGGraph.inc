@@ -2,14 +2,15 @@
 require_once ('FrxChart.inc');
 class FrxSVGGraph extends FrxChart {
 	private $graph;
-
+  private $links;
 	function __construct() {
 		  $directory = FrxReportGenerator::instance()->configuration('library_path');
 			$library = rtrim($directory,'/') . '/SVGGraph/SVGGraph.php';
 		  require_once $library;
 	}
 
-	function renderChart($type, $data, $options ) {
+	function renderChart($type, $data, $options, $links ) {
+		$this->links = $links;
 		if ($data) {
 				switch ($type) {
 					case 'bargraph':
@@ -105,6 +106,7 @@ class FrxSVGGraph extends FrxChart {
 	}
 
 	function renderGraph($type, $options, $data) {
+		$links = $this->links;
 	  $width = (@$options['width']) ? @$options['width'] : 600;
 	  $heigth = (@$options['height']) ? @$options['height'] : 400;
 		$graph = new SVGGraph($width, $heigth);
@@ -113,10 +115,10 @@ class FrxSVGGraph extends FrxChart {
     if (is_array(@$options['colors'])) {
       $graph->colours = $options['colors'];
     }
-		ob_start();
-		$graph->Render($type, FALSE);
-		$output = ob_get_contents();
-		ob_end_clean();
+    if ($links) {
+    	$graph->Links($links);
+    }
+		$output = $graph->Fetch($type, FALSE);
 		return $output;
 	}
 

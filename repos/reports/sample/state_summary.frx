@@ -25,8 +25,8 @@
 			see the possibilities for inter-connecting reports</p>
 	</div>
 	<div frx:block="sampledb/users_by_state" id="forena-1">
-	  <div frx:src="reports/sample.state_graph.svg?height=480&amp;width=640" frx:renderer="FrxInclude" frx:height="480" frx:width="640">
-	    <p>To see an example SVG Graph install SVGGraph into your sites/all libaries folder and then enable the SVG docoument type in forena configuration.</p>
+	  <div frx:src="reports/sample.state_graph.svg?height=400&amp;width=600" frx:renderer="FrxInclude" frx:height="480" frx:width="640">
+	    <p>SVG Graphing Disabled</p>
 	  </div>
 		<table>
 			<thead>
