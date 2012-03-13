@@ -127,6 +127,13 @@ class FrxSyntaxEngine {
    * @return unknown_type
    */
   public function replace($text, $raw=FALSE) {
+  	if (is_array($text)) {
+  	  foreach ($text as $key => $value) {
+  		  $text[$key] = $this->replace($value, $raw);
+  	  }
+      return $text;
+  	}
+  	//Otherswise assume text
     $match=array();
     $o_text = $text;
     // Put the data on the stack.

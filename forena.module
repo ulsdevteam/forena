@@ -455,6 +455,7 @@ function forena_forena_plugins() {
  *
  */
 function forena_forena_controls() {
+
   $controls[] = array(
     'file' => 'plugins/FrxControls.inc',
     'class' => 'FrxControls',
@@ -467,10 +468,20 @@ function forena_forena_controls() {
     'file' => 'plugins/FrxXMLSource.inc',
     'class' => 'FrxXMLSource',
   );
+
   $controls[] = array(
-    'file' => 'plugins/FrxChart.inc',
-    'class' => 'FrxChart'
+    'file' => 'plugins/FrxInclude.inc',
+    'class' => 'FrxInclude',
   );
+
+	$library_dir = FrxReportGenerator::instance()->configuration('library_path');
+  $library = rtrim($library_dir,'/') . '/SVGGraph/SVGGraph.php';
+  if (file_exists($library)) {
+    $controls[] = array(
+      'file' => 'plugins/FrxSVGGraph.inc',
+      'class' => 'FrxSVGGraph'
+    );
+  }
   return $controls;
 }
 

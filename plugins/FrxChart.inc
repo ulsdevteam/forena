@@ -10,12 +10,25 @@ class FrxChart extends FrxRenderer {
 		$attributes = $this->mergedAttributes();
 		$path = isset($attributes['xpath']) ? $attributes['xpath'] :  '*';
 		$label = '';
+		$type = $attributes['type'];
 		if (isset($attributes['options'])) {
 		  parse_str($attributes['options'], $options);
 		  $series = @$options['series'];
-		  if (isset($options['seriesx'])) $seriesx = $options['seriesx'];
-		  if (isset($options['label'])) $label =  $options['label'];
+		  if (isset($options['seriesx']))  {
+			  $seriesx = $options['seriesx'];
+		  	unset($options['seriesx']);
+		  }
+		  if (isset($options['label'])) {
+			  $label =  $options['label'];
+			  unset($options['label']);
+		  }
+		  foreach($options as $key=>$value) {
+		  	$options[$key] = $this->teng->replace($value);
+		  }
 		}
+
+	 if (isset($attributes['height'])) $options['height'] = $this->teng->replace($attributes['height']);
+	 if (isset($attributes['width'])) $options['width'] = $this->teng->replace($attributes['width']);
 
 		// Extract chart series data from xml.
 		if ($series) {
@@ -30,56 +43,12 @@ class FrxChart extends FrxRenderer {
 
 		}
 		if ($data) {
-			$graph = $this->graph();
-			if (is_object($graph)) {
-				$type = isset($attributes['type']) ? strtolower($attributes['type']) : 'bargraph';
-				switch ($type) {
-					case 'bargraph':
-						if ($data)  $output = $graph->barGraph($data[0], $options);
-					  break;
-					case 'piechart':
-						if ($data) $output = $graph->pieChart($data[0], $options);
-						break;
-					case 'stackedbargraph':
-						if ($data) $output = $graph->stackedBarGraph($data, $options);
-						break;
-					case 'groupedbargraph':
-						if ($data) $output = $graph->groupedBarGraph($data, $options);
-						break;
-					case 'linegraph':
-						if ($data) $output = $graph->lineGraph($data[0], $options);
-						break;
-					case 'multilinegraph':
-						if ($data) $output = $graph->multiLineGraph($data, $options);
-						break;
-					case 'scatterplot':
-						if ($data) $output = $graph->scatterPlot($data, $options);
-						break;
-					case 'multiscatterplot':
-						if ($data) $output = $graph->multiScatterPlot($data, $options);
-						break;
-
-
-				}
+			if (method_exists($this,'renderChart')) {
+				$output = $this->renderChart($type, $data, $options);
 			}
+
 		}
-
 		return $output;
-	}
-
-	/**
-	 * This is a placeholder function.  It really needs to be smart enough to pull the
-	 * correct graph type depeding on the format sepcified.  This is likely to be based on
-	 * document configuration set by the hosting
-	 * Enter description here ...
-	 */
-	public function graph() {
-		include_once 'FrxSVGGraph.inc';
-		return FrxSVGGraph::instance(FrxReportGenerator::instance()->configuration('library_path'). '/SVGGraph');
-	}
-
-	public function get_value() {
-
 	}
 
 	public function xmlToValues($path, $data_path, $label_path) {

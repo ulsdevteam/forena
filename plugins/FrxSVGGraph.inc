@@ -1,21 +1,44 @@
 <?php
-class FrxSVGGraph {
+require_once ('FrxChart.inc');
+class FrxSVGGraph extends FrxChart {
 	private $graph;
 
-	static function instance($directory) {
-		static $inst='';
-		if (!$inst) {
-			$library = rtrim($directory,'/') . '/SVGGraph.php';
-			if (file_exists($library)) {
-			  require_once $library;
-			  $inst = new FrxSVGGraph();
-			}
-		}
-		return $inst;
+	function __construct() {
+		  $directory = FrxReportGenerator::instance()->configuration('library_path');
+			$library = rtrim($directory,'/') . '/SVGGraph/SVGGraph.php';
+		  require_once $library;
 	}
 
-	function __construct($width = 640, $heigth = 480) {
-		$this->graph = new SVGGraph($width, $heigth);
+	function renderChart($type, $data, $options ) {
+		if ($data) {
+				switch ($type) {
+					case 'bargraph':
+						$output = $this->barGraph($data[0], $options);
+					  break;
+					case 'piechart':
+						$output = $this->pieChart($data[0], $options);
+						break;
+					case 'stackedbargraph':
+						$output = $this->stackedBarGraph($data, $options);
+						break;
+					case 'groupedbargraph':
+						$output = $this->groupedBarGraph($data, $options);
+						break;
+					case 'linegraph':
+						$output = $this->lineGraph($data[0], $options);
+						break;
+					case 'multilinegraph':
+						$output = $this->multiLineGraph($data, $options);
+						break;
+					case 'scatterplot':
+						$output = $this->scatterPlot($data, $options);
+						break;
+					case 'multiscatterplot':
+						$output = $this->multiScatterPlot($data, $options);
+						break;
+				}
+		}
+		return $output;
 	}
 
   // Generate a bar graph.
@@ -29,7 +52,7 @@ class FrxSVGGraph {
     else {
       $type = 'BarGraph';
     }
-    return $this->render($type, $options, $data);
+    return $this->renderGraph($type, $options, $data);
 	}
 
 	function stackedBarGraph($data, $options) {
@@ -39,7 +62,7 @@ class FrxSVGGraph {
 		else {
 			$type = 'StackedBarGraph';
 		}
-		return $this->render($type, $options, $data);
+		return $this->renderGraph($type, $options, $data);
 	}
 
 	function groupedBarGraph($data, $options) {
@@ -49,7 +72,7 @@ class FrxSVGGraph {
 		else {
 			$type = 'GroupedBarGraph';
 		}
-		return $this->render($type, $options, $data);
+		return $this->renderGraph($type, $options, $data);
 	}
 
 	// Generate a pie chart
@@ -60,34 +83,38 @@ class FrxSVGGraph {
     else {
       $type = 'PieGraph';
     }
-    return $this->render($type, $options, $data);
+    return $this->renderGraph($type, $options, $data);
 	}
 
 	function lineGraph($data, $options) {
-		return $this->render('LineGraph', $options, $data);
+		return $this->renderGraph('LineGraph', $options, $data);
 	}
 
 	function multiLineGraph($data, $options) {
-		return $this->render('MultiLineGraph', $options, $data);
+		return $this->renderGraph('MultiLineGraph', $options, $data);
 	}
 
 	// Scatter plot
 	function scatterPlot($data, $options) {
-		return $this->render('ScatterGraph', $options, $data);
+		return $this->renderGraph('ScatterGraph', $options, $data);
 	}
 
 	// Multi scatter plot
 	function multiScatterPlot($data, $options) {
-		return $this->render('MultiScatterGraph', $options, $data);
+		return $this->renderGraph('MultiScatterGraph', $options, $data);
 	}
 
-	function render($type, $options, $data) {
-    $this->graph->Values($data);
+	function renderGraph($type, $options, $data) {
+	  $width = (@$options['width']) ? @$options['width'] : 600;
+	  $heigth = (@$options['height']) ? @$options['height'] : 400;
+		$graph = new SVGGraph($width, $heigth);
+		$this->graph = $graph;
+    $graph->Values($data);
     if (is_array(@$options['colors'])) {
-      $this->graph->colours = $options['colors'];
+      $graph->colours = $options['colors'];
     }
 		ob_start();
-		$this->graph->Render($type, FALSE);
+		$graph->Render($type, FALSE);
 		$output = ob_get_contents();
 		ob_end_clean();
 		return $output;

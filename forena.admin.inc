@@ -490,7 +490,7 @@ function forena_layout_form($formid, $form_state, $new_report='') {
       $required = array('id' => TRUE, 'label' => TRUE);
       //list of supported document formats
       $supported = FrxReportGenerator::instance()->supported_doctypes();
-      $doclist = variable_get('forena_doc_formats', FrxReportGenerator::instance()->supported_doctypes());
+      $doclist = variable_get('forena_doc_formats', array());
 
       $form['report_name'] = array(
         '#type' => 'value',

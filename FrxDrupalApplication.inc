@@ -16,6 +16,7 @@ class FrxDrupalApplication extends FrxHostApplication {
 	  $this->default_config['default_form'] = 'letter';
 	  $this->default_config['doc_defaults'] = array();
 	  $this->default_config['library_path'] = 'sites/all/libraries';
+	  $this->default_config['doc_formats'] = array();
 	}
 
 	/**
@@ -24,7 +25,7 @@ class FrxDrupalApplication extends FrxHostApplication {
 	 * @param unknown_type $var_name
 	 */
 	public function configuration($var_name) {
-	  $v = variable_get('forena_' . $var_name, $this->default_config[$var_name]);
+	  $v = variable_get('forena_' . $var_name, @$this->default_config[$var_name]);
 	  return $v;
 	}
 

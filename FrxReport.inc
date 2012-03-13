@@ -209,7 +209,6 @@ class FrxReport {
       	if ($renderer) {
       		// Implement custom renderer.
           $co = FrxReportGenerator::instance()->define_controls($renderer);
-
       	  if ($co) {
       	  	$co->initReportNode($dom_node, $this);
       	  	$o = $co->render();
