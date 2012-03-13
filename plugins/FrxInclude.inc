@@ -43,7 +43,8 @@ class FrxInclude extends FrxRenderer {
   			$x['pluginspage'] = "http://www.adobe.com/svg/viewer/install/";
   			break;
   		default:
-  			$x = new SimpleXMLElement('<object/>');
+  			$x = new SimpleXMLElement('<a>' . $ext . ' document</a>' );
+  			$x['href'] = $url;
   	}
 
   	if (isset($attributes['id'])) $x['id'] = $attributes['id'];
