@@ -169,6 +169,8 @@ class FrxHostApplication {
 	                      'class' => 'FrxSource');
 	  $controls[] = array('file' => 'plugins/FrxXMLSource.inc',
 	                      'class' => 'FrxXMLSource');
+	  $controls[] = array('file' => 'plugins/FrxInclude.inc',
+	                      'class' => 'FrxInclude');
 	  return $controls;
 	}
 
