@@ -651,6 +651,7 @@ function report($name_in, $parms = array()) {
   // Determine the data to get.
   if (!$parms) {
   	$parms = array_merge($_GET, $_POST);
+  	unset($parms['q']);
   }
   else $parms = (array)$parms;
   if ($name) {
