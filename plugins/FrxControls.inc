@@ -257,6 +257,7 @@ class FrxControls {
           // Zero is ok here bu
           $inner_symbols = FALSE;
           if (strpos($tval, '+') || strpos($tval, '-') || strpos($tval, ' ')) $inner_symbols =  TRUE;
+          if (substr_count($tval, '.') > 1) $inner_symbols = TRUE;
           if (empty($non_numeric_chars) && trim($value)!=='' && !$inner_symbols) {
             $output .= '      <Cell><Data ss:Type="Number">' . $tval . '</Data></Cell>' . "\n";
           }
