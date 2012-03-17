@@ -699,6 +699,7 @@ function forena_parameters_form($form_state) {
         //returned values filtered against data_field attr.
       	if ($data_source) {
       		$list = forena_get_data_block_params($data_source, $data_field, $label_field);
+      	  if (!$required) $list = array('' => '') + $list;
       	}
 
         $form['params'][$id] = array (
