@@ -85,13 +85,16 @@ function forena_menu() {
     'access arguments' => array('design any report'),
    );
 
-  $items['reports/%/params'] = array(
-    'page callback' => 'forena_admin_params',
-    'page arguments' => array(1),
-    'title' => 'Parameters',
-    'access arguments' => array('design any report'),
-    'type' => MENU_LOCAL_TASK,
-   );
+   $items['reports/%/edit'] = array(
+     'title' => 'Edit',
+     'page callback' => 'forena_layout_report',
+     'page arguments' => array(1),
+     'access arguments' => array('design any report'),
+     'description' => 'Edit the layout of your report',
+     'type' => MENU_LOCAL_TASK,
+     'file' => 'forena.common.inc',
+    );
+
 
    if (module_exists('locale')) {
      $items['reports/%/translations'] = array(
@@ -103,18 +106,26 @@ function forena_menu() {
        'type' => MENU_LOCAL_TASK,
      );
    }
+  $items['reports/%/edit/params'] = array(
+    'page callback' => 'forena_admin_params',
+    'page arguments' => array(1),
+    'title' => 'Parameters',
+    'access arguments' => array('design any report'),
+    'type' => MENU_LOCAL_TASK,
+   );
 
-   $items['reports/%/layout'] = array(
+
+   $items['reports/%/edit/layout'] = array(
      'title' => 'Layout',
      'page callback' => 'forena_layout_report',
      'page arguments' => array(1),
      'access arguments' => array('design any report'),
      'description' => 'Edit the layout of your report',
-     'type' => MENU_LOCAL_TASK,
+     'type' => MENU_DEFAULT_LOCAL_TASK,
      'file' => 'forena.common.inc',
     );
 
-   $items['reports/%/data'] = array(
+   $items['reports/%/edit/data'] = array(
      'title' => 'Data',
      'page callback' => 'forena_data_block',
      'access arguments' => array('design any report'),
@@ -124,12 +135,21 @@ function forena_menu() {
    );
 
 
-   $items['reports/%/fields'] = array(
+   $items['reports/%/edit/fields'] = array(
      'title' => 'Fields',
      'page callback' => 'forena_fields_report',
      'page arguments' => array(1),
      'access arguments' => array('design any report'),
      'description' => 'Edit the fields of your report',
+     'type' => MENU_LOCAL_TASK,
+   );
+
+   $items['reports/%/edit/format'] = array(
+     'title' => 'Format',
+     'page callback' => 'forena_format_report',
+     'page arguments' => array(1),
+     'access arguments' => array('design any report'),
+     'description' => 'Style and document options',
      'type' => MENU_LOCAL_TASK,
    );
 
@@ -143,12 +163,28 @@ function forena_menu() {
    );
 
    $items['reports/add'] = array(
-     'title' => 'Add Report',
+     'title' => 'Create Report',
      'page callback' => 'forena_add_report',
-     'page arguments' => array(1),
      'access arguments' => array('create any report'),
      'description' => 'Create a new report',
      'type' => MENU_NORMAL_ITEM,
+   );
+   $items['reports/%/add'] = array(
+     'title' => 'Create Report',
+     'page callback' => 'forena_add_report',
+     'page arguments' => array(1),
+     'access arguments' => array('create any report'),
+     'description' => 'Create a new report from a template',
+     'type' => MENU_CALLBACK,
+   );
+
+   $items['reports/%/translate'] = array(
+     'title' => 'Create Translation',
+     'page callback' => 'forena_add_translation',
+     'page arguments' => array(1),
+     'access arguments' => array('create any report'),
+     'description' => 'Create a new report translation',
+     'type' => MENU_CALLBACK,
    );
 
   $items['forena'] = array(
@@ -305,9 +341,14 @@ function forena_admin_params() {
  *  Add a new report from scratch
  *  in forena.admin.inc
  */
-function forena_add_report($new_report) {
+function forena_add_report($name='') {
   require_once('forena.admin.inc');
-  return drupal_get_form('forena_layout_form', TRUE);
+  return drupal_get_form('forena_add_report_form', $name);
+}
+
+function forena_add_translation($name='') {
+	require_once('forena.admin.inc');
+	return drupal_get_form('forena_create_trans_form', $name);
 }
 
 /**
@@ -347,6 +388,15 @@ function forena_parameters_report() {
 function forena_fields_report() {
   require_once('forena.admin.inc');
   return drupal_get_form('forena_fields_form');
+}
+
+/**
+ *  Calls forena_fields_form
+ *  in forena.admin.inc
+ */
+function forena_format_report() {
+  require_once('forena.admin.inc');
+  return drupal_get_form('forena_format_form');
 }
 
 
@@ -424,7 +474,7 @@ function forena_render_report($report, $format='', $data='', $options= array(), 
   return $output;
 }
 
-
+/**
 /**
  * Self register plugins with forena.
  *
