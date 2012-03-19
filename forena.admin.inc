@@ -1523,12 +1523,9 @@ function forena_fields_form_submit($form, &$form_state) {
 
 }
 
-/**
- * A form to preview and add data blocks to an existing report
- * @param unknown_type $form_state
- * @return unknown_type
- */
-function forena_data_block_form($formid, &$form_state) {
+
+
+function forena_add_data_block_form($formid, &$form_state) {
   $desc = forena_report_desc();
   $name = $desc['name'];
   $filename = $desc['filename'];
@@ -1538,7 +1535,6 @@ function forena_data_block_form($formid, &$form_state) {
     drupal_set_title($r->title);
     $form = array();
     $title = (string)$r->title;
-
     $template_array = FrxReportGenerator::instance()->supported_templates();
     @$default_template = $form_state['storage']['template'];
     @$params = $form_state['storage']['parameters'];
@@ -1551,46 +1547,10 @@ function forena_data_block_form($formid, &$form_state) {
         '#value' => $name,
      );
 
-
-    //The default submit handler
-    //If someone presses enter, this handler will execute
-    $form['default_submit'] = array(
-      '#type' => 'submit',
-      '#submit' => array('forena_data_block_form_submit'),
-      '#prefix' => '<div style="visibility:hidden;float:right">',
-      '#suffix' => '</div>',
+    $form['return'] = array(
+      '#type' => 'value',
+      '#value' => $desc['link'] . '/edit/data',
     );
-
-    //find the datablocks in the existing report
-    $data_block_array = array();
-    if ($r) $r->get_attributes_by_id();
-    $body = $r->simplexml->body;
-    $path = '//*[@frx:block]';
-
-    if ($body) foreach ($body->xpath($path) as $node) {
-      $attrs = $node->attributes(FRX_NS);
-      $id = (string)$node['id'];
-      $block = (string)$attrs['block'];
-      $clause = ($attrs['clause']) ?  "(" . (string)$attrs['clause'] . ")" : '';
-      $block_info = FrxReportGenerator::instance()->load_block($block, $clause);
-      $access = $block_info['access'];
-      $data_block_array[$id] = $block . ": <i>" . $clause . ' security "' . $access . '"</i>';
-    }
-
-    $form['delete_blocks'] = array(
-      '#type' => 'checkboxes',
-      '#title' => t('Data Blocks In Report'),
-      '#options' => $data_block_array,
-      '#description' => ($data_block_array) ? t('Check the data block to be deleted from your report.') : '',
-    );
-
-    if ($data_block_array) {
-      $form['delete'] = array(
-        '#type' => 'submit',
-        '#value' => 'Delete',
-        '#submit' => array('forena_data_block_delete'),
-      );
-    }
 
     $form['data_block'] = array(
       '#type' => 'textfield',
@@ -1652,7 +1612,6 @@ function forena_data_block_form($formid, &$form_state) {
       '#type' => 'submit',
       '#value' => 'Preview',
     );
-
     if (@$form_state['storage']['output'] != '') {
       $form['add'] = array(
         '#type' => 'submit',
@@ -1660,108 +1619,21 @@ function forena_data_block_form($formid, &$form_state) {
         '#submit' => array('forena_data_block_add'),
       );
     }
-    return $form;
+    $form['cancel'] = array(
+      '#type' => 'submit',
+      '#value' => 'Cancel',
+      '#submit' => array('forena_data_block_add_cancel'),
+    );
+
+
   }
-  else {
-    drupal_not_found();
-   }
+  return $form;
+
 }
 
-/**
- * Validates the forena_data_block_form's data_block field.
- * @param $form
- * @param $form_state
- * @return unknown_type
- */
-
-function forena_data_block_form_validate($form, &$form_state) {
-  $values = $form_state['values'];
-  $data_block = $values['data_block'];
-  $delete_blocks = $values['delete_blocks'];
-
-  //validate the data block only if delete block was not chosen
-  if (!$delete_blocks) {
-    $block_info = FrxReportGenerator::instance()->load_block($data_block);
-    if (!$block_info) {
-      form_set_error('data_block', t('Invalid data block.'));
-    }
-  }
+function forena_data_block_add_cancel($form, &$form_state) {
+	$form_state['redirect'] = $form_state['values']['return'];
 }
-
-
-
-/**
- * The Preview submit handler for forena_add_block_form
- * Renders datablock into a report
- * @param $form
- * @param $form_state
- * @return unknown_type
- */
-function forena_data_block_form_submit($form, &$form_state) {
-	$xml='';
-	$block_info='';
-  $values = $form_state['values'];
-  $data_block = $values['data_block'];
-  $template = $values['templates'];
-  $params = isset($values['params']) ? $values['params'] : array();
-  $name = $values['report_name'];
-  $where_clause = $values['where_clause'];
-  $r = FrxReportGenerator::instance()->get_report($name);
-
-  $form_state['storage']['param_values'] = $params;
-  $form_state['storage']['data_block'] = $data_block;
-  $form_state['storage']['template'] = $template;
-  $form_state['storage']['where_clause'] = $where_clause;
-  $form_state['rebuild'] = TRUE;
-  if ($data_block)  {
-     //get xml from data block
-    //check for and store parameters
-    $block_info = FrxReportGenerator::instance()->load_block($data_block, $where_clause);
-    if ($block_info) {
-      //if there were not any parameters passed. Use the report parameters
-      if (!$params) {
-        $rpt_params = $r->parameters;
-        if ($rpt_params) foreach ($block_info['tokens'] as $index => $id) {
-          $params[$id] = @$rpt_params[$id]['value'];
-        }
-      }
-
-      //now invoke the data provider with the correct params
-      FrxData::instance()->push($params, 'parm');
-      $xml = FrxReportGenerator::instance()->invoke_data_provider($data_block, $params, $where_clause);
-    }
-  }
-  if ($xml) {
-
-    //create an array of columns
-    $rows = $xml->xpath('//row');
-    $column_array = array();
-
-    foreach ($rows as $columns) {
-      foreach ($columns as $name => $value) {
-        $column_array[$name] = $name;
-      }
-    }
-
-    //create xml from template object
-    $template_obj = FrxReportGenerator::instance()->get_templates($template);
-    if ($template_obj) {
-      $body = $template_obj->$template($column_array, $data_block, $where_clause);
-    }
-    $rpt_xml =  '<html xmlns:frx="urn:FrxReports"><body>' . $body . '</body></html>';
-
-    //render the xml
-    $output = forena_render_report($rpt_xml, NULL, $params);
-    $form_state['storage']['output'] = $output;
-    $form_state['storage']['template_body'] = $body;
-
-  }
-  else { //there wasn't any xml returned. clear the storage
-    $form_state['storage']['output'] = '';
-  }
-  $form_state['storage']['parameters'] = $block_info ? $block_info['tokens'] :array();
-}
-
 
 /**
  * submit handler for forena_data_block_form.
@@ -1769,7 +1641,7 @@ function forena_data_block_form_submit($form, &$form_state) {
  *
  */
 function forena_data_block_add($form, &$form_state) {
-  $form_state['rebuild'] = TRUE;
+  //$form_state['rebuild'] = TRUE;
   $values = $form_state['values'];
   $report_name = $values['report_name'];
   $data_block = $values['data_block'];
@@ -1818,8 +1690,260 @@ function forena_data_block_add($form, &$form_state) {
 
   if (forena_save_report($report_name, $r->asXML(), TRUE) == 1) {
     drupal_set_message(t('Your report has been saved'));
+    $form_state['redirect'] = $values['return'];
   }
 }
+
+/**
+ * Validates the forena_data_block_form's data_block field.
+ * @param $form
+ * @param $form_state
+ * @return unknown_type
+ */
+function forena_data_add_block_validate($form, &$form_state) {
+  $values = $form_state['values'];
+
+  //validate the data block only if delete block was not chosen
+  $block_info = FrxReportGenerator::instance()->load_block($data_block);
+  if (!$block_info) {
+    form_set_error('data_block', t('Invalid data block.'));
+  }
+}
+
+function forena_add_data_block_form_submit($form, &$form_state) {
+  $xml='';
+	$block_info='';
+  $values = $form_state['values'];
+  $data_block = $values['data_block'];
+  $template = $values['templates'];
+  $params = isset($values['params']) ? $values['params'] : array();
+  $name = $values['report_name'];
+  $where_clause = $values['where_clause'];
+  $r = FrxReportGenerator::instance()->get_report($name);
+
+  $form_state['storage']['param_values'] = $params;
+  $form_state['storage']['data_block'] = $data_block;
+  $form_state['storage']['template'] = $template;
+  $form_state['storage']['where_clause'] = $where_clause;
+  $form_state['rebuild'] = TRUE;
+  $form_state['storage']['parameters'] = $block_info ? $block_info['tokens'] :array();
+
+	if ($data_block)  {
+    //get xml from data block
+    //check for and store parameters
+    $block_info = FrxReportGenerator::instance()->load_block($data_block, $where_clause);
+    if ($block_info) {
+      //if there were not any parameters passed. Use the report parameters
+      if (!$params) {
+        $rpt_params = $r->parameters;
+        if ($rpt_params) foreach ($block_info['tokens'] as $index => $id) {
+          $params[$id] = @$rpt_params[$id]['value'];
+        }
+      }
+
+      //now invoke the data provider with the correct params
+      FrxData::instance()->push($params, 'parm');
+      $xml = FrxReportGenerator::instance()->invoke_data_provider($data_block, $params, $where_clause);
+    }
+  }
+  if ($xml) {
+
+    //create an array of columns
+    $rows = $xml->xpath('//row');
+    $column_array = array();
+
+    foreach ($rows as $columns) {
+      foreach ($columns as $name => $value) {
+        $column_array[$name] = $name;
+      }
+    }
+
+    //create xml from template object
+    $template_obj = FrxReportGenerator::instance()->get_templates($template);
+    if ($template_obj) {
+      $body = $template_obj->$template($column_array, $data_block, $where_clause);
+    }
+    $rpt_xml =  '<html xmlns:frx="urn:FrxReports"><body>' . $body . '</body></html>';
+
+    //render the xml
+    $output = forena_render_report($rpt_xml, NULL, $params);
+    $form_state['storage']['output'] = $output;
+    $form_state['storage']['template_body'] = $body;
+
+  }
+  else { //there wasn't any xml returned. clear the storage
+    $form_state['storage']['output'] = '';
+  }
+
+}
+
+/**
+ * A form to preview and add data blocks to an existing report
+ * @param unknown_type $form_state
+ * @return unknown_type
+ */
+function forena_data_block_form($formid, &$form_state) {
+  $desc = forena_report_desc();
+  $name = $desc['name'];
+  $filename = $desc['filename'];
+  $format = isset($desc['format']) ? $desc['format'] : '';
+  if ($desc['exists']) {
+    $r = forena_get_report_editor($name);
+    drupal_set_title($r->title);
+    $form = array();
+    $title = (string)$r->title;
+
+    $template_array = FrxReportGenerator::instance()->supported_templates();
+    @$default_template = $form_state['storage']['template'];
+    @$params = $form_state['storage']['parameters'];
+    @$param_values = $form_state['storage']['param_values'];
+
+    $form = array();
+
+    $form['report_name'] = array(
+        '#type' => 'value',
+        '#value' => $name,
+     );
+    $links = array();
+    $links[] = array('href' => $desc['link']. '/edit/data/add', 'title' => 'Add Data' );
+    $form['add_link'] = array(
+      '#type' => 'markup',
+      '#markup' => theme('links',
+                     array(
+                       'links' => $links,
+                       'attributes' => array('class' => 'action-links'),
+                     )
+                   )
+    );
+
+
+    //The default submit handler
+    //If someone presses enter, this handler will execute
+    $form['default_submit'] = array(
+      '#type' => 'submit',
+      '#submit' => array('forena_data_block_form_submit'),
+      '#prefix' => '<div style="visibility:hidden;float:right">',
+      '#suffix' => '</div>',
+    );
+
+    //find the datablocks in the existing report
+    $data_block_array = array();
+    if ($r) $r->get_attributes_by_id();
+    $body = $r->simplexml->body;
+    $path = '//*[@frx:block]';
+
+    $form['blocks'] = array(
+      '#tree' => TRUE,
+      '#type' => 'vertical_tabs',
+    );
+
+    if ($body) foreach ($body->xpath($path) as $node) {
+      $attrs = $node->attributes(FRX_NS);
+      $id = (string)$node['id'];
+      $block = (string)$attrs['block'];
+      $parameters = (string)$attrs['parameters'];
+      $clause = ($attrs['clause']) ?  "(" . (string)$attrs['clause'] . ")" : '';
+      $block_info = FrxReportGenerator::instance()->load_block($block, $clause);
+      $access = $block_info['access'];
+      $data_block_array[$id] = $block . ": <i>" . $clause . ' security "' . $access . '"</i>';
+
+    	$ctl = array(
+    	  '#type' => 'fieldset',
+    	  '#title' => $id,
+    	  '#group' => 'additional_settings'
+    	);
+
+    	$ctl['id'] = array(
+    	  '#type' => 'value',
+    	  '#value' => $id,
+      );
+
+      $ctl['block'] = array(
+        '#type' => 'textfield',
+        '#autocomplete_path' => 'forena/data_block/autocomplete',
+        '#title' => 'Data Block',
+        '#default_value' => $block,
+        '#description' => t('The data block to be used as the source for the data in the report.'),
+      );
+
+      $ctl['access'] = array(
+        '#type' => 'item',
+        '#markup' => $access,
+        '#title' => t('Security'),
+      );
+
+      $ctl['parameters'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Parameters'),
+        '#default_value' => $parameters,
+        '#description' => t('Leave blank to use the current data context as parameters.  In a simple report this will be the parameters of the report.
+          In master detail reports, this will be the report of the containing data block. Parameters should be specified in the form of a url string.')
+      );
+
+      $ctl['delete'] = array(
+        '#type' => 'checkbox',
+        '#title' => 'Confirm delete',
+        '#description' => t('Check this box to remove this data from the report.'),
+      );
+
+      $ctl['delete_submit'] = array(
+        '#type' => 'submit',
+        '#value' => 'Delete',
+        '#submit' => array('forena_data_block_delete'),
+      );
+
+      $form['blocks'][] = $ctl;
+    }
+
+    $form['save'] = array(
+      '#type' => 'submit',
+      '#value' => 'Save',
+    );
+    return $form;
+  }
+  else {
+    drupal_not_found();
+   }
+}
+
+
+
+
+
+/**
+ * The Preview submit handler for forena_add_block_form
+ * Renders datablock into a report
+ * @param $form
+ * @param $form_state
+ * @return unknown_type
+ */
+function forena_data_block_form_submit($form, &$form_state) {
+	$xml='';
+	$block_info='';
+  $values = $form_state['values'];
+  $name = $values['report_name'];
+  $r = forena_get_report_editor($name);
+
+  if ($values['blocks']) {
+  	$r->get_attributes_by_id();
+  	$data = array();
+	  foreach ($values['blocks'] as $block) {
+	  	if (!$block['delete']) {
+
+	  		$attrs = $block;
+	  		unset($attrs['delete']);
+	  		unset($attrs['delete_submit']);
+	  		unset($attrs['id']);
+	  		$data[$block['id']] = $attrs;
+	  	}
+	  }
+    if ($r) $r->save_attributes_by_id($data);
+  }
+  if (forena_save_report($name, $r->asXML(), TRUE) == 1) {
+    drupal_set_message(t('Your report %s been saved', array('%s' => $name)));
+  }
+}
+
 
 function forena_report_translations($name_in) {
 	$desc = forena_report_desc();
@@ -1867,7 +1991,6 @@ function forena_report_translations($name_in) {
  */
 function forena_data_block_delete($form, &$form_state) {
   $values = $form_state['values'];
-  $delete_blocks = array_filter($values['delete_blocks']);
 
   $report_name = $values['report_name'];
   $r = FrxReportGenerator::instance()->get_report($report_name);
@@ -1876,8 +1999,10 @@ function forena_data_block_delete($form, &$form_state) {
   if ($r) $r->get_attributes_by_id();
   $body = $r->body;
 
-  foreach ($delete_blocks as $id) {
-    if ($r) $r->deleteNode($id);
+  foreach ($values['blocks'] as $block) {
+  	if ($block['delete']) {
+      if ($r) $r->deleteNode($block['id']);
+  	}
   }
 
  if (forena_save_report($report_name, $r->rpt_xml, TRUE) == 1) {

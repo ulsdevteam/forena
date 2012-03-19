@@ -446,11 +446,11 @@ class FrxReportEditor {
 
         foreach ($att_list as $key => $value) {
           if (!$frx_attributes[$key]) {
-            $node['frx:' . $key] = $value;
+            if ($value) $node['frx:' . $key] = $value;
           }
           else {
             unset($frx_attributes[$key]);
-            $node['frx:' . $key] = $value;
+            if ($value) $node['frx:' . $key] = $value;
           }
         }
       }

@@ -327,9 +327,11 @@ class FrxReport {
   public function deleteNode($id) {
     $path = '//*[@id="' . $id . '"]';
     $nodes = $this->rpt_xml->xpath($path);
-    $node = $nodes[0];
-    $dom=dom_import_simplexml($node);
-    $dom->parentNode->removeChild($dom);
+    if ($nodes) {
+      $node = $nodes[0];
+      $dom=dom_import_simplexml($node);
+      $dom->parentNode->removeChild($dom);
+    }
   }
 
   /**
