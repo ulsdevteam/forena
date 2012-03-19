@@ -280,6 +280,15 @@ class FrxReportEditor {
       'value');
   }
 
+  public function addParameter($parm) {
+  	$parms= array();
+  	$parms[$parm['id']] = $parm;
+  	$this->setFrxHeader('parameters', 'parm',
+      $parms,
+      array('id', 'label', 'require', 'desc', 'data_source', 'data_field', 'type'),
+      'value');
+  }
+
   /**
    * Set the report title
    * @param String $title

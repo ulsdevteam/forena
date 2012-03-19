@@ -1622,7 +1622,7 @@ function forena_add_data_block_form($formid, &$form_state) {
     $form['cancel'] = array(
       '#type' => 'submit',
       '#value' => 'Cancel',
-      '#submit' => array('forena_data_block_add_cancel'),
+      '#submit' => array('forena_add_cancel'),
     );
 
 
@@ -1631,7 +1631,7 @@ function forena_add_data_block_form($formid, &$form_state) {
 
 }
 
-function forena_data_block_add_cancel($form, &$form_state) {
+function forena_add_cancel($form, &$form_state) {
 	$form_state['redirect'] = $form_state['values']['return'];
 }
 
@@ -2173,6 +2173,18 @@ function forena_admin_params_form($formid, $form_state) {
       '#value' => $name,
     );
 
+    $links = array();
+    $links[] = array('href' => $desc['link']. '/edit/params/add', 'title' => 'Add Parameter' );
+    $form['add_link'] = array(
+      '#type' => 'markup',
+      '#markup' => theme('links',
+                     array(
+                       'links' => $links,
+                       'attributes' => array('class' => 'action-links'),
+                     )
+                   )
+    );
+
     if ($r) $nodes = $r->simplexml->xpath('head/frx:parameters/frx:parm');
     if ($nodes) {
       $form['params'] = array(
@@ -2202,11 +2214,8 @@ function forena_admin_params_form($formid, $form_state) {
         );
 
         $form['params'][$id]['id'] = array(
-          '#type' => 'textfield',
-          '#title' => t('id'),
-          '#default_value' => $id,
-          '#required' => TRUE,
-          '#description' => t('The name of the parameter to be filtered against.')
+          '#type' => 'value',
+          '#value' => $id,
         );
 
         $form['params'][$id]['label'] = array(
@@ -2273,11 +2282,98 @@ function forena_admin_params_form($formid, $form_state) {
        '#type' => 'submit',
        '#value' => 'Save',
       );
-      return $form;
     }
+    return $form;
   }
   else {
     drupal_not_found();
+  }
+}
+
+function forena_add_param_form($form, &$form_state) {
+	$desc = forena_report_desc();
+  $name = $desc['name'];
+  $filename = $desc['filename'];
+  $format = @$desc['format'];
+  if ($desc['exists'] && $name) {
+    $r = forena_get_report_editor($name);
+    drupal_set_title($r->title);
+    $form = array();
+
+    $form['rpt_name'] = array(
+      '#type' => 'value',
+      '#value' => $name,
+    );
+
+    $form['return'] = array(
+      '#type' => 'value',
+      '#value' => $desc['link'] . '/edit/params',
+    );
+
+    $form['params'] = array('#tree' => TRUE);
+
+		$form['params']['id'] = array(
+			'#type' => 'textfield',
+			'#title' => t('id'),
+			'#required' => TRUE,
+			'#description' => t('The name of the parameter to be filtered against.')
+		);
+
+		$form['params']['label'] = array(
+			'#type' => 'textfield',
+			'#title' => t('label'),
+			'#required' => FALSE,
+			'#description' => t('A descriptive name of the parameter to be displayed on a form.')
+		);
+
+		$form['params']['require'] = array(
+			'#type' => 'radios',
+			'#title' => t('require'),
+			'#options' => array("1" => t('Yes'), "0" => t('No')),
+			'#description' => t('Requires a value for this parameter to display the report. If there is not a default value, the user will be prompted to enter a value.')
+		);
+
+		$form['params']['value'] = array(
+			'#type' => 'textfield',
+			'#title' => 'default value',
+			'#description' => t('The value of the parameter for the initial view of the report.')
+		);
+
+		$form['params']['desc'] = array(
+			'#type' => 'textfield',
+			'#title' => t('description'),
+			'#description' => t('Enter a helpful description about this parameter. This will display on the form when the user is prompted to enter a parameter.'),
+		);
+
+		$form['save'] = array(
+		  '#type' => 'submit',
+		  '#value' => 'Add',
+		  '#submit' => array('forena_add_param_form_submit'),
+		);
+
+		$form['cancel'] = array(
+		  '#type' => 'submit',
+		  '#value' => 'Cancel',
+		  '#submit' => array('forena_add_cancel'),
+		);
+  }
+  return $form;
+}
+
+function forena_add_param_form_submit($form, &$form_state) {
+  $values = $form_state['values'];
+  $name = $values['rpt_name'];
+  $param = $values['params'];
+
+  $r = forena_get_report_editor($name);
+  //add the new parms
+  $r->addParameter($param);
+
+  $new_report = $r->asXML();
+
+  if (forena_save_report($name, $new_report, TRUE) == 1) {
+    drupal_set_message(t('Parameter added'));
+    $form_state['redirect'] = $values['return'];
   }
 }
 
