@@ -509,14 +509,14 @@ function forena_report($name_in, $parms = array()) {
  * @param unknown_type $data
  * @return unknown
  */
-function forena_render_report($report, $format='', $data='', $options= array()) {
+function forena_render_report($report, $format='', $data='', $options= array(), $print = TRUE) {
   require_once('forena.common.inc');
   $o = forena_report_object($report, $data);
   $output = $o->render($format);
 
   //If a format was requested render a custom non-drupal document
   if ($format) {
-    $output = forena_generate_doc($format, $output, $options);
+    $output = forena_generate_doc($format, $output, $options, $print);
     return $output;
   }
   else {

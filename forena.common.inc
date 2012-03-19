@@ -850,7 +850,7 @@ function forena_supported_formats() {
  * @return: The document in the requested format. Returns a string if not
  * able to format.
  */
-function  forena_generate_doc($format, $output, $options = array()) {
+function  forena_generate_doc($format, $output, $options = array(), $print=TRUE) {
 
   $doc = forena_get_doctypes($format);
   if ($doc) {
@@ -858,7 +858,7 @@ function  forena_generate_doc($format, $output, $options = array()) {
     $method = $all_methods[$format];
     $ret = $doc->$method($output, $options);
   }
-  if ($ret) {
+  if ($ret && $print) {
   // If an object was found, set the appropriate mime type (header doctype).
  //   $flen = strlen($ret);
     switch ($format) {
