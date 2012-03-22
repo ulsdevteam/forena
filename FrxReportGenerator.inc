@@ -640,7 +640,7 @@ function load_block($data_block, $clause='') {
  *
  * @return unknown
  */
-function report($name_in, $parms = array()) {
+function report($name_in, $parms = array(), $print=TRUE) {
   $output = '';
   $desc = $this->report_desc($name_in);
   $name = $desc['name'];
@@ -717,7 +717,7 @@ function report($name_in, $parms = array()) {
                          'title' => $title,
                    );
 
-        $output = $this->generate_doc($format, $output, $options);
+        $output = $this->generate_doc($format, $output, $options, $print);
         print $output;
         exit;
       }
