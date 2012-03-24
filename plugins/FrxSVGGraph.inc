@@ -108,8 +108,8 @@ class FrxSVGGraph extends FrxChart {
 	function renderGraph($type, $options, $data) {
 		$links = $this->links;
 	  $width = (@$options['width']) ? @$options['width'] : 600;
-	  $heigth = (@$options['height']) ? @$options['height'] : 400;
-		$graph = new SVGGraph($width, $heigth);
+	  $height = (@$options['height']) ? @$options['height'] : 400;
+		$graph = new SVGGraph($width, $height, $options);
 		$this->graph = $graph;
     $graph->Values($data);
     if (is_array(@$options['colors'])) {
