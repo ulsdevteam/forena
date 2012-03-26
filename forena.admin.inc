@@ -736,12 +736,6 @@ function forena_add_report_form($formid, $form_state, $report_name) {
 	$supported = FrxReportGenerator::instance()->supported_doctypes();
 	$doclist = variable_get('forena_doc_formats', array());
 
-	$form['report_name'] = array(
-		'#title' => 'Create from report',
-		'#type' => 'textfield',
-		'#default_value' => $name,
-	);
-
 	$form['save_report_name'] = array(
 		'#type' => 'textfield',
 		'#title' => t('Report Name'),
@@ -790,6 +784,12 @@ function forena_add_report_form($formid, $form_state, $report_name) {
 		'#title' => t('Hidden'),
 		'#default_value' => $hidden,
 		'#description' => t('Hide your report from showing up on the report list.'),
+	);
+
+	$form['report_name'] = array(
+		'#title' => t('Create from report'),
+		'#type' => 'textfield',
+		'#default_value' => $name,
 	);
 
 
