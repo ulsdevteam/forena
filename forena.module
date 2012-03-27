@@ -475,9 +475,9 @@ function forena_user_reports() {
  *
  * @return unknown
  */
-function forena_report($name_in, $parms = array()) {
+function forena_report($name_in, $parms = array(), $print = TRUE) {
   require_once('forena.common.inc');
-  $output = FrxReportGenerator::instance()->report($name_in, $parms);
+  $output = FrxReportGenerator::instance()->report($name_in, $parms, $print);
   $output = check_markup($output, variable_get('forena_input_format', filter_default_format()));
   return $output;
 }
@@ -485,7 +485,7 @@ function forena_report($name_in, $parms = array()) {
 /**
  * Render report with some data
  *
- * @param reprot $report
+ * @param string $report
  * @param string $format
  * @param mixed $data
  * @return unknown
@@ -505,7 +505,7 @@ function forena_render_report($report, $format='', $data='', $options= array(), 
 /**
  * Self register plugins with forena.
  *
- *
+ */
  */
 function forena_forena_plugins() {
   $plugins[] = array('file' => 'plugins/FrxPDO.inc',
