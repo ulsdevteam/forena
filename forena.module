@@ -506,7 +506,6 @@ function forena_render_report($report, $format='', $data='', $options= array(), 
  * Self register plugins with forena.
  *
  */
- */
 function forena_forena_plugins() {
   $plugins[] = array('file' => 'plugins/FrxPDO.inc',
                      'class' => 'FrxPDO',
