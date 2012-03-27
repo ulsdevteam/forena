@@ -1313,7 +1313,7 @@ function forena_data_settings_save($form, &$form_state) {
 	  $values['connection']['password'] = $values['connection']['new_password'];
   }
   if (isset($values['connection']['new_password'])) unset($values['connection']['new_password']);
-  if (is_array($values['connection'])) $config = array_merge($config, $values['connection']);
+  if (is_array(@$values['connection'])) $config = array_merge($config, @$values['connection']);
   if (empty($values['access_block'])) {
   	$config['access callback'] = empty($values['access_callback']) ? 'user_access' : $values['access_callback'];
   }
@@ -1568,7 +1568,7 @@ function forena_add_data_block_form($formid, &$form_state) {
     );
 
     $form['templates'] = array(
-      '#type' => 'radios',
+      '#type' => 'select',
       '#title' => t('Templates'),
       '#default_value' => ($default_template) ? $default_template : $template_array['table'],
       '#options' => $template_array,
@@ -1774,6 +1774,7 @@ function forena_add_data_block_form_submit($form, &$form_state) {
   else { //there wasn't any xml returned. clear the storage
     $form_state['storage']['output'] = '';
   }
+  $form_state['storage']['parameters'] = $block_info['tokens'];
 
 }
 
