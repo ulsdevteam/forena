@@ -517,18 +517,10 @@ function load_block($data_block, $clause='') {
    * If it fails it returns a 0;
    */
   function get_templates($fkey) {
-    $controls = $this->define_controls();
-    foreach ($controls as $k => $r) {
-      $provider = $r;
-      if ($provider && method_exists($provider, 'templates'))  {
-        $f = $provider->templates();
-        if ($f[$fkey] && method_exists($provider, $fkey)) {
-          // We found an object with the advertised method, return it
-          return $provider;
-        }
-      }
+    $templates = $this->supported_templates();
+    if (class_exists($fkey)) {
+    	return new $fkey();
     }
-    return 0;
   }
 
   /**
@@ -537,16 +529,17 @@ function load_block($data_block, $clause='') {
    *
    */
   function supported_templates() {
-    $controls = $this->define_controls();
-    $supported_templates = array();
-    foreach ($controls as $k => $r) {
-      $provider = $r;
-      if ($provider && method_exists($provider, 'templates'))  {
-        $f = $provider->templates();
-        $supported_templates = array_merge($supported_templates, $f);
-      }
-    }
-    return $supported_templates;
+  	require_once('templates/FrxTemplate.inc');
+  	require_once('templates/FrxTable.inc');
+  	require_once('templates/FrxFieldTable.inc');
+   	require_once('templates/FrxEmailMerge.inc');
+    $templates = array(
+      'FrxTable' => 'Table',
+      'FrxTemplate' => 'Document',
+      'FrxEmailMerge' => 'Email Merge',
+      'FrxFieldTable' => 'Fields',
+    );
+    return $templates;
   }
 
   function supported_formats() {

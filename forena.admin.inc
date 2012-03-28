@@ -1570,7 +1570,7 @@ function forena_add_data_block_form($formid, &$form_state) {
     $form['templates'] = array(
       '#type' => 'select',
       '#title' => t('Templates'),
-      '#default_value' => ($default_template) ? $default_template : $template_array['table'],
+      '#default_value' => ($default_template) ? $default_template : 'table',
       '#options' => $template_array,
       '#required' => TRUE,
       '#description' => t('Select a template to preview the data block in.'),
@@ -1748,33 +1748,23 @@ function forena_add_data_block_form_submit($form, &$form_state) {
   }
   if ($xml) {
 
-    //create an array of columns
-    $rows = $xml->xpath('//row');
-    $column_array = array();
-
-    foreach ($rows as $columns) {
-      foreach ($columns as $name => $value) {
-        $column_array[$name] = $name;
-      }
-    }
-
+    $config = array('block' => $data_block, 'clause' => $where_clause);
     //create xml from template object
     $template_obj = FrxReportGenerator::instance()->get_templates($template);
     if ($template_obj) {
-      $body = $template_obj->$template($column_array, $data_block, $where_clause);
+      $template_obj->generate($xml, $config);
+      $body = $template_obj->template();
+      $rpt_xml = $template_obj->asXML();
+	    $output = forena_render_report($rpt_xml, NULL, $params);
+	    //render the xml
+	    $form_state['storage']['output'] = $output;
+	    $form_state['storage']['template_body'] = $body;
     }
-    $rpt_xml =  '<html xmlns:frx="urn:FrxReports"><body>' . $body . '</body></html>';
-
-    //render the xml
-    $output = forena_render_report($rpt_xml, NULL, $params);
-    $form_state['storage']['output'] = $output;
-    $form_state['storage']['template_body'] = $body;
-
   }
   else { //there wasn't any xml returned. clear the storage
     $form_state['storage']['output'] = '';
   }
-  $form_state['storage']['parameters'] = $block_info['tokens'];
+  $form_state['storage']['parameters'] = @$block_info['tokens'];
 
 }
 
