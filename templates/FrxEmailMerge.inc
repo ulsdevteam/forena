@@ -5,6 +5,7 @@ class FrxEmailMerge extends FrxTemplate {
 		$from = $this->extract('from', $config);
 		$to = $this->extract('to', $config);
 		$subject = $this->extract('subject', $config);
+		$body = $this->extract('body', $config);
 
 		$div = $this->blockDiv($config);
 		$doc = $this->addNode($div, 4, 'div', NULL, array('class' => 'email-document'));

@@ -53,7 +53,6 @@ class FrxTemplate {
 	 */
 	public function config_form($config) {
 		$form_ctl = array();
-		$form_ctl['#tree'] = TRUE;
 		$form_ctl['id'] = array(
 		  '#type' => 'textfield',
 		  '#title' => t('CSS id'),
@@ -63,13 +62,14 @@ class FrxTemplate {
 
 		$form_ctl['heading'] = array(
 		  '#type' => 'textfield',
-		  '#title' => 'Section Header',
-		  '#description'
+		  '#title' => t('Heading'),
+		  '#default_value' => @$config['heading'],
 		);
 
 		$form_ctl['description'] = array(
 		  '#type' => 'textarea',
-		  '#title' => 'Description',
+		  '#title' => t('Description'),
+		  '#default_value' => @$config['description'],
 		);
 		return $form_ctl;
 	}
@@ -128,8 +128,11 @@ class FrxTemplate {
    * @param unknown_type $config
    * @param unknown_type $text
    */
-  public function blockDiv($config, $text='') {
+  public function blockDiv(&$config, $text='') {
     $body = $this->body;
+    $heading = $this->extract('heading', $config);
+    $descr = $this->extract('description', $config);
+
 
   	$frx_attributes = array(
       'block' => @$config['block'],
@@ -142,6 +145,12 @@ class FrxTemplate {
     );
 
     $node = $this->addNode($body, 2, 'div', $text, $attributes, $frx_attributes);
+    if ($heading) {
+    	$this->addNode($node, 4, 'h2', $heading);
+    }
+    if ($descr) {
+    	$this->addNode($node, 4, 'p', $descr);
+    }
   	return $node;
   }
 
