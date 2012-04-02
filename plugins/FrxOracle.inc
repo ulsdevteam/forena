@@ -73,7 +73,7 @@ class FrxOracle extends FrxDataProvider {
       if (stripos($sql,'end;')>= stripos($sql,'begin') && stripos($sql,'begin')!==FALSE) {
       	$this->call($sql, $params, array('return' => 'clob'));
       	$xml = $params['return'];
-      	if ($xml) $xml = new SimpleXMLElement($xml);
+      	if (trim($xml)) $xml = new SimpleXMLElement($xml);
       }
       else {
 	      if ($clause) {
