@@ -163,76 +163,78 @@ function forena_parameter_form($formid, &$form_state, $r) {
       );
 
       $nodes = $head->xpath('frx:parameters/frx:parm');
+      if ($nodes) {
 
-      foreach ($nodes as $node) {
-        $label = (string)$node['label'];
-        $id = (string)$node['id'];
-        $data_source = (string)$node['data_source'];
-        $data_field = (string)$node['data_field'];
+	      foreach ($nodes as $node) {
+	        $label = (string)$node['label'];
+	        $id = (string)$node['id'];
+	        $data_source = (string)$node['data_source'];
+	        $data_field = (string)$node['data_field'];
 
-        $type = (string)$node['type'];
-        if (isset($parms[$id])) {
-        	$value = $parms[$id];
-        }
-        else {
-        	$value = (string)$node;
-	        if (strpos($value, '|')!==FALSE) $value = explode('|', $value);
-        }
-        $desc =  (string)$node['desc'];
-        $label_field = (string)$node['label_field'];
+	        $type = (string)$node['type'];
+	        if (isset($parms[$id])) {
+	        	$value = $parms[$id];
+	        }
+	        else {
+	        	$value = (string)$node;
+		        if (strpos($value, '|')!==FALSE) $value = explode('|', $value);
+	        }
+	        $desc =  (string)$node['desc'];
+	        $label_field = (string)$node['label_field'];
 
-        (strcmp((string)$node['require'], "1") == 0) ? $required = TRUE : $required = FALSE;
+	        (strcmp((string)$node['require'], "1") == 0) ? $required = TRUE : $required = FALSE;
 
-        //Determine the form element type to be displayed
-        //If select or radios is chosen then begin a $list array for display values.
-        $multiselect = FALSE;
-        $list = array();
-        switch ($type) {
-        	case 'multiselect':
-        		$type = 'select';
-        		$multiselect = TRUE;
-        		break;
-        	case 'checkboxes':
-          case 'select':
-          case 'radios':
-           break;
-          default:
-           $type = 'textfield';
-           $list = '';
-        }
+	        //Determine the form element type to be displayed
+	        //If select or radios is chosen then begin a $list array for display values.
+	        $multiselect = FALSE;
+	        $list = array();
+	        switch ($type) {
+	        	case 'multiselect':
+	        		$type = 'select';
+	        		$multiselect = TRUE;
+	        		break;
+	        	case 'checkboxes':
+	          case 'select':
+	          case 'radios':
+	           break;
+	          default:
+	           $type = 'textfield';
+	           $list = '';
+	        }
 
-        //If a data_source attr was found then create an array of
-        //returned values filtered against data_field attr.
-        if ($data_source) {
-          $list = FrxReportGenerator::instance()->data_block_params($data_source, $data_field, $label_field);
-          if (!$required) $list = array('' => '') + $list;
-        }
+	        //If a data_source attr was found then create an array of
+	        //returned values filtered against data_field attr.
+	        if ($data_source) {
+	          $list = FrxReportGenerator::instance()->data_block_params($data_source, $data_field, $label_field);
+	          if (!$required) $list = array('' => '') + $list;
+	        }
 
-        $form['params'][$id] = array(
-          '#type' => $type,
-          '#title' => ($label) ? t($label) : t($id),
-          '#default_value' => $value,
-          '#required' => $required,
-          '#description' => t($desc),
-        );
+	        $form['params'][$id] = array(
+	          '#type' => $type,
+	          '#title' => ($label) ? t($label) : t($id),
+	          '#default_value' => $value,
+	          '#required' => $required,
+	          '#description' => t($desc),
+	        );
 
-        //if $list is not empty then push options
-        //onto the array. options will cause an error for
-        //textfield elements.
-        if ($type != 'textfield') {
-          $form['params'][$id]['#options'] = $list;
-          $form['params'][$id]['#multiple'] = $multiselect;
-        }
+	        //if $list is not empty then push options
+	        //onto the array. options will cause an error for
+	        //textfield elements.
+	        if ($type != 'textfield') {
+	          $form['params'][$id]['#options'] = $list;
+	          $form['params'][$id]['#multiple'] = $multiselect;
+	        }
 
+	      }
+
+	      $form['params']['submit'] = array(
+	        '#type' => 'submit',
+	        '#value' => t('Submit'),
+	      );
+			  return $form;
       }
-
-      $form['params']['submit'] = array(
-        '#type' => 'submit',
-        '#value' => t('Submit'),
-      );
     }
 
-  return $form;
 }
 
 /**

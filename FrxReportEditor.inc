@@ -280,6 +280,15 @@ class FrxReportEditor {
       'value');
   }
 
+  public function addParameter($parm) {
+  	$parms= array();
+  	$parms[$parm['id']] = $parm;
+  	$this->setFrxHeader('parameters', 'parm',
+      $parms,
+      array('id', 'label', 'require', 'desc', 'data_source', 'data_field', 'type'),
+      'value');
+  }
+
   /**
    * Set the report title
    * @param String $title
@@ -446,11 +455,11 @@ class FrxReportEditor {
 
         foreach ($att_list as $key => $value) {
           if (!$frx_attributes[$key]) {
-            $node['frx:' . $key] = $value;
+            if ($value) $node['frx:' . $key] = $value;
           }
           else {
             unset($frx_attributes[$key]);
-            $node['frx:' . $key] = $value;
+            if ($value) $node['frx:' . $key] = $value;
           }
         }
       }
