@@ -847,7 +847,7 @@ function forena_add_report_form_submit($form, &$form_state) {
     drupal_set_message(t('Your report, %s has been saved.', array('%s'=>$report_name)));
     //if this is a new report then redirect to data blocks
 
-    $form_state['redirect']= 'reports/' . str_replace('/', '.', $report_name) . '/edit/data';
+    $form_state['redirect']= 'reports/' . str_replace('/', '.', $report_name) . '/edit/data/add';
 
   }
 }
