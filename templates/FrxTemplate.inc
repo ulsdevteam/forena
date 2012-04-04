@@ -43,6 +43,11 @@ class FrxTemplate {
       foreach ($columns as $name => $value) {
         $column_array[$name] = $name;
       }
+      if (is_object($xml) && method_exists($xml, 'attributes')) {
+      	foreach ($xml->attributes() as $name => $value) {
+      	  $column_array['@' . $name] = '@' . $name;
+      	}
+      }
     }
 		return $column_array;
 	}
@@ -51,31 +56,28 @@ class FrxTemplate {
 	 * Returns the section
 	 * Enter description here ...
 	 */
-	public function config_form($config) {
+	public function config_form($config, $xml='') {
 		$form_ctl = array();
-		$form_ctl['#tree'] = TRUE;
-		$form_ctl['id'] = array(
-		  '#type' => 'textfield',
-		  '#title' => t('CSS id'),
-		  '#description' => t('Specify a unique identifier for the id of this data'),
-		  '#default_value' => @$config['id'],
-		);
 
 		$form_ctl['heading'] = array(
 		  '#type' => 'textfield',
-		  '#title' => 'Section Header',
-		  '#description'
+		  '#title' => t('Heading'),
+		  '#default_value' => @$config['heading'],
 		);
 
 		$form_ctl['description'] = array(
 		  '#type' => 'textarea',
-		  '#title' => 'Description',
+		  '#title' => t('Description'),
+		  '#default_value' => @$config['description'],
 		);
 		return $form_ctl;
 	}
 
   function addNode($cur_node, $indent=0, $tag='div', $value='', $attributes=array(), $frx_attributes=array()) {
   	$dom = $this->dom;
+  	if (!$cur_node) {
+  		return;
+  	}
   	if ($indent!==FALSE) {
   	  $tnode = $dom->createTextNode("\n" . str_repeat(' ', $indent));
   	  $cur_node->appendChild($tnode);
@@ -91,7 +93,7 @@ class FrxTemplate {
   	if ($frx_attributes) foreach ($frx_attributes as $key => $value) {
       if ($value) {
 	      $attr = $dom->createAttributeNS($this->xmlns, $key);
-	      $attr->value = $value;
+	      $attr->value = htmlentities($value);
 	      $pnode->appendChild($attr);
       }
   	}
@@ -128,8 +130,11 @@ class FrxTemplate {
    * @param unknown_type $config
    * @param unknown_type $text
    */
-  public function blockDiv($config, $text='') {
+  public function blockDiv(&$config, $text='') {
     $body = $this->body;
+    $heading = $this->extract('heading', $config);
+    $descr = $this->extract('description', $config);
+
 
   	$frx_attributes = array(
       'block' => @$config['block'],
@@ -142,6 +147,12 @@ class FrxTemplate {
     );
 
     $node = $this->addNode($body, 2, 'div', $text, $attributes, $frx_attributes);
+    if ($heading) {
+    	$this->addNode($node, 4, 'h2', $heading);
+    }
+    if ($descr) {
+    	$this->addNode($node, 4, 'p', $descr);
+    }
   	return $node;
   }
 
