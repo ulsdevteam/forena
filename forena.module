@@ -642,6 +642,9 @@ function _forena_filter_process($text='') {
       if ($r) {
         $output = $r->render(null);
       }
+      else {
+      	$output = '';
+      }
 
       // Finally replace the parameters
       $find[]=$match[0][$idx];

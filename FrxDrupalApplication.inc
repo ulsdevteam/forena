@@ -111,6 +111,7 @@ class FrxDrupalApplication extends FrxHostApplication {
 function load_report($report_name) {
   $r=null;
   global $language;
+  $r_text = '';
   if ($report_name) {
   	$i_report_name = $report_name;
     $report_path =  $this->configuration('report_repos');
@@ -284,6 +285,15 @@ public function repositories() {
 
   module_invoke_all('forena_repos_alter', $repos);
   return $repos;
+}
+
+/**
+ * Allow modules to alter the parameters of a report.
+ * @param unknown_type $report_name
+ * @param unknown_type $parms
+ */
+function alter_parameters($report_name, &$parms) {
+  module_invoke_all('forena_parameters_alter', $report_name, $parms);
 }
 
 }
