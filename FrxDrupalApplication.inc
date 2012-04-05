@@ -287,4 +287,13 @@ public function repositories() {
   return $repos;
 }
 
+/**
+ * Allow modules to alter the parameters of a report.
+ * @param unknown_type $report_name
+ * @param unknown_type $parms
+ */
+function alter_parameters($report_name, &$parms) {
+  module_invoke_all('forena_parameters_alter', $report_name, $parms);
+}
+
 }
