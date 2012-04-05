@@ -111,6 +111,7 @@ class FrxDrupalApplication extends FrxHostApplication {
 function load_report($report_name) {
   $r=null;
   global $language;
+  $r_text = '';
   if ($report_name) {
   	$i_report_name = $report_name;
     $report_path =  $this->configuration('report_repos');

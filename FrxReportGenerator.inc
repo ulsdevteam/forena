@@ -339,9 +339,9 @@ class FrxReportGenerator {
     $r=null;
     if ($report_name) {
       $r_text = $this->app->load_report($report_name);
-    }
-    if ($r_text) {
-      $r = new FrxReport($r_text, $data);
+	    if ($r_text) {
+	      $r = new FrxReport($r_text, $data);
+	    }
     }
     return $r;
   }
