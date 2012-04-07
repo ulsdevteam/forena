@@ -7,6 +7,32 @@
 require_once('forena.common.inc');
 
 /**
+ * Display reports to edit for admins in the structure menu
+ * Enter description here ...
+ */
+function forena_admin_reports() {
+	GLOBAL $language;
+	$links[] = array('href' => 'reports/add', 'title' => 'Create New Report' );
+  $output = theme('links',
+                     array(
+                       'links' => $links,
+                       'attributes' => array('class' => 'action-links'),
+                     )
+                   );
+  $headers = array(t('title'), t('name'), t('category'), t('operation'));
+  $result = db_query('SELECT * FROM {forena_reports} where language=:language ORDER BY category,title', array(':language' => $language->language));
+  foreach ($result as $row) {
+  	$rpt = str_replace('/', '.', $row->report_name);
+    $edit = l('Edit', 'reports/' . $rpt . '/edit');
+    $clone = l('Clone', 'reports/add/' . $rpt);
+    $title = l($row->title, 'reports/' . $rpt);
+    $data[] = array($title, $row->report_name, $row->category, $edit . ' ' . $clone);
+  }
+  $output .= theme_table(array('header' => $headers, 'rows' => $data, 'attributes' => array(), 'caption' => '', 'sticky' => true, 'colgroups' => array(), 'empty' => ''));
+  return $output;
+}
+
+/**
  * Make sure a drectory exists in the report path prior to save.
  *
  * @param unknown_type $fullpath
@@ -699,7 +725,7 @@ function forena_add_report_form($formid, $form_state, $report_name) {
 	$filename = '';
 	$format = '';
 	if ($report_name) {
-    $desc = forena_report_desc();
+    $desc = forena_report_desc($report_name);
     $name = $desc['name'];
 	  $filename = $desc['filename'];
 	  $format = @$desc['format'];

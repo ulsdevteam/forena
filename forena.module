@@ -7,6 +7,15 @@
 function forena_menu() {
   $items = array();
 
+  $items['admin/structure/reports'] = array(
+    'type' => MENU_NORMAL_ITEM,
+    'title' => 'Forena Reports',
+    'description' => 'Build reports based on data in your sites databases.',
+    'page callback' => 'forena_admin_reports',
+    'access arguments' => array('design any report'),
+    'file' => 'forena.admin.inc',
+  );
+
   $items['admin/config/content/forena'] = array(
     'page callback' => 'drupal_get_form',
     'page arguments' => array('forena_settings'),
