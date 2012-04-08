@@ -283,7 +283,7 @@ public function repositories() {
   }
 
 
-  module_invoke_all('forena_repos_alter', $repos);
+  drupal_alter('forena_repos',  $repos);
   return $repos;
 }
 
@@ -293,7 +293,7 @@ public function repositories() {
  * @param unknown_type $parms
  */
 function alter_parameters($report_name, &$parms) {
-  module_invoke_all('forena_parameters_alter', $report_name, $parms);
+  drupal_alter('forena_parameters', $report_name, $parms );
 }
 
 }
