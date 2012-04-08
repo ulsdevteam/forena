@@ -59,12 +59,13 @@ function _forena_verify_directory($fullpath, $recursive=FALSE) {
  *
  * @param string $src_dir  Source directory
  */
-function _forena_copy_reports($src_dir) {
+function _forena_copy_reports($src_dir, $overwrite=FALSE, $subdir=FALSE) {
   static $dest_dir = '';
   static $i = 0;
-  if (!$dest_dir) {
+  if (!$subdir) {
     $dest_dir = forena_report_path();
   }
+
   if (!file_exists($dest_dir)) {
     mkdir($dest_dir);
   }
@@ -75,18 +76,19 @@ function _forena_copy_reports($src_dir) {
     $dest_file = $dest_dir . '/' . $rpt_file;
 
     if (is_file($src_file)) {
-      file_put_contents($dest_file, file_get_contents($src_file));
-      $i++;
+      if ($overwrite || !file_exists($dest_file)) {
+	      file_put_contents($dest_file, file_get_contents($src_file, $overwrite));
+	      $i++;
+      }
     }
     else {
       if (strpos($rpt_file, '.')!==0) {
-
         // Recurse into sub directory
         $src_save = $src_dir;
         $dest_save = $dest_dir;
         $dest_dir .= '/' . $rpt_file;
         $src_dir .= '/' . $rpt_file;
-        _forena_copy_reports($src_dir);
+        _forena_copy_reports($src_dir, FALSE);
         $src_dir = $src_save;
         $dest_dir = $dest_save;
       }
@@ -264,6 +266,8 @@ function forena_db_sync($subdir='') {
      db_delete('forena_reports')
        ->execute();
   }
+
+  $save_count=0;
   $path =forena_report_path() . '/' . $subdir;
   $d = dir($path);
   if ($d) while (false !== ($rpt_file = $d->read())) {
@@ -370,8 +374,13 @@ function forena_filter_element($fmt) {
  *
  */
 function forena_settings() {
-  $report_path = forena_report_path();
 
+  $report_path = forena_report_path();
+  $form['sync'] = array(
+    '#type' => 'submit',
+    '#value' => t('Clear Cache'),
+    '#submit' => array('forena_settings_sync_submit'),
+  );
 
   $form['forena_report_repos'] = array(
     '#type' => 'textfield',
@@ -382,21 +391,18 @@ function forena_settings() {
     '#default_value' => $report_path,
   );
 
-  $form['forena_input_format'] = forena_filter_element(variable_get('forena_input_format', filter_default_format()));
-
-  $form['instructions'] = array(
-    '#type' => 'item',
-    '#title' => t('Data Sources'),
-    '#value' => '<p>' . t('Database connections and data block repositories are configured directly in the file system for ' .
-                         'security reasons.  See the Forena Reports README.txt file for more information.') . '</p>',
+  $form['forena_last_report_path'] = array(
+    '#type' => 'value',
+    '#value' => forena_report_path(),
   );
+
+  $form['forena_input_format'] = forena_filter_element(variable_get('forena_input_format', filter_default_format()));
 
   $form['forena_default_form'] = array(
     '#type' => 'textfield',
     '#title' => t('Default report form'),
     '#description' => t('Indicates the default style sheet(s) that will be used when no tag is present in the report.'),
   );
-
 
   $form =  system_settings_form($form);
   $form['#submit'][] = 'forena_settings_submit';
@@ -413,29 +419,42 @@ function forena_settings_submit($form, &$form_state) {
   $values = $form_state['values'];
   $path = $values['forena_report_repos'];
   $src_dir = drupal_get_path('module', 'forena') . '/repos/reports';
-  if (!file_exists($path)) {
-    try {
+  if ($path != $values['forena_last_report_path']) {
+	  if (!file_exists($path)) {
+	    try {
 
-      if (file_exists($path)) {
-        drupal_set_message(t('Created directory %s', array($path))) ;
-      }
-      mkdir($path);
+	      if (file_exists($path)) {
+	        drupal_set_message(t('Created directory %s', array($path))) ;
+	      }
+	      mkdir($path);
 
-    } catch (Exception $e) {
-      forena_error(t('Unable to create report directory'), $e->getMessage());
-    }
-
+	    } catch (Exception $e) {
+	      forena_error(t('Unable to create report directory'), $e->getMessage());
+	      return;
+	    }
+	  }
   }
+  forena_sync_reports();
+}
 
-  if (file_exists($path) && $path != $src_dir) {
-    // Copy the reports from the
+function forena_forena_report_directory() {
+	  return drupal_get_path('module', 'forena') . '/repos/reports';
+}
 
+function forena_sync_reports() {
+	$directories = module_invoke_all('forena_report_directory');
+	$i=0;
+	if ($directories) foreach ($directories as $src_dir) {
     $i = _forena_copy_reports($src_dir);
-    drupal_set_message($i . ' delivered reports copied from ' . $src_dir . ' to ' . $path);
-  }
-  $save_count = forena_db_sync();
+	  if ($i > 0) drupal_set_message($i . ' new reports copied from ' . $src_dir);
 
-  menu_cache_clear();
+	}
+  forena_db_sync();
+
+}
+
+function forena_settings_sync_submit($form, &$form_state) {
+	forena_sync_reports();
 }
 
 
@@ -1314,6 +1333,7 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
     '#submit' => array('forena_data_settings_save'),
   );
 
+
   $form['delete'] = array(
     "#type" => 'submit',
     '#value' => t('Delete'),
@@ -1322,6 +1342,8 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
 
   return $form;
 }
+
+
 
 /**
  * Submit handler to cause save events to happen.
