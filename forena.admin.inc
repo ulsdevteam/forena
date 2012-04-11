@@ -55,7 +55,7 @@ function _forena_verify_directory($fullpath, $recursive=FALSE) {
 }
 
 /**
- * Recursively copy all report files from the source directory to the destination directory
+ * Recursively ,  all report files from the source directory to the destination directory
  *
  * @param string $src_dir  Source directory
  */
@@ -88,7 +88,7 @@ function _forena_copy_reports($src_dir, $overwrite=FALSE, $subdir=FALSE) {
         $dest_save = $dest_dir;
         $dest_dir .= '/' . $rpt_file;
         $src_dir .= '/' . $rpt_file;
-        _forena_copy_reports($src_dir, FALSE);
+        _forena_copy_reports($src_dir, FALSE, TRUE);
         $src_dir = $src_save;
         $dest_dir = $dest_save;
       }
