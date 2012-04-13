@@ -376,6 +376,13 @@ function forena_filter_element($fmt) {
 function forena_settings() {
 
   $report_path = forena_report_path();
+
+  $form['sync_overwrite'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Revert all delivered reports to orignial'),
+    '#description' => t('All customizations to module delivered reports will be lost.')
+  );
+
   $form['sync'] = array(
     '#type' => 'submit',
     '#value' => t('Clear Cache'),
@@ -441,11 +448,11 @@ function forena_forena_report_directory() {
 	  return drupal_get_path('module', 'forena') . '/repos/reports';
 }
 
-function forena_sync_reports() {
+function forena_sync_reports($overwrite=FALSE) {
 	$directories = module_invoke_all('forena_report_directory');
 	$i=0;
 	if ($directories) foreach ($directories as $src_dir) {
-    $i = _forena_copy_reports($src_dir);
+    $i = _forena_copy_reports($src_dir, $overwrite);
 	  if ($i > 0) drupal_set_message($i . ' new reports copied from ' . $src_dir);
 
 	}
@@ -454,7 +461,7 @@ function forena_sync_reports() {
 }
 
 function forena_settings_sync_submit($form, &$form_state) {
-	forena_sync_reports();
+	forena_sync_reports($form_state['values']['sync_overwrite']);
   drupal_set_message(t('Report cache cleared'));
 }
 

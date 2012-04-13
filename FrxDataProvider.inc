@@ -214,5 +214,4 @@ class FrxDataProvider{
 
     return array('access' => $access, 'source' => $data);
   }
-
 }
