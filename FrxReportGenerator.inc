@@ -423,7 +423,7 @@ function load_block($data_block, $clause='') {
    */
    function load_block_file($filepath) {
     if (!file_exists($filepath)) {
-      return array();
+      return '';
     }
 
     $block_data = file_get_contents($filepath);

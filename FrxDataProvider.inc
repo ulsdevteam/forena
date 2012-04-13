@@ -60,7 +60,12 @@ class FrxDataProvider{
     $filename = $this->block_path . '/' . $block_name . '.' . $this->block_ext;
 
     $contents = FrxReportGenerator::instance()->load_block_file($filename);
-    $block = $this->parseXMLFile($contents);
+    if ($this->block_ext == 'sql') {
+    	$block = $this->parseSQLFile($contents);
+    }
+    else {
+      $block = $this->parseXMLFile($contents);
+    }
     // If we have a regular expression token parser, then get the tokens out of the block.
 
     if ($this->te) {
@@ -207,7 +212,6 @@ class FrxDataProvider{
     }
 
 
+    return array('access' => $access, 'source' => $data);
   }
-
-
 }
