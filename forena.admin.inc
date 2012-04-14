@@ -238,7 +238,7 @@ function forena_delete_report($report_name, $delete_file = TRUE) {
     if ($delete_file) $do = unlink($info['basename']);
   }
   if (module_exists('locale')) {
-    @list($tlang, $tname) = explode('/', $report_name);
+    @list($tlang, $tname) = explode('/', $report_name, 2);
     if (array_key_exists($tlang, language_list())) {
     	$report_name = $tname;
     	$language = $tlang;
@@ -2135,9 +2135,9 @@ function forena_data_block_delete($form, &$form_state) {
  * @param $form_state
  * @return unknown_type
  */
-function forena_delete_form() {
+function forena_delete_form($form_state, $formid, $report_name) {
   // Parse names from url
-  $desc = forena_report_desc();
+  $desc = forena_report_desc($report_name);
   $report_name = $desc['name'];
   $link = $desc['link'];
   $form['report_name'] = array(

@@ -125,7 +125,7 @@ function forena_menu() {
 
   $items['reports/%/edit/params/add'] = array(
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('forena_add_param_form'),
+    'page arguments' => array('forena_add_param_form', 1),
     'file' => 'forena.admin.inc',
     'title' => 'Parameters',
     'access arguments' => array('design any report'),
@@ -146,6 +146,7 @@ function forena_menu() {
    $items['reports/%/edit/data'] = array(
      'title' => 'Data',
      'page callback' => 'forena_data_block',
+     'page arguments' => array(1),
      'access arguments' => array('design any report'),
      'description' => 'Add a data block to your report',
      'type' => MENU_LOCAL_TASK,
@@ -156,7 +157,7 @@ function forena_menu() {
      'title' => 'Data',
      'file' => 'forena.admin.inc',
      'page callback' => 'drupal_get_form',
-     'page arguments' => array('forena_add_data_block_form'),
+     'page arguments' => array('forena_add_data_block_form', 1),
      'access arguments' => array('design any report'),
      'description' => 'Add a data block to your report',
      'type' => MENU_CALLBACK,
@@ -183,7 +184,7 @@ function forena_menu() {
    $items['reports/%/delete'] = array(
      'title' => 'Delete Report',
      'page callback' => 'drupal_get_form',
-     'page arguments' => array('forena_delete_form'),
+     'page arguments' => array('forena_delete_form', 1),
      'access arguments' => array('delete report'),
      'type' => MENU_NORMAL_ITEM,
      'file' => 'forena.admin.inc',
