@@ -175,4 +175,29 @@ class FrxSyntaxEngine {
     }
     return $tokens;
   }
+
+  /**
+   * Convert an object into an array
+   * @param mixed $data
+   * Iterates the object and builds an array of strings from it.
+   * If the object appears to be an xml object and has an attributes
+   * method, do the same for it.
+   */
+  public function object_to_array($data) {
+  	if (is_object($data)) {
+  		$ar = array();
+  		foreach ($data as $key => $value) {
+  			$ar[$key] = (string)$value;
+  		}
+  		if (method_exists($data, 'attributes')) {
+  			foreach ($data->attributes() as $key => $value) {
+  				$ar[$key] = (string)$value;
+  			}
+  		}
+  		return $ar;
+  	}
+  	else {
+  		return $data;
+  	}
+  }
 }
