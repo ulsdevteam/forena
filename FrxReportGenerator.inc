@@ -824,4 +824,8 @@ public function report_path() {
     return $this->app->link($title, $path, $options);
   }
 
+public function url($path, $options = array()) {
+	return $this->app->url($path, $options);
+}
+
 }

@@ -38,6 +38,10 @@ class FrxDrupalApplication extends FrxHostApplication {
     return l($title, $path, $options);
   }
 
+  public function url($path, $options = array()) {
+  	return url($path, $options);
+  }
+
   /**
    * Theme the output of a css
    * Enter description here ...

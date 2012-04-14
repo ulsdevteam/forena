@@ -8,16 +8,19 @@ class FrxInclude extends FrxRenderer {
 		// Determine data type
 		$include = @$attributes['src'];
 		$include = $this->teng->replace($include);
-		list($url, $query)=@explode('?', $include);
+		list($url, $query_str)=@explode('?', $include);
 		$parts = @explode('/', $url);
 		$file = @$parts[count($parts) - 1];
 		$parts = explode('.', $file);
 		// Determine file extention
 		$ext = count($parts) > 1 ? $parts[count($parts) - 1] : '';
-
+		$query = array();
+		parse_str($query_str, $query );
+    $options = array('query' => $query);
+		$url = FrxReportGenerator::instance()->url($url, $options);
     $doc_types = FrxReportGenerator::instance()->configuration('doc_formats');
     if (@$doc_types[$ext]) {
-      $output = $this->render_reference($include, $ext, $attributes);
+      $output = $this->render_reference($url, $ext, $attributes);
     }
 		else {
 			$output = $this->teng->replace($this->reportDocNode->asXML());

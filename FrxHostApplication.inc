@@ -41,6 +41,8 @@ class FrxHostApplication {
     return '<a href="'. $path . '">' . $title . '</a>';
   }
 
+
+
   /**
    * Theme the output of a css
    * Enter description here ...
