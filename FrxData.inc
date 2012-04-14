@@ -75,6 +75,10 @@ class FrxData {
     }
   }
 
+  public function setContext($id, $data) {
+  	$this->data_sources[$id] = $data;
+  }
+
   /**
    * Remove data from the data stack.  This will make data unavaiable
    * when we leave the context of the current nested reports.
