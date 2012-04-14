@@ -1,4 +1,4 @@
---ACCESS=design any report
+--ACCESS=access demo reports
 select code AS state,name,total from states s join 
   (select state,sum(users) as total from user_distribution group by state) su
   ON su.state=s.code
