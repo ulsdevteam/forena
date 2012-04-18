@@ -135,31 +135,31 @@ class FrxPostgres extends FrxDataProvider {
    * @param unknown_type $data
    */
   public function format($value, $key, $data) {
-    if ($value=='' )
+    if ($value=='')
       $value = 'NULL';
     else {
       if (is_array($value)) {
+      	if ($value == array()) {
+      		$value = 'NULL';
+      	}
+      	else {
       		// Build a array of values string
-        	$i=0;
-	      	$val ='';
+	      	$i=0;
+	      	$val = '';
 	      	foreach ($value as $v) {
 	      		$i++;
-	      	  if ($i!=1) {
+	      	  if ($i>1) {
 	    			  $val .= ',';
 	     		  }
-	     		  if ($value=='') {
-		     		  $val .= 'NULL';
-	     		  }
-	     		  else {
-			    		$val .=  $v;
-	     		  }
+	    		$val .=  "'".   pg_escape_string($v) ."'";
 	    	  }
-	    	$value = $val;
+        }
       }
-	    $value = trim($value);
-	    $value =  "'".   pg_escape_string($value) ."'";
+      else {
+        $value = trim($value);
+        $value =  "'".   pg_escape_string($value) ."'";
+      }
     }
-
     return $value;
   }
     /**
