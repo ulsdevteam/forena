@@ -151,15 +151,11 @@ class FrxPostgres extends FrxDataProvider {
 	      	$val = '';
 	      	foreach ($value as $v) {
 	      		$i++;
-	      	  if ($i==1) {
-	      			$val .= '(';
-	      		}
-	     		  else {
+	      	  if ($i>1) {
 	    			  $val .= ',';
 	     		  }
 	    		$val .=  "'".   pg_escape_string($v) ."'";
 	    	  }
-	    	$value = $val . ')';
         }
       }
       else {
