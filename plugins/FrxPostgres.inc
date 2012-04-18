@@ -148,6 +148,7 @@ class FrxPostgres extends FrxDataProvider {
       	else {
       		// Build a array of values string
 	      	$i=0;
+	      	$val = '';
 	      	foreach ($value as $v) {
 	      		$i++;
 	      	  if ($i==1) {
