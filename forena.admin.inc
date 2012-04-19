@@ -2138,6 +2138,7 @@ function forena_data_block_delete($form, &$form_state) {
 function forena_delete_form($form_state, $formid, $report_name) {
   // Parse names from url
   $desc = forena_report_desc($report_name);
+  drupal_set_message(print_r($desc,1));
   $report_name = $desc['name'];
   $link = $desc['link'];
   $form['report_name'] = array(

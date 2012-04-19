@@ -156,6 +156,7 @@ class FrxPostgres extends FrxDataProvider {
 	     		  }
 	    		$val .=  "'".   pg_escape_string($v) ."'";
 	    	  }
+	    	  $value = $val;
         }
       }
       else {
