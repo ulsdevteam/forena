@@ -71,7 +71,32 @@ class FrxDrupal extends FrxDataProvider {
   public function format($value, $key, $data) {
     $db = Database::getConnection('default');
     if ($db) {
-      if ($value=='') $value = 'NULL'; else  $value =   $db -> quote($value);
+	    if ($value=='')
+	      $value = 'NULL';
+	    else {
+	      if (is_array($value)) {
+	      	if ($value == array()) {
+	      		$value = 'NULL';
+	      	}
+	      	else {
+	      		// Build a array of values string
+		      	$i=0;
+		      	$val = '';
+		      	foreach ($value as $v) {
+		      		$i++;
+		      	  if ($i>1) {
+		    			  $val .= ',';
+		     		  }
+		    		$val .=   $db->quote($v);
+		    	  }
+		    	  $value = $val;
+	        }
+	      }
+	      else {
+	        $value = trim($value);
+	        $value =    $db->quote($value) ;
+	      }
+	    }
     }
     return $value;
   }
