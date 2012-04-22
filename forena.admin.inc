@@ -2380,8 +2380,8 @@ function forena_admin_params_form($formid, $form_state, $report_name) {
   }
 }
 
-function forena_add_param_form($form, &$form_state) {
-  $desc = forena_report_desc();
+function forena_add_param_form($form, &$form_state, $report_name) {
+  $desc = forena_report_desc($report_name);
   $name = $desc['name'];
   $filename = $desc['filename'];
   $format = @$desc['format'];
