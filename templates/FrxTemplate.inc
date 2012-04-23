@@ -70,6 +70,12 @@ class FrxTemplate {
 		  '#title' => t('Description'),
 		  '#default_value' => @$config['description'],
 		);
+
+		$form_ctl['include'] = array(
+		  '#type' => 'textfield',
+		  '#title' => 'Include Report (graph/image)',
+		  '#default_value' => @$config['include']
+		);
 		return $form_ctl;
 	}
 
@@ -134,8 +140,7 @@ class FrxTemplate {
     $body = $this->body;
     $heading = $this->extract('heading', $config);
     $descr = $this->extract('description', $config);
-
-
+    $include = $this->extract('include', $config);
   	$frx_attributes = array(
       'block' => @$config['block'],
       'foreach' => @$config['foreach'],
@@ -153,6 +158,10 @@ class FrxTemplate {
     if ($descr) {
     	$this->addNode($node, 4, 'p', $descr);
     }
+    if ($include) {
+    	$this->addNode($node, 4, 'div', null, null, array('renderer' => 'FrxInclude', 'src' => $include));
+    }
+
   	return $node;
   }
 
