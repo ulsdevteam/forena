@@ -78,7 +78,7 @@ function _forena_copy_reports($src_dir, $overwrite=FALSE, $subdir=FALSE) {
 
     if (is_file($src_file)) {
       if ($overwrite || !file_exists($dest_file)) {
-        file_put_contents($dest_file, file_get_contents($src_file, $overwrite));
+        file_put_contents($dest_file, file_get_contents($src_file));
         $i++;
       }
     }
@@ -89,7 +89,7 @@ function _forena_copy_reports($src_dir, $overwrite=FALSE, $subdir=FALSE) {
         $dest_save = $dest_dir;
         $dest_dir .= '/' . $rpt_file;
         $src_dir .= '/' . $rpt_file;
-        _forena_copy_reports($src_dir, FALSE, TRUE);
+        _forena_copy_reports($src_dir, $overwrite, TRUE);
         $src_dir = $src_save;
         $dest_dir = $dest_save;
       }
@@ -452,10 +452,11 @@ function forena_forena_report_directory() {
 function forena_sync_reports($overwrite=FALSE) {
   $directories = module_invoke_all('forena_report_directory');
   $i=0;
-  if ($directories) foreach ($directories as $src_dir) {
-    $i = _forena_copy_reports($src_dir, $overwrite);
-    if ($i > 0) drupal_set_message($i . ' new reports copied from ' . $src_dir);
-
+  if ($directories) {
+    foreach ($directories as $src_dir) {
+      $i += _forena_copy_reports($src_dir, $overwrite);
+    }
+    if ($i > 0) drupal_set_message($i . ' reports copied');
   }
   forena_db_sync();
 
@@ -1823,6 +1824,9 @@ function forena_data_select_block_submit($form, &$form_state) {
           $parms[$id] = @$rpt_params[$id]['value'];
         }
       }
+		  if ($parms) {
+		  	  drupal_alter('forena_parameters', $name, $parms );
+		  }
 
       //now invoke the data provider with the correct params
       FrxData::instance()->push($parms, 'parm');
