@@ -906,7 +906,6 @@ function forena_create_trans_form($formid, $form_state, $report_name) {
   if ($lang) {
   	$language = $languages[$lang];
   }
-
   $form['base_name'] = array(
     '#type' => 'value',
     '#value' => $base_name
@@ -951,9 +950,7 @@ function forena_create_trans_form($formid, $form_state, $report_name) {
 function forena_create_trans_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   $base_name = $values['base_name'];
-  if ($values['save_report_language']!='en') {
-    $new_name = $values['save_report_language']. '.' . $base_name;
-  }
+  $new_name = $values['save_report_language']. '.' . $base_name;
 
   $desc = forena_report_desc($new_name);
   $filename = $desc['filename'];
@@ -967,7 +964,7 @@ function forena_create_trans_form_submit($form, &$form_state) {
   //determine redirection.
 
   if (file_exists($filename)) {
-    drupal_set_message(t('Report %s already exists', array('%s' => $report_name)), 'error');
+    drupal_set_message(t('Report %s already exists', array('%s' => $new_name)), 'error');
     return;
   }
 
