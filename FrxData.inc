@@ -45,12 +45,12 @@ class FrxData {
      if (is_array($this->cur_context)) {
        $this->cur_context[$key] = $value;
      }
-     elseif (is_object($parameters)) {
+     elseif (is_object($this->cur_context)) {
      	 if (strpos($key, '@')===0) {
      	   $this->cur_context[$key] = $value;
      	 }
      	 else {
-         $parmeters->$key = $value;
+         $this->cur_context->$key = $value;
      	 }
      }
   }
