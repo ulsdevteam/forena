@@ -1808,7 +1808,7 @@ function forena_data_select_block_submit($form, &$form_state) {
   $params = $form_state['storage']['params'] = isset($values['params']) ? $values['params'] : array();
   $where_clause = $form_state['storage']['where_clause'] = $values['where_clause'];
   $parameters = $form_state['storage']['parm_data'] = $values['parameters'];
-  $parms = @$values['parms'];
+  $parms = isset($values['parms']) ? $values['parms']: array();
   $xml='';
   $block_info='';
 
@@ -1825,9 +1825,9 @@ function forena_data_select_block_submit($form, &$form_state) {
           $parms[$id] = (string)@$rpt_params[$id];
         }
       }
-		  if ($parms) {
-		  	  drupal_alter('forena_parameters', $name, $parms );
-		  }
+
+			drupal_alter('forena_parameters', $name, $parms );
+
 
       //now invoke the data provider with the correct params
       FrxData::instance()->push($parms, 'parm');
