@@ -8,7 +8,7 @@ class FrxInclude extends FrxRenderer {
 		// Determine data type
 		$include = @$attributes['src'];
 		$include = $this->teng->replace($include);
-		list($url, $query_str)=@explode('?', $include);
+		@list($url, $query_str)=@explode('?', $include);
 		$parts = @explode('/', $url);
 		$file = @$parts[count($parts) - 1];
 		$parts = explode('.', $file);

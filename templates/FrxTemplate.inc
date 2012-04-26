@@ -68,12 +68,14 @@ class FrxTemplate {
 		$form_ctl['description'] = array(
 		  '#type' => 'textarea',
 		  '#title' => t('Description'),
+		  '#rows' => 2,
 		  '#default_value' => @$config['description'],
 		);
 
 		$form_ctl['include'] = array(
 		  '#type' => 'textfield',
 		  '#title' => 'Include Report (graph/image)',
+      '#autocomplete_path' => 'forena/reports/autocomplete',
 		  '#default_value' => @$config['include']
 		);
 		return $form_ctl;
@@ -159,7 +161,8 @@ class FrxTemplate {
     	$this->addNode($node, 4, 'p', $descr);
     }
     if ($include) {
-    	$this->addNode($node, 4, 'div', null, null, array('renderer' => 'FrxInclude', 'src' => $include));
+    	$src = 'reports/' . str_replace('/', '.',$include);
+    	$this->addNode($node, 4, 'div', null, null, array('renderer' => 'FrxInclude', 'src' => $src));
     }
 
   	return $node;

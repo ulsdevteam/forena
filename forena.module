@@ -251,6 +251,13 @@ function forena_menu() {
      'type' => MENU_CALLBACK,
    );
 
+   $items['forena/reports/autocomplete'] = array(
+     'page callback' => 'forena_reports_autocomplete',
+     'access callback' => TRUE,
+     'type' => MENU_CALLBACK,
+   );
+
+
    $items['forena/categories/autocomplete'] = array(
      'page callback' => 'forena_categories_autocomplete',
      'access callback' => TRUE,
@@ -335,6 +342,40 @@ function forena_data_block_autocomplete($string='') {
   print drupal_json_output($data_blocks);
 }
 
+function forena_reports_autocomplete($string='') {
+	GLOBAL $language;
+  $reports='';
+	$string = '%' .$string .'%';
+	$result = db_query('SELECT * FROM {forena_reports} where language=:language
+	  AND report_name like :string
+	  ORDER BY category,title', array(':language' => $language->language, ':string' => $string));
+  foreach ($result as $row) {
+    $access = TRUE;
+    $cache = $row->cache;
+
+    if ($cache) {
+      $cache = unserialize($cache);
+
+      // Check each callback function to see if we have an error.
+      if ($cache['access']) foreach ($cache['access'] as $callback => $args) {
+        if ($callback) foreach ($args as $arg) {
+          $access = FALSE;
+          if (function_exists($callback)) {
+            $a = $callback($arg);
+          }
+          if ($a) $access = TRUE;
+        }
+        else {
+          $access = TRUE;
+        }
+      }
+    }
+    if ($access) {
+      $reports[$row->report_name] = $row->report_name . ' - ' . $row->title;
+    }
+  }
+	return drupal_json_output($reports);
+}
 
 function forena_xml($block_name, $parms=array()) {
 	  include_once('forena.common.inc');
