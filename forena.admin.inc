@@ -1561,7 +1561,7 @@ function forena_add_data_block_form($formid, &$form_state, $report_name) {
   $template = ($default_template) ? $default_template : 'FrxTable';
   $template_obj = FrxReportGenerator::instance()->get_templates($template);
   $params = @$form_state['storage']['parameters'];
-  $param_values = @$form_state['storage']['parm_values'];
+  $param_values = @$form_state['storage']['parms'];
   $form = array();
   $form['report_name'] = array(
       '#type' => 'value',
@@ -1628,7 +1628,6 @@ function forena_add_data_block_form($formid, &$form_state, $report_name) {
 
   //Template selection
   if ($step == 'select_template') {
-
     $form['templates'] = array(
       '#type' => 'select',
       '#title' => t('Templates'),
@@ -1655,6 +1654,7 @@ function forena_add_data_block_form($formid, &$form_state, $report_name) {
 
     $xml = $form_state['storage']['xml'];
     if ($xml) {
+
         $xml = new SimpleXMLElement($xml);
         //create xml from template object
         $template_obj = FrxReportGenerator::instance()->get_templates($template);
@@ -1672,7 +1672,8 @@ function forena_add_data_block_form($formid, &$form_state, $report_name) {
           $template_obj->generate($xml, $config);
           $body = $template_obj->template();
           $rpt_xml = $template_obj->asXML();
-          $output = forena_render_report($rpt_xml, NULL, $form_state['storage']['parms']);
+          $parms = $form_state['storage']['parms'];
+          $output = forena_render_report($rpt_xml, NULL, $parms);
           //render the xml
           $form_state['storage']['output'] = $output;
           $form_state['storage']['template_body'] = $body;
@@ -1821,7 +1822,7 @@ function forena_data_select_block_submit($form, &$form_state) {
         $r = FrxReportGenerator::instance()->get_report($values['report_name']);
         $rpt_params = $r->parameters;
         if ($rpt_params) foreach ($block_info['tokens'] as $index => $id) {
-          $parms[$id] = @$rpt_params[$id]['value'];
+          $parms[$id] = (string)@$rpt_params[$id];
         }
       }
 		  if ($parms) {
@@ -1835,7 +1836,7 @@ function forena_data_select_block_submit($form, &$form_state) {
       if ($xml) {
         $form_state['storage']['step'] = 'select_template';
         $form_state['storage']['xml'] = $xml->asXML();
-        $form_state['storage']['parms'] = @$values['parms'];
+        $form_state['storage']['parms'] = $parms;
       }
       else $form_state['storage']['parameters'] = @$block_info['tokens'];
       //create xml from template object
