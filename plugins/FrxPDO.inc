@@ -133,15 +133,12 @@ class FrxPDO extends FrxDataProvider {
 	      	$val ='';
 	      	foreach ($value as $v) {
 	      		$i++;
-	      	  if ($i==1) {
-	      			$val .= '(';
-	      		}
-	     		  else {
+	      	  if ($i!=1) {
 	    			  $val .= ',';
 	     		  }
 	    		$val .= $db->quote($v);
 	    	  }
-	    	$value = $val . ')';
+	    	$value = $val;
         }
       }
       else  $value =  $db -> quote($value);

@@ -200,10 +200,12 @@ function forena_parameter_form($formid, &$form_state, $r) {
 	        $type = (string)$node['type'];
 	        if (isset($parms[$id])) {
 	        	$value = $parms[$id];
+	        	$multi_value=(array)$value;
 	        }
 	        else {
 	        	$value = (string)$node;
-		        if (strpos($value, '|')!==FALSE) $value = explode('|', $value);
+	        	$multi_value = array();
+		        if (strpos($value, '|')!==FALSE) $multi_value = explode('|', $value);
 	        }
 	        $desc =  (string)$node['desc'];
 	        $label_field = (string)$node['label_field'];
@@ -218,10 +220,13 @@ function forena_parameter_form($formid, &$form_state, $r) {
 	        	case 'multiselect':
 	        		$type = 'select';
 	        		$multiselect = TRUE;
+	        		$value = $multi_value;
 	        		break;
 	        	case 'checkboxes':
+	        		$value = $multi_value;
 	          case 'select':
 	          case 'radios':
+
 	           break;
 	          default:
 	           $type = 'textfield';
@@ -274,7 +279,14 @@ function forena_parameter_form_submit($form, &$form_state) {
   foreach($values['params'] as $key=>$value) {
   	if (is_array($value)) {
   		foreach ($value as $k => $val) {
-  			if (!$val) unset($values['params'][$key][$k]);
+  			if (!$val) {
+	  			unset($values['params'][$key][$k]);
+  			}
+  		}
+  	}
+  	else {
+  	  if (strpos($value, '|')!==FALSE) {
+  	    $values['params'][$key] = explode('|', $value);
   		}
   	}
   }
