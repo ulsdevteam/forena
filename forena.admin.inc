@@ -33,6 +33,7 @@ function forena_admin_reports() {
   return $output;
 }
 
+
 /**
  * Make sure a drectory exists in the report path prior to save.
  *
@@ -833,6 +834,7 @@ function forena_add_report_form($formid, $form_state, $report_name='') {
   $form['report_name'] = array(
     '#title' => t('Create from report'),
     '#type' => 'textfield',
+    '#autocomplete_path' => 'forena/reports/autocomplete',
     '#default_value' => $name,
   );
 
@@ -882,8 +884,13 @@ function forena_add_report_form_submit($form, &$form_state) {
   if (forena_save_report($report_name, $r->asXML(), TRUE) == 1) {
     drupal_set_message(t('Your report, %s has been saved.', array('%s'=>$report_name)));
     //if this is a new report then redirect to data blocks
-
-    $form_state['redirect']= 'reports/' . str_replace('/', '.', $desc['base_name']) . '/edit/data/add';
+    if ($values['report_name']) {
+    	$edit = '/edit';
+    }
+    else {
+    	$edit = '/edit/data/add';
+    }
+    $form_state['redirect']= 'reports/' . str_replace('/', '.', $desc['base_name']) . $edit;
 
   }
 }

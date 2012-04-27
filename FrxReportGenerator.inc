@@ -671,7 +671,11 @@ function report($name_in, $parms = array(), $print=TRUE) {
       //put default parameters in parms array
       foreach ($r_params as $key => $parm) {
         if (@!$parms[$key] && @$parm['value']) {
-         $parms[$key] = $parm['value'];
+         $value = (string)$parm['value'];
+         if (strpos($value, '|')!==FALSE) {
+         	$value = explode('|', $value);
+         }
+         $parms[$key] = $value;
          $reload_params = TRUE;
         }
           //do not show report if a required parameter does not have a value
