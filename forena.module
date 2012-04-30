@@ -478,6 +478,10 @@ function forena_user_reports() {
 function forena_report($name_in, $parms = array(), $print = TRUE) {
   require_once('forena.common.inc');
   $desc = forena_report_desc($name_in);
+  if (!$desc['exists']) {
+  	drupal_not_found();
+  	exit;
+  }
   $report_name = $desc['name'];
   $output = FrxReportGenerator::instance()->report($name_in, $parms, $print);
   $output = check_markup($output, variable_get('forena_input_format', filter_default_format()));
@@ -573,7 +577,7 @@ function forena_forena_controls() {
 function forena_report_path() {
   $report_path = variable_get('forena_report_repos', '');
   if (!$report_path) {
-    $report_path = drupal_get_path('module', 'forena') . '/repos/reports';
+    $report_path = variable_get('file_' . file_default_scheme() . '_path', conf_path() . '/files');
   }
   return trim($report_path, '/');
 }
