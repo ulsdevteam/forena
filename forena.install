@@ -26,7 +26,7 @@ function forena_schema() {
        'modified' => array('type' => 'int'),
        'altered' => array('type' => 'int'),
     ),
-    'primary key' => array('report_name,language'),
+    'primary key' => array('report_name', 'language'),
     'indexes' => array(
       'category' => array('category'),
     ),

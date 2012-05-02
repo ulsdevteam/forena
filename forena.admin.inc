@@ -42,18 +42,31 @@ function forena_admin_reports() {
  */
 function _forena_verify_directory($fullpath, $recursive=FALSE) {
   static $path='';
-  if (!$recursive) $path = forena_report_path();
+  $success = TRUE;
+  if (!$recursive) {
+	  $path = forena_report_path();
+	  if (!is_writable($path)) {
+  	  drupal_set_message(t('Report directory %s is not modifiable', array('%s' => $path)), 'error');
+  	  return FALSE;
+	  }
+  }
   @list($dir, $file) = explode('/', $fullpath, 2);
   $path .= '/' . $dir;
+
   // Path
   if (!file_exists($path) && $file) {
-    mkdir($path);
+    @mkdir($path);
+    if (!@is_writable($path)) {
+    	drupal_set_message(t('Error creating directory %path', array('%path' => $path)), 'error');
+    	return FALSE;
+    }
+
   }
   // Recurse to next file.
   if ($file && strpos($file, '/')) {
-    watchdog('debug', $file);
     _forena_verify_directory($file, TRUE);
   }
+  return TRUE;
 }
 
 /**
@@ -120,7 +133,10 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
     }
   }
 
-  _forena_verify_directory($report_name);
+  if (!_forena_verify_directory($report_name)) {
+    drupal_set_message(t('Error creating directory.  Check Permissions'), 'error');
+    return 0;
+  };
   $report_path = forena_report_path();
   $r = new FrxReport($report);
   $data['title'] = $r->title;
@@ -338,15 +354,17 @@ function forena_filter_element($fmt) {
   $element['format'] =  array(
     '#type' => 'fieldset',
     '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
+    '#collapsed' => $fmt!='',
     '#title' => t('Input formats'),
   );
+  if (!$fmt) $fmt='full_html';
     // Get a list of formats that the current user has access to.
   $formats = filter_formats($user);
   foreach ($formats as $format) {
     $options[$format->format] = $format->name;
     $element['format']['guidelines'][$format->format] = array(
       '#theme' => 'filter_guidelines',
+      '#required' => TRUE,
       '#format' => $format,
     );
   }
@@ -405,7 +423,8 @@ function forena_settings() {
     '#value' => forena_report_path(),
   );
 
-  $form['forena_input_format'] = forena_filter_element(variable_get('forena_input_format', filter_default_format()));
+
+  $form['forena_input_format'] = forena_filter_element(variable_get('forena_input_format',''));
 
   $form['forena_default_form'] = array(
     '#type' => 'textfield',
@@ -485,6 +504,10 @@ function forenea_general_form($formid, $form_state, $new_report='') {
 function forena_format_form($formid, $form_state, $report_name) {
   $desc = forena_report_desc($report_name);
   $name = $desc['name'];
+  if (!$desc['exists']) {
+  	drupal_not_found();
+  	exit;
+  }
   $filename = $desc['filename'];
   $format = isset($desc['format']) ? $desc['format'] : '';
   if ($desc['exists']) {
@@ -587,6 +610,7 @@ function forena_format_form_submit($form, &$form_state) {
 function forena_layout_form($form, $form_state, $report_name) {
 	$name_in = $report_name;
   $desc = forena_report_desc($report_name);
+
   $name = $desc['name'];
   global $language;
   //determine if this is an add new report request
@@ -1401,6 +1425,10 @@ function forena_access_info_callback($form, $form_state) {
  */
 function forena_fields_form($formid, $form_state, $report_name) {
   $desc = forena_report_desc($report_name);
+  if (!$desc['exists']) {
+  	drupal_not_found();
+  	exit;
+  }
   $name = $desc['name'];
   $filename = $desc['filename'];
   @$format = $desc['format'];
@@ -1867,11 +1895,14 @@ function forena_add_data_block_form_submit($form, &$form_state) {
  */
 function forena_data_block_form($formid, &$form_state, $report_name) {
   $desc = forena_report_desc($report_name);
+  if (!$desc['exists']) {
+  	drupal_not_found();
+  	exit;
+  }
   $name = $desc['name'];
   $filename = $desc['filename'];
   $format = isset($desc['format']) ? $desc['format'] : '';
-  if ($desc['exists']) {
-    $r = forena_get_report_editor($name);
+  $r = forena_get_report_editor($name);
     drupal_set_title($r->title);
     $form = array();
     $title = (string)$r->title;
@@ -1983,10 +2014,6 @@ function forena_data_block_form($formid, &$form_state, $report_name) {
       '#value' => 'Save',
     );
     return $form;
-  }
-  else {
-    drupal_not_found();
-   }
 }
 
 
@@ -2259,6 +2286,10 @@ function forena_xmlpp($xml, $html_output=FALSE) {
 function forena_admin_params_form($formid, $form_state, $report_name) {
 
   $desc = forena_report_desc($report_name);
+  if (!$desc['exists']) {
+  	drupal_not_found();
+  	exit;
+  }
   $name = $desc['name'];
   $filename = $desc['filename'];
   $format = @$desc['format'];

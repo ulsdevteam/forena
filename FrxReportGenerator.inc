@@ -63,10 +63,7 @@ class FrxReportGenerator {
     $desc['filename'] = $report_path . '/' . trim($name, ' /') . '.frx';
     $desc['link'] = 'reports/' . trim(str_replace('/' , '.', $name), '.');
 
-    if (file_exists($desc['filename'])) {
-      $desc['exists'] = TRUE;
-    }
-
+    $desc['exists'] = file_exists($desc['filename']);
     return $desc;
   }
 
