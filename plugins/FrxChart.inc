@@ -2,6 +2,7 @@
 class FrxChart extends FrxRenderer {
 	public function render() {
 		// Get data from source
+		$output = '';
 		$options = array();
 		$series = array();
 		$seriesx = array();
