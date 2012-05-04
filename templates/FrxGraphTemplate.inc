@@ -38,12 +38,8 @@ class FrxGraphTemplate extends FrxTemplate {
       '#title' => t('Graph Type'),
       '#options' => $graph_types,
       '#default_value' => $config['type'],
-      '#ajax' => array(
-        'callback' => 'forena_template_info_callback',
-        'wrapper' => 'template-wrapper',
-      ),
     );
-
+    forena_template_ajax($form_ctl['type']);
 
     $form_ctl['gen_table'] = array(
       '#type' => 'checkbox',
@@ -124,7 +120,7 @@ class FrxGraphTemplate extends FrxTemplate {
 			  'type' => $type,
 			  'renderer' => 'FrxSVGGraph',
 			  'xpath' => $xpath,
-			  'options' => drupal_http_build_query($config)
+			  'options' => forena_query_string($config),
 			);
 			$svg = $this->addNode($div, 2, 'svg', null, null, $frxparms);
 			if ($gen_table) {

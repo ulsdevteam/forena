@@ -235,7 +235,6 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
   $cache = NULL;
   $rpt_cache = NULL;
 
-
   return $save_count;
 }
 
@@ -273,80 +272,6 @@ function forena_delete_report($report_name, $delete_file = TRUE) {
   }
 }
 
-/**
- * Syncronize the data
- *
- */
-function forena_db_sync($subdir='') {
-  static $prefix = '';
-  if (!$subdir) {
-    $prefix = '';
-     db_delete('forena_reports')
-       ->execute();
-  }
-
-  $save_count=0;
-  $path =forena_report_path() . '/' . $subdir;
-  $d = dir($path);
-  if ($d) while (false !== ($rpt_file = $d->read())) {
-    $src_file = trim($d->path, '/') . '/' . trim($rpt_file, '/');
-    $dest_file = $path . '/' . trim($rpt_file, '/');
-    if (is_file($src_file)) {
-      list($report_name, $ext) = explode('.', $rpt_file, 2);
-      if ($ext == 'frx') {
-        $report_name = trim($prefix . '/' . $report_name, '/');
-
-        try {
-          $r_xml =file_get_contents($src_file);
-        } catch (Exception $e) {
-          $s = t('unable to load Report %s', $r_xml);
-          forena_error($s, $s . $e->getMessage());
-
-        }
-
-        // Load the report
-
-        $r = new FrxReport($r_xml);
-        $save_count = forena_save_report($report_name, $r_xml, FALSE);
-      }
-    }
-    elseif (is_dir($src_file)) {
-      if (strpos($rpt_file, '.')!==0) {
-        $save_prefix = $prefix;
-        $prefix .=  '/' . $rpt_file;
-        $prefix = trim($prefix, '/');
-        forena_db_sync($prefix);
-        $prefix = $save_prefix;
-      }
-    }
-  }
-  if ($d) $d->close();
-
-  return $save_count;
-}
-
-/**
- * Accepts the name of a file
- *
- * Returns an editor object of the file.
- *
-*/
-function forena_get_report_editor($report_name) {
-  require_once('FrxReportEditor.inc');
-  if ($report_name) {
-    $r_text='';
-    $report_path = forena_report_path();
-    $filename = $report_path . '/' . $report_name . '.frx';
-    if (file_exists($filename)) {
-      $r_text = file_get_contents($filename);
-    }
-    $r = new FrxReportEditor($r_text);
-    return $r;
-  }
-  else {
-    return new FrxReportEditor();
-  }
-}
 
 
 function forena_filter_element($fmt) {
@@ -387,6 +312,30 @@ function forena_filter_element($fmt) {
     '#weight' => 11,
   );
   return $element['format'];
+}
+
+
+/**
+ * Accepts the name of a file
+ *
+ * Returns an editor object of the file.
+ *
+*/
+function forena_get_report_editor($report_name) {
+  require_once('FrxReportEditor.inc');
+  if ($report_name) {
+    $r_text='';
+    $report_path = forena_report_path();
+    $filename = $report_path . '/' . $report_name . '.frx';
+    if (file_exists($filename)) {
+      $r_text = file_get_contents($filename);
+    }
+    $r = new FrxReportEditor($r_text);
+    return $r;
+  }
+  else {
+    return new FrxReportEditor();
+  }
 }
 
 /**
@@ -485,20 +434,6 @@ function forena_sync_reports($overwrite=FALSE) {
 function forena_settings_sync_submit($form, &$form_state) {
   forena_sync_reports($form_state['values']['sync_overwrite']);
   drupal_set_message(t('Report cache cleared'));
-}
-
-
-function forenea_general_form($formid, $form_state, $new_report='') {
-  $desc = forena_report_desc();
-  $name = $desc['name'];
-  $add_new_rpt;
-  //determine if this is an add new report request
-  if ($new_report == 'add') {
-    $add_new_rpt = TRUE;
-  }
-
-  $filename = $desc['filename'];
-  $format = $desc['format'];
 }
 
 function forena_format_form($formid, $form_state, $report_name) {
@@ -1354,8 +1289,9 @@ function forena_data_settings_save($form, &$form_state) {
   }
   if (isset($values['connection']['new_password'])) unset($values['connection']['new_password']);
   if (is_array(@$values['connection'])) $config = array_merge($config, @$values['connection']);
-  if (empty($values['access_block'])) {
+  if ($values['access_method']=='callback') {
     $config['access callback'] = empty($values['access_callback']) ? 'user_access' : $values['access_callback'];
+    if (isset($config['access block'])) unset($config['access block']);
   }
   else {
     $config['access block'] = $values['access_block'];
@@ -1670,11 +1606,9 @@ function forena_add_data_block_form($formid, &$form_state, $report_name) {
       '#options' => $template_array,
       '#required' => TRUE,
       '#description' => t('Select a template to preview the data block in.'),
-      '#ajax' => array(
-        'callback' => 'forena_template_info_callback',
-        'wrapper' => 'template-wrapper',
-      ),
     );
+
+    forena_template_ajax($form['templates']);
 
     $form['template'] = array(
      '#prefix' => '<div id="template-wrapper">',
@@ -2566,6 +2500,17 @@ function forena_get_categories($string='') {
       }
     }
     return $categories;
+}
+
+function forena_template_ajax($form_element) {
+	$form_element['#ajax'] = array(
+        'callback' => 'forena_template_info_callback',
+        'wrapper' => 'template-wrapper',
+      );
+}
+
+function forena_query_string($var) {
+  return drupal_http_build_query($var);
 }
 
 
