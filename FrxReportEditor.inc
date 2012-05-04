@@ -181,7 +181,7 @@ class FrxReportEditor {
   	$this->verifyHeaderElements(array($parent));
   	$pnode = $dom->getElementsByTagNameNS($this->xmlns, $parent)->item(0);
 
- 	// Iterate through all child arrays in the header
+  	// Iterate through all child arrays in the header
   	$tnode = $dom->createTextNode("\n");
     $pnode->appendChild($tnode);
   	foreach ($element_array as $element_data) {
@@ -217,6 +217,8 @@ class FrxReportEditor {
       }
   	}
 
+
+
   }
 
   /**
@@ -245,7 +247,7 @@ class FrxReportEditor {
    * @param unknown_type $docgenElements
    */
   public function setDocgen($docgenElements) {
-    $dom = $this->dom;
+  	$dom = $this->dom;
     $newDocs = $dom->createElementNS($this->xmlns, 'docgen');
     $this->verifyHeaderElements(array('docgen'));
     $dnode = $dom->getElementsByTagNameNS($this->xmlns, 'docgen')->item(0);
@@ -274,6 +276,15 @@ class FrxReportEditor {
 
   	$this->setFrxHeader('parameters', 'parm',
       $parmElements,
+      array('id', 'label', 'require', 'desc', 'data_source', 'data_field', 'type'),
+      'value');
+  }
+
+  public function addParameter($parm) {
+  	$parms= array();
+  	$parms[$parm['id']] = $parm;
+  	$this->setFrxHeader('parameters', 'parm',
+      $parms,
       array('id', 'label', 'require', 'desc', 'data_source', 'data_field', 'type'),
       'value');
   }
@@ -444,11 +455,11 @@ class FrxReportEditor {
 
         foreach ($att_list as $key => $value) {
           if (!$frx_attributes[$key]) {
-            $node['frx:' . $key] = $value;
+            if ($value) $node['frx:' . $key] = $value;
           }
           else {
             unset($frx_attributes[$key]);
-            $node['frx:' . $key] = $value;
+            if ($value) $node['frx:' . $key] = $value;
           }
         }
       }

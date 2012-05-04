@@ -8,57 +8,32 @@
  *
  */
 define('FRX_TOKEN_EXP', '/\{[^\n^\r^}]+}/');
-define('FRX_SQL_TOKEN', '/:([a-z]|[0-9]|{A-Z]|[_])+/');
+define('FRX_SQL_TOKEN', '/:([a-z]|[0-9]|{A-Z]|[_\.])+/');
 class FrxSyntaxEngine {
   private $tpattern;
   private $trim_chars;
   private $formatter; // Object used to format the data
-  private $data_stack;
-  private $data_sources;
+  private $frxData ;
   /**
    * Class for doing syntax replacements;
    * @param $regexp
    * @return unknown_type
    */
-  public function __construct($regexp, $trim, $formatter=NULL) {
+  public function __construct($regexp, $trim, $formatter=NULL, $frxObject=NULL) {
     $this->tpattern = $regexp;
     $this->trim_chars = $trim;
     if (is_object($formatter)) {
       $this->formatter=$formatter;
     }
-    $this->data_stack = array();
-    $this->data_sources = array();
-  }
-
-  /**
-   * Push a data context onto the data stacks
-   * to make sure that we can address these using an
-   * appropriate syntax.  I think we don't need data_stack
-   * but i'm holding it there in case we develop a "relative" path syntax.
-   * @param $data
-   * @param $id
-   * @return unknown_type
-   */
-  public function push_data($data, $id='') {
-    $this->data_stack[] = $data;
-
-    if ($id) {
-      $this->data_sources[$id] = $data;
+    if ($frxObject) {
+    	$this->frxData = $frxObject;
     }
+    else {
+      $this->frxData = FrxData::instance();
+    }
+
   }
 
-  /**
-   * Remove data from the data stack.  This will make data unavaiable
-   * when we leave the context of the current nested reports.
-   * @param $id
-   * @return unknown_type
-   */
-  public function pop_data($id='') {
-    array_pop($this->data_stack);
-    if ($id) {
-      unset($this->data_stack[$id]);
-    }
-  }
 
   /**
    * Provides an api to the {=xpath} syntax that can be used
@@ -91,23 +66,18 @@ class FrxSyntaxEngine {
   */
   protected function get_value( $key, $raw=FALSE) {
     $retvar = '';
-    // Determne which $data var we're going to get
-    $data = array();
-    if ($this->data_stack) {
-      $i = count($this->data_stack) - 1;
-      $data = $this->data_stack[$i];
-    }
-    $raw_key=$key;
+    // Default to theo current context
+    $data = $this->frxData->currentContext();
+
     // Determine if we have a . syntax for the id.
+    $raw_key=$key;
     if ($key && strpos($key, '.')) {
       @list($id, $path) = explode('.', $key, 2);
-      if ($data && isset($this->data_sources[$id])) {
-        $data = $this->data_sources[$id];
+      if ($this->frxData->contextExists($id)) {
+        $data = $this->frxData->getContext($id);
         $key = $path;
       }
     }
-
-
 
     if (is_array($data)) {
       $retvar = @$data[$key];
@@ -156,17 +126,23 @@ class FrxSyntaxEngine {
    * @param $data
    * @return unknown_type
    */
-  public function replace($text, $data='', $raw=FALSE) {
+  public function replace($text, $raw=FALSE) {
+  	if (is_array($text)) {
+  	  foreach ($text as $key => $value) {
+  		  $text[$key] = $this->replace($value, $raw);
+  	  }
+      return $text;
+  	}
+  	//Otherswise assume text
     $match=array();
     $o_text = $text;
     // Put the data on the stack.
-    if ($data) $this->push_data($data);
     if (preg_match_all($this->tpattern, $o_text, $match)) {
       //list($params) = $match[1];
       $i=0;
 
       foreach ($match[0] as $match_num => $token) {
-      	 $path = trim($token, $this->trim_chars);
+         $path = trim($token, $this->trim_chars);
          $value = $this->get_value($path, $raw);
 
           $pos = strpos($text, $token);
@@ -175,7 +151,6 @@ class FrxSyntaxEngine {
           }
       }
     }
-    if ($data) $this->pop_data();
     return $text;
   }
 

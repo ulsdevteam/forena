@@ -1,4 +1,5 @@
 <?php
+// $Id$
 /**
  * @file contains various methods for extending report
  * formating, layout, transformation and design.
@@ -6,8 +7,7 @@
  */
 
 class FrxControls {
-
-	/**
+  /**
    * @section
    * Below here are advertising methods
    */
@@ -18,29 +18,21 @@ class FrxControls {
                      'iso_date' => 'ISO Date',
                      'sprintf' => 'PHP sprintf()',
                      'number' => 'Number',
+                     'drupal_translation' => 'Translatable Text'
                      );
     return $formats;
   }
 
   //document transformations
   public function doc_types() {
-    $doc_types = array('doc' => 'htmldocument',
-                       'html' => 'htmldocument',
-                       'csv' => 'csvdocument',
-                       'xls' => 'xlsdocument',
-                       'email' => 'emaildocument',
+    $doc_types = array('doc' => 'htmlDocument',
+                       'html' => 'htmlDocument',
+                       'csv' => 'csvDocument',
+                       'xls' => 'xlsDocument',
+                       'email' => 'emailDocument',
+                       'svg' => 'svgDocument'
     );
     return $doc_types;
-  }
-
-  //Report templates
-  public function templates() {
-    $templates = array('table' => 'table',
-                       'vertical_list' => 'list',
-                       'email_merge' => 'email merge'
-                      );
-
-    return $templates;
   }
 
   // Custom formats based on translation string
@@ -50,7 +42,7 @@ class FrxControls {
      $field = $teng->replace($field, null, TRUE);
      $vars = array();
      if ($field) {
-     	$vars = @unserialize($field);
+     	$vars = (array) @unserialize($field);
      }
      return t($value, $vars);
   }
@@ -75,7 +67,10 @@ class FrxControls {
          $type = 'custom';
          $format = $format_str;
      }
-     return $value ? format_date($value, $type, $format): '';
+     if ($value) {
+     	  $value = function_exists('format_date') ? format_date($value, $type, $format) : date($format, $value);
+     }
+     return $value;
   }
 
   public function iso_date($value, $format_str, $teng) {
@@ -85,31 +80,30 @@ class FrxControls {
 
   public function sprintf($value, $format_str, $teng) {
     if ($value) {
-      $value =  sprintf($format_str,$value);
+      $value = sprintf($format_str, $value);
     }
     return $value;
   }
 
-  public function number($value, $format_str, $teng) {
+  public function number($value, $format_str, $data='') {
 
     $dec= 2;
     $dec_sep='.';
     $th_sep = ',';
-    if ($format_str && !trim($format_str,'9.,$')) {
-        // Determine the decimal places.
-        $dec_pos = strrpos($format_str, $dec_sep);
-        if ($dec_pos) {
-          $dec = strlen($format_str) - $dec_pos -1;
-        }
-        else {
-          $dec = 0;
-          $dec_sep = '';
-        }
+    if ($format_str && !trim($format_str, '9.,$')) {
+      //Determine the decimal places.
+      $dec_pos = strrpos($format_str, $dec_sep);
+      if ($dec_pos) {
+        $dec = strlen($format_str) - $dec_pos -1;
+      }
+      else {
+        $dec = 0;
+       $dec_sep = '';
+      }
     }
 
     if ($value && $this->is_number($value)) $value = number_format($value, $dec, $dec_sep, $th_sep);
     return $value;
-
   }
 
   private function is_number($value) {
@@ -117,49 +111,101 @@ class FrxControls {
           // Determine if it contains +- in the interior
           // Zero is ok here bu
           $inner_symbols = FALSE;
-          if (strpos($value,'+') || strpos($value,'-') || strpos($value,' ')) $inner_symbols =  TRUE;
+          if (strpos($value, '+') || strpos($value, '-') || strpos($value, ' ')) $inner_symbols =  TRUE;
           return (empty($non_numeric_chars) && trim($value)!=='' && !$inner_symbols) ? TRUE : FALSE;
   }
 
   //Document transformation methods
-  public function htmldocument($body, $options) {
-    $output .= '<html><head>';
+  public function htmlDocument($body, $options) {
+    $output = '<html><head>';
 
     if ($options['css']) {
       $output .= '<style type="text/css">';
       $output .= $options['css'];
       $output .= '</style>';
     }
-    $output .= '<title>'. $options['title'] .'</title></head><body class="forena-report">'. $body .'</body></html>';
+    $output .= '<title>' . $options['title'] . '</title></head><body class="forena-report">' . $body . '</body></html>';
     return $output;
   }
 
-  public function csvdocument($body, $options) {
+  /**
+   * Fill columns with rowspan tags.
+   * @param unknown_type $colspan
+   */
+  private function fillColumns($colspan) {
+  	$f = '';
+  	for ($i=2; $i<=$colspan; $i++) {
+  		$f .= ',';
+  	}
+  	return $f;
+  }
+
+
+  /**
+   * Generate the CSV document.
+   * @param XML $body
+   * @param unknown_type $options
+   */
+  public function csvDocument($body, $options) {
     $doc = new DOMDocument();
     $doc->strictErrorChecking = FALSE;
     $xmlBody = '<?xml version="1.0" encoding="UTF-8"?>' . $body;
-    $doc->loadHTML($xmlBody);
+    @$doc->loadHTML($xmlBody);
     $xml = simplexml_import_dom($doc);
-
+    $output = '';
     $rows = $xml->xpath('//tr');
+    $rowspans = array();
     if ($rows) foreach ($rows as $row) {
+    	$c = 0;
       foreach ($row as $column) {
+      	$c++;
+      	if (@$rowspans[$c]) {
+      		$cont = true;
+      		while ($rowspans[$c] && $cont) {
+      			$rowspans[$c]--;
+      			$output .= ',';
+      			$c++;
+      		}
+      	}
         $value = $column->asXML();
         $value = strip_tags($value);
         $value = str_replace('"', '""', $value);
         $value = str_replace(array("\n"), '', $value);
         $value =  '"' . $value . '",';
         $output .= $value;
+        // Add Column span elements
+        if ((int)$column['colspan'] > 1) {
+          for ($i=2; $i<=(int)$column['colspan']; $i++) {
+          	$c++;
+  		      $output .= ',';
+  	      }
+        }
+        // Check to see if we have some rowspans that we need to save
+        if ((int)$column['rowspan'] > 1) {
+        	$rowspans[$c] = (int)$column['rowspan'] - 1;
+        }
       }
       $output .= "\n";
     }
     return $output;
   }
 
+  public function svgDocument($body, $options) {
+  	$output = '<?xml version="1.0" encoding="UTF-8" standalone="no" ?>';
+  	$doc = new DomDocument();
+  	$doc->strictErrorChecking = FALSE;
+  	@$doc->loadHTML($body);
+  	$xml = simplexml_import_dom($doc);
+  	$svg = $xml->xpath('//svg');
+  	if ($svg) foreach($svg as $graph) {
+  		$output .= $graph->asXML();
+  	}
+  	return $output;
+  }
 
 
-  public function xlsdocument($body, $options) {
-    $output .= '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+  public function xlsDocument($body, $options) {
+    $output = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
     $output .= '<?mso-application progid="Excel.Sheet"?>' . "\n";
     $output .= '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"' . "\n";
     $output .= '  xmlns:o="urn:schemas-microsoft-com:office:office"' . "\n";
@@ -177,7 +223,7 @@ class FrxControls {
     $output .= '  </Style>' . "\n";
     $output .= '</Styles>' . "\n";
 
-    $doc = new DOMDocument('1.0', 'UTF-8');
+    $doc = new DOMDocument();
     $doc->strictErrorChecking = FALSE;
     $doc->loadHTML($body);
     $xml = simplexml_import_dom($doc);
@@ -185,7 +231,7 @@ class FrxControls {
     $tables = $xml->xpath('//table');
     $count = 1;
     if ($tables) foreach ($tables as $table) {
-      $output .= '<Worksheet ss:Name="sheet'. ' ' . $count . '">' . "\n";
+      $output .= '<Worksheet ss:Name="sheet' . ' ' . $count . '">' . "\n";
       $count ++;
       $output .= '  <Table>' . "\n";
 
@@ -201,7 +247,7 @@ class FrxControls {
           // Determine if it contains +- in the interior
           // Zero is ok here bu
           $inner_symbols = FALSE;
-          if (strpos($tval,'+') || strpos($tval,'-') || strpos($tval,' ')) $inner_symbols =  TRUE;
+          if (strpos($tval, '+') || strpos($tval, '-') || strpos($tval, ' ')) $inner_symbols =  TRUE;
           if (substr_count($tval, '.') > 1) $inner_symbols = TRUE;
           if (empty($non_numeric_chars) && trim($value)!=='' && !$inner_symbols) {
             $output .= '      <Cell><Data ss:Type="Number">' . $tval . '</Data></Cell>' . "\n";
@@ -224,7 +270,7 @@ class FrxControls {
     return $output;
  }
 
- public function emaildocument($body, $options) {
+ public function emailDocument($body, $options) {
    $doc = new DOMDocument('1.0', 'UTF-8');
    $doc->strictErrorChecking = FALSE;
    $doc->loadHTML($body);
@@ -257,84 +303,4 @@ class FrxControls {
    return $output;
  }
 
-
-
- //template methods
-  public function table($columns, $data_block, $clause='') {
-    if ($clause) $clause = 'frx:clause ="' . $clause . '"';
-    $xml .= '<div frx:block="'. $data_block .'" '. $clause .'>';
-    $xml .= '<table>';
-    $xml .= '<thead>';
-    $xml .= '<tr>';
-    //Create the headers
-    foreach ($columns as $header) {
-     $xml .= '<th>'. $header .'</th>';
-    }
-    $xml .= '</tr>';
-    $xml .= '</thead>';
-    $xml .= '<tbody>';
-    $xml .= '<tr frx:foreach="*">';
-    foreach ($columns as $column) {
-      $xml .= '<td>{'. $column .'}</td>';
-    }
-    $xml .= '</tr>';
-    $xml .= '</tbody>';
-    $xml .= '</table>';
-    $xml .= '</div>';
-
-    return $xml;
-  }
-
-  public function vertical_list($columns, $data_block, $clause) {
-    if ($clause) $clause = 'frx:clause ="'. $clause .'"';
-    $xml .= '<div frx:block="'. $data_block .'" '. $clause .'>';
-    $xml .= '<table frx:foreach="*">';
-    $xml .= '<tbody>';
-
-    foreach ($columns as $column) {
-      $xml .= '<tr >';
-      $xml .= '<th>'. $column .'</th><td>{'. $column .'}</td>';
-      $xml .= '</tr>';
-    }
-
-    $xml .= '</tbody>';
-    $xml .= '</table>';
-    $xml .= '</div>';
-
-    return $xml;
-  }
-
-  public function email_merge($columns, $data_block, $clause) {
-    if ($clause) $clause = 'frx:clause ="'. $clause .'"';
-    $xml = '<div frx:block="'. $data_block .'" '. $clause .' frx:foreach="*">';
-    $xml .='<div class="email-document">';
-    $xml .='<div class="email-header">
-    <table>
-      <tbody>
-        <tr>
-          <th>From</th>
-          <td class="email-header-from">metzlerd@evergreen.edu</td>
-        </tr>
-       <tr>
-         <th>To</th>
-         <td class="email-header-to">{email}</td>
-       </tr>
-       <tr>
-         <th>Subject</th>
-         <td class="email-header-subject"></td>
-       </tr>
-     </tbody>
-    </table>
-   </div>';
-   $xml .= '<div class="email-body"><p>';
-
-   foreach ($columns as $column) {
-   	$xml .= '{' . $column . '} ';
-   }
-
-   $xml .= '</p></div>';
-   $xml .= '</div>';
-   $xml .= '</div>';
-   return $xml;
-  }
 }

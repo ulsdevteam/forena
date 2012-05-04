@@ -31,24 +31,19 @@ class FrxOracle extends FrxDataProvider {
     if ($uri) {
          // Test for postgres suport
       if (!is_callable('oci_connect')) {
-        forena_error('OCI support not installed.', 'OCI support not installed.');
+        $this->error('OCI support not installed.', 'OCI support not installed.');
         return;
       }
       try {
-        $db = oci_connect($conf['user'], $conf['password'], $uri, $conf['character_set']);
+        $db = oci_connect($conf['user'], $conf['password'], $uri, @$conf['character_set']);
         $this->db = $db;
-        if ($db) {
-          $stmt = oci_parse($db,"ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD HH24:MI:SS'");
-          oci_execute($stmt);
-        }
-      }
-      catch (Exception $e) {
-        forena_error('Unable to connect to database ' . $conf['title'], $e->getMessage());
+      } catch (Exception $e) {
+        $this->error('Unable to connect to database ' . $conf['title'], $e->getMessage());
       }
 
     }
     else {
-      forena_error('No database connection string specified', 'No database connection: ' . print_r($conf, 1));
+      $this->error('No database connection string specified', 'No database connection: ' . print_r($conf, 1));
     }
 
     // Set up the stuff required to translate.
@@ -70,28 +65,28 @@ class FrxOracle extends FrxDataProvider {
     if ($block['source'] && $this->access($block['access']) && $db) {
       $sql = $block['source'];
       // See if this block matches a declare begin end; syntax.
-      if (stripos($sql,'end;')>= stripos($sql,'begin') && stripos($sql,'begin')!==FALSE) {
+      if (stripos($sql, 'end;')>= stripos($sql, 'begin') && stripos($sql, 'begin')!==FALSE) {
       	$params = $this->te->object_to_array($params);
-      	$this->call($sql, $params, array('return' => 'clob'));
-      	$xml = $params['return'];
-      	if (trim($xml)) $xml = new SimpleXMLElement($xml);
+        $this->call($sql, $params, array('return' => 'clob'));
+        $xml = $params['return'];
+        if (trim($xml)) $xml = new SimpleXMLElement($xml);
       }
       else {
-	      if ($clause) {
-	        $sql = 'SELECT * FROM (' . trim($sql, ' ;') . ') ' . $clause;
-	      }
-	      $sql = $this->te->replace($sql, $params);
+        if ($clause) {
+          $sql = 'SELECT * FROM (' . trim($sql, ' ;') . ') ' . $clause;
+        }
+        $sql = $this->te->replace($sql);
 
-	      if ($this->use_oracle_xml) {
-	        $xml = $this->oracle_xml($sql, $block_name);
-	      }
-	      else {
-	        $xml = $this->php_xml($sql);
-	      }
+        if ($this->use_oracle_xml) {
+          $xml = $this->oracle_xml($sql, $block_name);
+        }
+        else {
+          $xml = $this->php_xml($sql);
+        }
       }
       if ($this->debug) {
         $d = ($xml) ? htmlspecialchars($xml->asXML()) : '';
-        forena_debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "\n</pre>");
+        $this->debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "\n</pre>");
       }
       return $xml;
     }
@@ -122,7 +117,7 @@ class FrxOracle extends FrxDataProvider {
         $msg .= htmlentities($e['sqltext']);
         //printf("\n%".($e['offset']+1)."s", "^");
         $msg .= "\n</pre>\n";
-        forena_error('Database error in ' . $block . ' see logs for info', $msg);
+        $this->error('Database error in ' . $block . ' see logs for info', $msg);
         return NULL;
       }
 
@@ -131,7 +126,7 @@ class FrxOracle extends FrxDataProvider {
         $xml = new SimpleXMLElement($xml_text);
         if ($xml->getName() == 'error') {
           $msg = (string)$xml . ' in ' . $block . '.sql. ';
-          forena_error($msg . 'See logs for more info', $msg . ' in <pre> ' . $sql . '</pre>');
+          $this->error($msg . 'See logs for more info', $msg . ' in <pre> ' . $sql . '</pre>');
         }
       }
       oci_free_statement($stmt);
@@ -168,7 +163,7 @@ class FrxOracle extends FrxDataProvider {
    */
   public function call($sql, &$data, $types = array()) {
     $db = $this->db;
-    $begin_end_block = stripos($sql,'begin')===FALSE? FALSE : TRUE;
+    $begin_end_block = stripos($sql, 'begin')===FALSE ? FALSE : TRUE;
     $match=array();
     if ($db) $stmt = oci_parse($db, $sql);
     if ($stmt) {
@@ -205,7 +200,7 @@ class FrxOracle extends FrxDataProvider {
              case 'number':
              case 'numeric':
              case 'varchar':
-               oci_bind_by_name($stmt,$token, $data[$name], 32767);
+               oci_bind_by_name($stmt, $token, $data[$name], 32767);
                break;
              default:
 
@@ -248,7 +243,7 @@ class FrxOracle extends FrxDataProvider {
        }
 
       // Retrieve any clob data.
-      if ($lobs) foreach ($lobs as $name=>$lob) {
+      if ($lobs) foreach ($lobs as $name => $lob) {
         if (is_object($lob)) {
           $data[$name] = $lob->load();
           $lob->free();
@@ -261,7 +256,7 @@ class FrxOracle extends FrxDataProvider {
       }
       if (!$begin_end_block) {
         $rows = array();
-        $rows = oci_fetch_all($stmt, $return, null, null, OCI_FETCHSTATEMENT_BY_ROW );
+        $rows = oci_fetch_all($stmt, $return, NULL, NULL, OCI_FETCHSTATEMENT_BY_ROW );
       }
 
       oci_free_statement($stmt);
@@ -293,6 +288,7 @@ class FrxOracle extends FrxDataProvider {
       	else {
       		// Build a array of values string
 	      	$i=0;
+	      	$val = '';
 	      	foreach ($value as $v) {
 	      		$i++;
 	      	  if ($i==1) {
@@ -313,6 +309,7 @@ class FrxOracle extends FrxDataProvider {
     }
     return $value;
   }
+
     /**
    * Destructor - Closes database connections.
    *

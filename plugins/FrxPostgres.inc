@@ -1,4 +1,5 @@
 <?php
+// $Id$
 /**
  * @file
  * Oracle specific driver that takes advantage of oracles native XML support
@@ -10,7 +11,7 @@ class FrxPostgres extends FrxDataProvider {
 
 
   private $db;
-  private $use_postgres_xml;
+  private $use_postgres_xml=FALSE;
 
   /**
    * Object constructor
@@ -19,29 +20,29 @@ class FrxPostgres extends FrxDataProvider {
    * @param string $repos_path Path to location of data block definitions
    */
   public function __construct($conf, $repos_path) {
-
     parent::__construct($conf, $repos_path);
-    $this->use_oracle_xml = FALSE;
+    $this->use_postgres_xml = FALSE;
     $uri = $conf['uri'];
-    $this->debug = $conf['debug'];
+    if (!empty($conf['password'])) $uri = trim($uri) . ' password='. $conf['password'];
+    $this->debug = @$conf['debug'];
     if (isset($conf['postgres_xml'])) $this->use_postgres_xml = $conf['postgres_xml'];
     if ($uri) {
-    	// Test for postgres suport
-    	if (!is_callable('pg_connect')) {
-    		forena_error('PHP Postgres support not installed.', 'PHP Postgres support not installed.');
-    		return;
-    	}
+      // Test for postgres suport
+      if (!is_callable('pg_connect')) {
+        $this->error('PHP Postgres support not installed.', 'PHP Postgres support not installed.');
+        return;
+      }
       try {
         $db = pg_connect($uri);
-        if (isset($conf['search path'])) pg_query($db,"SET search_path=". $conf['search path']);
+        if (isset($conf['search path'])) pg_query($db, "SET search_path=" . $conf['search path']);
         $this->db = $db;
       } catch (Exception $e) {
-        forena_error('Unable to connect to database '. $conf['title'], $e->getMessage());
+        $this->error('Unable to connect to database ' . $conf['title'], $e->getMessage());
       }
 
     }
     else {
-      forena_error('No database connection string specified', 'No database connection: '. print_r($conf,1));
+      $this->error('No database connection string specified', 'No database connection: ' . print_r($conf, 1));
     }
 
     // Set up the stuff required to translate.
@@ -59,12 +60,13 @@ class FrxPostgres extends FrxDataProvider {
     $db = $this->db;
     $block = $this->load_block($block_name);
     $xml ='';
-    if ($block['source'] && $this->access($block['access']) && $db) {
+    if (@$block['source'] && $this->access($block['access']) && $db) {
       $sql = $block['source'];
       if ($clause) {
-        $sql = 'SELECT * FROM ('. trim($sql, ' ;') . ') vvv '. $clause;
+        $sql = 'SELECT * FROM (' . trim($sql, ' ;') . ') vvv ' . $clause;
       }
-      $sql = $this->te->replace($sql, $params);
+
+      $sql = $this->te->replace($sql);
 
       if ($this->use_postgres_xml) {
         $xml = $this->postgres_xml($sql, $block_name);
@@ -73,8 +75,9 @@ class FrxPostgres extends FrxDataProvider {
         $xml = $this->php_xml($sql);
       }
       if ($this->debug) {
+      	$d = '';
         if ($xml) $d = htmlspecialchars($xml->asXML());
-        forena_debug('SQL: '. $sql, '<pre> SQL:'. $sql . "\n XML: ". $d . "\n</pre>");
+        $this->debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "\n</pre>");
       }
       return $xml;
     }
@@ -89,19 +92,20 @@ class FrxPostgres extends FrxDataProvider {
    */
   private function postgres_xml($sql, $block) {
       $db = $this->db;
-
       //$rs->debugDumpParams();
       $fsql = 'select query_to_xml($1,true,false,$2);';
-      $rs = pg_query_params($db,$fsql,array($sql,''));
-		  if ($rs) {
-		    $row = pg_fetch_row($rs);
-		    $xml_text = $row[0];
-		  }
+      $rs = pg_query_params($db, $fsql, array($sql, ''));
+      $xml_text='';
+      if ($rs) {
+        $row = pg_fetch_row($rs);
+        $xml_text = $row[0];
+      }
+      $xml = null;
       if ($xml_text) {
         $xml = new SimpleXMLElement($xml_text);
-        if ($xml->getName() == 'error'){
-          $msg = (string)$xml . ' in '. $block .'.sql. ';
-          forena_error($msg .'See logs for more info', $msg. ' in <pre> '.$sql. '</pre>');
+        if ($xml->getName() == 'error') {
+          $msg = (string)$xml . ' in ' . $block . '.sql. ';
+          $this->error($msg . 'See logs for more info', $msg . ' in <pre> ' . $sql . '</pre>');
         }
         if (!$xml->children()) $xml ='';
       }
@@ -112,10 +116,9 @@ class FrxPostgres extends FrxDataProvider {
   private function php_xml($sql) {
       $db = $this->db;
       $xml = new SimpleXMLElement('<table/>');
-
       $rs = pg_query($sql);
 
-      while ($row = pg_fetch_assoc($rs)) {
+      if ($rs) while ($row = pg_fetch_assoc($rs)) {
         $row_node = $xml->addChild('row');
         foreach ($row as $key => $value) {
           $row_node->addChild(strtolower($key), htmlspecialchars($value));
@@ -153,6 +156,7 @@ class FrxPostgres extends FrxDataProvider {
 	     		  }
 	    		$val .=  "'".   pg_escape_string($v) ."'";
 	    	  }
+	    	  $value = $val;
         }
       }
       else {
@@ -161,8 +165,9 @@ class FrxPostgres extends FrxDataProvider {
       }
     }
     return $value;
+
   }
-    /**
+  /**
    * Destructor - Closes database connections.
    *
    */

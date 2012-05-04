@@ -1,4 +1,5 @@
 <?php
+// $Id$
 /**
  * @file
  * Oracle specific driver that takes advantage of oracles native XML support
@@ -10,7 +11,7 @@ class FrxMSSQL extends FrxDataProvider {
 
 
   private $db;
-  private $use_postgres_xml;
+  private $use_mssql_xml;
 
   /**
    * Object constructor
@@ -21,27 +22,27 @@ class FrxMSSQL extends FrxDataProvider {
   public function __construct($conf, $repos_path) {
 
     parent::__construct($conf, $repos_path);
-    $this->use_oracle_xml = FALSE;
+    $this->use_mssql_xml = FALSE;
     $uri = $conf['uri'];
-    $this->debug = @$conf['debug'];
-    if (isset($conf['mssql_xml'])) $this->use_mssql_xml = TRUE;
+    $this->debug = $conf['debug'];
+    if ($conf['mssql_xml']) $this->use_mssql_xml = TRUE;
     if ($uri) {
-    	// Test for mssql suport
-    	if (!is_callable('mssql_connect')) {
-    		forena_error('MSSQL support not installed.', 'MSSQL mssql support not installed.');
-    		return;
-    	}
+      // Test for mssql suport
+      if (!is_callable('mssql_connect')) {
+        FrxReportGenerator::instance()->error('MSSQL support not installed.', 'MSSQL mssql support not installed.');
+        return;
+      }
       try {
         $db = mssql_connect($uri, $conf['user'], $conf['password']);
         $this->db = $db;
         if ($db) mssql_select_db($conf['database'], $db);
       } catch (Exception $e) {
-        forena_error('Unable to connect to database '. $conf['title'], $e->getMessage());
+        FrxReportGenerator::instance()->error('Unable to connect to database ' . $conf['title'], $e->getMessage());
       }
 
     }
     else {
-      forena_error('No database connection string specified', 'No database connection: '. print_r($conf,1));
+      FrxReportGenerator::instance()->error('No database connection string specified', 'No database connection: ' . print_r($conf, 1));
     }
 
     // Set up the stuff required to translate.
@@ -62,9 +63,9 @@ class FrxMSSQL extends FrxDataProvider {
     if ($block['source'] && $this->access($block['access']) && $db) {
       $sql = $block['source'];
       if ($clause) {
-        $sql = 'SELECT * FROM ('. trim($sql, ' ;') . ') '. $clause;
+        $sql = 'SELECT * FROM (' . trim($sql, ' ;') . ') ' . $clause;
       }
-      $sql = $this->te->replace($sql, $params);
+      $sql = $this->te->replace($sql);
 
       if ($this->use_mssql_xml) {
         $xml = $this->mssql_xml($sql, $block_name);
@@ -74,7 +75,7 @@ class FrxMSSQL extends FrxDataProvider {
       }
       if ($this->debug) {
         if ($xml) $d = htmlspecialchars($xml->asXML());
-        forena_debug('SQL: '. $sql, '<pre> SQL:'. $sql . "\n XML: ". $d . "\n</pre>");
+        FrxReportGenerator::instance()->debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "\n</pre>");
       }
       return $xml;
     }
@@ -92,16 +93,16 @@ class FrxMSSQL extends FrxDataProvider {
 
       //$rs->debugDumpParams();
       $fsql = $sql . ' FOR XML AUTO';
-      $rs = mssql_query($db,$fsql,array($sql,''));
-		  if ($rs) {
-		    $row = mssql_fetch_row($rs);
-		    $xml_text = $row[0];
-		  }
+      $rs = mssql_query($db, $fsql, array($sql, ''));
+      if ($rs) {
+        $row = mssql_fetch_row($rs);
+        $xml_text = $row[0];
+      }
       if ($xml_text) {
         $xml = new SimpleXMLElement($xml_text);
-        if ($xml->getName() == 'error'){
-          $msg = (string)$xml . ' in '. $block .'.sql. ';
-          forena_error($msg .'See logs for more info', $msg. ' in <pre> '.$sql. '</pre>');
+        if ($xml->getName() == 'error') {
+          $msg = (string)$xml . ' in ' . $block . '.sql. ';
+          FrxReportGenerator::instance()->error($msg . 'See logs for more info', $msg . ' in <pre> ' . $sql . '</pre>');
         }
       }
       if ($rs) mssql_free_result($rs);
@@ -135,7 +136,7 @@ class FrxMSSQL extends FrxDataProvider {
    * @param unknown_type $data
    */
   public function format($value, $key, $data) {
-    if ($value=='') $value = 'NULL'; else $value =  "'".  str_replace("'", "''", $value) ."'";
+    if ($value=='') $value = 'NULL'; else $value = "'" . str_replace("'", "''", $value) . "'";
     return $value;
   }
 

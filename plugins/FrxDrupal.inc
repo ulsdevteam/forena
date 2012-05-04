@@ -1,4 +1,5 @@
 <?php
+// $Id$
 /**
  * @file
  * Provides data blocks for native drupal connections using the default
@@ -24,7 +25,6 @@ class FrxDrupal extends FrxDataProvider {
     // Set up the stuff required to translate.
     $this->te = new FrxSyntaxEngine(FRX_SQL_TOKEN, ':', $this);
   }
-
   /**
    * Get data based on file data block in the repository.
    *
@@ -34,16 +34,15 @@ class FrxDrupal extends FrxDataProvider {
    */
   public function data($block_name, $params=array(), $clause='') {
     // Load the block from the file
-
     $block = $this->load_block($block_name, $clause);
     $xml ='';
-    if ($block['source'] && $this->access($block['access'])) {
+    if (trim($block['source']) && $this->access($block['access'])) {
       $sql = $block['source'];
       if ($clause) {
-        $sql = 'SELECT * FROM ('. trim($sql, ' ;') . ') forena_table '. $clause;
+        $sql = 'SELECT * FROM (' . trim($sql, ' ;') . ') forena_table ' . $clause;
       }
-      $sql = $this->te->replace($sql, $params);
-      $rs = db_query($sql);
+     $sql = $this->te->replace($sql, $params);
+     $rs = db_query($sql);
 
       $xml = new SimpleXMLElement('<table/>');
       while ($data = db_fetch_object($rs)) {
@@ -54,7 +53,6 @@ class FrxDrupal extends FrxDataProvider {
             //$row_node->$key = $value;
           }
       }
-
     }
 
     return $xml;
@@ -70,8 +68,33 @@ class FrxDrupal extends FrxDataProvider {
    * @param unknown_type $data
    */
   public function format($value, $key, $data) {
-    if ($value=='') $value = 'NULL'; else $value =  "'". db_escape_string($value) ."'";
-  	return $value;
+	    if ($value=='')
+	      $value = 'NULL';
+	    else {
+	      if (is_array($value)) {
+	      	if ($value == array()) {
+	      		$value = 'NULL';
+	      	}
+	      	else {
+	      		// Build a array of values string
+		      	$i=0;
+		      	$val = '';
+		      	foreach ($value as $v) {
+		      		$i++;
+		      	  if ($i>1) {
+		    			  $val .= ',';
+		     		  }
+		    		$val .=    "'". db_escape_string($v) ."'";
+		    	  }
+		    	  $value = $val;
+	        }
+	      }
+	      else {
+	        $value = trim($value);
+	        $value =    "'". db_escape_string($value) ."'" ;
+	      }
+	    }
+    return $value;
   }
 
   /**

@@ -1,4 +1,5 @@
 <?php
+// $Id$
 /**
  * @file
  * General database engine used to do sql queries.
@@ -25,36 +26,36 @@ class FrxPDO extends FrxDataProvider {
     if ($uri) {
       // Test for PDO suport
       if (!class_exists('PDO')) {
-        forena_error('PDO support not installed.', 'PDO support not installed.');
+        FrxReportGenerator::instance()->error('PDO support not installed.', 'PDO support not installed.');
         return;
       }
 
       // Test for driver support
-      list($prot, $c) = explode(':', $uri, 2);
+      @list($prot, $c) = explode(':', $uri, 2);
       $drivers = PDO::getAvailableDrivers();
       if ($drivers && (array_search($prot, $drivers)===FALSE)) {
-      	$msg = 'PDO driver support for ' . $prot . ' not installed';
-      	forena_error($msg, $msg);
-      	return;
+        $msg = 'PDO driver support for ' . $prot . ' not installed';
+        FrxReportGenerator::instance()->error($msg, $msg);
+        return;
       }
       try {
-      	if ($conf['user']) {
+        if (isset($conf['user'])) {
           $db = new PDO($uri, $conf['user'], $conf['password']);
-      	}
-      	else {
-      		$db = new PDO($uri);
-      	}
+        }
+        else {
+          $db = new PDO($uri);
+        }
         $this->db = $db;
         if (!is_object($db)) {
-        	forena_error('Unknown error connecting to database '. $uri);
+          FrxReportGenerator::instance()->error('Unknown error connecting to database ' . $uri);
         }
       } catch (PDOException $e) {
-        forena_error('Unable to connect to database', $e->getMessage());
+        FrxReportGenerator::instance()->error('Unable to connect to database', $e->getMessage());
       }
 
     }
     else {
-      forena_error('No database connection string specified');
+      FrxReportGenerator::instance()->error('No database connection string specified');
     }
 
     // Set up the stuff required to translate.
@@ -71,28 +72,24 @@ class FrxPDO extends FrxDataProvider {
     // Load the block from the file
     $db = $this->db;
     $block = $this->load_block($block_name);
-
-
     $xml ='';
     if ($block['source'] && $this->access($block['access']) && $db) {
       $sql = $block['source'];
       if ($clause) {
-	        $sql = 'SELECT * FROM ('. trim($sql, ' ;') . ') forena_table '. $clause;
-	      }
-      $sql = $this->te->replace($sql, $params);
+        $sql = 'SELECT * FROM (' . trim($sql, ' ;') . ') forena_table ' . $clause;
+      }
+      $sql = $this->te->replace($sql);
       $rs = $db->query($sql);
       $xml = new SimpleXMLElement('<table/>');
-
       $e = $db->errorCode();
       if ($e != '00000') {
-       $i = $db->errorInfo();
-       forena_error($i[2] .':'. $sql, $i[2]);
-
+        $i = $db->errorInfo();
+        FrxReportGenerator::instance()->error($i[2] . ':' . $sql, $i[2]);
       }
       else {
-
+        $data = array();
         //$rs->debugDumpParams();
-        $data = $rs->fetchAll(PDO::FETCH_ASSOC);
+        if ($rs) $data = $rs->fetchAll(PDO::FETCH_ASSOC);
         foreach ($data as $row) {
           $row_node = $xml->addChild('row');
           foreach ($row as $key => $value) {
@@ -104,7 +101,7 @@ class FrxPDO extends FrxDataProvider {
 
       if ($this->debug) {
         if ($xml) $d = htmlspecialchars($xml->asXML);
-        forena_debug('SQL: '. $sql, '<pre> SQL:'. $sql . "\n XML: ". $d . "/n</pre>");
+        FrxReportGenerator::instance()->debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "/n</pre>");
       }
       return $xml;
     }
@@ -136,15 +133,12 @@ class FrxPDO extends FrxDataProvider {
 	      	$val ='';
 	      	foreach ($value as $v) {
 	      		$i++;
-	      	  if ($i==1) {
-	      			$val .= '(';
-	      		}
-	     		  else {
+	      	  if ($i!=1) {
 	    			  $val .= ',';
 	     		  }
 	    		$val .= $db->quote($v);
 	    	  }
-	    	$value = $val . ')';
+	    	$value = $val;
         }
       }
       else  $value =  $db -> quote($value);
