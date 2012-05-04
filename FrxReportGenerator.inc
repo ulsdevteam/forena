@@ -785,7 +785,9 @@ function report($name_in, $parms = array(), $print=TRUE) {
  *
  */
 function data_block_params($data_block, $field, $label, $params=array(), $clause='') {
+	FrxData::instance()->push($params);
   $xml = $this->invoke_data_provider($data_block, $params, $clause);
+  FrxData::instance()->pop();
 
   $list = array();
   if ($xml) {

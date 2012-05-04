@@ -181,6 +181,13 @@ function forena_menu() {
      'file' => 'forena.admin.inc',
    );
 
+   $items['forena/js/parameters'] = array(
+     'page callback' => 'forena_parameters_js',
+     'access arguments' => array('access content'),
+     'type' => MENU_CALLBACK,
+     'file' => 'forena.common.inc',
+   );
+
    $items['reports/%/edit/fields'] = array(
      'title' => 'Fields',
      'page callback' => 'drupal_get_form',

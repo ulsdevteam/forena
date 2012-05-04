@@ -159,10 +159,15 @@ function forena_get_html($tag, $r_text) {
  * and display those values appropriately.
  *
  */
-function forena_parameter_form(&$form_state, $r) {
+function forena_parameter_form(&$form_state, $rpt, $collapse=FALSE) {
 
   $parms = $_GET;
   unset($parms['q']);
+  $r = new FrxReport($rpt);
+  if (isset($form_state['values'])) {
+  	$collapse=FALSE;
+  	$parms = array_merge($parms, $form_state['values']['params']);
+  }
   $form = array();
 
   if ($r) {
@@ -206,6 +211,7 @@ function forena_parameter_form(&$form_state, $r) {
 	        //If select or radios is chosen then begin a $list array for display values.
 	        $multiselect = FALSE;
 	        $list = array();
+	        $ajax = FALSE;
 	        switch ($type) {
 	        	case 'multiselect':
 	        		$type = 'select';
@@ -214,9 +220,12 @@ function forena_parameter_form(&$form_state, $r) {
 	        		break;
 	        	case 'checkboxes':
 	        		$value = $multi_value;
+	        	case 'selectajax':
+	        		 $ajax = TRUE;
+	        		 $type = 'select';
+	        		 break;
 	          case 'select':
 	          case 'radios':
-
 	           break;
 	          default:
 	           $type = 'textfield';
@@ -226,7 +235,7 @@ function forena_parameter_form(&$form_state, $r) {
 	        //If a data_source attr was found then create an array of
 	        //returned values filtered against data_field attr.
 	        if ($data_source) {
-	          $list = FrxReportGenerator::instance()->data_block_params($data_source, $data_field, $label_field);
+	          $list = FrxReportGenerator::instance()->data_block_params($data_source, $data_field, $label_field, $parms);
 	          if (!$required) $list = array('' => '') + $list;
 	        }
 
@@ -244,6 +253,13 @@ function forena_parameter_form(&$form_state, $r) {
 	        if ($type != 'textfield') {
 	          $form['params'][$id]['#options'] = $list;
 	          $form['params'][$id]['#multiple'] = $multiselect;
+	          if ($ajax) {
+		        	$form['params'][$id]['#ahah'] = array(
+		        	  'path' => 'forena/js/parameters',
+		            'wrapper' => 'parameters-wrapper',
+		        	  'method' => 'replace',
+		        	  'event' => 'change');
+		        }
 	        }
 
 	      }
@@ -256,6 +272,17 @@ function forena_parameter_form(&$form_state, $r) {
       }
     }
 	  return $form;
+}
+
+/**
+ * Ajax callback for settings pages.
+ * Enter description here ...
+ * @param string $part matches the form path callback
+ */
+function forena_parameters_js() {
+  $form = forena_ahah_helper_start();
+  $form = $form['params'];
+	forena_ahah_helper_end($form);
 }
 
 /**
