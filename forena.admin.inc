@@ -234,6 +234,11 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
   $rpt = NULL;
   $cache = NULL;
   $rpt_cache = NULL;
+  // Destroy object to clear memory leaks.
+  if ($r) {
+  	$r->__destruct();
+  	unset($r);
+  }
 
   return $save_count;
 }
@@ -270,6 +275,60 @@ function forena_delete_report($report_name, $delete_file = TRUE) {
   else {
     drupal_set_message('Unable to delete file '. $info['basename'],'error');
   }
+}
+
+/**
+ * Syncronize the data
+ *
+ */
+function forena_db_sync($subdir='') {
+  static $prefix = '';
+  if (!$subdir) {
+    $prefix = '';
+     db_delete('forena_reports')
+       ->execute();
+  }
+
+  $save_count=0;
+  $path =forena_report_path() . '/' . $subdir;
+  $d = dir($path);
+  if ($d) while (false !== ($rpt_file = $d->read())) {
+    $src_file = trim($d->path, '/') . '/' . trim($rpt_file, '/');
+    $dest_file = $path . '/' . trim($rpt_file, '/');
+    if (is_file($src_file)) {
+      list($report_name, $ext) = explode('.', $rpt_file, 2);
+      if ($ext == 'frx') {
+        $report_name = trim($prefix . '/' . $report_name, '/');
+
+        try {
+          $r_xml =file_get_contents($src_file);
+        } catch (Exception $e) {
+          $s = t('unable to load Report %s', $r_xml);
+          forena_error($s, $s . $e->getMessage());
+
+        }
+
+        // Load the report
+
+        $r = new FrxReport($r_xml);
+        $save_count = forena_save_report($report_name, $r_xml, FALSE);
+        $r->__destruct();
+        unset($r);
+      }
+    }
+    elseif (is_dir($src_file)) {
+      if (strpos($rpt_file, '.')!==0) {
+        $save_prefix = $prefix;
+        $prefix .=  '/' . $rpt_file;
+        $prefix = trim($prefix, '/');
+        forena_db_sync($prefix);
+        $prefix = $save_prefix;
+      }
+    }
+  }
+  if ($d) $d->close();
+
+  return $save_count;
 }
 
 

@@ -216,7 +216,7 @@ class FrxReportGenerator {
         return $repos[$name];
       }
       else {
-        $this->app->error('Undefined repository' . $name, "Undefined Repository: $name <pre>" . print_r($repos, 1) . '</pre>');
+        $this->app->error('Undefined repository' . $name, "Undefined Repository: $name ");
       }
     }
     else {
