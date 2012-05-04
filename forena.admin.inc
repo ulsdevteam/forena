@@ -2390,7 +2390,14 @@ function forena_admin_params_form($formid, $form_state, $report_name) {
           '#type' => 'select',
           '#title' => t('Input Control Type'),
           '#default_value' => $type,
-          '#options' => array('textfield' => 'Text', 'radios' => 'Radios', 'select' => 'Select','multiselect' => 'Multi-Select', 'checkboxes' => 'Checkboxes'),
+          '#options' => array
+           ('textfield' => 'Text',
+           'radios' => 'Radios',
+           'select' => 'Select',
+           'selectajax' => 'Select with Refresh',
+           'multiselect' => 'Multi-Select',
+           'checkboxes' => 'Checkboxes'
+           ),
           '#description' => t('Enter a helpful description about this parameter. This will display on the form when the user is prompted to enter a parameter.'),
         );
 

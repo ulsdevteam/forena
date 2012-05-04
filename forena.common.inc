@@ -170,13 +170,18 @@ function forena_get_html($tag, $r_text) {
  * and display those values appropriately.
  *
  */
-function forena_parameter_form($formid, &$form_state, $r) {
+function forena_parameter_form($formid, &$form_state, $rpt, $collapse=FALSE) {
   $parms = $_GET;
+  $r = new FrxReport($rpt);
+  if (isset($form_state['values'])) {
+  	$collapse=FALSE;
+  	$parms = array_merge($parms, $form_state['values']['params']);
+  }
   unset($parms['q']);
   $form = array();
 
   if ($r) {
-      drupal_set_title($r->title);
+//      drupal_set_title($r->title);
       $head = $r->rpt_xml->head;
 
 
@@ -184,8 +189,10 @@ function forena_parameter_form($formid, &$form_state, $r) {
         '#tree' => TRUE,
         '#title' => t('Parameters'),
         '#type' => 'fieldset',
+        '#prefix' => '<div id="parameters-wrapper">',
+        '#suffix' => '</div>',
         '#collapsible' => TRUE,
-        '#collapsed' => $r->blocks_loaded,
+        '#collapsed' => $collapse,
       );
 
       $nodes = $head->xpath('frx:parameters/frx:parm');
@@ -200,7 +207,7 @@ function forena_parameter_form($formid, &$form_state, $r) {
 	        $type = (string)$node['type'];
 	        if (isset($parms[$id])) {
 	        	$value = $parms[$id];
-	        	$multi_value=(array)$value;
+	        	$multi_value=(array)$parms[$id];
 	        }
 	        else {
 	        	$value = (string)$node;
@@ -216,6 +223,7 @@ function forena_parameter_form($formid, &$form_state, $r) {
 	        //If select or radios is chosen then begin a $list array for display values.
 	        $multiselect = FALSE;
 	        $list = array();
+	        $ajax = FALSE;
 	        switch ($type) {
 	        	case 'multiselect':
 	        		$type = 'select';
@@ -224,19 +232,24 @@ function forena_parameter_form($formid, &$form_state, $r) {
 	        		break;
 	        	case 'checkboxes':
 	        		$value = $multi_value;
+	        		break;
+	        	case 'selectajax':
+	        		 $ajax = TRUE;
+	        		 $type = 'select';
+	        		 break;
 	          case 'select':
 	          case 'radios':
-
 	           break;
 	          default:
 	           $type = 'textfield';
 	           $list = '';
+	           $ajax = FALSE;
 	        }
 
 	        //If a data_source attr was found then create an array of
 	        //returned values filtered against data_field attr.
 	        if ($data_source) {
-	          $list = FrxReportGenerator::instance()->data_block_params($data_source, $data_field, $label_field);
+	          $list = FrxReportGenerator::instance()->data_block_params($data_source, $data_field, $label_field, $parms);
 	          if (!$required) $list = array('' => '') + $list;
 	        }
 
@@ -248,12 +261,17 @@ function forena_parameter_form($formid, &$form_state, $r) {
 	          '#description' => t($desc),
 	        );
 
+
 	        //if $list is not empty then push options
 	        //onto the array. options will cause an error for
 	        //textfield elements.
 	        if ($type != 'textfield') {
 	          $form['params'][$id]['#options'] = $list;
 	          $form['params'][$id]['#multiple'] = $multiselect;
+		        if ($ajax) {
+		        	$form['params'][$id]['#ajax'] = array('callback' => 'forena_parameters_callback',
+		            'wrapper' => 'parameters-wrapper');
+		        }
 	        }
 
 	      }
@@ -266,6 +284,17 @@ function forena_parameter_form($formid, &$form_state, $r) {
       }
     }
 
+
+}
+
+/**
+ * Ajax form callback function
+ * Enter description here ...
+ * @param unknown_type $form
+ * @param unknown_type $form_state
+ */
+function forena_parameters_callback($form, $form_state) {
+	return $form['params'];
 }
 
 /**

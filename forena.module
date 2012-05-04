@@ -484,7 +484,6 @@ function forena_report($name_in, $parms = array(), $print = TRUE) {
   }
   $report_name = $desc['name'];
   $output = FrxReportGenerator::instance()->report($name_in, $parms, $print);
-  $output = check_markup($output, variable_get('forena_input_format', filter_default_format()));
   return $output;
 }
 

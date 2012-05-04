@@ -50,9 +50,10 @@ class FrxDrupalApplication extends FrxHostApplication {
    */
   public function theme($r, $title, $doc_type) {
   	$output = $r->html;
+    $output = check_markup($output, variable_get('forena_input_format', filter_default_format()));
     if (!$doc_type || $doc_type='embed') {
       // Set the title and return the output
-      $f = drupal_get_form('forena_parameter_form', $r);
+      $f = drupal_get_form('forena_parameter_form', $r->rpt_xml->asXML(), $r->blocks_loaded);
       if ($f) $output = drupal_render($f) . $output;
       drupal_set_title(filter_xss($title));
       $output = '<div class="forena-report">' . $output . '</div>';
