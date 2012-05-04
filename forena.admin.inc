@@ -115,7 +115,6 @@ function _forena_copy_reports($src_dir, $overwrite=FALSE, $subdir=FALSE) {
  */
 function forena_save_report($report_name, $report, $save_file = FALSE, $altered = 0) {
   static $save_count=0;
-
   if ($report && !is_object($report)) {
     try {
       $report = new SimpleXMLElement($report);
@@ -236,6 +235,11 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
   $rpt = null;
   $cache = null;
   $rpt_cache = null;
+  // Destroy object to clear memory leaks.
+  if ($r) {
+  	$r->__destruct();
+  	unset($r);
+  }
 
 
   return $save_count;
@@ -282,7 +286,6 @@ function forena_db_sync($subdir='') {
     $prefix = '';
      db_query('DELETE FROM {forena_reports}');
   }
-
   $save_count=0;
   $path =forena_report_path() . '/' . $subdir;
   $d = dir($path);
@@ -292,6 +295,7 @@ function forena_db_sync($subdir='') {
     if (is_file($src_file)) {
       list($report_name, $ext) = explode('.', $rpt_file, 2);
       if ($ext == 'frx') {
+
         $report_name = trim($prefix . '/' . $report_name, '/');
 
         try {
@@ -305,7 +309,10 @@ function forena_db_sync($subdir='') {
         // Load the report
 
         $r = new FrxReport($r_xml);
+        $save_count++;
         $save_count = forena_save_report($report_name, $r_xml, FALSE);
+        $r->__destruct();
+
       }
     }
     elseif (is_dir($src_file)) {
@@ -319,7 +326,6 @@ function forena_db_sync($subdir='') {
     }
   }
   if ($d) $d->close();
-
   return $save_count;
 }
 
@@ -431,6 +437,7 @@ function forena_sync_reports($overwrite=FALSE) {
     }
     if ($i > 0) drupal_set_message($i . ' reports copied');
   }
+
   forena_db_sync();
 
 }
