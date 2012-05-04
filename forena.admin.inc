@@ -312,6 +312,7 @@ function forena_db_sync($subdir='') {
         $save_count++;
         $save_count = forena_save_report($report_name, $r_xml, FALSE);
         $r->__destruct();
+        unset($r);
 
       }
     }
