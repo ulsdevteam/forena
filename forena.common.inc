@@ -243,7 +243,6 @@ function forena_parameter_form($formid, &$form_state, $rpt, $collapse=FALSE) {
 	          default:
 	           $type = 'textfield';
 	           $list = '';
-	           $ajax = FALSE;
 	        }
 
 	        //If a data_source attr was found then create an array of
