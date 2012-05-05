@@ -92,6 +92,13 @@ class FrxReport {
     }
   }
 
+  function __destruct() {
+  	foreach ($this as $key=>$value) {
+  		unset($this->$key);
+  	}
+  }
+
+
   /**
    * Get the data block
    * @param $block
