@@ -179,17 +179,17 @@ function forena_parameter_form($formid, &$form_state, $r) {
       drupal_set_title($r->title);
       $head = $r->rpt_xml->head;
 
-
-      $form['params'] = array(
-        '#tree' => TRUE,
-        '#title' => t('Parameters'),
-        '#type' => 'fieldset',
-        '#collapsible' => TRUE,
-        '#collapsed' => $r->blocks_loaded,
-      );
-
       $nodes = $head->xpath('frx:parameters/frx:parm');
       if ($nodes) {
+
+	      $form['params'] = array(
+	        '#tree' => TRUE,
+	        '#title' => t('Parameters'),
+	        '#type' => 'fieldset',
+	        '#collapsible' => TRUE,
+	        '#collapsed' => $r->blocks_loaded,
+	      );
+
 
 	      foreach ($nodes as $node) {
 	        $label = (string)$node['label'];
@@ -276,6 +276,7 @@ function forena_parameter_form($formid, &$form_state, $r) {
  */
 function forena_parameter_form_submit($form, &$form_state) {
   $values = $form_state['values'];
+  unset($values['submit']);
   foreach($values['params'] as $key=>$value) {
   	if (is_array($value)) {
   		foreach ($value as $k => $val) {
