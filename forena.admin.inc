@@ -1648,6 +1648,7 @@ function forena_add_data_block_form($formid, &$form_state, $report_name) {
         );
       }
     }
+
     $form['preview'] = array(
       '#type' => 'submit',
       '#value' => 'Preview',
@@ -1707,6 +1708,11 @@ function forena_add_data_block_form($formid, &$form_state, $report_name) {
           $form_state['storage']['template_body'] = $body;
         }
       }
+    $form['template']['back'] = array(
+      '#type' => 'submit',
+      '#value' => t('Back'),
+      '#submit' => array('forena_data_block_back'),
+    );
     if (@$form_state['storage']['output'] != '') {
       $form['template']['add'] = array(
         '#type' => 'submit',
@@ -1738,6 +1744,11 @@ function forena_add_data_block_form($formid, &$form_state, $report_name) {
   }
   return $form;
 
+}
+
+function forena_data_block_back($form, &$form_state) {
+	$form_state['rebuild'] = TRUE;
+	$form_state['storage']['step'] = 'select_block';
 }
 
 function forena_data_select_template_submit($form, &$form_state) {
