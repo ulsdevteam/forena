@@ -176,7 +176,12 @@ function forena_parameter_form(&$form_state, $rpt, $collapse=FALSE) {
 
       $nodes = $head->xpath('frx:parameters/frx:parm');
       if ($nodes) {
-
+        if($form_state['ahah_submission']){
+			    // Clear the form errors.  We don't need to show any validation errors if this is an ahah submit, not a final submit
+			    drupal_get_messages('error');
+			    // Clear the form error state.
+			    form_set_error(null, '', true);
+				}
 	      $form['params'] = array(
 	        '#tree' => TRUE,
 	        '#title' => t('Parameters'),
