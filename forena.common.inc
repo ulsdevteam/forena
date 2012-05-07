@@ -226,6 +226,7 @@ function forena_parameter_form(&$form_state, $rpt, $collapse=FALSE) {
 	        		break;
 	        	case 'checkboxes':
 	        		$value = $multi_value;
+	        		break;
 	        	case 'selectajax':
 	        		 $ajax = TRUE;
 	        		 $type = 'select';
