@@ -181,8 +181,10 @@ function forena_parameter_form(&$form_state, $rpt, $collapse=FALSE) {
 	        '#tree' => TRUE,
 	        '#title' => t('Parameters'),
 	        '#type' => 'fieldset',
+	        '#prefix' => '<div id="parameters-wrapper">',
+	        '#suffix' => '</div>',
 	        '#collapsible' => TRUE,
-	        '#collapsed' => (string)$r->blocks_loaded,
+	        '#collapsed' => (string)$r->$collapse,
 	      );
 
 	      foreach ($nodes as $node) {
@@ -257,6 +259,7 @@ function forena_parameter_form(&$form_state, $rpt, $collapse=FALSE) {
 		        	  'path' => 'forena/js/parameters',
 		            'wrapper' => 'parameters-wrapper',
 		        	  'method' => 'replace',
+		        	  'effect' => 'fade',
 		        	  'event' => 'change');
 		        }
 	        }
