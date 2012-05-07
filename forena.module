@@ -281,8 +281,8 @@ function forena_menu() {
    );
 
 
-  $items['forena/categories/autocomplete'] = array(
-     'page callback' => 'forena_categories_autocomplete',
+  $items['forena/reports/autocomplete'] = array(
+     'page callback' => 'forena_reports_autocomplete',
      'access callback' => TRUE,
      'type' => MENU_CALLBACK,
    );
@@ -504,6 +504,43 @@ function forena_user_reports() {
   }
   return $output;
 }
+
+
+function forena_reports_autocomplete($string='') {
+	GLOBAL $language;
+  $reports='';
+	$string = '%' .$string .'%';
+	$result = db_query("SELECT * FROM {forena_reports} where language='%s'
+	  AND report_name like '%s'
+	  ORDER BY category,title", $language->language, $string);
+  while ($row=db_fetch_object($result)) {
+    $access = TRUE;
+    $cache = $row->cache;
+
+    if ($cache) {
+      $cache = unserialize($cache);
+
+      // Check each callback function to see if we have an error.
+      if ($cache['access']) foreach ($cache['access'] as $callback => $args) {
+        if ($callback) foreach ($args as $arg) {
+          $access = FALSE;
+          if (function_exists($callback)) {
+            $a = $callback($arg);
+          }
+          if ($a) $access = TRUE;
+        }
+        else {
+          $access = TRUE;
+        }
+      }
+    }
+    if ($access) {
+      $reports[$row->report_name] = $row->report_name . ' - ' . $row->title;
+    }
+  }
+	return drupal_json($reports);
+}
+
 
 /**
  * Load and render a report based on a drupal path.
