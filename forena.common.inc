@@ -184,7 +184,7 @@ function forena_parameter_form(&$form_state, $rpt, $collapse=FALSE) {
 	        '#prefix' => '<div id="parameters-wrapper">',
 	        '#suffix' => '</div>',
 	        '#collapsible' => TRUE,
-	        '#collapsed' => (string)$r->$collapse,
+	        '#collapsed' => (string)$collapse,
 	      );
 
 	      foreach ($nodes as $node) {
