@@ -1732,7 +1732,7 @@ function forena_add_data_block_form($formid, &$form_state, $report_name) {
     if (isset($form_state['storage']['output'])) {
       $form['template']['output_text'] = array(
         '#type' => 'markup',
-        '#markup' => '</p>' . $form_state['storage']['output'] . '</p>',
+        '#markup' => '<p>' . $form_state['storage']['output'] . '</p>',
       );
     }
 

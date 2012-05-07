@@ -143,9 +143,11 @@ class FrxTemplate {
     $heading = $this->extract('heading', $config);
     $descr = $this->extract('description', $config);
     $include = $this->extract('include', $config);
+    $block = $this->extract('block', $config);
+    $foreach = $this->extract('foreach', $config);
   	$frx_attributes = array(
-      'block' => @$config['block'],
-      'foreach' => @$config['foreach'],
+      'block' => $block,
+      'foreach' => $foreach,
     );
 
     $attributes = array(
