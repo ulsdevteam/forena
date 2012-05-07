@@ -114,22 +114,35 @@ class FrxGraphTemplate extends FrxTemplate {
 		$div = $this->blockDiv($config);
 		if ($media == 'FrxSVGGraph') {
 			// Clean series
-			if ($config['series']) foreach($config['series'] as $i=>$series) if (!$series) unset($config['series'][$i]);
-			if (count($config['series'])==1) $config['series'] = $config['series'][1];
+			//if (count($config['series'])==1) $config['series'] = $config['series'][1];
+			//if (count($config['seriesx'])==1) $config['seriesx'] = $config['seriesx'][1];
+			if (@$config['series']) foreach($config['series'] as $i=>$series) if (!$series) unset($config['series'][$i]);
 			// Clean colors
 			if (isset($config['colors'])) foreach($config['colors'] as $i=>$color) if (!$color) unset($color[$i]);
 			$type = $this->extract('type', $config);
 			$xpath = $this->extract('xpath', $config);
 			$clause = $this->extract('clause', $config);
+			$gen_table = $this->extract('gen_table', $config);
 			$frxparms = array(
 			  'type' => $type,
 			  'renderer' => 'FrxSVGGraph',
 			  'xpath' => $xpath,
-			  'options' => forena_query_string($config)
+			  'options' => forena_query_string($config),
 			);
-
 			$svg = $this->addNode($div, 2, 'svg', null, null, $frxparms);
+			if ($gen_table) {
+			  $columns = $this->columns($xml);
+			  $table = $this->addNode($div, 4, 'table');
+			  $thead = $this->addNode($table, 6, 'thead');
+			  $throw = $this->addNode($thead, 8, 'tr');
+			  $tbody = $this->addNode($table, 6, 'tbody');
+			  $tdrow = $this->addNode($tbody, 8, 'tr', null, null, array('foreach' => '*'));
+			  if ($columns) foreach($columns as $col) {
+		  		 $this->addNode($throw, 10, 'th', $col);
+	  			 $this->addNode($tdrow, 10, 'td', '{'. $col . '}');
+	  		}
+			}
+
 		}
 	}
-
 }

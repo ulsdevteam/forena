@@ -1716,7 +1716,7 @@ function forena_add_data_block_form( &$form_state, $report_name) {
     if (isset($form_state['storage']['output'])) {
       $form['template']['output_text'] = array(
         '#type' => 'markup',
-        '#value' => '</p>' . $form_state['storage']['output'] . '</p>',
+        '#value' => '<p>' . $form_state['storage']['output'] . '</p>',
       );
     }
 
@@ -2575,5 +2575,5 @@ function forena_template_ajax(&$form_element) {
 }
 
 function forena_query_string($var) {
-   return drupal_query_string_encode($var);
+   return http_build_query($var, NULL, '&');
 }
