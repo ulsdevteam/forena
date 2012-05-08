@@ -20,7 +20,7 @@ function forena_admin_reports() {
     $rpt = str_replace('/', '.', $row->report_name);
     $edit = l('Edit', 'reports/' . $rpt . '/edit');
     $clone = l('Clone', 'reports/add/' . $rpt);
-    $delete = l('Delete', 'reports/' . $rpt . '/delete');
+    $delete = l('Delete', 'reports/' . $rpt . '/delete', array('query' => array('destination' => 'admin/build/reports')));
     $title = l($row->title, 'reports/' . $rpt);
     $data[] = array($title, $row->report_name, $row->category, $edit . ' ' . $clone . ' '. $delete);
   }
