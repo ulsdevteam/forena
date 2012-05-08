@@ -145,7 +145,7 @@ class FrxTemplate {
     $include = $this->extract('include', $config);
     $block = $this->extract('block', $config);
     $foreach = $this->extract('foreach', $config);
-    $id = $this->extract('id', $id);
+    $id = $this->extract('id', $config);
     if (!$id) {
       $id = $this->idFromBlock($block);
     }
@@ -213,7 +213,7 @@ class FrxTemplate {
 
   public function idFromBlock($block) {
     $parts = explode('/', $block);
-    $id = str_replace('.', '-', array_pop($parts));
+    $id = str_replace('.', '_', array_pop($parts));
     return $id;
   }
 
