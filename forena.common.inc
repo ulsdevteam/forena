@@ -223,6 +223,7 @@ function forena_parameter_form($formid, &$form_state, $rpt, $collapse=FALSE) {
 	        $multiselect = FALSE;
 	        $list = array();
 	        $ajax = FALSE;
+	        $add_null = FALSE;
 	        switch ($type) {
 	        	case 'multiselect':
 	        		$type = 'select';
@@ -237,6 +238,8 @@ function forena_parameter_form($formid, &$form_state, $rpt, $collapse=FALSE) {
 	        		 $type = 'select';
 	        		 break;
 	          case 'select':
+	          	$add_null = TRUE;
+	          	break;
 	          case 'radios':
 	           break;
 	          default:
@@ -248,7 +251,7 @@ function forena_parameter_form($formid, &$form_state, $rpt, $collapse=FALSE) {
 	        //returned values filtered against data_field attr.
 	        if ($data_source) {
 	          $list = FrxReportGenerator::instance()->data_block_params($data_source, $data_field, $label_field, $parms);
-	          if (!$required) $list = array('' => '') + $list;
+	          if (!$required && $add_null) $list = array('' => '') + $list;
 	        }
 
 	        $form['params'][$id] = array(
