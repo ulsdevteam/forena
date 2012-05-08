@@ -477,15 +477,17 @@ function forena_forena_report_directory() {
     return drupal_get_path('module', 'forena') . '/repos/reports';
 }
 
-function forena_sync_reports($overwrite=FALSE) {
-  $directories = module_invoke_all('forena_report_directory');
-  $i=0;
-  if ($directories) {
-    foreach ($directories as $src_dir) {
-      $i += _forena_copy_reports($src_dir, $overwrite);
-    }
-    if ($i > 0) drupal_set_message($i . ' reports copied');
-  }
+function forena_sync_reports($copy_reports=FALSE) {
+	if ($copy_reports) {
+	  $directories = module_invoke_all('forena_report_directory');
+	  $i=0;
+	  if ($directories) {
+	    foreach ($directories as $src_dir) {
+	      $i += _forena_copy_reports($src_dir, TRUE);
+	    }
+	    if ($i > 0) drupal_set_message($i . ' reports copied');
+	  }
+	}
   forena_db_sync();
 
 }
