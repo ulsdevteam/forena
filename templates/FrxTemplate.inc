@@ -145,14 +145,19 @@ class FrxTemplate {
     $include = $this->extract('include', $config);
     $block = $this->extract('block', $config);
     $foreach = $this->extract('foreach', $config);
+    $id = $this->extract('id', $id);
+    if (!$id) {
+      $id = $this->idFromBlock($block);
+    }
+    $class = $this->extract('class', $config);
   	$frx_attributes = array(
       'block' => $block,
       'foreach' => $foreach,
     );
 
     $attributes = array(
-      'id' => @$config['id'],
-      'class' => @$config['class'],
+      'id' => $id,
+      'class' => $class,
     );
 
     $node = $this->addNode($body, 2, 'div', $text, $attributes, $frx_attributes);
@@ -206,5 +211,10 @@ class FrxTemplate {
   	return $this->dom->saveXML();
   }
 
+  public function idFromBlock($block) {
+    $parts = explode('/', $block);
+    $id = str_replace('.', '-', array_pop($parts));
+    return $id;
+  }
 
 }

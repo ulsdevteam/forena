@@ -2,6 +2,7 @@
 require_once('FrxTemplate.inc');
 class FrxTable extends FrxTemplate {
 	public function generate($xml, $config) {
+		$config['class'] = 'FrxTable';
 		$div = $this->blockDiv($config);
 		$columns = $this->columns($xml);
 		$table = $this->addNode($div, 4, 'table');
