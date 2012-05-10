@@ -194,6 +194,8 @@ function forena_parameter_form($formid, &$form_state, $rpt, $collapse=FALSE) {
 	        '#type' => 'fieldset',
 	        '#collapsible' => TRUE,
 	        '#collapsed' => $collapse,
+	        '#prefix' => '<div id="parameters-wrapper">',
+	        '#suffix' => '</div>',
 	      );
 
 
@@ -294,7 +296,7 @@ function forena_parameter_form($formid, &$form_state, $rpt, $collapse=FALSE) {
  * @param unknown_type $form
  * @param unknown_type $form_state
  */
-function forena_parameters_callback($form, $form_state) {
+function forena_parameters_callback($form, &$form_state) {
 	return $form['params'];
 }
 
