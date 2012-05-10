@@ -118,10 +118,7 @@ class FrxSVGGraph extends FrxChart {
     if ($links) {
     	$graph->Links($links);
     }
-    ob_start();
-		$graph->Render($type, FALSE);
-		$output = ob_get_contents();
-		ob_end_clean();
+		$output = $graph->Fetch($type, FALSE);
 		return $output;
 	}
 

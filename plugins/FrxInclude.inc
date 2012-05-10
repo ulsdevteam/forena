@@ -45,7 +45,7 @@ class FrxInclude extends FrxRenderer {
   			$x = new SimpleXMLElement('<embed/>');
   			$x['src'] = $url;
   			$x['type'] = 'image/svg+xml';
-  			$x['pluginspage'] = "http://www.adobe.com/svg/viewer/install/";
+    		$x['pluginspage'] = "http://www.adobe.com/svg/viewer/install/";
       	if (isset($attributes['height'])) $x['height'] = $attributes['height'];
       	if (isset($attributes['width'])) $x['width'] = $attributes['width'];
   			break;
