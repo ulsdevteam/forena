@@ -35,9 +35,9 @@ class FrxEmailMerge extends FrxTemplate {
 		$to = $this->extract('to', $config);
 		$subject = $this->extract('subject', $config);
 		$body = $this->extract('body', $config);
-
+    $config['foreach'] = "*";
 		$div = $this->blockDiv($config);
-		$doc = $this->addNode($div, 4, 'div', NULL, array('class' => 'email-document'),  array('foreach' => '*'));
+		$doc = $this->addNode($div, 4, 'div', NULL, array('class' => 'email-document'));
 		$header = $this->addNode($doc, 6, 'div', NULL, array('class' => 'email-header'));
 		$table = $this->addNode($header,8, 'table');
 		$tr = $this->addNode($table, 10, 'tr');
