@@ -566,7 +566,7 @@ function load_block($data_block, $clause='') {
    * @return: The document in the requested format. Returns a string if not
    * able to format.
    */
-  function  generate_doc($format, $output, $options = array()) {
+  function  generate_doc($format, $output, $options = array(), $print = TRUE) {
 
     $doc = $this->get_doctypes($format);
     if ($doc) {
@@ -577,13 +577,12 @@ function load_block($data_block, $clause='') {
     if ($ret) {
     // If an object was found, set the appropriate mime type (header doctype).
    //   $flen = strlen($ret);
-      switch ($format) {
+      switch ($format && $print) {
         case 'doc':
           header('Content-Type: application/msword');
           header('Cache-Control:');
           header('Pragma:');
           header("Cache-Control: must-revalidate");
-          print $ret;
           break;
         case 'pdf':
           header('Content-Type: application/pdf');
@@ -591,7 +590,6 @@ function load_block($data_block, $clause='') {
           header('Pragma:');
           header("Cache-Control: must-revalidate");
           header("Content-Disposition: attachment; filename=report.pdf");
-          print $ret;
           break;
 
         case 'xls':
@@ -600,7 +598,6 @@ function load_block($data_block, $clause='') {
           header('Pragma:');
           header("Cache-Control: must-revalidate");
           header("Content-Disposition: attachment; filename=report.xls");
-          print $ret;
           break;
        case 'csv':
           header('Content-Type: application/csv');
@@ -608,25 +605,19 @@ function load_block($data_block, $clause='') {
           header('Pragma:');
           header("Cache-Control: must-revalidate");
           header("Content-Disposition: attachment; filename=report.csv");
-          print $ret;
           break;
        case 'svg':
        	  header('Content-Type: image/svg+xml');
        	  header('Cache-Control:');
        	  header('Pragma:');
        	  header('Cache-Control: must-revalidate');
-       	  print $ret;
        	  break;
-       default:
-           return $ret;
-
       }
-      // Print the output.
 
     }
-    else {
-      return $ret;
-    }
+
+    return $ret;
+
   }
 
 
