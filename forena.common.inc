@@ -385,7 +385,7 @@ function forena_confirm_email(&$form_state, $docs, $count) {
     	  '#title' => 'Send Email',
     	  '#options' => array('send' => 'email to users',
     	    'test' => 'emails to me (test mode)'),
-    	  '#required' => TRUE,
+    	  '#default_value' => 'test',
     	);
   	}
   	$form['max'] = array(

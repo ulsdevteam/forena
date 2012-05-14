@@ -567,7 +567,7 @@ function load_block($data_block, $clause='') {
    * @return: The document in the requested format. Returns a string if not
    * able to format.
    */
-  function  generate_doc($format, $output, $options = array()) {
+  function  generate_doc($format, $output, $options = array(), $print=TRUE) {
 
     $doc = $this->get_doctypes($format);
     if ($doc) {
@@ -575,7 +575,7 @@ function load_block($data_block, $clause='') {
       $method = $all_methods[$format];
       $ret = $doc->$method($output, $options);
     }
-    if ($ret) {
+    if ($ret && $print) {
     // If an object was found, set the appropriate mime type (header doctype).
    //   $flen = strlen($ret);
       switch ($format) {
@@ -584,7 +584,6 @@ function load_block($data_block, $clause='') {
           header('Cache-Control:');
           header('Pragma:');
           header("Cache-Control: must-revalidate");
-          print $ret;
           break;
         case 'pdf':
           header('Content-Type: application/pdf');
@@ -592,7 +591,6 @@ function load_block($data_block, $clause='') {
           header('Pragma:');
           header("Cache-Control: must-revalidate");
           header("Content-Disposition: attachment; filename=report.pdf");
-          print $ret;
           break;
 
         case 'xls':
@@ -601,7 +599,6 @@ function load_block($data_block, $clause='') {
           header('Pragma:');
           header("Cache-Control: must-revalidate");
           header("Content-Disposition: attachment; filename=report.xls");
-          print $ret;
           break;
        case 'csv':
           header('Content-Type: application/csv');
@@ -609,25 +606,18 @@ function load_block($data_block, $clause='') {
           header('Pragma:');
           header("Cache-Control: must-revalidate");
           header("Content-Disposition: attachment; filename=report.csv");
-          print $ret;
           break;
        case 'svg':
        	  header('Content-Type: image/svg+xml');
        	  header('Cache-Control:');
        	  header('Pragma:');
        	  header('Cache-Control: must-revalidate');
-       	  print $ret;
        	  break;
-       default:
-           return $ret;
 
       }
       // Print the output.
-
     }
-    else {
-      return $ret;
-    }
+    return $ret;
   }
 
 
@@ -719,7 +709,12 @@ function report($name_in, $parms = array(), $print=TRUE) {
                    );
 
         $output = $this->generate_doc($format, $output, $options, $print);
-        print $output;
+        if ($format!='email'  && $print) {
+          print $output;
+        }
+        else {
+        	return $output;
+        }
         exit;
       }
       else {
