@@ -382,7 +382,7 @@ function forena_my_reports_block() {
  * @param array $docs An array of SimpleXML email documents to send
  * @param integer $count Number of documents to send.
  */
-function forena_confirm_email($form, &$form_state, $docs, $count) {
+function forena_confirm_email($formid, &$form_state, $docs, $count) {
   if ($docs) {
     if (!variable_get('forena_email_override', FALSE)) {
       $form['send'] = array(
@@ -390,7 +390,7 @@ function forena_confirm_email($form, &$form_state, $docs, $count) {
         '#title' => 'Send Email',
         '#options' => array('send' => 'email to users',
           'test' => 'emails to me (test mode)'),
-        '#required' => TRUE,
+        '#default_value' => 'test',
       );
     }
     $form['max'] = array(

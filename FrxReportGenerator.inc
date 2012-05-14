@@ -718,7 +718,12 @@ function report($name_in, $parms = array(), $print=TRUE) {
                    );
 
         $output = $this->generate_doc($format, $output, $options, $print);
-        print $output;
+        if ($format!='email') {
+          print $output;
+        }
+        else {
+        	return $output;
+        }
         exit;
       }
       else {

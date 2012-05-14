@@ -299,7 +299,8 @@ class FrxControls {
    }
    $count = count($docs);
    if ($count) {
-     $output = drupal_get_form('forena_confirm_email', $emails, $count);
+   	 $form = drupal_get_form('forena_confirm_email', $emails, $count);
+     $output = drupal_render($form);
    }
    else {
       $output = $body;
