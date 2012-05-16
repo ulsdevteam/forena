@@ -706,6 +706,7 @@ function forena_filter($op, $delta=0, $format=-1, $text='') {
 
 function _forena_filter_process($text='') {
   GLOBAL $language;
+  require_once('forena.common.inc');
   // initial Parameters
   $in_parms = array();
   $in_parms  = $_GET;
