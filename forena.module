@@ -558,7 +558,7 @@ function forena_report($name_in, $parms = array(), $print = TRUE) {
   $report_name = $desc['name'];
   $output = FrxReportGenerator::instance()->report($name_in, $parms, $print);
   $format=@$desc['format'];
-  if (!$format || $format=='web')$output = check_markup($output, variable_get('forena_input_format', FILTER_FORMAT_DEFAULT));
+  if (!$format || $format=='web')$output = check_markup($output, variable_get('forena_input_format', FILTER_FORMAT_DEFAULT), FALSE);
   return $output;
 }
 
