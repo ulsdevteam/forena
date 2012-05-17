@@ -1033,6 +1033,8 @@ function forena_doc_formats_settings() {
     '#default_value' => variable_get('forena_email_override',FALSE),
     '#description' => t('When this box is checked emails are sent to the currently logged in user.  Useful for testing environments.'),
   );
+  $form['forena_email_input_format'] = forena_filter_element(variable_get('forena_email_input_format',''));
+  $form['forena_email_input_format']['#title'] = t('Email Input Format');
 
   return system_settings_form($form);
 }

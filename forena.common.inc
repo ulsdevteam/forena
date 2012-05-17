@@ -382,12 +382,33 @@ function forena_my_reports_block() {
  * @param array $docs An array of SimpleXML email documents to send
  * @param integer $count Number of documents to send.
  */
-function forena_confirm_email($formid, &$form_state, $docs, $count) {
+function forena_confirm_email($formid, &$form_state, $docs, $count, $prompt_subject, $prompt_body) {
   if ($docs) {
+  	$values = @$form_state['values'];
+  	if ($prompt_subject) {
+  		$form['subject'] = array(
+  		  '#type' => 'textfield',
+  		  '#title' => t('Subject'),
+  		  '#default_value' => @$values['subject'],
+
+  		);
+  	}
+
+  	if ($prompt_body) {
+  		$form['body'] = array(
+  		  '#type' => 'text_format',
+  		  '#title' => t('Message'),
+  		  '#default_value' => @$values['body'],
+        '#format' => variable_get('forena_email_input_format', filter_default_format())
+
+  		);
+  	}
+
+
     if (!variable_get('forena_email_override', FALSE)) {
       $form['send'] = array(
         '#type' => 'radios',
-        '#title' => 'Send Email',
+        '#title' => t('Send Email'),
         '#options' => array('send' => 'email to users',
           'test' => 'emails to me (test mode)'),
         '#default_value' => 'test',
@@ -400,6 +421,7 @@ function forena_confirm_email($formid, &$form_state, $docs, $count) {
       '#default_value' => 1,
       '#size' => 3,
     );
+
     $form_state['storage']['docs'] = $docs;
     $form_state['storage']['count'] = $count;
   }
@@ -411,9 +433,18 @@ function forena_confirm_email_submit($form, &$form_state) {
   $test_send = @$form_state['values']['send']=='test' ? TRUE : variable_get('forena_email_override', FALSE);
   $max = (integer)$form_state['values']['max'];
   $i = 0;
+  if (isset($form_state['values']['body'])) {
+  	$body =  check_markup($form_state['values']['body'], variable_get('forena_input_format', filter_default_format()));
+  }
   foreach ($form_state['storage']['docs'] as $doc) {
     $to = $test_send ? $user->mail : $doc['to'];
     $from = $doc['from'];
+    if (isset($form_state['values']['body'])) {
+    	$doc['parms']['body'] = $body;
+    }
+    if (isset($form_state['values']['subject'])) {
+    	$doc['parms']['subject'] = $form_state['values']['subject'];
+    }
     if ($test_send) $i++;
     if ($i <= $max) drupal_mail('forena', 'mailmerge', $to, language_default(), $doc['parms'], $from, TRUE);
   }
