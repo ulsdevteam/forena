@@ -377,8 +377,24 @@ function forena_my_reports_block() {
  * @param array $docs An array of SimpleXML email documents to send
  * @param integer $count Number of documents to send.
  */
-function forena_confirm_email(&$form_state, $docs, $count) {
+function forena_confirm_email(&$form_state, $docs, $count, $prompt_subject, $prompt_body) {
   if ($docs) {
+  	if ($prompt_subject) {
+  		$form['subject'] = array(
+  		  '#type' => 'textfield',
+  		  '#title' => t('Subject'),
+  		  '#default_value' => @$values['subject'],
+  		);
+  	}
+
+  	if ($prompt_body) {
+  		$form['body'] = array(
+  		  '#type' => 'textarea',
+  		  '#title' => t('Message'),
+  		  '#default_value' => @$values['body'],
+  		);
+  	}
+
   	if (!variable_get('forena_email_override', FALSE)) {
     	$form['send'] = array(
     	  '#type' => 'radios',
