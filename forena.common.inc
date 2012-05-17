@@ -379,11 +379,13 @@ function forena_my_reports_block() {
  */
 function forena_confirm_email(&$form_state, $docs, $count, $prompt_subject, $prompt_body) {
   if ($docs) {
+  	$values = @$form_state['values'];
   	if ($prompt_subject) {
   		$form['subject'] = array(
   		  '#type' => 'textfield',
   		  '#title' => t('Subject'),
   		  '#default_value' => @$values['subject'],
+  		  '#required' => TRUE,
   		);
   	}
 
@@ -392,7 +394,9 @@ function forena_confirm_email(&$form_state, $docs, $count, $prompt_subject, $pro
   		  '#type' => 'textarea',
   		  '#title' => t('Message'),
   		  '#default_value' => @$values['body'],
+  		  '#required' => TRUE,
   		);
+  		$form['format'] = filter_form(variable_get('forena_mail_input_format', FILTER_FORMAT_DEFAULT));
   	}
 
   	if (!variable_get('forena_email_override', FALSE)) {
@@ -421,9 +425,17 @@ function forena_confirm_email_submit($form, &$form_state) {
 	global $user;
 	$test_send = $form_state['values']['send']=='test' ? TRUE : variable_get('forena_email_override', FALSE);
   $max = (integer)$form_state['values']['max'];
-	$i = 0;
+  if (isset($form_state['values']['body'])) {
+    	$body = check_markup($form_state['values']['body'], variable_get('forena_email_input_format', FILTER_FORMAT_DEFAULT), FALSE);
+  }
   foreach ($form_state['storage']['docs'] as $doc) {
   	$to = $test_send ? $user->mail : $doc['to'];
+    if (isset($form_state['values']['body'])) {
+    	$doc['parms']['body'] = $body;
+    }
+    if (isset($form_state['values']['subject'])) {
+    	$doc['parms']['subject'] = $form_state['values']['subject'];
+    }
   	if ($test_send) $i++;
     if ($i <= $max) drupal_mail('forena', 'mailmerge', $to, language_default(), $doc['parms'], $doc['from'], TRUE);
   }

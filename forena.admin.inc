@@ -389,7 +389,6 @@ function forena_settings() {
 
 
   $form['forena_input_format'] = filter_form(variable_get('forena_input_format', FILTER_FORMAT_DEFAULT), NULL, array('forena_input_format'));
-
   $form['forena_default_form'] = array(
     '#type' => 'textfield',
     '#title' => t('Default report form'),
@@ -1001,6 +1000,8 @@ function forena_doc_formats_settings() {
     '#description' => t('When this box is checked emails are sent to the currently logged in user.  Useful for testing environments.'),
   );
 
+ $form['forena_mail_input_format'] = filter_form(variable_get('forena_mail_input_format', FILTER_FORMAT_DEFAULT), NULL, array('forena_mail_input_format'));
+  $form['forena_mail_input_format']['#title'] = 'Email Input Format';
   return system_settings_form($form);
 }
 
