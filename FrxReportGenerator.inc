@@ -334,9 +334,7 @@ class FrxReportGenerator {
   */
   function get_report($report_name, $data=array()) {
     $r=null;
-    if (method_exists($this->app, 'alter_parameters')) {
-    	$this->app->alter_parameters($report_name, $data);
-    }
+    $this->alter_parameters($report_name, $data);
     if ($report_name) {
       $r_text = $this->app->load_report($report_name);
 	    if ($r_text) {
@@ -344,6 +342,13 @@ class FrxReportGenerator {
 	    }
     }
     return $r;
+  }
+
+  function alter_parameters($report_name, &$data) {
+  	if (method_exists($this->app, 'alter_parameters')) {
+    	$this->app->alter_parameters($report_name, $data);
+    }
+
   }
 
 
