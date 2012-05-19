@@ -173,6 +173,7 @@ function forena_parameter_form(&$form_state, $rpt, $collapse=FALSE) {
   if ($r) {
       drupal_set_title($r->title);
       $head = $r->rpt_xml->head;
+      FrxReportGenerator::instance()->alter_parameters('', $parms);
 
       $nodes = $head->xpath('frx:parameters/frx:parm');
       if ($nodes) {
