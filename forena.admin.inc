@@ -393,6 +393,7 @@ function forena_settings() {
     '#type' => 'textfield',
     '#title' => t('Default report form'),
     '#description' => t('Indicates the default style sheet(s) that will be used when no tag is present in the report.'),
+    '#default_value' => variable_get('forena_default_form',''),
   );
 
   $form =  system_settings_form($form);
