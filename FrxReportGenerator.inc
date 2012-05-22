@@ -572,17 +572,17 @@ function load_block($data_block, $clause='') {
    * able to format.
    */
   function  generate_doc($format, $output, $options = array(), $print = TRUE) {
-
+    watchdog('debug','format' .  $format);
     $doc = $this->get_doctypes($format);
     if ($doc) {
       $all_methods = $doc->doc_types();
       $method = $all_methods[$format];
       $ret = $doc->$method($output, $options);
     }
-    if ($ret) {
+    if ($ret && $print) {
     // If an object was found, set the appropriate mime type (header doctype).
    //   $flen = strlen($ret);
-      switch ($format && $print) {
+      switch ($format) {
         case 'doc':
           header('Content-Type: application/msword');
           header('Cache-Control:');
