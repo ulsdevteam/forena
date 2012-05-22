@@ -205,7 +205,7 @@ class FrxDataProvider{
         }
 
       }
-      if (strpos($l, $comment)!==0 && $data) {
+      if (strpos($l, $comment)!==0 && $l) {
         $data .= "$l\n";
       }
       $i++;
