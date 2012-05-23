@@ -576,8 +576,8 @@ function forena_render_report($report, $format='', $data='', $options= array(), 
   $output = $o->render($format);
 
   //If a format was requested render a custom non-drupal document
-  if ($format) {
-    $output = forena_generate_doc($format, $output, $options, $print);
+  if ($format != 'web') {
+    $output = FrxReportGenerator::instance()->generate_doc($format, $output, $options, $print);
   }
   return $output;
 }
