@@ -573,7 +573,6 @@ function load_block($data_block, $clause='') {
    * able to format.
    */
   function  generate_doc($format, $output, $options = array(), $print=TRUE) {
-
     $doc = $this->get_doctypes($format);
     if ($doc) {
       $all_methods = $doc->doc_types();
