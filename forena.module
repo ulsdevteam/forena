@@ -481,7 +481,7 @@ function forena_block_xml($block_name='') {
  */
 function forena_xml($block_name, $parms=array()) {
 	require_once('forena.common.inc');
-  $xml = forena_invoke_data_provider($block_name, $parms);
+  $xml = FrxReportGenerator::instance()->invoke_data_provider($block_name, $parms);
   return $xml;
 }
 
