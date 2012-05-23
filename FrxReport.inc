@@ -170,7 +170,9 @@ class FrxReport {
         if ($xml) {
           $this->frx_data->push($xml, $id);
         }
-        else $continue = FALSE;
+        else {
+        	return '';
+        }
       }
 
       // Preserve non frx attributes
