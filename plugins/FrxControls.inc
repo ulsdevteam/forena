@@ -191,7 +191,7 @@ class FrxControls {
   }
 
   public function svgDocument($body, $options) {
-  	$output = '<?xml version="1.0" encoding="UTF-8" standalone="no" ?>';
+  	$output = '';
   	$doc = new DomDocument();
   	$xml_body = '<html><body>'. $body . '</body></html>';
   	$doc->formatOutput=FALSE;
@@ -201,8 +201,9 @@ class FrxControls {
   	$xml = simplexml_import_dom($doc);
   	$xml->registerXPathNamespace('__empty_ns', 'http://www.w3.org/2000/svg');
   	if ($xml) $svg = $xml->xpath('//__empty_ns:svg');
-  	if ($svg) foreach($svg as $graph) {
-  		$output .= $graph->asXML();
+  	if ($svg) {
+   	  $output = '<?xml version="1.0" encoding="UTF-8" standalone="no" ?>';
+  		$output .= $svg[0]->asXML();
   	}
   	return $output;
   }
