@@ -100,7 +100,7 @@ class FrxReportGenerator {
   }
 
   /**
-   * Determines which css files need to be loaded.
+   * Determines which js files need to be loaded.
    *
    * @param array $desc Report descriptor from forena_rport_desc
    * @param string $form The report "form" to be used.  From the report
