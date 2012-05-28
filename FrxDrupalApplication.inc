@@ -81,7 +81,7 @@ class FrxDrupalApplication extends FrxHostApplication {
    * @param unknown_type $js_file
    */
   public function add_js($js_file) {
-     drupal_add_js($js_file, 'module');
+     drupal_add_js($js_file);
   }
 
   /**

@@ -100,6 +100,38 @@ class FrxReportGenerator {
   }
 
   /**
+   * Determines which css files need to be loaded.
+   *
+   * @param array $desc Report descriptor from forena_rport_desc
+   * @param string $form The report "form" to be used.  From the report
+   * @param string $format Document format that will be used for the report.
+   * @return array A list of css files that should be applied to the report.
+   */
+  function report_js($desc, $form,  $format = '') {
+    $js_files = array();
+    // First check for the form file
+    $path = $this->app->configuration('report_repos');
+    if (file_exists($path . '/' . $form . '.js')) {
+      $js_files[] = $path . '/' . $form . '.js';
+    }
+    if ($format && file_exists($path . '/' . $form . '-' . $format . '.js')) {
+      $js_files[] = $path . '/' . $form . '-' . $format . '.js';
+    }
+
+    // Now check for a report specific file
+    $base_file = $path . '/' . $desc['name'];
+
+    if ($format && file_exists($base_file . '-' . $format . '.js')) {
+      $js_files[] = $base_file . '-' . $format . '.js';
+    }
+    elseif (file_exists($base_file . '.js')) {
+
+      $js_files[] = $base_file . '.js';
+    }
+    return $js_files;
+  }
+
+  /**
    * Clear session data because we want to reload.
    */
   public function clear_session() {
@@ -693,6 +725,7 @@ function report($name_in, $parms = array(), $print=TRUE) {
     if (!$missing_parms) {
       $output .= $r->render($format);
       $css_files = $this->report_css($desc, $form, $format);
+      $js_files = $this->report_js($desc, $form, $format);
     }
 
     //put title on top of report
@@ -765,6 +798,9 @@ function report($name_in, $parms = array(), $print=TRUE) {
         $this->app->add_css($this->app->forena_path() . '/forena.css');
         if ($css_files) foreach ($css_files as $css_file) {
           $this->app->add_css($css_file);
+        }
+        if ($js_files) foreach ($js_files as $js_file) {
+          $this->app->add_js($js_file);
         }
         return $output;
       }
