@@ -721,7 +721,7 @@ function report($name_in, $parms = array(), $print=TRUE) {
 
     // Default the form
     if (!$form) $form = $this->app->configuration('default_form');
-
+    $this->form = $form;
     if (!$missing_parms) {
       $output .= $r->render($format);
       $css_files = $this->report_css($desc, $form, $format);
