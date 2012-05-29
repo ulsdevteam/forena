@@ -475,7 +475,6 @@ function forena_include_data_tables() {
 		$init = TRUE;
 		$lib = 'sites/all/libraries/dataTables/media/js/jquery.dataTables.js';
 		if (file_exists($lib)) {
-			drupal_set_message('hi');
 			drupal_add_js($lib);
 		}
 	}
