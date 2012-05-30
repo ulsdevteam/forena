@@ -541,6 +541,19 @@ function forena_reports_autocomplete($string='') {
 	return drupal_json($reports);
 }
 
+/**
+ * Include javascript files for dataTables
+ */
+function forena_include_data_tables() {
+	static $init = FALSE;
+	if (!$init) {
+		$init = TRUE;
+		$lib = 'sites/all/libraries/dataTables/media/js/jquery.dataTables.js';
+		if (file_exists($lib)) {
+			drupal_add_js($lib);
+		}
+	}
+}
 
 /**
  * Load and render a report based on a drupal path.
@@ -559,6 +572,13 @@ function forena_report($name_in, $parms = array(), $print = TRUE) {
   $output = FrxReportGenerator::instance()->report($name_in, $parms, $print);
   $format=@$desc['format'];
   if (!$format || $format=='web')$output = check_markup($output, variable_get('forena_input_format', FILTER_FORMAT_DEFAULT), FALSE);
+  $m_path = drupal_get_path('module', 'forena');
+  forena_include_data_tables();
+  drupal_add_js($m_path . '/forena.js');
+  $forena_js = array();
+  $forena_js['form'] = preg_replace('/[^\w\-]+/u', '_', FrxReportGenerator::instance()->form);
+  $forena_js['report'] = preg_replace('/[^\w\-]+/u', '_', $name_in);
+  drupal_add_js(array('forena' => $forena_js), 'setting');
   return $output;
 }
 
