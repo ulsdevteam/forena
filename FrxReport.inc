@@ -188,9 +188,20 @@ class FrxReport {
        // if we have a foreach in this node, we need to iterate the children
       if ((string)$frx['foreach'] ) {
         // Save xml
-        $path = (string)$frx['foreach'];
+        $path = $this->teng->replace((string)$frx['foreach'], TRUE);
         $data = $this->frx_data->currentContext();
 
+        if (is_object($data)) {
+        	if (method_exists($data, 'xpath')) {
+	          $nodes = $data->xpath($path);
+        	}
+        	else {
+        		$nodes = $data;
+        	}
+        }
+        else {
+        	$nodes = (array)$data;
+        }
         if (is_object($data)) $nodes = $data->xpath($path);
         $i=0;
 
