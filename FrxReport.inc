@@ -191,7 +191,17 @@ class FrxReport {
         $path = $this->teng->replace((string)$frx['foreach'], TRUE);
         $data = $this->frx_data->currentContext();
 
-        if (is_object($data)) $nodes = $data->xpath($path);
+        if (is_object($data)) {
+        	if (method_exists($data, 'xpath')) {
+	          $nodes = $data->xpath($path);
+        	}
+        	else {
+        		$nodes = $data;
+        	}
+        }
+        else {
+        	$nodes = (array)$data;
+        }
         $i=0;
 
         //$tmp_attrs = (array)$attrs;
