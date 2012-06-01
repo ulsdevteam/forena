@@ -694,8 +694,8 @@ function report($name_in, $parms = array(), $print=TRUE) {
 
       //put default parameters in parms array
       foreach ($r_params as $key => $parm) {
-        if (@!$parms[$key] && @$parm['value']) {
-         $value = (string)$parm['value'];
+        if ((@$parms[$key]=='' || @$parms[$key]==array()) && @$parm['value']) {
+      	 $value = (string)$parm['value'];
          if (strpos($value, '|')!==FALSE) {
          	$value = explode('|', $value);
          }
