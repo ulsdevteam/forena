@@ -481,6 +481,9 @@ function forena_block_xml($block_name='') {
  */
 function forena_xml($block_name, $parms=array()) {
 	require_once('forena.common.inc');
+	drupal_alter('forena_parameters', $block_name, $parms );
+  //now invoke the data provider with the correct params
+  FrxData::instance()->push($parms, 'parm');
   $xml = FrxReportGenerator::instance()->invoke_data_provider($block_name, $parms);
   return $xml;
 }
