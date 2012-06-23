@@ -118,7 +118,7 @@ class FrxControls {
   //Document transformation methods
   public function htmlDocument($body, $options) {
     $output = '<html><head>';
-
+    $output .= '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>';
     if ($options['css']) {
       $output .= '<style type="text/css">';
       $output .= $options['css'];
