@@ -476,11 +476,11 @@ function forena_include_data_tables() {
 	static $init = FALSE;
 	if (!$init) {
 		$init = TRUE;
-		$lib = 'sites/all/libraries/dataTables/media/js/jquery.dataTables.js';
+		$lib = 'sites/all/libraries/dataTables/media/js/jquery.dataTables.min.js';
 		if (file_exists($lib)) {
 			drupal_add_js($lib);
 		}
-		$lib = 'sites/all/libraries/FixedColumns/media/js/FixedColumns.js';
+		$lib = 'sites/all/libraries/FixedColumns/media/js/FixedColumns.min.js';
 		if (file_exists($lib)) {
 			drupal_add_js($lib);
 		}
