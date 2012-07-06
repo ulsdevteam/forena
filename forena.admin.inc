@@ -1242,6 +1242,13 @@ function forena_data_settings_edit(&$form_state, $source=-1) {
       $form['connection']['uri'] = $uri;
       $form['connection']['user'] = $user;
       $form['connection']['new_password'] = $password;
+      $form['connection']['database'] = array(
+        '#type' => 'textfield',
+        '#disabled' => $locked,
+        '#title' => t('Database'),
+        '#default_value' => $config['database'],
+        '#required' => TRUE,
+      );
       $form['connection']['mssql_xml'] = array(
         '#type' => 'checkbox',
         '#disabled' => $locked,
