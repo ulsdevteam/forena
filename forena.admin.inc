@@ -685,6 +685,21 @@ function forena_layout_form($form_state, $report_name) {
 }
 
 
+function forena_layout_form_validate($form, &$form_state) {
+	$values = $form_state['values'];
+  $body = $values['body']['value'];
+  $doc_prefix = '<?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE root [
+    <!ENTITY nbsp "&#160;">
+    ]>';
+  if ($body) {
+  	$body_doc = new DOMDocument('1.0', 'UTF-8');
+    $body_xml =  $doc_prefix . '<html xmlns:frx="urn:FrxReports">' . $body . '</html>';
+    if (@$body_doc->loadXML($body_xml) === FALSE) {
+    	form_set_error('body', t('Invalid XHTML Document. Check for unclosed tags or stray &'));
+    }
+  }
+}
 
 /**
  * builds a string of the xml document,
