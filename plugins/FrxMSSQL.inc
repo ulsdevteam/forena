@@ -33,9 +33,15 @@ class FrxMSSQL extends FrxDataProvider {
         return;
       }
       try {
+        ini_set('mssql.textlimit', 2147483647);
+        ini_set('mssql.textsize', 2147483647);
         $db = mssql_connect($uri, $conf['user'], $conf['password']);
         $this->db = $db;
-        if ($db) mssql_select_db($conf['database'], $db);
+
+        if ($db) {
+        	mssql_select_db($conf['database'], $db);
+        	mssql_query("SET QUOTED_IDENTIFIER ON");
+        }
       } catch (Exception $e) {
         FrxReportGenerator::instance()->error('Unable to connect to database ' . $conf['title'], $e->getMessage());
       }
@@ -92,11 +98,11 @@ class FrxMSSQL extends FrxDataProvider {
       $db = $this->db;
 
       //$rs->debugDumpParams();
-      $fsql = $sql . ' FOR XML AUTO';
-      $rs = mssql_query($db, $fsql, array($sql, ''));
+      $fsql = $sql . ' FOR XML AUTO, elements';
+      $rs = mssql_query($fsql, $db);
       if ($rs) {
-        $row = mssql_fetch_row($rs);
-        $xml_text = $row[0];
+        $row = mssql_fetch_array($rs, MSSQL_NUM);
+        $xml_text = '<table>' . $row[0] . '</table>';
       }
       if ($xml_text) {
         $xml = new SimpleXMLElement($xml_text);
@@ -113,7 +119,7 @@ class FrxMSSQL extends FrxDataProvider {
       $db = $this->db;
       $xml = new SimpleXMLElement('<table/>');
 
-      $rs = mssql_query($sql);
+      $rs = mssql_query($sql, $db);
 
       while ($row = mssql_fetch_assoc($rs)) {
         $row_node = $xml->addChild('row');
