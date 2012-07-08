@@ -97,38 +97,7 @@ class FrxDrupal extends FrxDataProvider {
     return $value;
   }
 
-  /**
-   * @section
-   * Formatters
-   * Below here are formatting types
-   */
-  public function formats() {
-    $formats = array('drupal_filter' => 'Drupal Input Filter'
-                     );
-    return $formats;
-  }
-
-
-  public function drupal_filter($nid, $format) {
-    $node = node_load($nid, NULL, TRUE);
-    if (!$node) {
-      return 'N/A';
-    }
-    if ((strcasecmp($format, 'teaser') == 0) || (!$format)) {
-      $bool = TRUE;
-    }
-    else {
-      $bool = FALSE;
-    }
-    //If true, render the teaser
-    //else render the body
-    $node = node_prepare($node, $bool);
-    if ($bool) {
-      return $node->teaser;
-    }
-    return $node->body;
-  }
-}
+ }
 
 
 

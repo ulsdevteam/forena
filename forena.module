@@ -646,6 +646,12 @@ function forena_forena_controls() {
     'file' => 'plugins/FrxControls.inc',
     'class' => 'FrxControls',
   );
+
+  $controls[] = array(
+    'file' => 'plugins/FrxDrupalControls.inc',
+    'class' => 'FrxDrupalControls',
+  );
+
   $controls[] = array(
     'file' => 'plugins/FrxSource.inc',
     'class' => 'FrxSource',
