@@ -78,7 +78,7 @@ class FrxDrupalControls {
     //If true, render the teaser
     //else render the body
     $output = theme('node',node_view($node, $format));
-    return print_r($output,1) ;
+    return $output;
 
   }
 }
