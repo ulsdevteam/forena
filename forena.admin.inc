@@ -687,7 +687,7 @@ function forena_layout_form($form_state, $report_name) {
 
 function forena_layout_form_validate($form, &$form_state) {
 	$values = $form_state['values'];
-  $body = $values['body']['value'];
+  $body = $values['body'];
   $doc_prefix = '<?xml version="1.0" encoding="UTF-8"?>
     <!DOCTYPE root [
     <!ENTITY nbsp "&#160;">
