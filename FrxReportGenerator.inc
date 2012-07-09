@@ -212,7 +212,7 @@ class FrxReportGenerator {
       return $o;
     }
     else {
-      $this->app->error('Data provider not found');
+      $this->app->error('Data provider not found for '. $conf['title']);
     }
 
   }
