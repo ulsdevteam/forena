@@ -342,9 +342,15 @@ function forena_data_block_autocomplete($string='') {
   print drupal_json_output($data_blocks);
 }
 
-function forena_reports_autocomplete($string='') {
+function forena_reports_autocomplete($string='', $string2='') {
 	GLOBAL $language;
   $reports='';
+  $link = '';
+  // If we have two parameters.
+  if ($string2) {
+  	$mode = $string;
+  	$string = $string2;
+  }
 	$string = '%' .$string .'%';
 	$result = db_query('SELECT * FROM {forena_reports} where language=:language
 	  AND report_name like :string
@@ -371,7 +377,11 @@ function forena_reports_autocomplete($string='') {
       }
     }
     if ($access) {
-      $reports[$row->report_name] = $row->report_name . ' - ' . $row->title;
+    	$key = $row->report_name;
+    	if ($mode = 'link') {
+    		$key = 'reports/' . str_replace('/', '.', $key);
+    	}
+      $reports[$key] = $key . ' - ' . $row->title;
     }
   }
 	return drupal_json_output($reports);
