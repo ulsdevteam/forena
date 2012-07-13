@@ -30,6 +30,13 @@ class FrxPDO extends FrxDataProvider {
         return;
       }
 
+      $options = array();
+      if (@$conf['mysql_charset']) {
+      	$options = array(
+            PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . $conf['mysql_charset'],
+        );
+      }
+
       // Test for driver support
       @list($prot, $c) = explode(':', $uri, 2);
       $drivers = PDO::getAvailableDrivers();
@@ -40,10 +47,10 @@ class FrxPDO extends FrxDataProvider {
       }
       try {
         if (isset($conf['user'])) {
-          $db = new PDO($uri, $conf['user'], $conf['password']);
+          $db = new PDO($uri, $conf['user'], $conf['password'], $options);
         }
         else {
-          $db = new PDO($uri);
+          $db = new PDO($uri,NULL,NULL,$options);
         }
         $this->db = $db;
         if (!is_object($db)) {
