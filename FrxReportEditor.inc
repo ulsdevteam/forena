@@ -236,7 +236,7 @@ class FrxReportEditor {
 
     $this->setFrxHeader('fields', 'field',
       $fieldElements,
-      array('id', 'link', 'format', 'format-string', 'target'),
+      array('id', 'link', 'format', 'format-string', 'target', 'rel', 'class'),
       'default');
 
   }
