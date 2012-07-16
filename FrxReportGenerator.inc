@@ -671,6 +671,7 @@ function report($name_in, $parms = array(), $print=TRUE) {
   $format = isset($desc['format']) ? $desc['format'] : '';
   $filename = $desc['filename'];
   $css_files = array();
+  $js_files = array();
 
   // Determine the data to get.
   if (!$parms) {
