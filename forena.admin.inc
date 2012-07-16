@@ -1526,6 +1526,24 @@ function forena_fields_form($form_state, $report_name) {
           '#description' => t('Create a link that incorporates this field, e.g "profile/{field_name}" will create a link to this field_name\'s profile. *Note the field must be wrapped in {}.')
         );
 
+        $form['fields'][$i]['rel'] = array(
+          '#type' => 'textfield',
+          '#title' => t('rel') ,
+          '#description' => t('Relationship attribute to apply to the link.'),
+          '#size' => 100,
+          '#maxlength' => 256,
+          '#default_value' => @$attr['rel'],
+        );
+
+        $form['fields'][$i]['class'] = array(
+          '#type' => 'textfield',
+          '#title' => t('class') ,
+          '#description' => t('Class applied to be applied to the link.'),
+          '#size' => 100,
+          '#maxlength' => 256,
+          '#default_value' => @$attr['class'],
+        );
+
         $form['fields'][$i]['target'] = array(
           '#type' => 'textfield',
           '#title' => t('target'),

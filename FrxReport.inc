@@ -282,8 +282,10 @@ class FrxReport {
     $default='';
     $link ='';
     $format='';
-    $format_str='';
-    $target='';
+    $format_str = '';
+    $target = '';
+    $class = '';
+    $rel = '';
     if ($this->fields) {
 
       $path = 'frx:field[@id="' . $key . '"]';
@@ -294,6 +296,8 @@ class FrxReport {
            //@TODO: Replace the default extraction with something that will get sub elements of the string
            $default = (string)$formatter;
            $link = (string)$formatter['link'];
+           $class = (string)$formatter['class'];
+           $rel = (string)$formatter['rel'];
            $format = (string) $formatter['format'];
            $format_str = (string) $formatter['format-string'];
            $target = (string) $formatter['target'];
@@ -323,9 +327,12 @@ class FrxReport {
           'window.open(this.href,\''. $target . '\', "' . $options . '"); return false;');
       }
       else {
-      	$attributes = array('target' => $target);
+      	if ($target) $attributes = array('target' => $target);
       }
       $link = $this->teng->replace($link, TRUE);
+      if ($rel) $attributes['rel'] = $this->teng->replace($rel, TRUE);
+      if ($class) $attributes['class'] = $this->teng->replace($class, TRUE);
+
       @list($url, $query) = explode('?', $link);
       @list($query, $queryFrag) = explode('#', $query);
       @list($url, $fragment) = explode('#', $url);
