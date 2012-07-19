@@ -118,6 +118,8 @@ class FrxReport {
 
     $xml = FrxReportGenerator::instance()->invoke_data_provider($block, null, $clause);
 
+    if ($data_uri) FrxData::instance()->pop();
+
     if ($xml) {
     	$this->blocks_loaded = TRUE;
     }
