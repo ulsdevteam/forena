@@ -70,7 +70,7 @@ class FrxDataProvider{
 
     if ($this->te) {
       $tokens = @$this->te->tokens($block['source']);
-      //drupal_set_message("tokens: ". print_r($tokens, 1));
+      $tokens = array_diff($tokens, array('current_user'));
       //check tokens in the where clause
       if ($clause) {
         $clause_tokens = $this->te->tokens($clause);
