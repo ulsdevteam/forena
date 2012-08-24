@@ -1653,6 +1653,7 @@ function forena_add_data_block_form($formid, &$form_state, $report_name) {
       '#title' => t('Data Block'),
       '#default_value' => @$form_state['storage']['data_block'],
       '#autocomplete_path' => 'forena/data_block/autocomplete',
+      '#required' => TRUE,
       '#description' => t('Enter a data block, a preview will appear below'),
     );
 
@@ -2025,6 +2026,7 @@ function forena_data_block_form($formid, &$form_state, $report_name) {
         '#autocomplete_path' => 'forena/data_block/autocomplete',
         '#title' => 'Data Block',
         '#default_value' => $block,
+        '#required' => TRUE,
         '#description' => t('The data block to be used as the source for the data in the report.'),
       );
 
