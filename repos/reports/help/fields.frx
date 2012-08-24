@@ -38,6 +38,18 @@
               formatting.&nbsp;</td>
           </tr>
           <tr>
+            <td>drupal_node_content</td>
+            <td>Loads content from the given nid and display it using teaser or full
+              display.&nbsp;</td>
+            <td>Specify "teaser" to get teaser view.&nbsp;</td>
+          </tr>
+          <tr>
+            <td>drupal_translation</td>
+            <td>Use drupal's translation api to tranlate the value prior to display.&nbsp;</td>
+            <td>Specify a field (if any) that contains the serialized data used for translations
+              (e.g. watchdog table). &nbsp;Normally you can leave this blank. &nbsp;</td>
+          </tr>
+          <tr>
             <td>iso_date</td>
             <td>ISO standard dates are of the form, YYYY-MM-DD followed by a 24 hour timestamp (e.g.
               2012-12-01 20:30:30). &nbsp;Dates in this format may be reformatted&nbsp;</td>
@@ -59,12 +71,6 @@
             <td>Use PHP's sprintf function for adding labels and such.&nbsp;</td>
             <td>See&nbsp;<a href="http://us.php.net/manual/en/function.sprintf.php"
                 >http://us.php.net/manual/en/function.sprintf.php</a> for possibilities.</td>
-          </tr>
-          <tr>
-            <td>drupal_translation</td>
-            <td>Use drupal's translation api to tranlate the value prior to display.&nbsp;</td>
-            <td>Specify a field (if any) that contains the serialized data used for translations
-              (e.g. watchdog table). &nbsp;Normally you can leave this blank. &nbsp;&nbsp;</td>
           </tr>
         </tbody>
       </table><p>&nbsp;</p><h2>Linking Fields</h2><p><strong>Link</strong> - Specify a site relatie
