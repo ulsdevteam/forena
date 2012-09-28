@@ -190,10 +190,7 @@ class FrxReportGenerator {
     }
 
     $repo = array_merge($conf, $repo);
-    // $repo['user callback'] = $conf['user callback'];
     if (!isset($repos['data'])||!is_object($repo['data'])) $repo['data'] = $this->load_provider($repo, $path);
-
-    //$repo['auth'] = __forena_load_auth($security_provider);
 
   }
 
@@ -242,7 +239,7 @@ class FrxReportGenerator {
     if ($name) {
       if (isset($repos[$name])) {
 
-        if (!isset($repos[$name]['data']) || !is_object($repos[$name]['data'])|| !isset($repos[$name]['auth'])||!is_object($repos[$name]['auth'])) {
+        if (@!is_object($repos[$name]['data'])) {
           $this->load_repository($repos[$name]);
         }
         return $repos[$name];
