@@ -15,6 +15,8 @@ class FrxControls {
   //date formats
   public function formats() {
     $formats = array('drupal_date_format' => 'Drupal Date',
+                     'xhtml' => 'XHTML Decode of data',
+                     'drupal_text_format' => 'Drupal Text Format',
                      'iso_date' => 'ISO Date',
                      'sprintf' => 'PHP sprintf()',
                      'number' => 'Number',
@@ -47,6 +49,21 @@ class FrxControls {
      return t($value, $vars);
   }
 
+    // Custom formats based on translation string
+  public function drupal_text_format($value, $format_str, $teng) {
+  	 $field = '';
+     if ($format_str) $field = $format_str;
+     $field = $teng->replace($field, null, TRUE);
+     if ($field) {
+     	$format = $field;
+     }
+     else {
+     	$format = filter_default_format();
+     }
+     return check_markup(html_entity_decode($value, ENT_QUOTES, 'UTF-8'), $format);
+  }
+
+
   //Date format methods
   public function drupal_date_format($value, $format_str, $teng) {
      if (!$format_str) $format_str = 'small';
@@ -76,6 +93,13 @@ class FrxControls {
   public function iso_date($value, $format_str, $teng) {
     if ($value) $date = strtotime($value);
     return $this->drupal_date_format($date, $format_str, $teng);
+  }
+
+  public function xhtml($value, $format_str, $teng) {
+  	if ($value) {
+  		$value = html_entity_decode($value, ENT_QUOTES, 'UTF-8');
+  	}
+  	return $value;
   }
 
   public function sprintf($value, $format_str, $teng) {
