@@ -494,7 +494,7 @@ function forena_include_data_tables() {
 		if (file_exists($lib)) {
 			drupal_add_js($lib);
 		}
-	  $lib = '/sites/all/libraries/FixedHeader/js/FixedHeader.min.js';
+	  $lib = 'sites/all/libraries/FixedHeader/js/FixedHeader.min.js';
 		if (file_exists($lib)) {
 			drupal_add_js($lib);
 		}
