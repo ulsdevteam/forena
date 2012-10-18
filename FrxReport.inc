@@ -182,7 +182,7 @@ class FrxReport {
       $tmp_attrs = array();
       if ($attrs) foreach ($attrs as $key => $value) {
         $attr_text .=  ' ' . $key . '="' . (string)$value . '"';
-        $tmp_attr[$key] = (string)$value;
+        $tmp_attrs[$key] = (string)$value;
       }
 
       // Determine if we have a custom renderer
@@ -207,6 +207,7 @@ class FrxReport {
         $i=0;
 
         //$tmp_attrs = (array)$attrs;
+
         if ($nodes) foreach ($nodes as $x) {
           $this->frx_data->push($x, $id);
           $i++;
