@@ -721,3 +721,160 @@ function forena_mail($key, &$message, $parms) {
       break;
   }
 }
+
+
+/**
+ * Make sure a drectory exists in the report path prior to save.
+ *
+ * @param $fullpath Full path to the drectory to be copied
+ * @param $recursive Whether we are in a recursive call.
+ */
+function _forena_verify_directory($fullpath, $recursive=FALSE) {
+  static $path='';
+  $success = TRUE;
+  if (!$recursive) {
+	  $path = forena_report_path();
+	  if (!is_writable($path)) {
+  	  drupal_set_message(t('Report directory %s is not modifiable', array('%s' => $path)), 'error');
+  	  return FALSE;
+	  }
+  }
+  @list($dir, $file) = explode('/', $fullpath, 2);
+  $path .= '/' . $dir;
+
+  // Path
+  if (!file_exists($path) && $file) {
+    @mkdir($path);
+    if (!@is_writable($path)) {
+    	drupal_set_message(t('Error creating directory %path', array('%path' => $path)), 'error');
+    	return FALSE;
+    }
+
+  }
+  // Recurse to next file.
+  if ($file && strpos($file, '/')) {
+    _forena_verify_directory($file, TRUE);
+  }
+  return TRUE;
+}
+
+
+
+/**
+ * Recursively ,  all report files from the source directory to the destination directory
+ * @param $src_dir  Source directory to copy files from
+ */
+function _forena_copy_reports($src_dir, $overwrite=FALSE, $subdir=FALSE) {
+  static $dest_dir = '';
+  static $i = 0;
+  if (!$subdir) {
+    $dest_dir = forena_report_path();
+  }
+
+  if (!file_exists($dest_dir)) {
+    mkdir($dest_dir);
+  }
+
+  $d = dir($src_dir);
+  while (false !== ($rpt_file = $d->read())) {
+    $src_file = $d->path . '/' . $rpt_file;
+    $dest_file = $dest_dir . '/' . $rpt_file;
+
+    if (is_file($src_file)) {
+      if ($overwrite || !file_exists($dest_file)) {
+        file_put_contents($dest_file, file_get_contents($src_file));
+        $i++;
+      }
+    }
+    else {
+      if (strpos($rpt_file, '.')!==0) {
+        // Recurse into sub directory
+        $src_save = $src_dir;
+        $dest_save = $dest_dir;
+        $dest_dir .= '/' . $rpt_file;
+        $src_dir .= '/' . $rpt_file;
+        _forena_copy_reports($src_dir, $overwrite, TRUE);
+        $src_dir = $src_save;
+        $dest_dir = $dest_save;
+      }
+    }
+  }
+  $d->close();
+  return $i;
+}
+
+
+/**
+ * Load cache files from the database
+ */
+function forena_db_sync($subdir='') {
+  static $prefix = '';
+  if (!$subdir) {
+    $prefix = '';
+     db_delete('forena_reports')
+       ->execute();
+  }
+
+  $save_count=0;
+  $path =forena_report_path() . '/' . $subdir;
+  $d = dir($path);
+  if ($d) while (false !== ($rpt_file = $d->read())) {
+    $src_file = trim($d->path, '/') . '/' . trim($rpt_file, '/');
+    $dest_file = $path . '/' . trim($rpt_file, '/');
+    if (is_file($src_file)) {
+      list($report_name, $ext) = explode('.', $rpt_file, 2);
+      if ($ext == 'frx') {
+        $report_name = trim($prefix . '/' . $report_name, '/');
+
+        try {
+          $r_xml =file_get_contents($src_file);
+        } catch (Exception $e) {
+          $s = t('unable to load Report %s', $r_xml);
+          forena_error($s, $s . $e->getMessage());
+
+        }
+
+        // Load the report
+
+        $r = new FrxReport($r_xml);
+        $save_count = forena_save_report($report_name, $r_xml, FALSE);
+        $r->__destruct();
+        unset($r);
+      }
+    }
+    elseif (is_dir($src_file)) {
+      if (strpos($rpt_file, '.')!==0) {
+        $save_prefix = $prefix;
+        $prefix .=  '/' . $rpt_file;
+        $prefix = trim($prefix, '/');
+        forena_db_sync($prefix);
+        $prefix = $save_prefix;
+      }
+    }
+  }
+  if ($d) $d->close();
+
+  return $save_count;
+}
+
+/**
+ *
+ * Enter description here ...
+ * @param $copy_reports If true, reports will by re-copied from
+ *         module source files to destination.
+ */
+function forena_sync_reports($copy_reports=FALSE) {
+	if ($copy_reports) {
+	  $directories = module_invoke_all('forena_report_directory');
+	  $i=0;
+	  if ($directories) {
+	    foreach ($directories as $src_dir) {
+	      $i += _forena_copy_reports($src_dir, TRUE);
+	    }
+	    if ($i > 0) drupal_set_message($i . ' reports copied');
+	  }
+	}
+  forena_db_sync();
+
+}
+

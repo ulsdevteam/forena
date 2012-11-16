@@ -465,3 +465,133 @@ function forena_block_xml($block_name='') {
 		print $xml->asXML();
 	}
 }
+
+/**
+ * Save the report file to disk
+ *
+ * @param string $name File name  to save report to
+ * @param unknown_type $data
+ */
+function forena_save_report($report_name, $report, $save_file = FALSE, $altered = 0) {
+  static $save_count=0;
+
+  if ($report && !is_object($report)) {
+    try {
+      $report = new SimpleXMLElement($report);
+    }
+    catch (Exception $e) {
+      FrxReportGenerator::instance()->app->error(t('Could not save %s because XML was malformed', htmlspecialchars($report_name)),
+        "<p>Invalid XML</p><pre>XML:" . htmlspecialchars($report) . "\n" . $e->getMessage() . "</pre>");
+      return;
+    }
+  }
+
+  if (!_forena_verify_directory($report_name)) {
+    drupal_set_message(t('Error creating directory.  Check Permissions'), 'error');
+    return 0;
+  };
+  $report_path = forena_report_path();
+  $r = new FrxReport($report);
+  $data['title'] = $r->title;
+  $data['category'] = $r->category;
+  $data['options'] = $r->options;
+  $data['descriptor'] = $r->descriptor;
+  $data['name'] = $report_name;
+  $data['altered'] = $altered;
+  $r_xml = $report->asXML();
+  //@TODO: Clean up filename to make sure
+  $name = $data['name'];
+  $filepath = $report_path . '/' . $report_name . '.frx';
+  // If we need to save this to the file system
+
+  if ($save_file) {
+    // Serialize the report for saving
+
+    try {
+      file_put_contents($filepath, $r_xml);
+    } catch (Exception $e) {
+      fornea_error('Error Saving Report', $e->getMessage());
+    }
+  }
+
+  // Get the security caches from the reports
+  if ($report) $cache = forena_load_cache($report); else $cache='';
+  $rpt_cache='';
+  if ($cache) $rpt_cache = serialize($cache);
+
+  // Set default interpretations of data
+  $data['enabled'] = (isset($data['enabled']) && $data['enabled']) ? 1 : 0;
+  if (isset($data['options']['hidden']) && (string)$data['options']['hidden']) {
+    $data['hidden'] =  ($data['options']['hidden'] && $data['options']['hidden']!='N' && $data['options']['hidden']!='0') ? 1:0;
+    if (!$data['category']) $data['category'] = 'All';
+  }
+  else {
+    // Set hidden based on category
+    $data['hidden'] = ($data['category'])? 0 : 1;
+  }
+
+  // Save language info
+  $lang = 'en';
+  if (module_exists('locale')) {
+    @list($tlang, $tname) = explode('/', $name,2);
+    if (array_key_exists($tlang, language_list())) {
+      $lang = $tlang;
+      $name = $tname;
+    }
+  }
+
+
+  // Save to the Database
+  if (file_exists($filepath)) {
+    $modified = filemtime($filepath);
+    $result = db_query("SELECT report_name FROM {forena_reports} WHERE report_name=:report_name AND language=:language", array(':report_name' => $name, 'language' => $lang) );
+    if ($rpt = $result->fetchObject() ) {
+      db_update('forena_reports')
+        -> condition('report_name', $name)
+        -> condition('language', $lang)
+        ->fields(array(
+          'title' => $data['title'],
+          'descriptor' => $data['descriptor'],
+          'category' => $data['category'],
+          'hidden' => $data['hidden'],
+          'cache' => $rpt_cache,
+          'src' => $r_xml,
+          'altered' => $data['altered'],
+          'modified' => $modified))
+        ->execute();
+    }
+    else {
+      db_insert('forena_reports')->
+        fields( array('report_name' => $name,
+          'language' => $lang,
+          'title' => $data['title'],
+          'descriptor' => $data['descriptor'],
+          'category' => $data['category'],
+          'hidden' => $data['hidden'],
+          'cache' => $rpt_cache,
+          'src' => $r_xml,
+          'altered' => $data['altered'],
+          'modified' => $modified,
+          ))
+        ->execute();
+    }
+
+    $save_count++;
+  }
+
+  $r = NULL;
+  $result = NULL;
+  $r_xml = NULL;
+  $report = NULL;
+  $data = NULL;
+  $rpt = NULL;
+  $cache = NULL;
+  $rpt_cache = NULL;
+  // Destroy object to clear memory leaks.
+  if ($r) {
+  	$r->__destruct();
+  	unset($r);
+  }
+
+  return $save_count;
+}

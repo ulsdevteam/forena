@@ -1,0 +1,24 @@
+<?php
+/**
+ * Implementation of drush command hook.
+ */
+function forena_drush_command() {
+  $items = array();
+  $items['clear-forena-cache'] = array(
+    'description' => 'Clear forenas report cache',
+    'examples' => array('drush frxcc'),
+    'aliases' => array('frxcc')
+  );
+  $items['deliver-forena-reports'] = array(
+    'description' => 'Copy/Deliver module provided forena reports',
+    'examples' => array('frxcp', 'frxcp sample'),
+    'aliases' => array('frxcp'),
+
+  );
+  return $items;
+}
+
+function drush_forena_clear_forena_cache() {
+  require_once 'forena.common.inc';
+  forena_sync_reports(FALSE);
+}
