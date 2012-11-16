@@ -615,6 +615,13 @@ function forena_forena_controls() {
 }
 
 /**
+ * Implementation of forena_report_directory hook.
+ */
+function forena_forena_report_directory() {
+    return drupal_get_path('module', 'forena') . '/repos/reports';
+}
+
+/**
  * Load the report repository path
  *
  * @return unknown
@@ -875,6 +882,6 @@ function forena_sync_reports($copy_reports=FALSE) {
 	  }
 	}
   forena_db_sync();
-
 }
+
 

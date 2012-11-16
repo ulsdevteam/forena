@@ -214,10 +214,6 @@ function forena_settings_submit($form, &$form_state) {
   forena_sync_reports();
 }
 
-function forena_forena_report_directory() {
-    return drupal_get_path('module', 'forena') . '/repos/reports';
-}
-
 function forena_settings_sync_submit($form, &$form_state) {
   forena_sync_reports($form_state['values']['sync_overwrite']);
   drupal_set_message(t('Report cache cleared'));

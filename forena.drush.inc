@@ -11,7 +11,7 @@ function forena_drush_command() {
   );
   $items['deliver-forena-reports'] = array(
     'description' => 'Copy/Deliver module provided forena reports',
-    'examples' => array('frxcp', 'frxcp sample'),
+    'examples' => array('drush frxcp'),
     'aliases' => array('frxcp'),
 
   );
@@ -21,4 +21,9 @@ function forena_drush_command() {
 function drush_forena_clear_forena_cache() {
   require_once 'forena.common.inc';
   forena_sync_reports(FALSE);
+}
+
+function drush_forena_deliver_forena_reports() {
+  require_once 'forena.common.inc';
+  forena_sync_reports(TRUE);
 }
