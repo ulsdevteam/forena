@@ -12,6 +12,7 @@ require_once('forena.common.inc');
  */
 function forena_admin_reports() {
   GLOBAL $language;
+  $data = array();
   $links[] = array('href' => 'reports/add', 'title' => 'Create New Report' );
   $output = theme('links',
                      array(
