@@ -184,7 +184,7 @@ class FrxDataProvider{
     $access = '';
     $i=0;
     $block = '';
-    $parms = FrxData::instance()->currentContext();
+    $parms = Frx::Data()->currentContext();
     $data = '';
     while ($i<$cnt) {
       $l = trim($lines[$i], "\r");

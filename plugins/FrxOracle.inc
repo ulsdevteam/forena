@@ -66,7 +66,7 @@ class FrxOracle extends FrxDataProvider {
       $sql = $block['source'];
       // See if this block matches a declare begin end; syntax.
       if (stripos($sql, 'end;')>= stripos($sql, 'begin') && stripos($sql, 'begin')!==FALSE) {
-      	$params = $this->te->object_to_array(FrxData::instance()->currentContext());
+      	$params = $this->te->object_to_array(Frx::Data()->currentContext());
         $this->call($sql, $params, array('return' => 'clob'));
         $xml = $params['return'];
         if (trim($xml)) $xml = new SimpleXMLElement($xml);

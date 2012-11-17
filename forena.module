@@ -1,4 +1,7 @@
 <?php
+
+require_once 'Frx.inc';
+
 /**
  * Implementation of hook_menu.
  *
@@ -391,7 +394,7 @@ function forena_xml($block_name, $parms=array()) {
 	  include_once('forena.common.inc');
 	  drupal_alter('forena_parameters', $block_name, $parms );
     //now invoke the data provider with the correct params
-    FrxData::instance()->push($parms, 'parm');
+    Frx::Data()->push($parms, 'parm');
 		return FrxReportGenerator::instance()->block_xml($block_name, $parms);
 }
 

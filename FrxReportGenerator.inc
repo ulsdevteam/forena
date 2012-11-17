@@ -156,7 +156,7 @@ class FrxReportGenerator {
     else {
       $rights = array();
       // Get the block from the repository
-      $frxData = FrxData::instance();
+      $frxData = Frx::Data();
       $frxData->push(array(), 'frx-block-access');
       $data = $this->invoke_data_provider($block, array(), NULL);
       $frxData->pop();
@@ -282,7 +282,7 @@ class FrxReportGenerator {
        $user_fn = $repos['user callback'];
        if (is_callable($user_fn)) {
        	 $current_user =   $user_fn();
-         FrxData::instance()->setValue('current_user', $current_user);
+         Frx::Data()->setValue('current_user', $current_user);
        }
      }
      if ($repos['data']) {
@@ -819,9 +819,9 @@ function report($name_in, $parms = array(), $print=TRUE) {
  *
  */
 function data_block_params($data_block, $field, $label, $params=array(), $clause='') {
-	FrxData::instance()->push($params);
+	Frx::Data()->push($params);
   $xml = $this->invoke_data_provider($data_block, $params, $clause);
-  FrxData::instance()->pop();
+  Frx::Data()->pop();
 
   $list = array();
   if ($xml) {

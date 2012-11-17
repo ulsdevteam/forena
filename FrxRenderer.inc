@@ -23,7 +23,7 @@ class FrxRenderer {
 
 	public function initReportNode($domNode, $frxReport) {
 		$this->reportDocDomNode = $domNode;
-    $this->dataProvider = FrxData::instance();
+    $this->dataProvider = Frx::Data();
     $this->reportDocNode = simplexml_import_dom($domNode);
     $node = $this->reportDocNode;
     $this->name = $node->getName();

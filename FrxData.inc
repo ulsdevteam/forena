@@ -11,22 +11,15 @@ class FrxData {
 	 * @var unknown_type
 	 */
 	public $id;
-	private static $instance='';
 	private $cur_context;  // The data of the xml;
 	private $data_sources = array();
   private $data_stack = array();
   private $id_stack = array();
-
-	/**
-	 * Static factory method for working on data objects
-	 * Enter description here ...
-	 */
-	static function instance() {
-		if (!self::$instance) {
-			self::$instance = new FrxData();
-		}
-		return self::$instance;
-	}
+  
+  // For backward compatibility. 
+  public static function instance() { 
+    return Frx::Data(); 
+  }
 
 	/**
 	 * Return the current data context

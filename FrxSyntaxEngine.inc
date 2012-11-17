@@ -29,7 +29,7 @@ class FrxSyntaxEngine {
     	$this->frxData = $frxObject;
     }
     else {
-      $this->frxData = FrxData::instance();
+      $this->frxData = Frx::Data();
     }
 
   }

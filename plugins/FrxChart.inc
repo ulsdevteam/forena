@@ -58,7 +58,7 @@ class FrxChart extends FrxRenderer {
 
 
 	public function xmlToValues($path, $data_path, $label_path='') {
-		$do = FrxData::instance();
+		$do = Frx::Data();
 		$data = $do->currentContext();
 		$values = array();
 		if (is_object($data)) {

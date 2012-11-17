@@ -1,0 +1,41 @@
+<?php
+class ForenaReportTestCase extends DrupalWebTestCase {
+  public static function getInfo() { 
+    $privileged_user; 
+    
+    return array(
+      'name' => 'Forena Reports',
+      'description' => 'Report rendering tests for forena', 
+      'group' => t('Forena'), 
+    ); 
+  }
+  
+  public function setup() { 
+    parent::setup('forena'); 
+    // Create and log in our privileged user.
+    $this->privileged_user = $this->drupalCreateUser(array(
+      'access demo reports',
+      'administer forena reports',
+    	'list reports',
+      ));
+    $this->drupalLogin($this->privileged_user);
+    variable_set('forena_report_path', 'sites/default/files/reports');
+    $edit= array('sync_overwrite' => 1 ); 
+    $this->drupalPost('admin/config/content/forena', $edit, t('Clear Cache')); 
+    $edit= array('sync_overwrite' => 1 ); 
+    $this->drupalPost('admin/config/content/forena', $edit, t('Clear Cache')); 
+  }
+
+  public function testConfig() { 
+    $this->drupalGet('forena'); 
+    $this->assertText('Simple Table'); 
+  }
+  
+  public function testSimpleReport() { 
+    $this->drupalGet('forena'); 
+    $this->drupalGet('reports/sample.states'); 
+    $this->assertText('Alaska'); 
+  }
+  
+  
+}

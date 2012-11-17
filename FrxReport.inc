@@ -32,7 +32,7 @@ class FrxReport {
     $this->parameters = array();
     $this->options = array();
     $this->root_data = $data;
-    $this->frx_data = FrxData::instance();
+    $this->frx_data = Frx::Data();
     $this->frx_data;
     $this->teng = new FrxSyntaxEngine(FRX_TOKEN_EXP, '{}', $this, $this->frx_data);
     if ($xhtml) {
@@ -113,12 +113,12 @@ class FrxReport {
 
     	}
     	$id .= '-parm';
-    	FrxData::instance()->push($data, $id);
+    	Frx::Data()->push($data, $id);
     }
 
     $xml = FrxReportGenerator::instance()->invoke_data_provider($block, null, $clause);
 
-    if ($data_uri) FrxData::instance()->pop();
+    if ($data_uri) Frx::Data()->pop();
 
     if ($xml) {
     	$this->blocks_loaded = TRUE;

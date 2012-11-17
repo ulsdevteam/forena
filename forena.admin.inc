@@ -121,7 +121,7 @@ function forena_filter_element($fmt) {
  *
 */
 function forena_get_report_editor($report_name) {
-  require_once('FrxReportEditor.inc');
+  require_once('FrxEditor.inc');
   if ($report_name) {
     $r_text='';
     $report_path = forena_report_path();
@@ -129,11 +129,11 @@ function forena_get_report_editor($report_name) {
     if (file_exists($filename)) {
       $r_text = file_get_contents($filename);
     }
-    $r = new FrxReportEditor($r_text);
+    $r = new FrxEditor($r_text);
     return $r;
   }
   else {
-    return new FrxReportEditor();
+    return new FrxEditor();
   }
 }
 
@@ -1635,7 +1635,7 @@ function forena_data_select_block_submit($form, &$form_state) {
 
 
       //now invoke the data provider with the correct params
-      FrxData::instance()->push($parms, 'parm');
+      Frx::Data()->push($parms, 'parm');
       $form_state['storage']['parms'] = $params;
       $xml = FrxReportGenerator::instance()->invoke_data_provider($data_block, $parms, $where_clause);
       if ($xml) {

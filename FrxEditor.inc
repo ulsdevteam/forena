@@ -6,7 +6,7 @@
  * @author metzlerd
  *
  */
-class FrxReportEditor {
+class FrxEditor {
   public $dom;
   public $document_root;
   public $simplexml;

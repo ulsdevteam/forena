@@ -34,7 +34,7 @@ class FrxPostgres extends FrxDataProvider {
       }
       try {
         $db = pg_connect($uri);
-        if (isset($conf['search path'])) pg_query($db, "SET search_path=" . $conf['search path']);
+        if (isset($conf['search path'])) @pg_query($db, "SET search_path=" . $conf['search path']);
         $this->db = $db;
       } catch (Exception $e) {
         $this->error('Unable to connect to database ' . $conf['title'], $e->getMessage());
