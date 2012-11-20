@@ -6,7 +6,9 @@
  * file to keep the module file lean.
  */
 // Include Report renderer.
-require_once('FrxReport.inc');
+require_once 'Frx.inc';
+require_once 'FrxReport.inc';
+require 'FrxDocument.inc';
 require_once('FrxDataProvider.inc');
 require_once('FrxReportGenerator.inc');
 require_once('FrxSQLQueryBuilder.inc');

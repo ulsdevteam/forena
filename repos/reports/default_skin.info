@@ -1,0 +1,11 @@
+;
+;  Example info file that will use the datatables plugin if loaded in sites/all/modules or reports directory.
+;
+;  Scripts are searched for first in the reports directory, second in the site relative file system 
+;  and thirdly in the sites/all/libraries folder. 
+;  
+name = Default Skin
+description = Default skin for use with Forena. 
+scripts[] = dataTables/media/js/jquery.dataTables.min.js
+scripts[] = default_skin.js
+stylesheets[all] = table_padding.css

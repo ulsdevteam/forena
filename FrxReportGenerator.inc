@@ -655,7 +655,7 @@ function load_block($data_block, $clause='') {
   }
 
 
-  /**
+ /**
  * Load and render a report based on a drupal path.
  * In this function the arglist is used to get the full path to the report.
  *
@@ -667,8 +667,6 @@ function report($name_in, $parms = array(), $print=TRUE) {
   $name = $desc['name'];
   $format = isset($desc['format']) ? $desc['format'] : '';
   $filename = $desc['filename'];
-  $css_files = array();
-  $js_files = array();
 
   // Determine the data to get.
   if (!$parms) {
@@ -676,132 +674,23 @@ function report($name_in, $parms = array(), $print=TRUE) {
   	unset($parms['q']);
   }
   else $parms = (array)$parms;
+  
+  
   if ($name) {
-    $r = $this->get_report($name, $parms);
+    $r = @$this->get_report($name, $parms);
     if (!$r || !$r->rpt_xml) {
     	$this->app->error('Could not load report. Check for invalid XML.');
     	return '';
     }
 
     //check for default parameters
-    $r_params = $r->parameters;
-    $reload_params = FALSE;
-    $missing_parms = FALSE;
+    $r->processParameters();
+    Frx::Skin()->load($r->skin); 
+    $r->render($format); 
+    $o =  Frx::Document($format); 
+    if ($o) $output .= $o->render($r, $format,  array()); 
 
-    //Set default Parameters
-    if ($r_params) {
-
-      //put default parameters in parms array
-      foreach ($r_params as $key => $parm) {
-        if ((@$parms[$key]=='' || @$parms[$key]==array()) && @$parm['value']) {
-         $value = (string)$parm['value'];
-         if (strpos($value, '|')!==FALSE) {
-         	$value = explode('|', $value);
-         }
-         $parms[$key] = $value;
-         $reload_params = TRUE;
-        }
-          //do not show report if a required parameter does not have a value
-          //force the user to input a parameter
-        if ((@!$parms[$key]) && (@strcmp($parm['require'], "1") == 0) && (!$parm['value'])) {
-          $missing_parms = TRUE;
-        }
-      }
-    }
-
-    //Reload report if parameters were missing
-    if ($reload_params) {
-      $r = $this->get_report($name, $parms);
-    }
-
-    $form = isset($r->options['form']) ? $r->options['form'] : '';
-    $rpt_xml = $r->rpt_xml;
-
-    // Default the form
-    if (!$form) $form = $this->app->configuration('default_form');
-    $this->form = $form;
-    if (!$missing_parms) {
-      $output .= $r->render($format);
-      $css_files = $this->report_css($desc, $form, $format);
-      $js_files = $this->report_js($desc, $form, $format);
-    }
-
-    //put title on top of report
-    $title = (string)$r->title;
-    $this->title = $title;
-
-    if ($format && $format !='web') { //a format was requested
-        $header = '<h1>' . $title . '</h1>';
-        $output = $header . $output;
-        $css_text = '';
-        $r_text = '';
-        if ($css_files) foreach ($css_files as $css_file) {
-          $css_text .= file_get_contents($css_file);
-        }
-        $options = array('css' => $css_text,
-                         'docname' => str_replace(' ', '_', $title),
-                         'xml' => $r_text,
-                         'title' => $title,
-                   );
-
-        $output = $this->generate_doc($format, $output, $options, $print);
-        if ($format!='email') {
-          print $output;
-        }
-        else {
-        	return $output;
-        }
-        exit;
-      }
-      else {
-        //Creating links for downloadable documents.
-        //build querystring for document href
-        $q='';
-        foreach ($parms as $key => $value) {
-          $q .= "&" . $key . '=' . $value;
-        }
-        $q = trim($q, '&');
-
-        //Building the document links
-        //@TODO: Move this to better location
-        $rpt_xml = $r->rpt_xml;
-        $nodes = $rpt_xml->xpath('//frx:docgen/frx:doc');
-        $div = '<div class="doclinks">';
-        $default_doctypes = $this->app->configuration('doc_defaults', array());
-
-        if (!$missing_parms) {
-          if (!$nodes) {
-            //show the default.
-            if ($default_doctypes) foreach ($default_doctypes as $value) if (is_object($this->get_doctypes($value))) {
-              $div .= $this->link(strtoupper($value) . ' ', 'report_doc/' . $name_in . '.' . $value, array('query' => $parms, 'class' => 'doclinks'));
-            }
-          }
-          else {
-            //There were nodes. show the prefered doc types
-            $doctypes = $this->supported_doctypes();
-            foreach ($nodes as $value) {
-              $arr = $value->attributes();
-              $type = (string)$arr['type'];
-              if (@$doctypes[$type]) {
-                if (is_object($this->get_doctypes($type))) {
-                  $div .= $this->link(strtoupper($type) . ' ', 'report_doc/' . $name_in . '.' . $type, array('query' => $parms, 'class' => 'doclinks'));
-                }
-              }
-            }
-          }
-        }
-        $div .= '</div>';
-        $output = $div .  $this->app->theme($r, $title, $format);
-
-        $this->app->add_css($this->app->forena_path() . '/forena.css');
-        if ($css_files) foreach ($css_files as $css_file) {
-          $this->app->add_css($css_file);
-        }
-        if ($js_files) foreach ($js_files as $js_file) {
-          $this->app->add_js($js_file);
-        }
-        return $output;
-      }
+    return $output; 
     }
     else {
       $this->app->not_found();

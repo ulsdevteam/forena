@@ -20,10 +20,10 @@ class FrxReport {
   public $options;
   public $body;
   public $html;
+  public $skin; 
   private $ids;
   public $teng;
-  public $frx_data; // Data object
-  private $root_data;
+  public $parms;
   private $dom;
 
 
@@ -31,10 +31,8 @@ class FrxReport {
     $this->access = array();
     $this->parameters = array();
     $this->options = array();
-    $this->root_data = $data;
-    $this->frx_data = Frx::Data();
-    $this->frx_data;
-    $this->teng = new FrxSyntaxEngine(FRX_TOKEN_EXP, '{}', $this, $this->frx_data);
+    $this->parms = $data;
+    $this->teng = new FrxSyntaxEngine(FRX_TOKEN_EXP, '{}', $this);
     if ($xhtml) {
       $dom = $this->dom = new DOMDocument('1.0', 'UTF-8');
       // Old assumption is an ojbect is a simplexml one
@@ -45,8 +43,7 @@ class FrxReport {
       $dom->formatOutput = TRUE;
       $rpt_xml = $this->rpt_xml = simplexml_import_dom($dom);
 
-      // Loaod data if its there.
-      $this->frx_data->push($data, 'parm');
+
       // Load header data
       $this->body = $rpt_xml->body;
       if ($rpt_xml->head) {
@@ -88,6 +85,8 @@ class FrxReport {
               break;
           }
         }
+        
+        $this->skin = isset($this->options['skin']) ? $this->options['skin'] : @$this->options['form']; 
       }
     }
   }
@@ -170,7 +169,7 @@ class FrxReport {
         $is_data_block = TRUE;
         $xml = $this->get_data((string)$frx['block'], (string)$frx['clause'], $id, (string)$frx['parameters']);
         if ($xml) {
-          $this->frx_data->push($xml, $id);
+          Frx::Data()->push($xml, $id);
         }
         else {
         	return '';
@@ -203,7 +202,7 @@ class FrxReport {
       if ((string)$frx['foreach'] ) {
         // Save xml
         $path = $this->teng->replace((string)$frx['foreach'], TRUE);
-        $data = $this->frx_data->currentContext();
+        $data = Frx::Data()->currentContext();
 
         if (is_object($data)) {
         	if (method_exists($data, 'xpath')) {
@@ -221,7 +220,7 @@ class FrxReport {
         //$tmp_attrs = (array)$attrs;
 
         if ($nodes) foreach ($nodes as $x) {
-          $this->frx_data->push($x, $id);
+          Frx::Data()->push($x, $id);
           $i++;
           $odd = $i & 1;
           $row_class = $odd ? 'odd' : 'even';
@@ -236,7 +235,7 @@ class FrxReport {
             $o .= $this->render_section($child);
           }
           $o .= '</' . $tag . '>';
-	        $this->frx_data->pop();
+	        Frx::Data()->pop();
         }
       }
       elseif ($continue) {
@@ -259,7 +258,7 @@ class FrxReport {
       	}
       }
       if ($is_data_block && $continue) {
-      	$this->frx_data->pop();
+      	Frx::Data()->pop();
       }
     }
     else {
@@ -279,6 +278,8 @@ class FrxReport {
   public function render($format) {
     $dom = $this->dom;
     $o='';
+    // Push the data 
+    Frx::Data()->push($this->parms, 'parm');
     $body = $dom->getElementsByTagName('body')->item(0);
 
     foreach ($body->childNodes as $node) {
@@ -485,34 +486,61 @@ class FrxReport {
    * @param string $value Value to be saved.
    * @return unknown_type
    */
-public function set_value($xpath, $value) {
-  $xml = $this->rpt_xml;
-  $i = strrpos($xpath, '/');
-  $path = substr($xpath, 0, $i);
-  $key = substr($xpath, $i+1);
-  $nodes = $xml->xpath($path);
-  if ($nodes) {
-    // if the last part of the xpath is a key then assume the key
-    if (strpos($key, '@')===0) {
-      $key = trim($key, '@');
-      if (is_null($value)) {
-        unset($nodes[0][$key]);
+  public function set_value($xpath, $value) {
+    $xml = $this->rpt_xml;
+    $i = strrpos($xpath, '/');
+    $path = substr($xpath, 0, $i);
+    $key = substr($xpath, $i+1);
+    $nodes = $xml->xpath($path);
+    if ($nodes) {
+      // if the last part of the xpath is a key then assume the key
+      if (strpos($key, '@')===0) {
+        $key = trim($key, '@');
+        if (is_null($value)) {
+          unset($nodes[0][$key]);
+        }
+        else {
+          $nodes[0][$key] = $value;
+        }
       }
+      // We must be refering to the text element of a node.
       else {
-        $nodes[0][$key] = $value;
-      }
-    }
-    // We must be refering to the text element of a node.
-    else {
-      if (is_null($value)) {
-        unset($nodes[0]->$key);
-      }
-      else {
-        $nodes[0]->$key = $value;
+        if (is_null($value)) {
+          unset($nodes[0]->$key);
+        }
+        else {
+          $nodes[0]->$key = $value;
+        }
       }
     }
   }
-}
+
+  /**
+   * Default the parameters ba
+   * @param $parms Array of parameters.  
+   * @return boolean indicating whether the required parameters are present. 
+   */
+  public function processParameters() { 
+    $parms = $this->parms; 
+    $missing_parms = FALSE; 
+    foreach ($this->parameters as $key => $parm) {
+      if ((@$parms[$key]=='' || @$parms[$key]==array()) && @$parm['value']) {
+       $value = (string)$parm['value'];
+       if (strpos($value, '|')!==FALSE) {
+       	$value = explode('|', $value);
+       }
+       $parms[$key] = $value;
+       $reload_params = TRUE;
+      }
+        //do not show report if a required parameter does not have a value
+        //force the user to input a parameter
+      if ((@!$parms[$key]) && (@strcmp($parm['require'], "1") == 0) && (!$parm['value'])) {
+        $missing_parms = TRUE;
+      }
+    }
+    $this->parms = $parms; 
+    return $missing_parms; 
+  }
 
 
 }

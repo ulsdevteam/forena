@@ -13,25 +13,17 @@ class FrxSyntaxEngine {
   private $tpattern;
   private $trim_chars;
   private $formatter; // Object used to format the data
-  private $frxData ;
   /**
    * Class for doing syntax replacements;
    * @param $regexp
    * @return unknown_type
    */
-  public function __construct($regexp, $trim, $formatter=NULL, $frxObject=NULL) {
+  public function __construct($regexp, $trim, $formatter=NULL) {
     $this->tpattern = $regexp;
     $this->trim_chars = $trim;
     if (is_object($formatter)) {
       $this->formatter=$formatter;
     }
-    if ($frxObject) {
-    	$this->frxData = $frxObject;
-    }
-    else {
-      $this->frxData = Frx::Data();
-    }
-
   }
 
 
@@ -67,14 +59,14 @@ class FrxSyntaxEngine {
   protected function get_value( $key, $raw=FALSE) {
     $retvar = '';
     // Default to theo current context
-    $data = $this->frxData->currentContext();
+    $data = Frx::Data()->currentContext();
 
     // Determine if we have a . syntax for the id.
     $raw_key=$key;
     if ($key && strpos($key, '.')) {
       @list($id, $path) = explode('.', $key, 2);
-      if ($this->frxData->contextExists($id)) {
-        $data = $this->frxData->getContext($id);
+      if (Frx::Data()->contextExists($id)) {
+        $data = Frx::Data()->getContext($id);
         $key = $path;
       }
     }

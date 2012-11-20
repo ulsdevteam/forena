@@ -522,11 +522,14 @@ function forena_report($name_in, $parms = array(), $print = TRUE) {
   forena_include_data_tables();
   $output = FrxReportGenerator::instance()->report($name_in, $parms, $print);
   $m_path = drupal_get_path('module', 'forena');
+  
+  // This has been deprecated, but we'll eave it in for now. 
   drupal_add_js($m_path . '/forena.js');
   $forena_js = array();
-  $forena_js['form'] = preg_replace('/[^\w\-]+/u', '_', FrxReportGenerator::instance()->form);
+  $forena_js['form'] = preg_replace('/[^\w\-]+/u', '_', Frx::Skin()->name);
   $forena_js['report'] = preg_replace('/[^\w\-]+/u', '_', $name_in);
   drupal_add_js(array('forena' => $forena_js), 'setting');
+  
 
   return $output;
 }
@@ -575,6 +578,20 @@ function forena_forena_plugins() {
                      'class' => 'FrxMSSQL',
                      );
   return $plugins;
+}
+
+/**
+ * Self register document formats with Forena
+ * 
+ */
+function forena_forena_document_types() { 
+  require_once 'docformats/FrxWebDoc.inc';
+  $items['web'] = array(
+    'class' => 'FrxWebDoc', 
+    'title' => t('Themed Drupal Page'), 
+  ); 
+  
+  return $items; 
 }
 
 /**
@@ -630,11 +647,7 @@ function forena_forena_report_directory() {
  * @return unknown
  */
 function forena_report_path() {
-  $report_path = variable_get('forena_report_repos', '');
-  if (!$report_path) {
-    $report_path = variable_get('file_' . file_default_scheme() . '_path', conf_path() . '/files/reports');
-  }
-  return trim($report_path, '/');
+  return Frx::File()->dir; 
 }
 
 /**
@@ -887,4 +900,26 @@ function forena_sync_reports($copy_reports=FALSE) {
   forena_db_sync();
 }
 
+function forena_theme() {
+  return array(
+    'forena_web_report' => array(
+      'variables' => array('doc_types' => NULL, 'parameters' => NULL, 'content' => NULL),
+    ),
+  ); 
+}
 
+/**
+ * Default theme function for forena web reports. 
+ * @param $variables Array of variables to theme
+ */
+function theme_forena_web_report ($variables) {
+  $output = ''; 
+  if (@$variables['parameters']) { 
+    $output .= '<div id="forena-parameters">' . $variables['parameters'] . '</div>'; 
+  }
+  if (@$variables['doc_links']) { 
+    $output .= "<div id='forena-doc-links'>" . $variables['doc_links']. '</div>'; 
+  }
+  $output .= '<div class="forena-report>' . $variables['content'] . '</div>'; 
+  return $output; 
+} 
