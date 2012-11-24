@@ -85,4 +85,18 @@ class Frx {
     
   }
   
+  /**
+   * Forena Repository manager 
+   * Class factory
+   * @return FrxRepoMan
+   */
+  public static function RepoMan() { 
+    static $o = ''; 
+    if (!$o) { 
+      require_once 'FrxRepoMan.inc';
+      $o = new FrxRepoMan(); 
+    }
+    return $o;
+  }
+  
 }

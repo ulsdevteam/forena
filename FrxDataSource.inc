@@ -3,10 +3,10 @@
 require_once('forena.common.inc');
 /**
  * @file
- * Class that defines default methods for access control in an FrxDataProvider
+ * Class that defines default methods for access control in an FrxDataSource
  *
  */
-class FrxDataProvider{
+class FrxDataSource{
 
   public $conf;
   public $block_path;

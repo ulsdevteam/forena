@@ -7,7 +7,7 @@
  * In order to take advantage of XML support the following XML
  *
  */
-class FrxPostgres extends FrxDataProvider {
+class FrxPostgres extends FrxDataSource {
 
 
   private $db;

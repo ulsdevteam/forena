@@ -6,7 +6,7 @@
  * drupal connections.
  *
  */
-class FrxDrupal extends FrxDataProvider {
+class FrxDrupal extends FrxDataSource {
   /**
 	 * Implements hooks into the drupal applications
 	 */

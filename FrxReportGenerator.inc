@@ -7,7 +7,7 @@
  */
 // Include Report renderer.
 require_once('FrxReport.inc');
-require_once('FrxDataProvider.inc');
+require_once('FrxDataSource.inc');
 
 class FrxReportGenerator {
 

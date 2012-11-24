@@ -9,7 +9,7 @@
 require_once 'Frx.inc';
 require_once 'FrxReport.inc';
 require 'FrxDocument.inc';
-require_once('FrxDataProvider.inc');
+require_once('FrxDataSource.inc');
 require_once('FrxReportGenerator.inc');
 require_once('FrxSQLQueryBuilder.inc');
 require_once('FrxDrupalApplication.inc');

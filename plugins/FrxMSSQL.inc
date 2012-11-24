@@ -7,7 +7,7 @@
  * In order to take advantage of XML support the following XML
  *
  */
-class FrxMSSQL extends FrxDataProvider {
+class FrxMSSQL extends FrxDataSource {
 
 
   private $db;

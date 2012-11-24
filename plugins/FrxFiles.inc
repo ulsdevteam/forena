@@ -8,7 +8,7 @@
  * @author metzlerd
  *
  */
-class FrxFiles extends FrxDataProvider {
+class FrxFiles extends FrxDataSource {
   private $path;
   public function __construct($conf, $repos_path) {
     parent::__construct($conf, $repos_path);

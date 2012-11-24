@@ -6,7 +6,7 @@
  *
  */
 
-class FrxPDO extends FrxDataProvider {
+class FrxPDO extends FrxDataSource {
 
 
   private $db;
