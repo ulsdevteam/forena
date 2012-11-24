@@ -591,6 +591,7 @@ function forena_forena_document_types() {
   require_once 'docformats/FrxSVGDoc.inc';
   require_once 'docformats/FrxWordDoc.inc';
   require_once 'docformats/FrxXLSDoc.inc';
+  require_once 'docformats/FrxEmailMergeDoc.inc'; 
   $items['web'] = array(
     'class' => 'FrxWebDoc', 
     'title' => t('Themed Drupal Page'), 
@@ -599,6 +600,11 @@ function forena_forena_document_types() {
   $items['csv'] = array(
     'class' => 'FrxCSVDoc', 
     'title' => t('Comma separated values'), 
+  ); 
+  
+  $itmes['email'] = array(
+    'class' => 'FrxEmailMergeDoc', 
+    'title' => t('Email Merge Document'), 
   ); 
   
   $items['html'] = array(
