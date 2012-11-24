@@ -264,7 +264,7 @@ function forena_format_form($formid, $form_state, $report_name) {
       foreach ($doclist as $value) {
         $options[$value] = strtoupper($value);
         $doc =  isset($r) ? $r->simplexml->head->xpath('frx:docgen/frx:doc[@type="' . $value . '"]') : '';
-        if ($doc && array_search($value, $doclist)) {
+        if ($doc && array_search($value, $doclist)!==FALSE) {
           $default[$value] = $value;
         }
       }
