@@ -44,34 +44,25 @@ class FrxWebDoc extends FrxDocument {
     $formats = ''; 
     if ($r->html) {
       //Building the document links
-      $rpt_xml = $r->rpt_xml;
-      $nodes = $rpt_xml->xpath('//frx:docgen/frx:doc');
-      $formats = '<div class="doclinks">';
       $default_doctypes = variable_get('forena_doc_defaults', array());
-
-      if (!$nodes) {
-        //show the default.
-        if ($default_doctypes) foreach ($default_doctypes as $value) {
-          $formats .= @l(strtoupper($value) . ' ', 'report_doc/' . $name_in . '.' . $value, array('query' => $r->parms, 'class' => 'doclinks'));
+      $m = Frx::Menu(); 
+      $link = str_replace('/', '.' ,$m->base_name); 
+      if ($m->name) { 
+        $formats = '<div class="doclinks">';
+        if (!$r->formats) {
+          $doc_types = $m->doc_defaults; 
         }
-      }
-      else {
-        //There were nodes. show the prefered doc types
-        $doctypes = FrxReportGenerator::instance()->supported_doctypes();
-        foreach ($nodes as $value) {
-          $arr = $value->attributes();
-          $type = (string)$arr['type'];
-          if (@$doctypes[$type]) {
-            if (is_object($this->get_doctypes($type))) {
-              $formats .= l(strtoupper($type) . ' ', 'report_doc/' . $name_in . '.' . $type, array('query' => $parms, 'class' => 'doclinks'));
-            }
-          }
+        else {
+          //There were nodes. show the prefered doc types
+          $doc_types = array_intersect($m->doc_formats, $r->formats);
         }
+        if ($doc_types) foreach ($doc_types as $value) {
+          $formats .= @l(strtoupper($value) . ' ', 'report_doc/' . $link . '.' . $value, array('query' => $r->parms, 'class' => 'doclinks'));
+        }
+        $formats .= '</div>';   
       }
     }
-    $formats .= '</div>';   
 
-    
     // Use a theme function to make sure the report gets themed. 
     $variables = array(
       'parameters' => $parameters, 

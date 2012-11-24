@@ -663,7 +663,7 @@ function load_block($data_block, $clause='') {
  */
 function report($name_in, $parms = array(), $print=TRUE) {
   $output = '';
-  $desc = $this->report_desc($name_in);
+  $desc = Frx::Menu()->parseURL($name_in); 
   $name = $desc['name'];
   $format = isset($desc['format']) ? $desc['format'] : '';
   $filename = $desc['filename'];
@@ -679,7 +679,7 @@ function report($name_in, $parms = array(), $print=TRUE) {
   if ($name) {
     $r = @$this->get_report($name, $parms);
     if (!$r || !$r->rpt_xml) {
-    	$this->app->error('Could not load report. Check for invalid XML.');
+    	$this->app->error('Could not load report. Check for invalid XML in ' . $name);
     	return '';
     }
 

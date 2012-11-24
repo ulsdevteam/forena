@@ -18,6 +18,7 @@ class FrxReport {
   public $access;
   public $parameters;
   public $options;
+  public $formats; 
   public $body;
   public $html;
   public $skin; 
@@ -48,7 +49,14 @@ class FrxReport {
       $this->body = $rpt_xml->body;
       if ($rpt_xml->head) {
         $this->title = (string)$rpt_xml->head->title;
-
+        $nodes = $rpt_xml->xpath('//frx:docgen/frx:doc');
+        $this->formats = array(); 
+        if ($nodes) foreach ($nodes as $value) {
+            $arr = $value->attributes();
+            $this->formats[] = (string)$arr['type'];
+        }
+ 
+        
         foreach ($rpt_xml->head->children(FRX_NS) as $name => $node) {
           switch ($name) {
             case 'fields':

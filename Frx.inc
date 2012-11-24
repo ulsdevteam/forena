@@ -40,14 +40,26 @@ class Frx {
     }
     return $o; 
   }
-  
+
+  /**
+   * File singleton factory
+   * @return FrxMenu
+   */
+  public static function Menu() {
+    static $o = ''; 
+    if (!$o) { 
+      require_once 'FrxMenu.inc';
+      $o = new FrxMenu(); 
+    }
+    return $o; 
+  }
   /**
    * 
    * Enter description here ...
    * @param unknown_type $type
    * @return FrxDocument
    */
-  public static function Document($type='drupal') {
+  public static function Document($type='web') {
     
     static $doc_types = ''; 
     static $objects = ''; 

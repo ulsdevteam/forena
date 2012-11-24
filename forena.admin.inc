@@ -34,8 +34,6 @@ function forena_admin_reports() {
   return $output;
 }
 
-
-
 /**
  * Remove the report from the database and file system.
  * @param string $report_name
@@ -220,7 +218,7 @@ function forena_settings_sync_submit($form, &$form_state) {
 }
 
 function forena_format_form($formid, $form_state, $report_name) {
-  $desc = forena_report_desc($report_name);
+  $desc = Frx::Menu()->parseURL($report_name);
   $name = $desc['name'];
   if (!$desc['exists']) {
   	drupal_not_found();
@@ -235,57 +233,55 @@ function forena_format_form($formid, $form_state, $report_name) {
     $r = forena_get_report_editor($name);
     $frx_options = $r->getOptions();
     $report_form = @$frx_options['form'];
-    $supported = FrxReportGenerator::instance()->supported_doctypes();
-    $doclist = variable_get('forena_doc_formats', array());
 
-      $form['report_name'] = array(
-        '#type' => 'value',
-        '#value' => $name,
+    $doclist = Frx::Menu()->doc_formats; 
+
+    $form['report_name'] = array(
+       '#type' => 'value',
+       '#value' => $name,
+    );
+
+    $form['form'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Form'),
+      '#default_value' => $report_form,
+      '#description' => t('The page style of your report.  Specify the base filename of any css or js. ')
+    );
+
+    //begin checking doc generation options
+    if ($r) $nodes = $r->simplexml->head->xpath('frx:docgen/frx:doc');
+    if ($doclist) {
+      $form['docgen'] = array(
+       '#tree' => TRUE,
+       '#type' => 'fieldset',
+       '#title' => t('Document Options'),
+       '#description' => t('These are document transformation options. Options selected will display as links in your report view.')
       );
 
-     $form['form'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Form'),
-        '#default_value' => $report_form,
-        '#description' => t('The page style of your report.  Specify the base filename of any css or js. ')
-      );
-
-            //begin checking doc generation options
-      if ($r) $nodes = $r->simplexml->head->xpath('frx:docgen/frx:doc');
-      if ($doclist) {
-        $form['docgen'] = array(
-         '#tree' => TRUE,
-         '#type' => 'fieldset',
-         '#title' => t('Document Options'),
-         '#description' => t('These are document transformation options. Options selected will display as links in your report view.')
-        );
-
-        //build the options and default list
-        $options = array();
-        $default = array();
-        foreach ($doclist as $key => $value) {
-          if (is_object(FrxReportGenerator::instance()->get_doctypes($value))) {
-            $options[$value] = strtoupper($value);
-            $doc =  isset($r) ? $r->simplexml->head->xpath('frx:docgen/frx:doc[@type="' . $value . '"]') : '';
-            if ($doc && $doclist[$value]) {
-              $default[$value] = $value;
-            }
-          }
+      //build the options and default list
+      $options = array();
+      $default = array();
+      foreach ($doclist as $value) {
+        $options[$value] = strtoupper($value);
+        $doc =  isset($r) ? $r->simplexml->head->xpath('frx:docgen/frx:doc[@type="' . $value . '"]') : '';
+        if ($doc && array_search($value, $doclist)) {
+          $default[$value] = $value;
         }
-
-        //display checkboxes
-        $form['docgen']['docs'] = array(
-          '#type' => 'checkboxes',
-          '#description' => t('If no options are selected, the system will display all of the above as available for this report.'),
-          '#options' => $options,
-          '#default_value' => $default
-        );
-
-        $form['submit'] = array(
-          '#type' => 'submit',
-          '#value' => 'Save',
-        );
       }
+
+      //display checkboxes
+      $form['docgen']['docs'] = array(
+        '#type' => 'checkboxes',
+        '#description' => t('If no options are selected, the system will display all of the above as available for this report.'),
+        '#options' => $options,
+        '#default_value' => $default
+      );
+
+      $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => 'Save',
+      );
+    }
   }
   return $form;
 }
@@ -327,7 +323,7 @@ function forena_format_form_submit($form, &$form_state) {
  */
 function forena_layout_form($form, $form_state, $report_name) {
 	$name_in = $report_name;
-  $desc = forena_report_desc($report_name);
+  $desc = Frx::Menu()->parseURL($report_name);
 
   $name = $desc['name'];
   global $language;
@@ -517,7 +513,7 @@ function forena_add_report_form($formid, $form_state, $report_name='') {
   $filename = '';
   $format = '';
   if ($report_name) {
-    $desc = forena_report_desc($report_name);
+    $desc = Frx::Menu()->parseURL($report_name);
     $name = $desc['name'];
     $filename = $desc['filename'];
     $format = @$desc['format'];
@@ -607,7 +603,7 @@ function forena_add_report_form_validate($form, &$form_state) {
   $values = $form_state['values'];
   $regexp = "/^[A-Za-z0-9\/\_\-]*$/";
   $save_report_name = $values['save_report_name'];
-  $desc = forena_report_desc($save_report_name);
+  $desc = FrxMenu::parseURL($save_report_name);
 
   //comparing the report names to see if they have changed.
   //If they have, making sure the new name does not already exist.
@@ -621,7 +617,7 @@ function forena_add_report_form_validate($form, &$form_state) {
 function forena_add_report_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   $report_name = $values['save_report_name'];
-  $desc = forena_report_desc($report_name);
+  $desc = Frx::Menu()->parseURL($report_name);
   $report_name = $desc['name'];
 
   $r = forena_get_report_editor($values['report_name']);
@@ -646,7 +642,7 @@ function forena_add_report_form_submit($form, &$form_state) {
     else {
     	$edit = '/edit/data/add';
     }
-    $form_state['redirect']= 'reports/' . str_replace('/', '.', $desc['base_name']) . $edit;
+    $form_state['redirect']= $desc['i_linke']  . $edit;
 
   }
 }
@@ -654,7 +650,7 @@ function forena_create_trans_form($formid, $form_state, $report_name) {
   $name = '';
   $filename = '';
   $format = '';
-  $desc = forena_report_desc($report_name);
+  $desc = Frx::Menu()->parseURL($report_name);
   $name = $desc['name'];
   $filename = $desc['filename'];
   $base_name = $desc['base_name'];
@@ -714,9 +710,9 @@ function forena_create_trans_form($formid, $form_state, $report_name) {
 function forena_create_trans_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   $base_name = $values['base_name'];
-  $new_name = $values['save_report_language']. '.' . $base_name;
+  $new_name = $values['save_report_language']. '/' . $base_name;
 
-  $desc = forena_report_desc($new_name);
+  $desc = Frx::Menu()->parseURL($new_name);
   $filename = $desc['filename'];
   $report_name = $desc['name'];
 
@@ -735,7 +731,7 @@ function forena_create_trans_form_submit($form, &$form_state) {
   if (forena_save_report($report_name, $r->asXML(), TRUE) == 1) {
     drupal_set_message(t('Translation,  %s has been created. Switch languages to translate  ', array('%s'=>$values['title'])));
     //if this is a new report then redirect to data blocks
-    $form_state['redirect']= array( 'reports/' . $values['save_report_language'] . '.' . str_replace('/', '.', $base_name) . '/edit/layout');
+    $form_state['redirect']= array( $desc['i_link'] . '/edit/layout');
 
   }
 }
@@ -746,7 +742,14 @@ function forena_create_trans_form_submit($form, &$form_state) {
  * administer the settings for document format options
  */
 function forena_doc_formats_settings() {
-  $supported_doctypes = FrxReportGenerator::instance()->supported_doctypes();
+  // Invoke doc_type hook to see which document types are there. 
+  $doc_types = module_invoke_all('forena_document_types'); 
+  unset($doc_types['web']); 
+  $supported_doctypes = array(); 
+  foreach ($doc_types as $type=>$doc) { 
+    $supported_doctypes[$type] = $type; 
+  }
+  
   $form['forena_doc_formats'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Allowed Document Formats'),
@@ -1166,7 +1169,7 @@ function forena_access_info_callback($form, $form_state) {
  * @return a form to edit the fields of the report
  */
 function forena_fields_form($formid, $form_state, $report_name) {
-  $desc = forena_report_desc($report_name);
+  $desc = Frx::Menu()->parseURL($report_name);
   if (!$desc['exists']) {
   	drupal_not_found();
   	exit;
@@ -1332,7 +1335,7 @@ function forena_fields_form_submit($form, &$form_state) {
 function forena_add_data_block_form($formid, &$form_state, $report_name) {
   // If no step is set then we're visiting this form for the first time.
   if (!isset($form_state['storage']['step'])) {
-    $desc = $form_state['storage']['desc'] = forena_report_desc($report_name);
+    $desc = $form_state['storage']['desc'] = Frx::Menu()->parseURL($report_name);
     $filename = $form_state['storage']['filename'] = $desc['filename'];
     $format = isset($desc['format']) ? $desc['format'] : '';
     $r = forena_get_report_editor($desc['name']);
@@ -1664,7 +1667,7 @@ function forena_add_data_block_form_submit($form, &$form_state) {
  * @return unknown_type
  */
 function forena_data_block_form($formid, &$form_state, $report_name) {
-  $desc = forena_report_desc($report_name);
+  $desc = Frx::Menu()->parseURL($report_name);
   if (!$desc['exists']) {
   	drupal_not_found();
   	exit;
@@ -1827,7 +1830,7 @@ function forena_data_block_form_submit($form, &$form_state) {
 
 
 function forena_report_translations($name_in='') {
-  $desc = forena_report_desc($name_in);
+  $desc = Frx::Menu()->parseURL($name_in);
   global $language;
   $cur_lang = $language->language=='en' ? '' : $language->language;
   $name = $desc['name'];
@@ -1900,7 +1903,7 @@ function forena_data_block_delete($form, &$form_state) {
 function forena_delete_form($form_state, $formid, $name_in) {
   // Parse names from url
   $report_name = $name_in;
-  $desc = forena_report_desc($report_name);
+  $desc = Frx::Menu()->parseURL($report_name);
   $report_name = $desc['name'];
   global $language;
 
@@ -1940,8 +1943,8 @@ function forena_delete_form_submit($form, &$form_state) {
   $report_name = $values['report_name'];
   if (isset($values['delete_all_languages']) && $values['delete_all_languages']=='all') {
   	foreach(language_list() as $language) {
-  		$report_name = $language->language . '.' . $values['base_name'];
-  		$desc = forena_report_desc($report_name);
+  		$report_name = $language->language . '/' . $values['base_name'];
+  		$desc = Frx::Menu()->parseURL($report_name);
   		forena_delete_report($desc['name']);
   	}
   	drupal_set_message(t('Deleted %s', array('%s' => $values['base_name'])));
@@ -2056,7 +2059,7 @@ function forena_xmlpp($xml, $html_output=FALSE) {
 
 function forena_admin_params_form($formid, $form_state, $report_name) {
 
-  $desc = forena_report_desc($report_name);
+  $desc = Frx::Menu()->parseURL($report_name);
   if (!$desc['exists']) {
   	drupal_not_found();
   	exit;
@@ -2199,7 +2202,7 @@ function forena_admin_params_form($formid, $form_state, $report_name) {
 }
 
 function forena_add_param_form($form, &$form_state, $report_name) {
-  $desc = forena_report_desc($report_name);
+  $desc = Frx::Menu()->parseURL($report_name);
   $name = $desc['name'];
   $filename = $desc['filename'];
   $format = @$desc['format'];

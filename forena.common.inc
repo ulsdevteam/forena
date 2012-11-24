@@ -16,44 +16,6 @@ require_once('FrxDrupalApplication.inc');
 require_once('FrxData.inc');
 
 /**
- * Get name from argument 1 or alterntaively from a file name
- *
- * @param unknown_type $name
- */
-function forena_report_desc(&$name='') {
-	global $language;
-	$lang = $language->language;
-	$base_name = $name;
-  if (module_exists('locale')) {
-  	//First check to see if the report allready has a language in it
-	  @list($tlang,	$tbase_name) = explode('.', $name, 2);
-	  // FInd out if the starting name of the report is an installed language.
-	  $lang_list = language_list();
-	  if (array_key_exists($tlang, $lang_list )) {
-	  	$base_name = $tbase_name;
-	  	if ($lang != $tlang) {
-	      $lang = $tlang;
-	      $language = $lang_list[$lang];
-	  	}
-	  	if ($tlang == 'en') {
-	  		$name = $tbase_name;
-	  		$base_name = $tlang . '.' . $tbase_name;
-	  	}
-	  }
-	  else {
-	    if ($lang != 'en') $name = $lang . '.' . $name;
-	  }
-  }
-  $desc = FrxReportGenerator::instance()->report_desc($name);
-  $desc['language'] = $lang;
-  $desc['base_name'] = $base_name;
-  return $desc;
-}
-
-
-
-
-/**
  * Build cache
  *
  * @param xhtml $r_xhtml Forena XML report.

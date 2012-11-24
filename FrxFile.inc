@@ -27,6 +27,19 @@ class FrxFile {
   }
   
   /**
+   * Return the directory portioin of a report filename. 
+   * @param unknown_type $filename
+   */
+  public function directory($filename) {
+    @list ($dir, $name_part) = explode('/', $filename, -2);
+    if (!$name_part) { 
+      $name_part = $dir; 
+      $dir = '';      
+    }
+    return $this->dir . '/' . $dir; 
+  }
+  
+  /**
    * Return whether the file exists. 
    * @param unknown_type $filename
    */
