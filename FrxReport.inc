@@ -123,7 +123,7 @@ class FrxReport {
     	Frx::Data()->push($data, $id);
     }
 
-    $xml = FrxReportGenerator::instance()->invoke_data_provider($block, null, $clause);
+    $xml = Frx::RepoMan()->data($block, null);
 
     if ($data_uri) Frx::Data()->pop();
 

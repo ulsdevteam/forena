@@ -51,7 +51,7 @@ function forena_load_cache($r_xhtml) {
         if ($provider && $block_name) {
           if (method_exists($provider, 'load_block')) {
             $conf = $provider->conf;
-            $block = $provider->load_block($block_name);
+            $block = $provider->loadBlock($block_name);
             if (isset($block['access']) && array_search($block['access'], $access)===FALSE) $access[]=$block['access'];
           }
         }
@@ -423,7 +423,7 @@ function forena_block_xml($block_name='') {
 	$block_name = str_replace('.', '/', $block_name);
 	$parms = $_GET;
 	unset($parms['q']);
-	$xml = FrxReportGenerator::instance()->invoke_data_provider($block_name, $parms);
+	$xml = Frx::RepoMan()->data($block_name, $parms);
 	if (is_object($xml)){
 		header('Content-Type: text/xml');
 		print $xml->asXML();

@@ -35,7 +35,7 @@ class FrxSQLQueryBuilder {
 	 * Enter description here ...
 	 */
 	public function execute() {
-    return FrxReportGenerator::instance()->invoke_data_provider($this->block, $this->data, $this->sql());
+    return Frx::RepoMan()->data($this->block, $this->data, $this->sql());
 	}
 
 	/**

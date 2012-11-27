@@ -32,9 +32,9 @@ class FrxDrupal extends FrxDataSource {
    * @param Array $parm_data
    * @param Query $subQuery
    */
-  public function data($block_name, $params=array(), $clause='') {
+  public function sqlData($block_name, $params=array()) {
     // Load the block from the file
-    $block = $this->load_block($block_name, $clause);
+    $block = $this->loadBlock($block_name);
     $xml ='';
     if (trim($block['source']) && $this->access($block['access'])) {
       $sql = $block['source'];

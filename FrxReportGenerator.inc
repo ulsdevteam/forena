@@ -36,102 +36,6 @@ class FrxReportGenerator {
   }
 
   /**
-   * Get name from argument 1 or alterntaively from a file name
-   *
-   * @param unknown_type $name
-   */
-  public function report_desc($name='') {
-    $app = $this->app;
-    // Get defined document types
-    $doctypes = $this->supported_doctypes();
-    $parts = explode('.', $name);
-    $name ='';
-
-    if ($parts) foreach ($parts as $part) {
-      if (!isset($doctypes[$part])) {
-        $name .= '/' . $part;
-      }
-      else {
-        $desc['format'] = $part;
-      }
-    }
-    $desc['name'] = trim($name, '/');
-    $report_path = $app->configuration('report_repos');
-    @list ($dir, $name_part) = explode('/', $name_part, -2);
-    if (!$name_part) $dir = '';
-    $desc['directory'] = $report_path . '/' . $dir;
-    $desc['filename'] = $report_path . '/' . trim($name, ' /') . '.frx';
-    $desc['link'] = 'reports/' . trim(str_replace('/' , '.', $name), '.');
-
-    $desc['exists'] = file_exists($desc['filename']);
-    return $desc;
-  }
-
-  /**
-   * Determines which css files need to be loaded.
-   *
-   * @param array $desc Report descriptor from forena_rport_desc
-   * @param string $form The report "form" to be used.  From the report
-   * @param string $format Document format that will be used for the report.
-   * @return array A list of css files that should be applied to the report.
-   */
-  function report_css($desc, $form,  $format = '') {
-    $css_files = array();
-    // First check for the form file
-    $path = $this->app->configuration('report_repos');
-    if (file_exists($path . '/' . $form . '.css')) {
-      $css_files[] = $path . '/' . $form . '.css';
-    }
-    if ($format && file_exists($path . '/' . $form . '-' . $format . '.css')) {
-      $css_files[] = $path . '/' . $form . '-' . $format . '.css';
-    }
-
-    // Now check for a report specific file
-    $base_file = $path . '/' . $desc['name'];
-
-    if ($format && file_exists($base_file . '-' . $format . '.css')) {
-      $css_files[] = $base_file . '-' . $format . '.css';
-    }
-    elseif (file_exists($base_file . '.css')) {
-
-      $css_files[] = $base_file . '.css';
-    }
-    return $css_files;
-  }
-
-  /**
-   * Determines which js files need to be loaded.
-   *
-   * @param array $desc Report descriptor from forena_rport_desc
-   * @param string $form The report "form" to be used.  From the report
-   * @param string $format Document format that will be used for the report.
-   * @return array A list of css files that should be applied to the report.
-   */
-  function report_js($desc, $form,  $format = '') {
-    $js_files = array();
-    // First check for the form file
-    $path = $this->app->configuration('report_repos');
-    if (file_exists($path . '/' . $form . '.js')) {
-      $js_files[] = $path . '/' . $form . '.js';
-    }
-    if ($format && file_exists($path . '/' . $form . '-' . $format . '.js')) {
-      $js_files[] = $path . '/' . $form . '-' . $format . '.js';
-    }
-
-    // Now check for a report specific file
-    $base_file = $path . '/' . $desc['name'];
-
-    if ($format && file_exists($base_file . '-' . $format . '.js')) {
-      $js_files[] = $base_file . '-' . $format . '.js';
-    }
-    elseif (file_exists($base_file . '.js')) {
-
-      $js_files[] = $base_file . '.js';
-    }
-    return $js_files;
-  }
-
-  /**
    * Clear session data because we want to reload.
    */
   public function clear_session() {
@@ -158,7 +62,7 @@ class FrxReportGenerator {
       // Get the block from the repository
       $frxData = Frx::Data();
       $frxData->push(array(), 'frx-block-access');
-      $data = $this->invoke_data_provider($block, array(), NULL);
+      $data = Frx::RepoMan()->data($block, array());
       $frxData->pop();
       if ($data) {
         if (!$path) {
@@ -264,38 +168,6 @@ class FrxReportGenerator {
   }
 
   /**
-   * Extract the data by running a block
-   *
-   * @param unknown_type $data_block
-   * @param unknown_type $parameters
-   * @param string $clause order / where cause
-   * @return unknown
-   */
-  function invoke_data_provider($data_block, $parameters=array(), $clause='') {
-     list($provider, $block) = explode('/', $data_block, 2);
-     // Get the data
-     $repos = $this->repository($provider);
-     if (isset($repos['enabled']) && !$repos['enabled']) {
-     	return '';
-     }
-     if (isset($repos['user callback'])) {
-       $user_fn = $repos['user callback'];
-       if (is_callable($user_fn)) {
-       	 $current_user =   $user_fn();
-         Frx::Data()->setValue('current_user', $current_user);
-       }
-     }
-     if ($repos['data']) {
-       $provider = $repos['data'];
-       $access = TRUE;
-       if (method_exists($provider, 'data')) {
-         $xml = $provider->data($block, $parameters, $clause);
-       }
-       return $xml;
-     }
-  }
-
-  /**
    * Returns an array of information about the data block
    * @param $data_block
    * @return unknown_type
@@ -310,7 +182,7 @@ class FrxReportGenerator {
      if (isset($repos['data'])) {
        $provider = $repos['data'];
        if (method_exists($provider, 'load_block')) {
-         $block_info = $provider->load_block($block, $clause);
+         $block_info = $provider->loadBlock($block, $clause);
 
        }
        return $block_info;
@@ -437,7 +309,7 @@ function load_block($data_block, $clause='') {
    if ($repos['data']) {
      $provider = $repos['data'];
      if (method_exists($provider, 'load_block')) {
-       $block_info = $provider->load_block($block, $clause);
+       $block_info = $provider->loadBlock($block);
 
      }
      return $block_info;
@@ -461,19 +333,6 @@ function load_block($data_block, $clause='') {
     return $block_data;
   }
 
-  /**
-   * Loads all of the include files that
-   */
-  function define_plugins( $class='') {
-    $plugins = $this->app->plugins();
-    foreach ($plugins as $p) {
-      if (($class=='' || $class==$p['class'])) {
-        if ($p['file'] ) {
-          include_once( trim($p['file'], '/'));
-        }
-      }
-    }
-  }
 
   /**
    * returns a list of instances of the control classes
@@ -707,9 +566,9 @@ function report($name_in, $parms = array(), $print=TRUE) {
  * @where_clause: Where clause for data block to be filtered against.
  *
  */
-function data_block_params($data_block, $field, $label, $params=array(), $clause='') {
+function data_block_params($data_block, $field, $label, $params=array()) {
 	Frx::Data()->push($params);
-  $xml = $this->invoke_data_provider($data_block, $params, $clause);
+  $xml = Frx::RepoMan()->data($data_block);
   Frx::Data()->pop();
 
   $list = array();

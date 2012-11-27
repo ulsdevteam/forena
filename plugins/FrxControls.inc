@@ -24,6 +24,16 @@ class FrxControls {
                      );
     return $formats;
   }
+  
+  
+  private function is_number($value) {
+           $non_numeric_chars = trim($value, ' +-.,0123456789');
+          // Determine if it contains +- in the interior
+          // Zero is ok here bu
+          $inner_symbols = FALSE;
+          if (strpos($value, '+') || strpos($value, '-') || strpos($value, ' ')) $inner_symbols =  TRUE;
+          return (empty($non_numeric_chars) && trim($value)!=='' && !$inner_symbols) ? TRUE : FALSE;
+  }
 
 
   // Custom formats based on translation string

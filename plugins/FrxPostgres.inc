@@ -55,17 +55,10 @@ class FrxPostgres extends FrxDataSource {
    * @param Array $parm_data
    * @param Query $subQuery
    */
-  public function data($block_name, $params=array(), $clause='') {
+  public function sqlData($sql, $params=array()) {
     // Load the block from the file
-    $db = $this->db;
-    $block = $this->load_block($block_name);
     $xml ='';
-    if (@$block['source'] && $this->access($block['access']) && $db) {
-      $sql = $block['source'];
-      if ($clause) {
-        $sql = 'SELECT * FROM (' . trim($sql, ' ;') . ') vvv ' . $clause;
-      }
-
+    if ($sql && $db) {
       $sql = $this->te->replace($sql);
 
       if ($this->use_postgres_xml) {

@@ -61,20 +61,16 @@ class FrxMSSQL extends FrxDataSource {
    * @param Array $parm_data
    * @param Query $subQuery
    */
-  public function data($block_name, $params=array(), $clause='') {
+  public function sqlData($sql, $params=array(), $tag='table') {
     // Load the block from the file
     $db = $this->db;
-    $block = $this->load_block($block_name);
+    $block = $this->loadBlock($block_name);
     $xml ='';
-    if ($block['source'] && $this->access($block['access']) && $db) {
-      $sql = $block['source'];
-      if ($clause) {
-        $sql = 'SELECT * FROM (' . trim($sql, ' ;') . ') ' . $clause;
-      }
+    if ($sql && $db) {
       $sql = $this->te->replace($sql);
 
       if ($this->use_mssql_xml) {
-        $xml = $this->mssql_xml($sql, $block_name);
+        $xml = $this->mssql_xml($sql, $tag);
       }
       else {
         $xml = $this->php_xml($sql);

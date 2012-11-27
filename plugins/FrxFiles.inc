@@ -23,23 +23,6 @@ class FrxFiles extends FrxDataSource {
   public function getName() {
     return 'XML File';
   }
-
-  public function data($block_name, $parm_data='', $subQuery='') {
-
-     $block = $this->load_block($block_name);
-    $xml ='';
-    if (isset($block['source']) && $this->access($block['access'])) {
-      try {
-        $xmlData = $block['source'];
-        $xml = new SimpleXMLElement($xmlData);
-      } catch (Exception $e) {
-        FrxReportGenerator::instance()->error("Error processing xml\n", $e->getMessage() . "\n" . $xmlData);
-      }
-    }
-
-    //@TODO: Implment xpath subquery parameter
-    // Should filter returned nodes, but within the original root element?
-    return $xml;
-  }
+  
 
 }

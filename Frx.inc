@@ -99,4 +99,34 @@ class Frx {
     return $o;
   }
   
+  /**
+   * General wrapper procedure for reporting erros
+   *
+   * @param string $short_message Message that will be displayed to the users
+   * @param string $log Message that will be recorded in the logs.
+   */
+  public static function error($short_message='', $log='') {
+    if ($short_message) {
+      drupal_set_message(check_markup($short_message), 'error');
+    }
+    if ($log) {
+      watchdog('forena', $log, NULL, WATCHDOG_ERROR);
+    }
+  }
+  
+  /**
+   * Debug handler
+   * Enter description here ...
+   * @param unknown_type $short_message
+   * @param unknown_type $log
+   */
+  public static function debug($short_message='', $log='') {
+    if ($log) {
+      watchdog('forena debug', $log, NULL);
+    }
+    if ($short_message) {
+      drupal_set_message(check_markup($short_message));
+    }
+  }
+  
 }

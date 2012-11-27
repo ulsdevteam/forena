@@ -1640,7 +1640,7 @@ function forena_data_select_block_submit($form, &$form_state) {
       //now invoke the data provider with the correct params
       Frx::Data()->push($parms, 'parm');
       $form_state['storage']['parms'] = $params;
-      $xml = FrxReportGenerator::instance()->invoke_data_provider($data_block, $parms, $where_clause);
+      $xml = Frx::RepoMan()->data($data_block, $parms);
       if ($xml) {
         $form_state['storage']['step'] = 'select_template';
         $form_state['storage']['xml'] = $xml->asXML();
@@ -2007,7 +2007,7 @@ function forena_user_data_blocks($search) {
     if (method_exists($o, 'list_blocks')) {
       $blocks = $o->list_blocks($search);
       foreach ($blocks as $block) {
-        $block_info = $o->load_block($block);
+        $block_info = $o->loadBlock($block);
         if (method_exists($o, 'access')) {
           $allow = $o->access($block_info['access']);
           if ($allow) $user_blocks[] = $name . '/' . $block;

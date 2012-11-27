@@ -13,6 +13,7 @@ class FrxDataSource{
   public $comment_prefix;
   public $comment_suffix;
   public $block_ext;
+  public $types; 
   protected $te;
   public function __construct($conf, $repos_path) {
     $this->conf = $conf;
@@ -44,51 +45,60 @@ class FrxDataSource{
       return user_access('access content');
     }
   }
+  
+  /**
+   * Load blcok data from filesystem
+   * @param $block_name
+   */
+  function loadBlock($block_name) {
+    $block = array(); 
+    $base_file = $this->block_path . '/' . $block_name; 
+    
+    if (file_exists($base_file . '.sql')) { 
+      $contents = file_get_contents($base_file . '.sql'); 
+      $block = $this->parseSQLFile($contents); 
+      $block['type'] = 'sql'; 
+      $block['tokens'] = $this->tokens($block['source']); 
+    }
+    elseif (file_exists($base_file . '.xml')) { 
+      $contents = file_get_contents($base_file . '.xml'); 
+      $block = $this->parseXMLFile($contents); 
+      $block['type'] = 'xml'; 
+      $block['tokens'] = $this->tokens($block['source']); 
+    }
+    elseif (file_exists($base_file . '.inc')) { 
+      $parts = pathinfo($base_file . '.inc'); 
+      @list($class, $method) = explode('.', $parts['filename']);
+      $inc = $base_file . '.inc';
+      require_once $inc;
+      if (class_exists($class)) { 
+        $o = new $class(); 
+        $block['type'] = 'php'; 
+        $block['access'] = @$o->access; 
+        $block['object'] = $o;
+        $block['method'] = $method; 
+        if (method_exists($o, 'tokens' )) { 
+          $block['tokens'] = $o->tokens(); 
+        } 
+      }
+    } 
+    return $block; 
+  }
 
 
   /**
-   * Default block load
-   * Loads the data block based on the block name from the file system.  The classes that
-   * are derived from this will set the block_ext property, which in most cases is .sql but
-   * might be something different.   The load of the block file should return data, access and
-   * probably parameters to.
-   * @param unknown_type $block_name
-   * @return unknown
+   * Load tokens from block source
    */
-  public function load_block($block_name, $clause='') {
-
-    $filename = $this->block_path . '/' . $block_name . '.' . $this->block_ext;
-
-    $contents = FrxReportGenerator::instance()->load_block_file($filename);
-    if ($this->block_ext == 'sql') {
-    	$block = $this->parseSQLFile($contents);
-    }
-    else {
-      $block = $this->parseXMLFile($contents);
-    }
+  public function tokens($soucre) {
+    $tokens = array(); 
     // If we have a regular expression token parser, then get the tokens out of the block.
-
     if ($this->te) {
-      $tokens = @$this->te->tokens($block['source']);
+      $tokens = @$this->te->tokens($source);
       $tokens = array_diff($tokens, array('current_user'));
       //check tokens in the where clause
-      if ($clause) {
-        $clause_tokens = $this->te->tokens($clause);
-        //drupal_set_message("clause tokens: ". print_r($clause_tokens, 1));
-        $temp = array();
-        $temp = array_merge($tokens, $clause_tokens);
-        //check for duplicates in block tokens
-        if ($clause_tokens) foreach ($clause_tokens as $ct) {
-          if (!isset($temp[$ct])) {
-            array_push($tokens, $ct);
-          }
-        }
-      }
-
-      $block['tokens'] = $tokens;
     }
 
-    return $block;
+    return $tokens;
   }
 
   /**
@@ -214,4 +224,34 @@ class FrxDataSource{
 
     return array('access' => $access, 'source' => $data);
   }
+  
+  /**
+   * Dummy method for returning sql data
+   * @param unknown_type $parameters
+   */
+  public function sqlData($parameters) { 
+    return ''; 
+  }
+
+  /**
+   * Implement static XML functioin 
+   * @param $source XML Source data from block load
+   * @param $parm_data Parameter data
+   */
+  public function xmlData($source, $parm_data='') {
+    $xml ='';
+    try {
+      $xmlData = $block['source'];
+      $xml = new SimpleXMLElement($xmlData);
+    } catch (Exception $e) {
+      $this->error("Error processing xml\n", $e->getMessage() . "\n" . $xmlData);
+    }
+    return $xml;
+  }
+  
+  public function phpData($method, $paremeters) { 
+    $xml = ''; 
+    return $xml; 
+  }
 }
+

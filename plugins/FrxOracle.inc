@@ -57,13 +57,11 @@ class FrxOracle extends FrxDataSource {
    * @param Array $parm_data
    * @param Query $subQuery
    */
-  public function data($block_name, $params=array(), $clause='') {
+  public function sqlData($sql, $params=array()) {
     // Load the block from the file
     $db = $this->db;
-    $block = $this->load_block($block_name);
     $xml ='';
-    if ($block['source'] && $this->access($block['access']) && $db) {
-      $sql = $block['source'];
+    if ($sql && $db) {
       // See if this block matches a declare begin end; syntax.
       if (stripos($sql, 'end;')>= stripos($sql, 'begin') && stripos($sql, 'begin')!==FALSE) {
       	$params = $this->te->object_to_array(Frx::Data()->currentContext());
@@ -72,9 +70,6 @@ class FrxOracle extends FrxDataSource {
         if (trim($xml)) $xml = new SimpleXMLElement($xml);
       }
       else {
-        if ($clause) {
-          $sql = 'SELECT * FROM (' . trim($sql, ' ;') . ') ' . $clause;
-        }
         $sql = $this->te->replace($sql);
 
         if ($this->use_oracle_xml) {
