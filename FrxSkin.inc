@@ -97,4 +97,17 @@ class FrxSkin {
     return $this; 
   }
   
+  /** 
+   * Adds on report specific skin files to 
+   * @param $name name of report to add. 
+   */
+  public function loadSkinFiles($name) { 
+    $this->addCSS('all', $name . '.css'); 
+    foreach(Frx::Menu()->doc_formats  as $ext) { 
+      $this->addCSS($ext, $name . '-' . $ext . '.css'); 
+    }
+    
+    $this->addJS($name . '.js'); 
+  } 
+  
 }

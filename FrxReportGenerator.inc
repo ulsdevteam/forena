@@ -256,6 +256,7 @@ function report($name_in, $parms = array(), $print=TRUE) {
     //check for default parameters
     $r->processParameters();
     Frx::Skin()->load($r->skin); 
+    Frx::Skin()->loadSkinFiles($name); 
     $r->render($format); 
     $o =  Frx::Document($format); 
     if ($o) $output .= $o->render($r, $format,  array()); 
