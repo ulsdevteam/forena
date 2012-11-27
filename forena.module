@@ -955,6 +955,6 @@ function theme_forena_web_report ($variables) {
   if (@$variables['doc_links']) { 
     $output .= "<div id='forena-doc-links'>" . $variables['doc_links']. '</div>'; 
   }
-  $output .= '<div class="forena-report>' . $variables['content'] . '</div>'; 
+  $output .= '<div class="forena-report">' . $variables['content'] . '</div>'; 
   return $output; 
 } 

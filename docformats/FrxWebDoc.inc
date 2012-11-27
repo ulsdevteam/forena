@@ -14,14 +14,13 @@ class FrxWebDoc extends FrxDocument {
     
     // Add Style attribute from header
     
-    
     // Add css files
     foreach (Frx::Skin()->stylesheets as $type=>$sheets) {
       foreach ($sheets as $sheet) { 
         switch ($type) { 
           case 'all': 
           case 'print': 
-          case 'screen': 
+          case 'screen':  
             drupal_add_css($sheet, array('media' => $type)); 
             break; 
         }

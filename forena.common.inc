@@ -42,8 +42,7 @@ function forena_load_cache($r_xhtml) {
     }
 
     if ($repos) foreach ($repos as $provider => $blocks) {
-      $repos = FrxReportGenerator::instance()->repository($provider);
-      $provider = $repos['data'];
+      $provider = Frx::RepoMan()->repository($provider);
       if (isset($provider->conf))$conf = $provider->conf;
       $access = array();
 

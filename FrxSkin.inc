@@ -32,10 +32,10 @@ class FrxSkin {
    */
   public function addCSS($type, $sheet) { 
     if (Frx::File()->exists($sheet)) { 
-      $stylesheets[$type][] = Frx::File()->path($sheet);  
+      $this->stylesheets[$type][] = Frx::File()->path($sheet);  
     }
     elseif (file_exists($sheet)) { 
-      $stylesheets[$type][] = $sheet; 
+      $this->stylesheets[$type][] = $sheet; 
     }
   }
   
@@ -45,13 +45,13 @@ class FrxSkin {
    */
   public function addJS($script) { 
     if (Frx::File()->exists($script)) { 
-      $scripts[] = Frx::File()->path($script); 
+      $this->scripts[] = Frx::File()->path($script); 
     } 
-    elseif (file_exists('sites/all/libraries' . $script)) { 
-      $scripts[] = 'sites/all/libraries' . $script; 
+    elseif (file_exists('sites/all/libraries/' . $script)) { 
+      $this->scripts[] = 'sites/all/libraries/' . $script; 
     }
     elseif (file_exists($script)) { 
-      $scripts[] = $script; 
+      $this->scripts[] = $script; 
     }
   }
   
@@ -70,14 +70,14 @@ class FrxSkin {
         $this->info = drupal_parse_info_format(Frx::File()->contents($name . '.info')); 
         if (isset($this->info['stylesheets'])) { 
           foreach($this->info['stylesheets'] as $type => $sheets) { 
-            foreach($sheets as $sheet) { 
+            if ($sheets) foreach($sheets as $sheet) { 
               $this->addCSS($type, $sheet); 
             }
           }
         }
         
         // Add the javascript files
-        if (isset($this->info['scripts'])) foreach ($scripts as $script) { 
+        if (is_array($this->info['scripts'])) foreach ($this->info['scripts'] as $script) { 
           $this->addJS($script); 
         }
         
