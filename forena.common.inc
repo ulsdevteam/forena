@@ -468,12 +468,13 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
   // If we need to save this to the file system
 
   if ($save_file) {
-    // Serialize the report for saving
+    if (is_writeable($filepath)) { 
+        // Serialize the report for saving
+        file_put_contents($filepath, $r_xml);
 
-    try {
-      file_put_contents($filepath, $r_xml);
-    } catch (Exception $e) {
-      fornea_error('Error Saving Report', $e->getMessage());
+    }
+    else { 
+        Frx::error("Insufficient priveleges error."); 
     }
   }
 
