@@ -57,7 +57,7 @@ class FrxOracle extends FrxDataSource {
    * @param Array $parm_data
    * @param Query $subQuery
    */
-  public function sqlData($sql, $params=array()) {
+  public function sqlData($sql) {
     // Load the block from the file
     $db = $this->db;
     $xml ='';
@@ -73,7 +73,7 @@ class FrxOracle extends FrxDataSource {
         $sql = $this->te->replace($sql);
 
         if ($this->use_oracle_xml) {
-          $xml = $this->oracle_xml($sql, $block_name);
+          $xml = $this->oracle_xml($sql, 'table');
         }
         else {
           $xml = $this->php_xml($sql);

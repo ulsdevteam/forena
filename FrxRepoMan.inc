@@ -160,7 +160,7 @@ class FrxRepoMan {
    * @param string $clause order / where cause
    * @return unknown
    */
-  function data($data_block, $parameters=array()) {   
+  function data($data_block) {   
      list($provider, $block_name) = explode('/', $data_block, 2);
      $repos = @$this->repositories[$provider];
      if (isset($repos['enabled']) && !$repos['enabled']) {
@@ -183,18 +183,18 @@ class FrxRepoMan {
      if ($o) {
        $access = TRUE;
        $block = $o->loadBlock($block_name);
-       $right = $block['access']; 
+       $right = @$block['access']; 
        if ($block && $o->access($right)) { 
          switch ($block['type'])  { 
            case 'sql': 
-             $xml = $o->sqlData($block['source'], $parameters); 
+             $xml = $o->sqlData($block['source']); 
              break; 
            case 'file': 
-             $xml = $o->xmlData($block['source'], $parameters); 
+             $xml = $o->xmlData($block['source']); 
              break; 
            case 'class': 
-             break; 
-             
+             $xml = $o->phpData($o, $block['method']); 
+             break;    
          }
          
        }

@@ -42,7 +42,7 @@ class FrxMenu {
   	$name = $url;
   	// Determine if the report has an extention that is one of the docuemnt types
   	$p = pathinfo($url); 
-    if (array_search($p['extension'], $this->doc_formats)!==FALSE) { 
+    if (isset($p['extension']) && array_search($p['extension'], $this->doc_formats)!==FALSE) { 
       $name = $p['filename']; 
       $format = $p['extension']; 
     }

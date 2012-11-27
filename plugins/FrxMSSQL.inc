@@ -70,7 +70,7 @@ class FrxMSSQL extends FrxDataSource {
       $sql = $this->te->replace($sql);
 
       if ($this->use_mssql_xml) {
-        $xml = $this->mssql_xml($sql, $tag);
+        $xml = $this->mssql_xml($sql, 'table');
       }
       else {
         $xml = $this->php_xml($sql);
