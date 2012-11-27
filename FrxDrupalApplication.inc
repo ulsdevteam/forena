@@ -1,8 +1,7 @@
 <?php
-require_once('FrxHostApplication.inc');
 global $forena_application_class;
 $forena_application_class = 'FrxDrupalApplication';
-class FrxDrupalApplication extends FrxHostApplication {
+class FrxDrupalApplication {
   /**
    * @file HostApp.inc
    * Defines all the interface points between the host application and Forena.
