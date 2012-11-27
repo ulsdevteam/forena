@@ -523,15 +523,16 @@ function forena_report($name_in, $parms = array(), $print = TRUE) {
   $output = FrxReportGenerator::instance()->report($name_in, $parms, $print);
   $m_path = drupal_get_path('module', 'forena');
   
-  // This has been deprecated, but we'll eave it in for now. 
-  drupal_add_js($m_path . '/forena.js');
-  $forena_js = array();
-  $forena_js['form'] = preg_replace('/[^\w\-]+/u', '_', Frx::Skin()->name);
-  $forena_js['report'] = preg_replace('/[^\w\-]+/u', '_', $name_in);
-  drupal_add_js(array('forena' => $forena_js), 'setting');
-  
+  if ($output) { 
+    // This has been deprecated, but we'll eave it in for now. 
+    drupal_add_js($m_path . '/forena.js');
+    $forena_js = array();
+    $forena_js['form'] = preg_replace('/[^\w\-]+/u', '_', Frx::Skin()->name);
+    $forena_js['report'] = preg_replace('/[^\w\-]+/u', '_', $name_in);
+    drupal_add_js(array('forena' => $forena_js), 'setting');
+    return $output;
+  }
 
-  return $output;
 }
 
 /**
