@@ -362,9 +362,6 @@ function forena_layout_form($form, $form_state, $report_name) {
 
       //array of xml attributes that are required to have a value
       $required = array('id' => TRUE, 'label' => TRUE);
-      //list of supported document formats
-      $supported = FrxReportGenerator::instance()->supported_doctypes();
-      $doclist = variable_get('forena_doc_formats', array());
 
       $form['report_name'] = array(
         '#type' => 'value',
@@ -1543,7 +1540,6 @@ function forena_data_block_add($form, &$form_state) {
   $values = $form_state['values'];
   $report_name = $values['report_name'];
   $data_block = $form_state['storage']['data_block'];
-  $where_clause = $form_state['storage']['where_clause'];
   $r = forena_get_report_editor($report_name);
   $head = $r->simplexml->head;
 
@@ -1551,7 +1547,7 @@ function forena_data_block_add($form, &$form_state) {
   $added_report = $form_state['storage']['template_body'];
 
   //Get the data block parameters
-  $block_info = FrxReportGenerator::instance()->load_block($data_block, $where_clause);
+  $block_info = Frx::RepoMan()->loadBlock($data_block);
   $data_block_parms = $block_info['tokens'];
 
   //Build the parameters
@@ -1602,7 +1598,7 @@ function forena_data_select_block_validate($form, &$form_state) {
   $block_info = array();
   $data_block = $values['data_block'];
   //validate the data block only if delete block was not chosen
-  if ($data_block) $block_info = FrxReportGenerator::instance()->load_block($data_block);
+  if ($data_block) $block_info = Frx::RepoMan()->loadBlock($data_block);
   if (!$block_info) {
     form_set_error('data_block', t('Invalid data block.'));
   }
@@ -1614,7 +1610,6 @@ function forena_data_select_block_submit($form, &$form_state) {
   $name = $values['report_name'];
   $data_block = $form_state['storage']['data_block'] = $values['data_block'];
   $params = $form_state['storage']['params'] = isset($values['params']) ? $values['params'] : array();
-  $where_clause = $form_state['storage']['where_clause'] = $values['where_clause'];
   $parameters = $form_state['storage']['parm_data'] = $values['parameters'];
   $parms = isset($values['parms']) ? $values['parms']: array();
   $xml='';
@@ -1623,7 +1618,7 @@ function forena_data_select_block_submit($form, &$form_state) {
   if ($data_block)  {
     //get xml from data block
     //check for and store parameters
-    $block_info = FrxReportGenerator::instance()->load_block($data_block, $where_clause);
+    $block_info = Frx::RepoMan()->loadBlock($data_block);
     if ($block_info) {
       //if there were not any parameters passed. Use the report parameters
       if (!$parms) {
@@ -1729,10 +1724,9 @@ function forena_data_block_form($formid, &$form_state, $report_name) {
       $id = (string)$node['id'];
       $block = (string)$attrs['block'];
       $parameters = (string)$attrs['parameters'];
-      $clause = ($attrs['clause']) ?  "(" . (string)$attrs['clause'] . ")" : '';
-      $block_info = FrxReportGenerator::instance()->load_block($block, $clause);
-      $access = $block_info['access'];
-      $data_block_array[$id] = $block . ": <i>" . $clause . ' security "' . $access . '"</i>';
+      $block_info = Frx::RepoMan()->loadBlock($block);
+      $access = @$block_info['access'];
+      $data_block_array[$id] = $block . ": <i>" .  ' security "' . $access . '"</i>';
 
       $ctl = array(
         '#type' => 'fieldset',

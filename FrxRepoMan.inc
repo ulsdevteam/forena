@@ -152,6 +152,25 @@ class FrxRepoMan {
     }
   }  
   
+  
+  public function loadBlock($data_block) { 
+    $block = array(); 
+    list($provider, $block_name) = explode('/', $data_block, 2);
+    $repos = @$this->repositories[$provider];
+    if (isset($repos['enabled']) && !$repos['enabled']) {
+     return array();
+    }
+     
+    $o = $this->repository($provider); 
+    if ($o) {
+     $access = TRUE;
+     $block = $o->loadBlock($block_name);
+    }
+    
+    return $block; 
+  }
+  
+  
   /**
    * Extract the data by running a block
    *
@@ -205,5 +224,77 @@ class FrxRepoMan {
      }
   }
   
+  /**
+   * Check access control using the block in a data block.  In this case
+   * public assess returns true.
+   * @param $block  Repository block used to test access
+   * @param $path   xpath to user right within xml data.
+   * @param $access Access to test
+   * @return boolean
+   */
+  function blockAccess($block, $path, $access, $cache=TRUE) {
+  	// PUBLIC always returns true.
+    if ($access=='PUBLIC') return TRUE;
+    if (!isset($_SESSION['forena_access'])) $_SESSION['forena_access'] = array();
+    if ($cache && isset($_SESSION['forena_access'][$block])) {
+      $rights = $_SESSION['forena_access'][$block];
+    }
+    else {
+      $rights = array();
+      // Get the block from the repository
+      $frxData = Frx::Data();
+      $frxData->push(array(), 'frx-block-access');
+      $data = Frx::RepoMan()->data($block);
+      $frxData->pop();
+      if ($data) {
+        if (!$path) {
+          $path ='*/*';
+        }
+        $nodes = $data->xpath($path);
+        if ($nodes) foreach ($nodes as $node) {
+          $rights[] = (string)$node;
+        }
+        $_SESSION['forena_access'][$block]=$rights;
+      }
+    }
+    foreach ($rights as $right) {
+      if ($access == $right) return TRUE;
+    }
+    return FALSE;
+  }
+  
+  
+/*
+ * Recieves a datablock and returns an array of values from the data block.
+ * @data_block: name of the data block to be invoked for values
+ * @field: Specific field name within the data block. The values returned will only
+ * come from this field.
+ * @params: filtering for the data block
+ * @where_clause: Where clause for data block to be filtered against.
+ *
+ */
+function dataBlockParams($data_block, $field, $label, $params=array()) {
+	Frx::Data()->push($params);
+  $xml = Frx::RepoMan()->data($data_block);
+  Frx::Data()->pop();
+
+  $list = array();
+  if ($xml) {
+    $path = ($field) ? $field : '*[1]';
+    $label_path = ($label) ? $label : '*[2]';
+
+
+    //walk through the $xml.
+    $rows = $xml->xpath('*');
+    if ($rows) foreach ($rows as $row) {
+    	$value = $row->xpath($path);
+    	$label_field = $row->xpath($label_path);
+    	$label_value =  $label_field ? (string)$label_field[0] : (string)$value[0];
+    	$list[(string)$value[0]] = (string)$label_value;
+
+    }
+  }
+  return $list;
+}
   
 }

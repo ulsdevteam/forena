@@ -42,154 +42,8 @@ class FrxReportGenerator {
   	if (isset($_SESSION['forena_access'])) unset($_SESSION['forena_access']);
   }
 
-  /**
-   * Check access control using the block in a data block.  In this case
-   * public assess returns true.
-   * @param $block  Repository block used to test access
-   * @param $path   xpath to user right within xml data.
-   * @param $access Access to test
-   * @return unknown_type
-   */
-  function block_access($block, $path, $access, $cache=TRUE) {
-  	// PUBLIC always returns true.
-    if ($access=='PUBLIC') return TRUE;
-    if (!isset($_SESSION['forena_access'])) $_SESSION['forena_access'] = array();
-    if ($cache && isset($_SESSION['forena_access'][$block])) {
-      $rights = $_SESSION['forena_access'][$block];
-    }
-    else {
-      $rights = array();
-      // Get the block from the repository
-      $frxData = Frx::Data();
-      $frxData->push(array(), 'frx-block-access');
-      $data = Frx::RepoMan()->data($block, array());
-      $frxData->pop();
-      if ($data) {
-        if (!$path) {
-          $path ='*/*';
-        }
-        $nodes = $data->xpath($path);
-        if ($nodes) foreach ($nodes as $node) {
-          $rights[] = (string)$node;
-        }
-        $_SESSION['forena_access'][$block]=$rights;
-      }
-    }
-    foreach ($rights as $right) {
-      if ($access == $right) return TRUE;
-    }
-    return FALSE;
-  }
-
-
-  // Putting this in a function to sandbox the repository settings
-  function load_repository(&$repo) {
-    // First determine if the class file exisits
-    $path = @$repo['path'];
-    $conf = array();
-
-    if (file_exists($path . '/settings.php')) {
-      // Override with repository specific data
-      include($path . '/settings.php');
-    }
-
-    $repo = array_merge($conf, $repo);
-    if (!isset($repos['data'])||!is_object($repo['data'])) $repo['data'] = $this->load_provider($repo, $path);
-
-  }
-
-  /**
-   * Load the data provider class based on the class name.
-   *
-   * @param string $name
-   * @return object The data provider object
-   */
-  function load_provider($conf, $repo_path) {
-    @$name = isset($conf['data provider'])? $conf['data provider'] : $conf['data_engine'];
-    $this->define_plugins();
-    // Instantiate the path
-    if (class_exists($name)) {
-      $o = new $name($conf, $repo_path);
-      return $o;
-    }
-    else {
-      $this->app->error('Data provider not found for '. $conf['title']);
-    }
-
-  }
-
-  /*
-   * Get the repository data for an a repository name.
-   * If no repository is specified the descriptors for all repositories are returned.
-   */
-  function repository($name='') {
-    static $repos ='';
-    global $_forena_repositories;
-    // Empty repository so we need to initialize
-    if (!$repos) {
-      // Build the default sample one
-      $path = $this->app->forena_path();
-      $repos = array();
-      // Load the repository list from the global settings.php file.
-
-      $repos = $this->app->repositories();
-      if ($_forena_repositories) {
-      	array_merge($repos, $_forena_repositories);
-      }
-
-    }
-
-    // Now determine if the object exists
-    if ($name) {
-      if (isset($repos[$name])) {
-
-        if (@!is_object($repos[$name]['data'])) {
-          $this->load_repository($repos[$name]);
-        }
-        return $repos[$name];
-      }
-      else {
-        $this->app->error('Undefined repository' . $name, "Undefined Repository: $name ");
-      }
-    }
-    else {
-      return $repos;
-    }
-  }
-
-  /**
-   * Accessor function named more conveniently
-   * Enter description here ...
-   * @param unknown_type $block_name
-   * @param unknown_type $parms
-   */
-  public function block_xml($block_name, $parms=array()) {
-	 return $this->invoke_data_provider($block_name, $parms);
-  }
-
-  /**
-   * Returns an array of information about the data block
-   * @param $data_block
-   * @return unknown_type
-   */
-  function forena_load_block($data_block, $clause='') {
-
-     @list($provider, $block) = explode('/', $data_block, 2);
-     // Get the data
-
-     $repos = forena_repository($provider);
-
-     if (isset($repos['data'])) {
-       $provider = $repos['data'];
-       if (method_exists($provider, 'load_block')) {
-         $block_info = $provider->loadBlock($block, $clause);
-
-       }
-       return $block_info;
-     }
-  }
-
-
+ 
+ 
 
   /**
    * Load the formatters for all initialized repositories.
@@ -294,45 +148,6 @@ class FrxReportGenerator {
     return $ret;
   }
 
-/**
- * Returns an array of information about the data block
- * @param $data_block
- * @return unknown_type
- */
-function load_block($data_block, $clause='') {
-
-   list($provider, $block) = explode('/', $data_block, 2);
-   // Get the data
-
-   $repos = $this->repository($provider);
-
-   if ($repos['data']) {
-     $provider = $repos['data'];
-     if (method_exists($provider, 'load_block')) {
-       $block_info = $provider->loadBlock($block);
-
-     }
-     return $block_info;
-   }
-}
-
-
-  /**
-   * Load a block file form disk and introspect the comments to determine security
-   * Return a structured array based on this.
-   *
-   * @param unknown_type $filepath
-   * @param unknown_type $comment
-   */
-   function load_block_file($filepath) {
-    if (!file_exists($filepath)) {
-      return '';
-    }
-
-    $block_data = file_get_contents($filepath);
-    return $block_data;
-  }
-
 
   /**
    * returns a list of instances of the control classes
@@ -359,49 +174,6 @@ function load_block($data_block, $clause='') {
     return $instances;
   }
 
-  /**
-   * Gets the correct format function
-   * to render the document and returns an
-   * object of that class.
-   *
-   * If it fails it returns a 0;
-   */
-
-  function get_doctypes($fkey) {
-    $controls = $this->define_controls();
-    foreach ($controls as $k => $r) {
-      $provider = $r;
-      if ($provider && method_exists($provider, 'doc_types'))  {
-        $f = $provider->doc_types();
-        if (isset($f[$fkey]) && method_exists($provider, $f[$fkey])) {
-          // We found an object with the advertised method return it
-          return $provider;
-        }
-      }
-    }
-    return 0;
-  }
-
-  /**
-   *
-   * @return returns an array of supported document format extensions
-   *
-   */
-  function supported_doctypes() {
-    $controls = $this->define_controls();
-    $supported_doctypes = array();
-    if ($controls) foreach ($controls as $k => $r) {
-      $provider = $r;
-      if ($provider && method_exists($provider, 'doc_types'))  {
-        $f = $provider->doc_types();
-        $supported_doctypes = array_merge($supported_doctypes, $f);
-      }
-    }
-    $temp = array_keys($supported_doctypes);
-    $temp[]='web';
-    if ($supported_doctypes) $supported_doctypes = array_combine($temp, $temp);
-    return $supported_doctypes;
-  }
 
   /**
    * Returns an object of the template class
@@ -452,67 +224,6 @@ function load_block($data_block, $clause='') {
     return $supported_formats;
   }
 
-  /**
-   *
-   * @param unknown_type $format: The extension of the document to be rendered
-   * @param unknown_type $output: The string of the page to be displayed
-   * @return: The document in the requested format. Returns a string if not
-   * able to format.
-   */
-  function  generate_doc($format, $output, $options = array(), $print = TRUE) {
-    watchdog('debug','format' .  $format);
-    $doc = $this->get_doctypes($format);
-    if ($doc) {
-      $all_methods = $doc->doc_types();
-      $method = $all_methods[$format];
-      $ret = $doc->$method($output, $options);
-    }
-    if ($ret && $print) {
-    // If an object was found, set the appropriate mime type (header doctype).
-   //   $flen = strlen($ret);
-      switch ($format) {
-        case 'doc':
-          header('Content-Type: application/msword');
-          header('Cache-Control:');
-          header('Pragma:');
-          header("Cache-Control: must-revalidate");
-          break;
-        case 'pdf':
-          header('Content-Type: application/pdf');
-          header('Cache-Control:');
-          header('Pragma:');
-          header("Cache-Control: must-revalidate");
-          header("Content-Disposition: attachment; filename=report.pdf");
-          break;
-
-        case 'xls':
-          header('Content-Type: application/msexcel');
-          header('Cache-Control:');
-          header('Pragma:');
-          header("Cache-Control: must-revalidate");
-          header("Content-Disposition: attachment; filename=report.xls");
-          break;
-       case 'csv':
-          header('Content-Type: application/csv');
-          header('Cache-Control:');
-          header('Pragma:');
-          header("Cache-Control: must-revalidate");
-          header("Content-Disposition: attachment; filename=report.csv");
-          break;
-       case 'svg':
-       	  header('Content-Type: image/svg+xml');
-       	  header('Cache-Control:');
-       	  header('Pragma:');
-       	  header('Cache-Control: must-revalidate');
-       	  break;
-      }
-
-    }
-
-    return $ret;
-
-  }
-
 
  /**
  * Load and render a report based on a drupal path.
@@ -556,39 +267,6 @@ function report($name_in, $parms = array(), $print=TRUE) {
     }
 
   }
-
-/*
- * Recieves a datablock and returns an array of values from the data block.
- * @data_block: name of the data block to be invoked for values
- * @field: Specific field name within the data block. The values returned will only
- * come from this field.
- * @params: filtering for the data block
- * @where_clause: Where clause for data block to be filtered against.
- *
- */
-function data_block_params($data_block, $field, $label, $params=array()) {
-	Frx::Data()->push($params);
-  $xml = Frx::RepoMan()->data($data_block);
-  Frx::Data()->pop();
-
-  $list = array();
-  if ($xml) {
-    $path = ($field) ? $field : '*[1]';
-    $label_path = ($label) ? $label : '*[2]';
-
-
-    //walk through the $xml.
-    $rows = $xml->xpath('*');
-    if ($rows) foreach ($rows as $row) {
-    	$value = $row->xpath($path);
-    	$label_field = $row->xpath($label_path);
-    	$label_value =  $label_field ? (string)$label_field[0] : (string)$value[0];
-    	$list[(string)$value[0]] = (string)$label_value;
-
-    }
-  }
-  return $list;
-}
 
 public function debug($short_message='', $log='') {
 	$this->app->debug($short_message, $log);
