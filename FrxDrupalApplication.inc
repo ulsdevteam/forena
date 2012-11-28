@@ -119,21 +119,21 @@ function load_report($report_name) {
   $r_text = '';
   if ($report_name) {
   	$i_report_name = $report_name;
-    $report_path =  $this->configuration('report_repos');
-    $int_filename = $report_path . '/' . $language->language . '/' . $report_name . '.frx';
-    $filename = $report_path . '/' . $report_name . '.frx';
-    if (file_exists($int_filename) && @$_GET['language']!= 'en') {
+    $report_path =  Frx::File()->path('');
+    $int_filename = $language->language . '/' . $report_name . '.frx';
+    $filename = $report_name . '.frx';
+    if (Frx::File()->exists($int_filename) && @$_GET['language']!= 'en') {
     	$i_report_name = $language->language . '/' . $report_name;
       $r_text = file_get_contents($int_filename);
       $modified = filemtime($int_filename);
       $filename = $int_filename;
     }
-    elseif (file_exists($filename)) {
-      $r_text = file_get_contents($filename);
-      $modified = filemtime($filename);
+    elseif (Frx::File()->exists($filename)) {
+      $r_text = Frx::File()->contents($filename);
+      $modified = filemtime(Frx::File()->path($filename));
     }
     $result = db_query("SELECT * FROM {forena_reports} WHERE report_name=:report_name AND language=:language",
-      array(':report_name' => $report_name, ':language' => $language->language));
+    array(':report_name' => $report_name, ':language' => $language->language));
     $save = FALSE;
     if ($rpt = $result->fetchObject()) {
 		    // If the file modification time has changed then save.

@@ -42,8 +42,8 @@ class FrxReportGenerator {
   	if (isset($_SESSION['forena_access'])) unset($_SESSION['forena_access']);
   }
 
- 
- 
+
+
 
   /**
    * Load the formatters for all initialized repositories.
@@ -233,19 +233,18 @@ class FrxReportGenerator {
  */
 function report($name_in, $parms = array(), $print=TRUE) {
   $output = '';
-  $desc = Frx::Menu()->parseURL($name_in); 
+  $desc = Frx::Menu()->parseURL($name_in);
   $name = $desc['name'];
   $format = isset($desc['format']) ? $desc['format'] : '';
   $filename = $desc['filename'];
-
   // Determine the data to get.
   if (!$parms) {
   	$parms = array_merge($_GET, $_POST);
   	unset($parms['q']);
   }
   else $parms = (array)$parms;
-  
-  
+
+
   if ($name) {
     $r = @$this->get_report($name, $parms);
     if (!$r || !$r->rpt_xml) {
@@ -255,19 +254,17 @@ function report($name_in, $parms = array(), $print=TRUE) {
 
     //check for default parameters
     $r->processParameters();
-    Frx::Skin()->load($r->skin); 
-    Frx::Skin()->loadSkinFiles($name); 
-    $r->render($format); 
-    $o =  Frx::Document($format); 
-    if ($o) $output .= $o->render($r, $format,  array()); 
-
-    return $output; 
-    }
-    else {
-      $this->app->not_found();
-    }
-
+    Frx::Skin()->load($r->skin);
+    Frx::Skin()->loadSkinFiles($name);
+    $r->render($format);
+    $o =  Frx::Document($format);
+    if ($o) $output .= $o->render($r, $format,  array());
+    return $output;
   }
+  else {
+    $this->app->not_found();
+  }
+}
 
 public function debug($short_message='', $log='') {
 	$this->app->debug($short_message, $log);
