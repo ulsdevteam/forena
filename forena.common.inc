@@ -215,7 +215,7 @@ function forena_parameter_form($formid, &$form_state, $rpt, $collapse=FALSE) {
 	        //If a data_source attr was found then create an array of
 	        //returned values filtered against data_field attr.
 	        if ($data_source) {
-	          $list = FrxReportGenerator::instance()->data_block_params($data_source, $data_field, $label_field, $parms);
+	          $list = Frx::RepoMan()->dataBlockParams($data_source, $data_field, $label_field);
 	          if (!$required && $add_null) $list = array('' => '') + $list;
 	        }
 
@@ -468,13 +468,13 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
   // If we need to save this to the file system
 
   if ($save_file) {
-    if (is_writeable($filepath)) { 
+    if (is_writeable($filepath)) {
         // Serialize the report for saving
         file_put_contents($filepath, $r_xml);
 
     }
-    else { 
-        Frx::error("Insufficient priveleges error."); 
+    else {
+        Frx::error("Insufficient priveleges error.");
     }
   }
 

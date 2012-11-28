@@ -51,7 +51,7 @@ class FrxReportGenerator {
    */
   function get_formatter($fkey) {
     // Get all repositories
-    $repos = $this->repository();
+    $repos = Frx::RepoMan()->repositories;
     $formats = array();
     foreach ($repos as $k => $r) {
       $provider = isset($r['data']) ? $r['data'] : NULL;
