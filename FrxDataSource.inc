@@ -53,7 +53,6 @@ class FrxDataSource{
   function loadBlock($block_name) {
     $block = array(); 
     $base_file = $this->block_path . '/' . $block_name; 
-    
     if (file_exists($base_file . '.sql')) { 
       $contents = file_get_contents($base_file . '.sql'); 
       $block = $this->parseSQLFile($contents); 
@@ -241,7 +240,7 @@ class FrxDataSource{
   public function xmlData($source, $parm_data='') {
     $xml ='';
     try {
-      $xmlData = $block['source'];
+      $xmlData = $source;
       $xml = new SimpleXMLElement($xmlData);
     } catch (Exception $e) {
       $this->error("Error processing xml\n", $e->getMessage() . "\n" . $xmlData);

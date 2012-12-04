@@ -208,7 +208,7 @@ class FrxRepoMan {
            case 'sql': 
              $xml = $o->sqlData($block['source']); 
              break; 
-           case 'file': 
+           case 'xml': 
              $xml = $o->xmlData($block['source']); 
              break; 
            case 'class': 
