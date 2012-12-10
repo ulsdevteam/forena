@@ -2,4 +2,5 @@ name = Forena Reports
 description = General Report Writing Tool.
 core = 7.x
 files[] = forena.test
+files[] = ForenaViewsPlugin.inc
 testing_api = 2.x

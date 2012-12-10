@@ -381,7 +381,7 @@ function forena_reports_autocomplete($string='', $string2='') {
     }
     if ($access) {
     	$key = $row->report_name;
-    	if ($mode = 'link') {
+    	if ($mode == 'link') {
     		$key = 'reports/' . str_replace('/', '.', $key);
     	}
       $reports[$key] = $key . ' - ' . $row->title;
@@ -519,17 +519,17 @@ function forena_report($name_in, $parms = array(), $print = TRUE) {
   }
   $report_name = $desc['name'];
   // Load dataTable plugin if possible.
-  forena_include_data_tables();
+  //forena_include_data_tables();
   $output = FrxReportGenerator::instance()->report($name_in, $parms, $print);
   $m_path = drupal_get_path('module', 'forena');
   
   if ($output) { 
     // This has been deprecated, but we'll eave it in for now. 
-    drupal_add_js($m_path . '/forena.js');
+    if ($print) drupal_add_js($m_path . '/forena.js');
     $forena_js = array();
     $forena_js['form'] = preg_replace('/[^\w\-]+/u', '_', Frx::Skin()->name);
     $forena_js['report'] = preg_replace('/[^\w\-]+/u', '_', $name_in);
-    drupal_add_js(array('forena' => $forena_js), 'setting');
+    if ($print) drupal_add_js(array('forena' => $forena_js), 'setting');
     return $output;
   }
 
@@ -959,3 +959,11 @@ function theme_forena_web_report ($variables) {
   $output .= '<div class="forena-report">' . $variables['content'] . '</div>'; 
   return $output; 
 } 
+
+function forena_views_api() {
+  return array(
+    'api' => 3, 
+    'path' => drupal_get_path('module', 'forena') , 
+    'template path' => drupal_get_path('module', 'forena') ,
+  );
+}
