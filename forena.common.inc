@@ -26,8 +26,19 @@ function forena_load_cache($r_xhtml) {
   $cache = array();
   $blocks = array();
   $repos = array();
+  $nodes = array(); 
   if (is_object($r_xhtml)) {
-
+    $head = @$r_xhtml->head; 
+    if ($head) $nodes = $head->xpath('frx:menu');
+    $menu = array(); 
+    if ($nodes) {
+      $m = $nodes[0]; 
+      $attrs = $m->attributes(); 
+      foreach ($attrs as $key => $value) { 
+        $menu[$key] = (string)$value; 
+      }
+    } 
+    if ($menu) $cache['menu'] = $menu; 
     $block_xml = $r_xhtml->xpath('//*[@frx:block]');
     // Extract all the blocks and organize by provider
 
@@ -48,7 +59,7 @@ function forena_load_cache($r_xhtml) {
 
       foreach ($blocks as $block_name) {
         if ($provider && $block_name) {
-          if (method_exists($provider, 'load_block')) {
+          if (method_exists($provider, 'loadBlock')) {
             $conf = $provider->conf;
             $block = $provider->loadBlock($block_name);
             if (isset($block['access']) && array_search($block['access'], $access)===FALSE) $access[]=$block['access'];
@@ -468,13 +479,13 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
   // If we need to save this to the file system
 
   if ($save_file) {
-    if (is_writeable($filepath)) {
+    if (!file_exists($filepath) || is_writeable($filepath)) {
         // Serialize the report for saving
         file_put_contents($filepath, $r_xml);
 
     }
     else {
-        Frx::error("Insufficient priveleges error.");
+        Frx::error(t('Insufficient privileges to write file.')); 
     }
   }
 
@@ -482,7 +493,7 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
   if ($report) $cache = forena_load_cache($report); else $cache='';
   $rpt_cache='';
   if ($cache) $rpt_cache = serialize($cache);
-
+ 
   // Set default interpretations of data
   $data['enabled'] = (isset($data['enabled']) && $data['enabled']) ? 1 : 0;
   if (isset($data['options']['hidden']) && (string)$data['options']['hidden']) {
@@ -509,6 +520,7 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
   if (file_exists($filepath)) {
     $modified = filemtime($filepath);
     $result = db_query("SELECT report_name FROM {forena_reports} WHERE report_name=:report_name AND language=:language", array(':report_name' => $name, 'language' => $lang) );
+    $path = isset($cache['menu']) ? $cache['menu']['path'] : ''; 
     if ($rpt = $result->fetchObject() ) {
       db_update('forena_reports')
         -> condition('report_name', $name)
@@ -521,7 +533,8 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
           'cache' => $rpt_cache,
           'src' => $r_xml,
           'altered' => $data['altered'],
-          'modified' => $modified))
+          'modified' => $modified,
+          'path' => $path))
         ->execute();
     }
     else {
@@ -536,6 +549,7 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
           'src' => $r_xml,
           'altered' => $data['altered'],
           'modified' => $modified,
+          'path' => $path, 
           ))
         ->execute();
     }

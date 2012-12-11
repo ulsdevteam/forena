@@ -10,6 +10,7 @@ class FrxMenu {
   public $directory; // name of directory; 
   public $link;   //Link to report in current language
   public $i_Link; //Link to language chaning report name
+  private $teng; 
 
   public function __construct() { 
     $docs = variable_get('forena_doc_defaults', array());
@@ -26,6 +27,8 @@ class FrxMenu {
     if ($docs) foreach ($docs as $doc=>$enabled) {
       if ($enabled) $this->doc_formats[] = $doc; 
     }
+    
+    $this->teng = Frx::SyntaxEngine(FRX_SQL_TOKEN, ':');
 
   }
   
@@ -108,4 +111,78 @@ class FrxMenu {
       $docs = $this->doc_defaults; 
     }
   }
+  
+  /**
+   * Extract tokens from path
+   * @param $path string path with Frx Tokens in them
+   */
+  public function tokens($path) { 
+	  return $this->teng->tokens($path);
+  }
+  
+  
+  /**
+   * Add menu items to the items array
+   * @param $items array of menu items. 
+   */
+  public function addMenuItems(&$items) { 
+    GLOBAL $language;
+  
+    $result = db_query("SELECT report_name, path, title, cache FROM {forena_reports} where path<>'' AND language='en' ORDER BY path asc");
+    $reports = array();
+    foreach ($result AS $row) {
+      $access = TRUE;
+      $cache = $row->cache;
+  
+      if ($cache) {
+
+        $cache = unserialize($cache);
+        // Load menu item defaults
+        $menu = $cache['menu']; 
+        $path = $menu['path']; 
+        $type = @$menu['type']; 
+        //Default type
+        switch ($type) { 
+          case 'normal-item': 
+            $menu_type = MENU_NORMAL_ITEM; 
+            break;
+          case 'default-local-task': 
+            $menu_type = MENU_DEFAULT_LOCAL_TASK; 
+            break; 
+          case 'local-task': 
+            $menu_type = MENU_LOCAL_TASK; 
+            break; 
+          default: 
+            $menu_type = MENU_CALLBACK;  
+        }
+             
+        //Replace the tokens with drupal menu wildcards
+      	$tokens = $this->tokens($path);
+      	$new_path = $path; 
+      	foreach($tokens as $i=>$token) { 
+      	  $new_path = str_replace(':' . $token, '%', $new_path); 
+      	  $args[] = $i; 
+      	}
+        // Now generate the callback arguments 
+      	$parts = explode( '/', $new_path); 
+      	$page_args = array_keys($parts, '%'); 
+        $page_args = array_merge(array($path, $row->report_name), $page_args); 
+        
+        // Set the access callback
+        $access_callback = isset($cache['access']) ? 'forena_check_all_access' : TRUE; 
+ 
+      	$items[$new_path] = array(
+      	  'type' => $menu_type,
+      	  'title' => $row->title,
+      	  'access callback' => $access_callback,
+      	  'page callback' => 'forena_report_menu_callback', 
+      	  'page arguments' => $page_args,
+      	); 
+      
+        if ($access_callback === 'forena_check_all_access') $items[$new_path]['access arguments'] = $cache['access']; 
+      }
+    }
+  }
+  
+  
 }

@@ -544,7 +544,6 @@ function forena_add_report_form($formid, $form_state, $report_name='') {
   //array of xml attributes that are required to have a value
   $required = array('id' => TRUE, 'label' => TRUE);
   //list of supported document formats
-  $supported = FrxReportGenerator::instance()->supported_doctypes();
   $doclist = variable_get('forena_doc_formats', array());
 
   $form['save_report_name'] = array(
@@ -600,7 +599,7 @@ function forena_add_report_form_validate($form, &$form_state) {
   $values = $form_state['values'];
   $regexp = "/^[A-Za-z0-9\/\_\-]*$/";
   $save_report_name = $values['save_report_name'];
-  $desc = FrxMenu::parseURL($save_report_name);
+  $desc = Frx::Menu()->parseURL($save_report_name);
 
   //comparing the report names to see if they have changed.
   //If they have, making sure the new name does not already exist.
@@ -639,7 +638,7 @@ function forena_add_report_form_submit($form, &$form_state) {
     else {
     	$edit = '/edit/data/add';
     }
-    $form_state['redirect']= $desc['i_linke']  . $edit;
+    $form_state['redirect']= $desc['i_link']  . $edit;
 
   }
 }

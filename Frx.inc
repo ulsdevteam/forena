@@ -2,6 +2,9 @@
 /**
  * General Forena Reporting Class
  */
+define('FRX_TOKEN_EXP', '/\{[^\n^\r^}]+}/');
+define('FRX_SQL_TOKEN', '/:([a-z]|[0-9]|{A-Z]|[_\.])+/');
+
 class Frx { 
   
   /**
@@ -127,6 +130,11 @@ class Frx {
     if ($short_message) {
       drupal_set_message(check_markup($short_message));
     }
+  }
+  
+  public static function SyntaxEngine($regexp, $trim) { 
+    require_once 'FrxSyntaxEngine.inc';
+    return new FrxSyntaxEngine($regexp, $trim); 
   }
   
 }

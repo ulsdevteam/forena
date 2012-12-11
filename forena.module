@@ -9,6 +9,10 @@ require_once 'Frx.inc';
  */
 function forena_menu() {
   $items = array();
+  
+  // First build menu items. 
+  Frx::Menu()->addMenuItems($items); 
+
 
   $items['admin/structure/reports'] = array(
     'type' => MENU_NORMAL_ITEM,
@@ -324,7 +328,6 @@ function forena_categories_autocomplete($string='') {
 
 
 
-
 /**
  * Auto complete for data blocks
  * @param $string
@@ -534,6 +537,51 @@ function forena_report($name_in, $parms = array(), $print = TRUE) {
   }
 
 }
+
+
+/**
+ * Menu callback for rendering the forena report. 
+ */
+function forena_report_menu_callback() { 
+  $args = func_get_args(); 
+	$path = array_shift($args); 
+	$report_name = array_shift($args); 
+	$parms = array(); 
+	
+  $tokens = Frx::Menu()->tokens($path); 
+	if ($args && $tokens) { 
+	  foreach ($args as $i=> $value) { 
+	    $parms[$tokens[$i]] = $value; 
+	  } 
+	}
+
+	Frx::Data()->setContext('menu-parms', $parms); 
+	$output = forena_report($report_name, $parms); 
+	if ($output) return $output; 
+}
+
+/**
+ * Used in hook_menu to test access to menu items. 
+ * @param $checks array key value of callbacks and args to check. 
+ */
+function forena_check_all_access($checks) {
+  // Check each callback function to see if we have an error.
+  $access = FALSE;
+  if ($checks) foreach ($checks as $callback => $args) {
+    if ($callback) foreach ($args as $arg) {
+      if (function_exists($callback)) {
+        $a = $callback($arg);
+      }
+      if ($a) $access = TRUE;
+    }
+    else {
+      $access = TRUE;
+    }
+  } 
+  return $access;  
+}
+
+
 
 /**
  * Render report with some data
@@ -912,7 +960,8 @@ function forena_db_sync($subdir='') {
     }
   }
   if ($d) $d->close();
-
+  // Rebuild menus in case there are changes. 
+  if (!$subdir) menu_rebuild(); 
   return $save_count;
 }
 

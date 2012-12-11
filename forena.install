@@ -25,10 +25,12 @@ function forena_schema() {
        'src' => array('type' => 'text'),
        'modified' => array('type' => 'int'),
        'altered' => array('type' => 'int'),
+       'path' => array('type' => 'varchar', 'length' => 255), 
     ),
     'primary key' => array('report_name', 'language'),
     'indexes' => array(
       'category' => array('category'),
+      'path' => array('path'), 
     ),
   );
 
@@ -109,6 +111,11 @@ function forena_update_7201() {
  	db_query("update {forena_reports} set language='en'");
  	db_drop_primary_key('forena_reports');
  	db_add_primary_key('forena_reports', array('report_name', 'language'));
+ }
+ 
+ function forena_update_7301() {
+   db_add_field('forena_reports', 'path', array('type' => 'varchar', 'length' => 255)); 
+   db_add_index('forena_reports', 'path', array('path')); 
  }
 
  /**

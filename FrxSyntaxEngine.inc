@@ -7,8 +7,7 @@
  * before substituting them.
  *
  */
-define('FRX_TOKEN_EXP', '/\{[^\n^\r^}]+}/');
-define('FRX_SQL_TOKEN', '/:([a-z]|[0-9]|{A-Z]|[_\.])+/');
+
 class FrxSyntaxEngine {
   private $tpattern;
   private $trim_chars;
