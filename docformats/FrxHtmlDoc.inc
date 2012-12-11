@@ -6,12 +6,13 @@ class FrxHtmlDoc extends FrxDocument {
     $css = $this->loadCSSFiles($format); 
     $output = '<html><head>';
     $output .= '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>';
+    $title = $r->title; 
     if ($options['css']) {
       $output .= '<style type="text/css">';
       $output .= $css;
       $output .= '</style>';
     }
-    $output .= '<title>' . $r->title . '</title></head><body class="forena-report">' . $r->html . '</body></html>';
+    $output .= '<title>' . $r->title . '</title></head><body class="forena-report"><h1>' . $r->title . '</h1>' . $r->html . '</body></html>';
     print $output;
   }
 }

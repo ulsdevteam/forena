@@ -64,7 +64,7 @@ class FrxSkin {
     if ($this->name != $name) {
       
       //Check for an info file
-      if (Frx::File()->exists($name . '.info')) { 
+      if (Frx::File()->exists($name . '.frxinfo')) { 
         
         // Parse the info file using drupals stock version
         $this->info = drupal_parse_info_format(Frx::File()->contents($name . '.info')); 
