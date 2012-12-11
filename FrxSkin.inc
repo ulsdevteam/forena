@@ -3,7 +3,7 @@
  * Skinning 
  * 
  * A skin is a collectio of css and js files that need to get used by 
- * an application or reports.  Skins are idntified by .info files contained
+ * an application or reports.  Skins are idntified by .fri files contained
  * in the report directory.  
  * 
  * Skins can specify external JS Libraries as well as 
@@ -62,12 +62,11 @@ class FrxSkin {
   public function load($name) { 
     if (!$name) $name = $this->default_skin; 
     if ($this->name != $name) {
-      
       //Check for an info file
-      if (Frx::File()->exists($name . '.frxinfo')) { 
+      if (Frx::File()->exists($name . '.skinfo')) { 
         
         // Parse the info file using drupals stock version
-        $this->info = drupal_parse_info_format(Frx::File()->contents($name . '.info')); 
+        $this->info = drupal_parse_info_format(Frx::File()->contents($name . '.skinfo')); 
         if (isset($this->info['stylesheets'])) { 
           foreach($this->info['stylesheets'] as $type => $sheets) { 
             if ($sheets) foreach($sheets as $sheet) { 
@@ -79,6 +78,7 @@ class FrxSkin {
         // Add the javascript files
         if (is_array($this->info['scripts'])) foreach ($this->info['scripts'] as $script) { 
           $this->addJS($script); 
+
         }
         
       }

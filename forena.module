@@ -888,9 +888,11 @@ function _forena_copy_reports($src_dir, $overwrite=FALSE, $subdir=FALSE) {
     $dest_file = $dest_dir . '/' . $rpt_file;
 
     if (is_file($src_file)) {
-      if (is_writable($dest_file) && ($overwrite || !file_exists($dest_file))) {
+      if ((is_writable($dest_file) && $overwrite) || !file_exists($dest_file)) {
         file_put_contents($dest_file, file_get_contents($src_file));
         $i++;
+      } else { 
+        drupal_set_message($dest_file . ' not writeable', 'error'); 
       }
     }
     else {
@@ -960,7 +962,7 @@ function forena_db_sync($subdir='') {
     }
   }
   if ($d) $d->close();
-  // Rebuild menus in case there are changes. 
+  // Rebuild menu
   if (!$subdir) menu_rebuild(); 
   return $save_count;
 }
