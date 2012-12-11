@@ -115,11 +115,19 @@ class FrxSVGGraph extends FrxChart {
     if (is_array(@$options['colors'])) {
       $graph->colours = $options['colors'];
     }
+
     if ($links) {
     	$graph->Links($links);
     }
-		$output = $graph->Fetch($type, FALSE);
-		return $output;
+    $output = $graph->Fetch($type, FALSE); 
+    // Add a viewbox to be compatible with Prince PDF generation. 
+    $output = str_replace('<svg width', "<svg viewBox='0 0 $width $height' width", $output); 
+    $javascript = '/<script[^>]*?>.*?<\/script>/si';
+    $noscript = '';
+    if ($this->format != 'web') { 
+      $output = preg_replace($javascript, $noscript, $output);
+    }
+		return $output; 
 	}
 
 

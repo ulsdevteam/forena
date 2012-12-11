@@ -26,6 +26,7 @@ class FrxReport {
   public $teng;
   public $parms;
   private $dom;
+  private $format; 
 
 
   public function __construct($xhtml, $data=array()) {
@@ -251,7 +252,7 @@ class FrxReport {
       		// Implement custom renderer.
           $co = FrxReportGenerator::instance()->define_controls($renderer);
       	  if ($co) {
-      	  	$co->initReportNode($dom_node, $this);
+      	  	$co->initReportNode($dom_node, $this, $this->format);
       	  	$o = $co->render();
       	  }
       	}
@@ -284,6 +285,8 @@ class FrxReport {
    * @return unknown_type
    */
   public function render($format) {
+    if (!$format) $format = 'web'; 
+    $this->format = $format; 
     $dom = $this->dom;
     $o='';
     // Push the data 

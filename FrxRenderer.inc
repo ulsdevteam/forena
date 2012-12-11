@@ -13,6 +13,7 @@ class FrxRenderer {
 	public $dataProvider;   // An FrxData instance that provides the data assiated with the report.
 	public $name;
 	public $id;
+	public $format; 
 
 
 	public function __construct($domNode = null, $teng = null, $frxReport = null) {
@@ -21,7 +22,8 @@ class FrxRenderer {
 		}
 	}
 
-	public function initReportNode($domNode, $frxReport) {
+	public function initReportNode($domNode, $frxReport, $format='web') {
+	  $this->format= $format; 
 		$this->reportDocDomNode = $domNode;
     $this->dataProvider = Frx::Data();
     $this->reportDocNode = simplexml_import_dom($domNode);

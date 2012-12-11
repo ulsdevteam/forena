@@ -1,6 +1,6 @@
 <?php
 class FrxChart extends FrxRenderer {
-	public function render() {
+	public function render($format='web') {
 		// Get data from source
 		$output = '';
 		$options = array();
