@@ -428,6 +428,12 @@ function forena_layout_form($form, $form_state, $report_name) {
         '#default_value' => @$menu['path'],
       );
 
+      $form['menu']['title'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Menu Title'),
+        '#description' => t('Title of menu item.  Leave blank to use the report title as the menu title. '),
+      );
+
       $menu_options = array(
         'normal-item' => t('Normal'),
         'local-task' => t('Tab'),

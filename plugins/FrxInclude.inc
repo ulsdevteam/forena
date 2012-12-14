@@ -9,7 +9,7 @@ class FrxInclude extends FrxRenderer {
 		$include = @$attributes['src'];
 		$include = $this->teng->replace($include);
 		@list($url, $query_str)=@explode('?', $include);
-    $report_url = $url; 
+    $report_url = $url;
 		$parts = @explode('/', $url);
 		$file = @$parts[count($parts) - 1];
 		$parts = explode('.', $file);
@@ -18,34 +18,35 @@ class FrxInclude extends FrxRenderer {
 		$query = array();
 		parse_str($query_str, $query );
     $options = array('query' => $query);
-		$url = FrxReportGenerator::instance()->url($url, $options);
+		$url = url($url, $options);
+
     if ($this->format=='web') {
       $output = $this->render_reference($url, $ext, $attributes);
     }
 		else {
-			$output = $this->renderInclude(str_replace('reports/','',$report_url), $query); 
+			$output = $this->renderInclude(str_replace('reports/','',$report_url), $query);
 		}
 		return $output;
 	}
-	
-	public function renderInclude($name, $parms) { 
-	  $desc= Frx::Menu()->parseURL($name);  
-	  $name = $desc['name']; 
-	  Frx::Data()->push($parms, 'parms'); 
-	  print_r($parms); 
+
+	public function renderInclude($name, $parms) {
+	  $desc= Frx::Menu()->parseURL($name);
+	  $name = $desc['name'];
+	  Frx::Data()->push($parms, 'parms');
+	  print_r($parms);
 	  $r = @FrxReportGenerator::instance()->get_report($name, $parms);
     if (!$r || !$r->rpt_xml) {
     	return '';
     }
-    
-    Frx::Data()->pop(); 
+
     //check for default parameters
-    //$r->processParameters();
+    $r->processParameters();
     $output = $r->render($desc['format']);
-    
-    return $output; 
+
+    Frx::Data()->pop();
+    return $output;
 	}
-	
+
 
   function render_reference($url, $ext, $attributes) {
   	$ext = strtolower($ext);

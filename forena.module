@@ -9,9 +9,9 @@ require_once 'Frx.inc';
  */
 function forena_menu() {
   $items = array();
-  
-  // First build menu items. 
-  Frx::Menu()->addMenuItems($items); 
+
+  // First build menu items.
+  Frx::Menu()->addMenuItems($items);
 
 
   $items['admin/structure/reports'] = array(
@@ -398,7 +398,7 @@ function forena_xml($block_name, $parms=array()) {
 	  drupal_alter('forena_parameters', $block_name, $parms );
     //now invoke the data provider with the correct params
     Frx::Data()->push($parms, 'parm');
-		return FrxReportGenerator::instance()->block_xml($block_name, $parms);
+		return Frx::RepoMan()->data($block_name);
 }
 
 /**
@@ -431,9 +431,9 @@ function forena_fields_format_autocomplete($string='') {
  */
 function forena_parameters_report() {
   require_once('forena.admin.inc');
-  $m = Frx::Menu(); 
-  $name = $m->name; 
-  $filename = $m->filename; 
+  $m = Frx::Menu();
+  $name = $m->name;
+  $filename = $m->filename;
   $format = $m->format;
   $report = forena_get_report($name);
   if ($report) {
@@ -525,9 +525,9 @@ function forena_report($name_in, $parms = array(), $print = TRUE) {
   //forena_include_data_tables();
   $output = FrxReportGenerator::instance()->report($name_in, $parms, $print);
   $m_path = drupal_get_path('module', 'forena');
-  
-  if ($output) { 
-    // This has been deprecated, but we'll eave it in for now. 
+
+  if ($output) {
+    // This has been deprecated, but we'll eave it in for now.
     if ($print) drupal_add_js($m_path . '/forena.js');
     $forena_js = array();
     $forena_js['form'] = preg_replace('/[^\w\-]+/u', '_', Frx::Skin()->name);
@@ -540,29 +540,29 @@ function forena_report($name_in, $parms = array(), $print = TRUE) {
 
 
 /**
- * Menu callback for rendering the forena report. 
+ * Menu callback for rendering the forena report.
  */
-function forena_report_menu_callback() { 
-  $args = func_get_args(); 
-	$path = array_shift($args); 
-	$report_name = array_shift($args); 
-	$parms = array(); 
-	
-  $tokens = Frx::Menu()->tokens($path); 
-	if ($args && $tokens) { 
-	  foreach ($args as $i=> $value) { 
-	    $parms[$tokens[$i]] = $value; 
-	  } 
+function forena_report_menu_callback() {
+  $args = func_get_args();
+	$path = array_shift($args);
+	$report_name = array_shift($args);
+	$parms = array();
+
+  $tokens = Frx::Menu()->tokens($path);
+	if ($args && $tokens) {
+	  foreach ($args as $i=> $value) {
+	    $parms[$tokens[$i]] = $value;
+	  }
 	}
 
-	Frx::Data()->setContext('menu-parms', $parms); 
-	$output = forena_report($report_name, $parms); 
-	if ($output) return $output; 
+	Frx::Data()->setContext('menu-parms', $parms);
+	$output = forena_report($report_name, $parms);
+	if ($output) return $output;
 }
 
 /**
- * Used in hook_menu to test access to menu items. 
- * @param $checks array key value of callbacks and args to check. 
+ * Used in hook_menu to test access to menu items.
+ * @param $checks array key value of callbacks and args to check.
  */
 function forena_check_all_access($checks) {
   // Check each callback function to see if we have an error.
@@ -577,8 +577,8 @@ function forena_check_all_access($checks) {
     else {
       $access = TRUE;
     }
-  } 
-  return $access;  
+  }
+  return $access;
 }
 
 
@@ -631,51 +631,51 @@ function forena_forena_plugins() {
 
 /**
  * Self register document formats with Forena
- * 
+ *
  */
-function forena_forena_document_types() { 
+function forena_forena_document_types() {
   require_once 'docformats/FrxWebDoc.inc';
   require_once 'docformats/FrxCSVDoc.inc';
   require_once 'docformats/FrxHtmlDoc.inc';
   require_once 'docformats/FrxSVGDoc.inc';
   require_once 'docformats/FrxWordDoc.inc';
   require_once 'docformats/FrxXLSDoc.inc';
-  require_once 'docformats/FrxEmailMergeDoc.inc'; 
+  require_once 'docformats/FrxEmailMergeDoc.inc';
   $items['web'] = array(
-    'class' => 'FrxWebDoc', 
-    'title' => t('Themed Drupal Page'), 
-  ); 
-  
+    'class' => 'FrxWebDoc',
+    'title' => t('Themed Drupal Page'),
+  );
+
   $items['csv'] = array(
-    'class' => 'FrxCSVDoc', 
-    'title' => t('Comma separated values'), 
-  ); 
-  
+    'class' => 'FrxCSVDoc',
+    'title' => t('Comma separated values'),
+  );
+
   $itmes['email'] = array(
-    'class' => 'FrxEmailMergeDoc', 
-    'title' => t('Email Merge Document'), 
-  ); 
-  
+    'class' => 'FrxEmailMergeDoc',
+    'title' => t('Email Merge Document'),
+  );
+
   $items['html'] = array(
-    'class' => 'FrxHtmlDoc', 
-    'title' => t('Unthemed HTML'), 
-  );   
-  
+    'class' => 'FrxHtmlDoc',
+    'title' => t('Unthemed HTML'),
+  );
+
   $items['svg'] = array(
-    'class' => 'FrxSVGDoc', 
-    'title' => t('SVG Document'), 
-  ); 
-  
+    'class' => 'FrxSVGDoc',
+    'title' => t('SVG Document'),
+  );
+
   $items['doc'] = array(
-    'class' => 'FrxWordDoc', 
-    'title' => t('MS Word Document format'), 
-  );   
-  
+    'class' => 'FrxWordDoc',
+    'title' => t('MS Word Document format'),
+  );
+
   $items['xls'] = array(
-    'class' => 'FrxXLSDoc', 
-    'title' => t('Excel Document'), 
-  ); 
-  return $items; 
+    'class' => 'FrxXLSDoc',
+    'title' => t('Excel Document'),
+  );
+  return $items;
 }
 
 /**
@@ -731,7 +731,7 @@ function forena_forena_report_directory() {
  * @return unknown
  */
 function forena_report_path() {
-  return Frx::File()->dir; 
+  return Frx::File()->dir;
 }
 
 /**
@@ -891,8 +891,8 @@ function _forena_copy_reports($src_dir, $overwrite=FALSE, $subdir=FALSE) {
       if ((is_writable($dest_file) && $overwrite) || !file_exists($dest_file)) {
         file_put_contents($dest_file, file_get_contents($src_file));
         $i++;
-      } else { 
-        drupal_set_message($dest_file . ' not writeable', 'error'); 
+      } else {
+        drupal_set_message($dest_file . ' not writeable', 'error');
       }
     }
     else {
@@ -963,7 +963,7 @@ function forena_db_sync($subdir='') {
   }
   if ($d) $d->close();
   // Rebuild menu
-  if (!$subdir) menu_rebuild(); 
+  if (!$subdir) menu_rebuild();
   return $save_count;
 }
 
@@ -992,29 +992,29 @@ function forena_theme() {
     'forena_web_report' => array(
       'variables' => array('doc_types' => NULL, 'parameters' => NULL, 'content' => NULL),
     ),
-  ); 
+  );
 }
 
 /**
- * Default theme function for forena web reports. 
+ * Default theme function for forena web reports.
  * @param $variables Array of variables to theme
  */
 function theme_forena_web_report ($variables) {
-  $output = ''; 
-  if (@$variables['parameters']) { 
-    $output .= '<div id="forena-parameters">' . $variables['parameters'] . '</div>'; 
+  $output = '';
+  if (@$variables['parameters']) {
+    $output .= '<div id="forena-parameters">' . $variables['parameters'] . '</div>';
   }
-  if (@$variables['doc_links']) { 
-    $output .= "<div id='forena-doc-links'>" . $variables['doc_links']. '</div>'; 
+  if (@$variables['doc_links']) {
+    $output .= "<div id='forena-doc-links'>" . $variables['doc_links']. '</div>';
   }
-  $output .= '<div class="forena-report">' . $variables['content'] . '</div>'; 
-  return $output; 
-} 
+  $output .= '<div class="forena-report">' . $variables['content'] . '</div>';
+  return $output;
+}
 
 function forena_views_api() {
   return array(
-    'api' => 3, 
-    'path' => drupal_get_path('module', 'forena') , 
+    'api' => 3,
+    'path' => drupal_get_path('module', 'forena') ,
     'template path' => drupal_get_path('module', 'forena') ,
   );
 }

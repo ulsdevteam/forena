@@ -1,68 +1,68 @@
 <?php
-class FrxMenu { 
+class FrxMenu {
   public $doc_defaults;  // Default Dcoument formats to inlcude
   public $doc_formats;  // Supported document formats
   public $name; // Report name wihout frx extention
   public $language; // Language
   public $format;  //format of report
-  public $filename; //Name of file; 
-  public $ext; // Extention of file to be returned. 
-  public $directory; // name of directory; 
+  public $filename; //Name of file;
+  public $ext; // Extention of file to be returned.
+  public $directory; // name of directory;
   public $link;   //Link to report in current language
   public $i_Link; //Link to language chaning report name
-  private $teng; 
+  private $teng;
 
-  public function __construct() { 
+  public function __construct() {
     $docs = variable_get('forena_doc_defaults', array());
-    
+
     // Load settings array into normal array
-    if ($docs) foreach ($docs as $doc=>$enabled) { 
-      if ($enabled) $this->doc_defaults[] = $doc; 
+    if ($docs) foreach ($docs as $doc=>$enabled) {
+      if ($enabled) $this->doc_defaults[] = $doc;
     } else {
-      $this->doc_formats = array('web'); 
+      $this->doc_formats = array('web');
     }
-    
+
     // Load settings array into normal array
     $docs = variable_get('forena_doc_formats', array(''));
     if ($docs) foreach ($docs as $doc=>$enabled) {
-      if ($enabled) $this->doc_formats[] = $doc; 
+      if ($enabled) $this->doc_formats[] = $doc;
     }
-    
+
     $this->teng = Frx::SyntaxEngine(FRX_SQL_TOKEN, ':');
 
   }
-  
+
   /**
-   * Convert url into file paths based report name.  Load all link data for the 
+   * Convert url into file paths based report name.  Load all link data for the
    * reprot.  Most report urls look like a java lassname, so urls are of the form
-   * lang.subdir.anothersubdir.report.doctype.  This function parses the url 
-   * into it's components and store them in the menu object so that we can use 
-   * this name. 
-   * @param $url path style name 
+   * lang.subdir.anothersubdir.report.doctype.  This function parses the url
+   * into it's components and store them in the menu object so that we can use
+   * this name.
+   * @param $url path style name
    */
   public function parseURL($url) {
   	global $language;
   	$name = $url;
   	// Determine if the report has an extention that is one of the docuemnt types
-  	$p = pathinfo($url); 
-    if (isset($p['extension']) && array_search($p['extension'], $this->doc_formats)!==FALSE) { 
-      $name = $p['filename']; 
-      $format = $p['extension']; 
+  	$p = pathinfo($url);
+    if (isset($p['extension']) && array_search($p['extension'], $this->doc_formats)!==FALSE) {
+      $name = $p['filename'];
+      $format = $p['extension'];
     }
     else {
-      $format = 'web'; 
-      $ext = ''; 
+      $format = 'web';
+      $ext = '';
     }
-    
-    // Convert class names to directory names. 
-    $base_name = str_replace('.', '/', $name); 
-    $name = $base_name; 
-    $i_name = $base_name; 
-  	
-    // Determine lanugage from url or drupal language interface. 
+
+    // Convert class names to directory names.
+    $base_name = str_replace('.', '/', $name);
+    $name = $base_name;
+    $i_name = $base_name;
+
+    // Determine lanugage from url or drupal language interface.
   	$lang = $language->language;
     if (module_exists('locale')) {
-      
+
     	//First check to see if the report allready has a language in it
   	  @list($tlang,	$tbase_name) = explode('/', $base_name, 2);
   	  // FInd out if the starting name of the report is an installed language.
@@ -72,7 +72,7 @@ class FrxMenu {
   	  	if ($lang != $tlang) {
   	      $lang = $tlang;
   	      $language = $lang_list[$lang];
-  	      $i_name = $t_lang . '/' . $base_name; 
+  	      $i_name = $t_lang . '/' . $base_name;
   	  	}
   	  	if ($tlang == 'en') {
   	  		$name = $base_name = $tbase_name;
@@ -80,109 +80,110 @@ class FrxMenu {
   	  }
   	  else {
   	    if ($lang != 'en') {
-    	    $name = $lang . '/' . $name; 
+    	    $name = $lang . '/' . $name;
   	    }
   	  }
     }
-    
-    $name = trim(str_replace('.', '/', $base_name),'/'); 
-    $filename = $name . '.frx'; 
-    
+
+    $name = trim(str_replace('.', '/', $base_name),'/');
+    $filename = $name . '.frx';
+
     $desc['name'] = $this->name = $name;
-    $desc['directory'] = Frx::File()->directory($filename); 
-    $desc['filename'] = Frx::File()->path($filename); 
-    $desc['base_name'] = $this->base_name = $base_name; 
-    $desc['exists'] = Frx::File()->exists($filename);    
+    $desc['directory'] = Frx::File()->directory($filename);
+    $desc['filename'] = Frx::File()->path($filename);
+    $desc['base_name'] = $this->base_name = $base_name;
+    $desc['exists'] = Frx::File()->exists($filename);
     $desc['link'] = $this->link = 'reports/' . str_replace('/' , '.', $name);
-    $desc['i_link']= 'reports/' . $this->i_link = str_replace('/', '.', $i_name); 
+    $desc['i_link']= 'reports/' . $this->i_link = str_replace('/', '.', $i_name);
     $desc['language'] = $this->language = $lang;
-    $desc['format'] = $this->format = $format; 
-     
-    return $desc;    
+    $desc['format'] = $this->format = $format;
+
+    return $desc;
   }
-  
+
   /**
-   * Generate dcoument links based on report name. 
+   * Generate dcoument links based on report name.
    * @param unknown_type $docs
    */
-  public function doclinks($docs = array()) { 
-    // Default documents. 
-    if (!$docs) { 
-      $docs = $this->doc_defaults; 
+  public function doclinks($docs = array()) {
+    // Default documents.
+    if (!$docs) {
+      $docs = $this->doc_defaults;
     }
   }
-  
+
   /**
    * Extract tokens from path
    * @param $path string path with Frx Tokens in them
    */
-  public function tokens($path) { 
+  public function tokens($path) {
 	  return $this->teng->tokens($path);
   }
-  
-  
+
+
   /**
    * Add menu items to the items array
-   * @param $items array of menu items. 
+   * @param $items array of menu items.
    */
-  public function addMenuItems(&$items) { 
+  public function addMenuItems(&$items) {
     GLOBAL $language;
-  
+
     $result = db_query("SELECT report_name, path, title, cache FROM {forena_reports} where path<>'' AND language='en' ORDER BY path asc");
     $reports = array();
     foreach ($result AS $row) {
       $access = TRUE;
       $cache = $row->cache;
-  
       if ($cache) {
 
         $cache = unserialize($cache);
         // Load menu item defaults
-        $menu = $cache['menu']; 
-        $path = $menu['path']; 
-        $type = @$menu['type']; 
+        $menu = $cache['menu'];
+        $path = $menu['path'];
+        $type = @$menu['type'];
+        $title = @$menu['title'] ? $menu['title']:  $row->title;
+
         //Default type
-        switch ($type) { 
-          case 'normal-item': 
-            $menu_type = MENU_NORMAL_ITEM; 
+        switch ($type) {
+          case 'normal-item':
+            $menu_type = MENU_NORMAL_ITEM;
             break;
-          case 'default-local-task': 
-            $menu_type = MENU_DEFAULT_LOCAL_TASK; 
-            break; 
-          case 'local-task': 
-            $menu_type = MENU_LOCAL_TASK; 
-            break; 
-          default: 
-            $menu_type = MENU_CALLBACK;  
+          case 'default-local-task':
+            $menu_type = MENU_DEFAULT_LOCAL_TASK;
+            break;
+          case 'local-task':
+            $menu_type = MENU_LOCAL_TASK;
+            break;
+          default:
+            $menu_type = MENU_CALLBACK;
         }
-             
+
         //Replace the tokens with drupal menu wildcards
       	$tokens = $this->tokens($path);
-      	$new_path = $path; 
-      	foreach($tokens as $i=>$token) { 
-      	  $new_path = str_replace(':' . $token, '%', $new_path); 
-      	  $args[] = $i; 
+      	$new_path = $path;
+      	foreach($tokens as $i=>$token) {
+      	  $new_path = str_replace(':' . $token, '%', $new_path);
+      	  $args[] = $i;
       	}
-        // Now generate the callback arguments 
-      	$parts = explode( '/', $new_path); 
-      	$page_args = array_keys($parts, '%'); 
-        $page_args = array_merge(array($path, $row->report_name), $page_args); 
-        
+        // Now generate the callback arguments
+      	$parts = explode( '/', $new_path);
+      	$page_args = array_keys($parts, '%');
+        $page_args = array_merge(array($path, $row->report_name), $page_args);
+
         // Set the access callback
-        $access_callback = isset($cache['access']) ? 'forena_check_all_access' : TRUE; 
- 
+        $access_callback = isset($cache['access']) ? 'forena_check_all_access' : TRUE;
+
       	$items[$new_path] = array(
       	  'type' => $menu_type,
-      	  'title' => $row->title,
+      	  'title' => $title,
       	  'access callback' => $access_callback,
-      	  'page callback' => 'forena_report_menu_callback', 
+      	  'page callback' => 'forena_report_menu_callback',
       	  'page arguments' => $page_args,
-      	); 
-      
-        if ($access_callback === 'forena_check_all_access') $items[$new_path]['access arguments'] = $cache['access']; 
+      	);
+
+        if ($access_callback === 'forena_check_all_access') $items[$new_path]['access arguments'] = $cache['access'];
       }
     }
   }
-  
-  
+
+
 }
