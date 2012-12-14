@@ -778,7 +778,7 @@ function forena_doc_formats_settings() {
  * administer the settings for document format options
  */
 function forena_data_settings() {
-  $repos = FrxReportGenerator::instance()->app->repositories();
+  $repos = Frx::RepoMan()->repositories;
   $r_list = array();
   $headers = array(t('Name'),t('Description'), t('Path'), t('Operation'));
   foreach ($repos as $name=>$r) {
@@ -813,16 +813,16 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
       );
     }
     else {
-      $repos = FrxReportGenerator::instance()->app->repositories();
+      Frx::RepoMan()->repository($source);
+      $repos = Frx::RepoMan()->repositories;
       $r = $repos[$source];
-      $load = FrxReportGenerator::instance()->repository($source);
       // Remove teh object from the data.
-      unset($load['data']);
+      unset($r['data']);
       $form_state['storage'] = array(
         'name' => $source,
         'title' => $r['title'],
         'path' => @$r['path'],
-        'config' => $load,
+        'config' => $r,
       );
 
     }

@@ -19,9 +19,9 @@ class FrxReportGenerator {
 
   /**
    * Factory
-   * 
+   *
    * @return FrxReportGenerator
-   *    
+   *
    **/
   static public function instance() {
     global $forena_application_class;
@@ -266,11 +266,12 @@ function report($name_in, $parms = array(), $print=TRUE) {
     $o =  Frx::Document($format);
     if ($o) {
       $output .= $o->render($r, $format,  array());
-      $printed = $o->output($output); 
-      if (!$printed) { 
-        return  $output; 
+      $output = check_markup($output, variable_get('forena_input_format', filter_default_format()));
+      $printed = $o->output($output);
+      if (!$printed) {
+        return  $output;
       }
-    } 
+    }
   }
 }
 
