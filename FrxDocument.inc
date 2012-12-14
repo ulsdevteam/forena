@@ -6,6 +6,7 @@
  */
 class FrxDocument { 
   public $format; 
+  public $content_type=''; 
   
   
   public function loadCSSFIles($format) { 
@@ -57,5 +58,20 @@ class FrxDocument {
       print $output;
     }
     
+  }
+  
+  public function output($output) { 
+    if ($this->content_type) { 
+      
+      header('Content-Type: '. $this->content_type);
+      header('Cache-Control:');
+      header('Pragma:');
+      header('Cache-Control: must-revalidate');
+      print $output; 
+      return TRUE; 
+    }
+    else { 
+      return FALSE; 
+    }
   }
 }

@@ -17,6 +17,12 @@ class FrxReportGenerator {
   public $title;
   public $content;
 
+  /**
+   * Factory
+   * 
+   * @return FrxReportGenerator
+   *    
+   **/
   static public function instance() {
     global $forena_application_class;
     if (!self::$instance) {
@@ -84,7 +90,7 @@ class FrxReportGenerator {
   /**
    * Accepts the name of a file
    *
-   * Returns a xml object of the file.
+   * @return FrxReport
    *
   */
   function get_report($report_name, $data=array()) {
@@ -258,11 +264,13 @@ function report($name_in, $parms = array(), $print=TRUE) {
     Frx::Skin()->loadSkinFiles($name);
     $r->render($format);
     $o =  Frx::Document($format);
-    if ($o) $output .= $o->render($r, $format,  array());
-    return $output;
-  }
-  else {
-    $this->app->not_found();
+    if ($o) {
+      $output .= $o->render($r, $format,  array());
+      $printed = $o->output($output); 
+      if (!$printed) { 
+        return  $output; 
+      }
+    } 
   }
 }
 

@@ -1,5 +1,8 @@
 <?php
 class FrxXLSDoc extends FrxDocument { 
+  public function __construct() { 
+    $this->content_type = 'application/msexcel'; 
+  }
   
   
   public function render($r, $format, $options = array()) { 
@@ -66,11 +69,6 @@ class FrxXLSDoc extends FrxDocument {
       $output .= '</Worksheet>' . "\n";
     }
     $output .= '</Workbook>';
-    header('Content-Type: application/msexcel');
-    header('Cache-Control:');
-    header('Pragma:');
-    header("Cache-Control: must-revalidate");
-    header("Content-Disposition: attachment; filename=report.xls");
-    print $output; 
+    return $output; 
   }
 }

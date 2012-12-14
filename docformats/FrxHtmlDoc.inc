@@ -1,7 +1,5 @@
 <?php
 class FrxHtmlDoc extends FrxDocument { 
-  
-  
   public function render($r, $format, $options = array()) { 
     $css = $this->loadCSSFiles($format); 
     $output = '<html><head>';
@@ -13,6 +11,10 @@ class FrxHtmlDoc extends FrxDocument {
       $output .= '</style>';
     }
     $output .= '<title>' . $r->title . '</title></head><body class="forena-report"><h1>' . $r->title . '</h1>' . $r->html . '</body></html>';
-    print $output;
+    return $output; 
+  }
+  
+  public function output($output) { 
+    print $output; 
   }
 }

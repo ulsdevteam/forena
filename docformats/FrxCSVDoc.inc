@@ -1,6 +1,10 @@
 <?php
 class FrxCSVDoc extends FrxDocument { 
   
+  public function __construct() { 
+    $this->content_type = 'application/csv'; 
+  }
+  
   /**
    * Fill columns with rowspan tags.
    * @param unknown_type $colspan
@@ -55,13 +59,6 @@ class FrxCSVDoc extends FrxDocument {
       }
       $output .= "\n";
     }
-    if ($output) {
-      header('Content-Type: application/csv');
-      header('Cache-Control:');
-      header('Pragma:');
-      header("Cache-Control: must-revalidate");
-      header("Content-Disposition: attachment; filename=report.csv");      
-      print $output; 
-    }
+    return $output; 
   }
 }

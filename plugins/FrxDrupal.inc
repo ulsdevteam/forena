@@ -32,30 +32,21 @@ class FrxDrupal extends FrxDataSource {
    * @param Array $parm_data
    * @param Query $subQuery
    */
-  public function sqlData($block_name) {
+  public function sqlData($sql) {
     // Load the block from the file
-    $block = $this->loadBlock($block_name);
     $xml ='';
-    if (trim($block['source']) && $this->access($block['access'])) {
-      $sql = $block['source'];
-      if ($clause) {
-        $sql = 'SELECT * FROM (' . trim($sql, ' ;') . ') forena_table ' . $clause;
-      }
-      $sql = $this->te->replace($sql);
-      $rs = db_query($sql);
+    $sql = $this->te->replace($sql);
+    $rs = db_query($sql);
 
-      $xml = new SimpleXMLElement('<table/>');
-      foreach ($rs as $data) {
-          $row_node = $xml->addChild('row');
+    $xml = new SimpleXMLElement('<table/>');
+    foreach ($rs as $data) {
+        $row_node = $xml->addChild('row');
 
-          foreach ($data as $key => $value) {
-            $row_node->addChild($key, htmlspecialchars($value));
-            //$row_node->$key = $value;
-          }
-      }
-
+        foreach ($data as $key => $value) {
+          $row_node->addChild($key, htmlspecialchars($value));
+          //$row_node->$key = $value;
+        }
     }
-
     return $xml;
   }
 

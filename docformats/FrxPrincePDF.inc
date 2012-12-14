@@ -1,8 +1,20 @@
 <?php
 class FrxPrincePDF extends FrxDocument { 
-  public function render($r, $format, $options = array()) { 
+  private $p; 
+  
+  public function __construct() { 
     include_once('sites/all/libraries/prince.php'); 
-    $prince_path = variable_get('forena_pdf_prince_path', '/usr/local/bin/prince'); 
+    $this->content_type='application/pdf'; 
+    $prince_path = variable_get('forena_pdf_prince_path', '/usr/local/bin/prince');     
+    if (class_exists('Prince') && file_exists($prince_path)) {
+      $this->p = new Prince($prince_path); 
+    }
+    
+  }
+  
+  
+  public function render($r, $format, $options = array()) { 
+
     $disable_links = variable_get('forena_pdf_disable_links', TRUE); 
     $link_class = $disable_links ? 'prince-disable-links': ''; 
     $output = '<html><head>';
@@ -16,8 +28,8 @@ class FrxPrincePDF extends FrxDocument {
     $output .= '<title>' . $r->title . "</title></head><body class='forena-report $link_class'><h1>" . $r->title . '</h1>' . $r->html . '</body></html>';
     $prince_css = drupal_get_path('module', 'forena_pdf') . '/forena_pdf_prince.css'; 
     // Generate the document
-    if (class_exists('Prince') && file_exists($prince_path)) {
-      $p = new Prince($prince_path); 
+    if ($this->p) {
+      $p = $this->p; 
       $p->addStyleSheet($prince_css); 
       foreach (Frx::Skin()->stylesheets as $type=>$sheets) {
         foreach ($sheets as $sheet) { 
@@ -31,15 +43,19 @@ class FrxPrincePDF extends FrxDocument {
           }
         }
       }
-      header('Content-Type: application/pdf');
-      header('Cache-Control:');
-      header('Pragma:');
-      header("Cache-Control: must-revalidate");  
-      
-      $p->convert_string_to_passthru($output); 
+      return $output; 
     }  else {
       drupal_set_message(t('Prince XML Not Properly Installed'), 'error'); 
       return (''); 
     }
+  }
+  
+  public function output($output) {
+      header('Content-Type: '. $this->content_type);
+      header('Cache-Control:');
+      header('Pragma:');
+      header('Cache-Control: must-revalidate');
+      $this->p->convert_string_to_passthru($output); 
+      return TRUE; 
   }
 }
