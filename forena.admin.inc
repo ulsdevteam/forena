@@ -356,6 +356,7 @@ function forena_layout_form($form, $form_state, $report_name) {
       $report_form = @$frx_options['form'];
       $attributes = $r->get_attributes_by_id();
       $category = $r->getCategory();
+      $menu = $r->getMenu();
       $body = $r->simplexml->body->asXML();
 
       $form = array();
@@ -394,7 +395,7 @@ function forena_layout_form($form, $form_state, $report_name) {
       );
       $form['visibility'] = array(
         '#type' => 'fieldset',
-        '#title' => 'Visibility'
+        '#title' => t('Visibility'),
       );
 
       $form['visibility']['category'] = array(
@@ -410,6 +411,34 @@ function forena_layout_form($form, $form_state, $report_name) {
         '#title' => t('Hidden'),
         '#default_value' => $hidden,
         '#description' => t('Hide your report from showing up on the report list.'),
+      );
+
+      $form['menu'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Menu'),
+        '#tree' => TRUE,
+        '#collapsible' => TRUE,
+        '#collapsed' => empty($menu),
+      );
+
+      $form['menu']['path'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Menu Path'),
+        '#description' => t('Indicate site reletive path to menu.  Paramters may be embedded in the url using a :parm syntax (e.g. states/:state)'),
+        '#default_value' => @$menu['path'],
+      );
+
+      $menu_options = array(
+        'normal-item' => t('Normal'),
+        'local-task' => t('Tab'),
+        'default-local-taks' => t('Default Tab'),
+        'callback' => t('Callback'),
+      );
+
+      $form['menu']['type'] = array(
+        '#type' => 'select',
+        '#title' => 'Type of menu to create',
+        '#options' => $menu_options,
       );
 
       $form['buttons']['save'] = array(
@@ -452,6 +481,11 @@ function forena_layout_form_validate($form, &$form_state) {
     	form_set_error('body', t('Invalid XHTML Document. Check for unclosed tags or stray &'));
     }
   }
+  if ($values['menu']['path']) {
+    if (!valid_url(str_replace(':', '', $values['menu']['path']), FALSE)) {
+      form_set_error('menu][path', t('Invalid Path'));
+    }
+  }
 }
 
 /**
@@ -460,6 +494,7 @@ function forena_layout_form_validate($form, &$form_state) {
  */
 function forena_layout_form_submit($form, &$form_state) {
   $nodes = array();
+  $rebuild_menu = FALSE;
   $values = $form_state['values'];
   $report_name = $values['report_name'];
   $r = forena_get_report_editor($report_name);
@@ -471,6 +506,11 @@ function forena_layout_form_submit($form, &$form_state) {
     'hidden' => $values['hidden'],
   );
   $r->setOptions($options);
+  $menu = $r->getMenu();
+  if ($values['menu']!= $menu) {
+    $r->setMenu($values['menu']);
+    $rebuild_menu = TRUE;
+  }
 
   // Body
   $r->setBody($values['body']['value']);
@@ -486,6 +526,10 @@ function forena_layout_form_submit($form, &$form_state) {
 
   if (forena_save_report($report_name, $r->asXML(), TRUE) == 1) {
     drupal_set_message(t('Your report, %s has been saved.', array('%s'=>$report_name)));
+  }
+  // If we changed the menu we need to rebuild it.
+  if ($rebuild_menu) {
+    menu_rebuild();
   }
 }
 

@@ -360,6 +360,43 @@ class FrxEditor {
     }
   }
 
+  /*
+   * Retrieve menu data for the report
+   */
+  public function getMenu() {
+  	$dom = $this->dom;
+  	$this->verifyHeaderElements(array('menu'));
+  	$opts = $dom->getElementsByTagNameNS($this->xmlns, 'menu')->item(0);
+    $ret = array();
+  	// Simplexml is easier to work with
+  	$options = simplexml_import_dom($opts);
+  	foreach ($options->attributes() as $key =>$value) {
+  	  $ret[(string)$key] = (string)$value;
+  	}
+    return $ret;
+
+  }
+
+  /*
+   * Set menu data for the report
+   * @param $menu_data array of key values for menu options.
+   */
+  public function setMenu($menu_data) {
+  	$dom = $this->dom;
+  	$this->verifyHeaderElements(array('menu'));
+  	$options = $dom->getElementsByTagNameNS($this->xmlns, 'menu')->item(0);
+    foreach ($menu_data as $key => $value) {
+    	if ($value) {
+    		$options->setAttribute($key, $value);
+    	}
+    	else {
+    		if ($options->hasAttribute($key)) {
+    			$options->removeAttribute($key);
+    		}
+    	}
+    }
+  }
+
   public function removeParm($id) {
   	$dom = $this->dom;
   	$xpq = $this->xpq;
