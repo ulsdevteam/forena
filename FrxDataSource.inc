@@ -13,7 +13,8 @@ class FrxDataSource{
   public $comment_prefix;
   public $comment_suffix;
   public $block_ext;
-  public $types; 
+  public $block_extensions;
+  public $types;
   protected $te;
   public function __construct($conf, $repos_path) {
     $this->conf = $conf;
@@ -21,6 +22,7 @@ class FrxDataSource{
     $this->block_ext = 'sql';
     $this->block_path = $repos_path;
     $this->app = FrxReportGenerator::instance()->app;
+    $this->block_extensions = array('inc','sql','xml');
   }
 
   /**
@@ -45,43 +47,43 @@ class FrxDataSource{
       return user_access('access content');
     }
   }
-  
+
   /**
    * Load blcok data from filesystem
    * @param $block_name
    */
   function loadBlock($block_name) {
-    $block = array(); 
-    $base_file = $this->block_path . '/' . $block_name; 
-    if (file_exists($base_file . '.sql')) { 
-      $contents = file_get_contents($base_file . '.sql'); 
-      $block = $this->parseSQLFile($contents); 
-      $block['type'] = 'sql'; 
-      $block['tokens'] = $this->tokens($block['source']); 
+    $block = array();
+    $base_file = $this->block_path . '/' . $block_name;
+    if (file_exists($base_file . '.sql')) {
+      $contents = file_get_contents($base_file . '.sql');
+      $block = $this->parseSQLFile($contents);
+      $block['type'] = 'sql';
+      $block['tokens'] = $this->tokens($block['source']);
     }
-    elseif (file_exists($base_file . '.xml')) { 
-      $contents = file_get_contents($base_file . '.xml'); 
-      $block = $this->parseXMLFile($contents); 
-      $block['type'] = 'xml'; 
-      $block['tokens'] = $this->tokens($block['source']); 
+    elseif (file_exists($base_file . '.xml')) {
+      $contents = file_get_contents($base_file . '.xml');
+      $block = $this->parseXMLFile($contents);
+      $block['type'] = 'xml';
+      $block['tokens'] = $this->tokens($block['source']);
     }
-    elseif (file_exists($base_file . '.inc')) { 
-      $parts = pathinfo($base_file . '.inc'); 
+    elseif (file_exists($base_file . '.inc')) {
+      $parts = pathinfo($base_file . '.inc');
       @list($class, $method) = explode('.', $parts['filename']);
       $inc = $base_file . '.inc';
       require_once $inc;
-      if (class_exists($class)) { 
-        $o = new $class(); 
-        $block['type'] = 'php'; 
-        $block['access'] = @$o->access; 
+      if (class_exists($class)) {
+        $o = new $class();
+        $block['type'] = 'php';
+        $block['access'] = @$o->access;
         $block['object'] = $o;
-        $block['method'] = $method; 
-        if (method_exists($o, 'tokens' )) { 
-          $block['tokens'] = $o->tokens(); 
-        } 
+        $block['method'] = $method;
+        if (method_exists($o, 'tokens' )) {
+          $block['tokens'] = $o->tokens();
+        }
       }
-    } 
-    return $block; 
+    }
+    return $block;
   }
 
 
@@ -89,7 +91,7 @@ class FrxDataSource{
    * Load tokens from block source
    */
   public function tokens($soucre) {
-    $tokens = array(); 
+    $tokens = array();
     // If we have a regular expression token parser, then get the tokens out of the block.
     if ($this->te) {
       $tokens = @$this->te->tokens($source);
@@ -111,9 +113,9 @@ class FrxDataSource{
     // First find files that match the search string
     $path = $this->block_path . '/';
     if ($subdir) $path = $subdir . '/';
-    $block_path .= $path . '*' . $search . '*.' . $this->block_ext;
-
+    $block_path .= $path . '*' . $search . '*';
     // Find sql files
+    drupal_set_message($block_path);
     $d = glob($block_path);
     if ($d) foreach ($d as $file_name) {
     	// Split off the extention
@@ -126,7 +128,10 @@ class FrxDataSource{
       	$ext = '';
       	$block_name = $file_name;
       }
-    	$block_list[] = str_replace($this->block_path . '/', '', $block_name);
+      drupal_set_message($file_name);
+      if (array_search($ext, $this->block_extensions)!==FALSE) {
+    	  $block_list[] = str_replace($this->block_path . '/', '', $block_name);
+      }
     }
 
     // Find directories
@@ -223,17 +228,17 @@ class FrxDataSource{
 
     return array('access' => $access, 'source' => $data);
   }
-  
+
   /**
    * Dummy method for returning sql data
    * @param unknown_type $parameters
    */
-  public function sqlData($parameters) { 
-    return ''; 
+  public function sqlData($parameters) {
+    return '';
   }
 
   /**
-   * Implement static XML functioin 
+   * Implement static XML functioin
    * @param $source XML Source data from block load
    * @param $parm_data Parameter data
    */
@@ -247,10 +252,10 @@ class FrxDataSource{
     }
     return $xml;
   }
-  
-  public function phpData($method, $paremeters) { 
-    $xml = ''; 
-    return $xml; 
+
+  public function phpData($method, $paremeters) {
+    $xml = '';
+    return $xml;
   }
 }
 

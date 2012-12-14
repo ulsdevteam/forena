@@ -1,20 +1,20 @@
 <?php
 /**
- * 
+ *
  * Enter description here ...
  * @author davidmetzler
  *
  */
-class FrxRepoMan { 
-  
-  public $repositories; 
-  
+class FrxRepoMan {
+
+  public $repositories;
+
 
   /**
    * Loads all of the include files that
    */
   private function define_plugins( $class='') {
-    static $plugins = ''; 
+    static $plugins = '';
     if (!$plugins) {
       $plugins = array();
       foreach (module_list() as $module) {
@@ -29,7 +29,7 @@ class FrxRepoMan {
         }
       }
     }
-        
+
     foreach ($plugins as $p) {
       if (($class=='' || $class==$p['class'])) {
         if ($p['file'] ) {
@@ -38,36 +38,36 @@ class FrxRepoMan {
       }
     }
   }
-  
-  //Determine data sources. 
-  public function __construct() { 
+
+  //Determine data sources.
+  public function __construct() {
     global $_forena_repositories;
     // Empty repository so we need to initialize
     // Build the default sample one
     $repos = array();
-    
+
     // Load the repository list from the global settings.php file.
     if ($_forena_repositories) {
       $repos = $_forena_repositories;
     }
-        
+
     // Overide difinitions of the sample and drupal repositories.
     $path = drupal_get_path('module', 'forena');
     $repos['forena_help'] = array(
       'path' => $path .'/repos/forena_help',
       'title' => 'Forena Help Reports',
     );
-    
+
     $repos['drupal'] = array(
       'path' => $path . '/repos/drupal',
       'title' => 'Drupal Reports',
     );
-    
+
     $repos['sampledb'] = array(
       'path' => $path . '/repos/sample',
       'title' => 'Sample DB Repository'
     );
-    
+
     // Retrieve the repositories defined in the database;
     $results = db_query('SELECT * FROM {forena_repositories}');
     foreach ($results as $r) {
@@ -86,25 +86,25 @@ class FrxRepoMan {
     	}
     	$new_r ['title'] = $r->title;
     	$new_r ['enabled'] = $r->enabled;
-  
+
     	$repos[$r_name] = $new_r;
     }
 
-    drupal_alter('forena_repos',  $repos);    
-       
+    drupal_alter('forena_repos',  $repos);
+
     if ($_forena_repositories) {
     	array_merge($repos, $_forena_repositories);
     }
-    
-    $this->repositories = $repos; 
+
+    $this->repositories = $repos;
 
   }
-  
+
   /**
    * Load repository
    * @param $name Name of the repository
    */
-  public function repository($name) { 
+  public function repository($name) {
     // Now determine if the object exists
     if (isset($this->repositories[$name])) {
       if (@!is_object($this->repositories[$name]['data'])) {
@@ -116,7 +116,7 @@ class FrxRepoMan {
       Frx::error('Undefined repository' . $name, "Undefined Repository: $name ");
     }
   }
-  
+
   // Putting this in a function to sandbox the repository settings
   public function load_repository(&$repo) {
     // First determine if the class file exisits
@@ -150,27 +150,27 @@ class FrxRepoMan {
     else {
       Frx::error('Data provider not found for '. $conf['title']);
     }
-  }  
-  
-  
-  public function loadBlock($data_block) { 
-    $block = array(); 
+  }
+
+
+  public function loadBlock($data_block) {
+    $block = array();
     list($provider, $block_name) = explode('/', $data_block, 2);
     $repos = @$this->repositories[$provider];
     if (isset($repos['enabled']) && !$repos['enabled']) {
      return array();
     }
-     
-    $o = $this->repository($provider); 
+
+    $o = $this->repository($provider);
     if ($o) {
      $access = TRUE;
      $block = $o->loadBlock($block_name);
     }
-    
-    return $block; 
+
+    return $block;
   }
-  
-  
+
+
   /**
    * Extract the data by running a block
    *
@@ -179,14 +179,17 @@ class FrxRepoMan {
    * @param string $clause order / where cause
    * @return unknown
    */
-  function data($data_block) {   
+  function data($data_block) {
      list($provider, $block_name) = explode('/', $data_block, 2);
+     //Intstantiate the provider
+     $o = $this->repository($provider);
      $repos = @$this->repositories[$provider];
+
+
      if (isset($repos['enabled']) && !$repos['enabled']) {
      	return '';
      }
-        
-     //Populate user callback. 
+     //Populate user callback.
      if (isset($repos['user callback'])) {
        $user_fn = $repos['user callback'];
        if (is_callable($user_fn)) {
@@ -194,36 +197,34 @@ class FrxRepoMan {
          Frx::Data()->setValue('current_user', $current_user);
        }
      }
-     
-     
-     //Execute the provider
-     $o = $this->repository($provider); 
-     $xml = ''; 
+
+
+     $xml = '';
      if ($o) {
        $access = TRUE;
        $block = $o->loadBlock($block_name);
-       $right = @$block['access']; 
-       if ($block && $o->access($right)) { 
-         switch ($block['type'])  { 
-           case 'sql': 
-             $xml = $o->sqlData($block['source']); 
-             break; 
-           case 'xml': 
-             $xml = $o->xmlData($block['source']); 
-             break; 
-           case 'class': 
-             $xml = $o->phpData($o, $block['method']); 
-             break;    
+       $right = @$block['access'];
+       if ($block && $o->access($right)) {
+         switch ($block['type'])  {
+           case 'sql':
+             $xml = $o->sqlData($block['source']);
+             break;
+           case 'xml':
+             $xml = $o->xmlData($block['source']);
+             break;
+           case 'class':
+             $xml = $o->phpData($o, $block['method']);
+             break;
          }
-         
+
        }
        return $xml;
      }
      else {
-       return ''; 
+       return '';
      }
   }
-  
+
   /**
    * Check access control using the block in a data block.  In this case
    * public assess returns true.
@@ -262,8 +263,8 @@ class FrxRepoMan {
     }
     return FALSE;
   }
-  
-  
+
+
 /*
  * Recieves a datablock and returns an array of values from the data block.
  * @data_block: name of the data block to be invoked for values
@@ -296,5 +297,5 @@ function dataBlockParams($data_block, $field, $label, $params=array()) {
   }
   return $list;
 }
-  
+
 }

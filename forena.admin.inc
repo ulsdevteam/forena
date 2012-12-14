@@ -234,7 +234,7 @@ function forena_format_form($formid, $form_state, $report_name) {
     $frx_options = $r->getOptions();
     $report_form = @$frx_options['form'];
 
-    $doclist = Frx::Menu()->doc_formats; 
+    $doclist = Frx::Menu()->doc_formats;
 
     $form['report_name'] = array(
        '#type' => 'value',
@@ -738,14 +738,14 @@ function forena_create_trans_form_submit($form, &$form_state) {
  * administer the settings for document format options
  */
 function forena_doc_formats_settings() {
-  // Invoke doc_type hook to see which document types are there. 
-  $doc_types = module_invoke_all('forena_document_types'); 
-  unset($doc_types['web']); 
-  $supported_doctypes = array(); 
-  foreach ($doc_types as $type=>$doc) { 
-    $supported_doctypes[$type] = $type; 
+  // Invoke doc_type hook to see which document types are there.
+  $doc_types = module_invoke_all('forena_document_types');
+  unset($doc_types['web']);
+  $supported_doctypes = array();
+  foreach ($doc_types as $type=>$doc) {
+    $supported_doctypes[$type] = $type;
   }
-  
+
   $form['forena_doc_formats'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Allowed Document Formats'),
@@ -1986,17 +1986,10 @@ function forena_clean_xhtml($xhtml) {
  * @return array list of blocks the user has access to.
  */
 function forena_user_data_blocks($search) {
-  $repos = FrxReportGenerator::instance()->app->repositories();
+  $repos = Frx::RepoMan()->repositories;
   foreach ($repos as $name => $r) {
-
     // Make really sure the data provider objects have been instantiated
-    $provider = $r;
-    if (!@$provider['data']) {
-      $provider = FrxReportGenerator::instance()->repository($name);
-    }
-    $repos[$name] = $provider;
-    // Invoke the list block function to find out all of the block names
-    $o = $provider['data'];
+    $o = Frx::RepoMan()->repository($name);
     if (method_exists($o, 'list_blocks')) {
       $blocks = $o->list_blocks($search);
       foreach ($blocks as $block) {
