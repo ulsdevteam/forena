@@ -538,6 +538,31 @@ function forena_report($name_in, $parms = array(), $print = TRUE) {
 
 }
 
+/**
+ * Render report as an inlcude.  Don't perform the output fuctnions for the document 
+ * @param $report_name String
+ * @param $parms array of parameters to include
+ */
+function forena_report_include($report_name, $parms=array()) { 
+    $output = ''; 
+    require_once 'forena.common.inc';
+  	$desc= Frx::Menu()->parseURL($report_name);
+	  $name = $desc['name'];
+	  Frx::Data()->push($parms, 'parms');
+	  $r = @FrxReportGenerator::instance()->get_report($name, $parms);
+    if (!$r || !$r->rpt_xml) {
+      Frx::Data()->pop(); 
+    	return '';
+    }
+
+    //check for default parameters
+    $r->processParameters();
+    $output = $r->render($desc['format']);
+
+    Frx::Data()->pop();
+    return $output;
+}
+
 
 /**
  * Menu callback for rendering the forena report.
@@ -1018,3 +1043,35 @@ function forena_views_api() {
     'template path' => drupal_get_path('module', 'forena') ,
   );
 }
+
+/**
+ * Implements hook_bean_types_api_info().
+ */
+function forena_bean_types_api_info() {
+  return array('api' => 4);
+}
+
+
+/**
+ * Implements hook_bean_types().
+ */
+function forena_bean_types() {
+  $plugins = array();
+  $plugin_path = drupal_get_path('module', 'forena') . '/bean';
+  $plugins['forena'] = array(
+    'label' => t('Forena report'),
+    'description' => t('Display a report.'),
+    'handler' => array(
+      'class' => 'FrxBean',
+      'parent' => 'bean',
+      'path' => $plugin_path,
+      'file' => 'FrxBean.inc',      
+    ),
+    'path' => $plugin_path,
+    'file' => 'FrxBean.inc',
+  );
+  return $plugins;
+}
+
+
+

@@ -24,29 +24,10 @@ class FrxInclude extends FrxRenderer {
       $output = $this->render_reference($url, $ext, $attributes);
     }
 		else {
-			$output = $this->renderInclude(str_replace('reports/','',$report_url), $query);
+			$output = forena_report_include(str_replace('reports/','',$report_url), $query);
 		}
 		return $output;
 	}
-
-	public function renderInclude($name, $parms) {
-	  $desc= Frx::Menu()->parseURL($name);
-	  $name = $desc['name'];
-	  Frx::Data()->push($parms, 'parms');
-	  print_r($parms);
-	  $r = @FrxReportGenerator::instance()->get_report($name, $parms);
-    if (!$r || !$r->rpt_xml) {
-    	return '';
-    }
-
-    //check for default parameters
-    $r->processParameters();
-    $output = $r->render($desc['format']);
-
-    Frx::Data()->pop();
-    return $output;
-	}
-
 
   function render_reference($url, $ext, $attributes) {
   	$ext = strtolower($ext);
