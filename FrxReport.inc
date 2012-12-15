@@ -287,15 +287,16 @@ class FrxReport {
    */
   public function render($format) {
     if (!$format) $format = 'web'; 
+    Frx::Data()->push($this->parms, 'parm'); 
     $this->format = $format; 
     $dom = $this->dom;
     $o='';
-    // Push the data 
     $body = $dom->getElementsByTagName('body')->item(0);
     foreach ($body->childNodes as $node) {
       $o .= $this->render_section($node);
     }
     $this->html = $o;
+    Frx::Data()->pop();
     return $o ;
   }
   /*
