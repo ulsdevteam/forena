@@ -64,6 +64,10 @@ class FrxData {
     $this->cur_context = $data;
 
     if ($id) {
+/*    if (@is_array($this->data_sources[$id]) && is_array($data)) {
+        $data = array_merge($this->data_sources[$id], $data); 
+      }
+      */
       $this->data_sources[$id] = $data;
     }
   }
@@ -81,7 +85,6 @@ class FrxData {
   public function pop() {
   	$this->id = array_pop($this->id_stack);
     $this->cur_context = array_pop($this->data_stack);
-
   }
 
   /**

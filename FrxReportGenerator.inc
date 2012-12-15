@@ -71,7 +71,7 @@ class FrxReportGenerator {
     }
     //Did not find the formater in the data provider
     //Look to see if it's in a control class
-    $controls = $this->define_controls();
+    $controls = Frx::Controls();
     foreach ($controls as $k => $r) {
       $provider = $r;
       if ($provider && method_exists($provider, 'formats'))  {
@@ -155,31 +155,6 @@ class FrxReportGenerator {
   }
 
 
-  /**
-   * returns a list of instances of the control classes
-   * if there wasn't a class, returns an empty string.
-   */
-  function define_controls( $class='') {
-    static $instances = '';
-    if (!$instances) {
-      $classes = $this->app->controls();
-      foreach ($classes as $c) {
-        if (($class=='' || $class==$c['class'])) {
-          if ($c['file']) {
-            include_once($c['file'] );
-            if (class_exists($c['class'])) {
-              $instances[$c['class']] =  new $c['class'];
-            }
-          }
-        }
-      }
-    }
-    if ($class) {
-      return @$instances[$class];
-    }
-    return $instances;
-  }
-
 
   /**
    * Returns an object of the template class
@@ -217,7 +192,7 @@ class FrxReportGenerator {
   }
 
   function supported_formats() {
-    $controls = $this->define_controls();
+    $controls = Frx::Controls();
     $supported_formats = array();
     $f = array();
     foreach ($controls as $k => $r) {

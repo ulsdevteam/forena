@@ -548,7 +548,7 @@ function forena_report_include($report_name, $parms=array()) {
     require_once 'forena.common.inc';
   	$desc= Frx::Menu()->parseURL($report_name);
 	  $name = $desc['name'];
-	  Frx::Data()->push($parms, 'parms');
+	  Frx::Data()->push($parms, 'parm');
 	  $r = @FrxReportGenerator::instance()->get_report($name, $parms);
     if (!$r || !$r->rpt_xml) {
       Frx::Data()->pop(); 
@@ -557,9 +557,15 @@ function forena_report_include($report_name, $parms=array()) {
 
     //check for default parameters
     $r->processParameters();
-    $output = $r->render($desc['format']);
-
+    $format = $desc['format'];
+    $r->render($format);
+ 
     Frx::Data()->pop();
+    
+    $o =  Frx::Document($format);
+    if ($o) {
+      $output = $o->render($r, $format,  array());
+    }
     return $output;
 }
 
@@ -820,15 +826,9 @@ function _forena_filter_process($text='') {
       }
 
       $parms = array_merge($parms, $in_parms);
-      // Debug the result
-      $r = FrxReportGenerator::instance()->get_report($report_name, $parms);
-      if ($r) {
-        $output = $r->render(null);
-      }
-      else {
-      	$output = '';
-      }
-
+      // Render it
+      $output = forena_report_include($report_name, $parms); 
+         
       // Finally replace the parameters
       $find[]=$match[0][$idx];
       $replace[]=$output;

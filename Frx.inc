@@ -88,6 +88,27 @@ class Frx {
     
   }
   
+  public static function Controls( $class='') {
+    static $instances = '';
+    static $classes = ''; 
+    if (!$instances) {
+      $classes = FrxReportGenerator::instance()->app->controls();
+      foreach ($classes as $c) {
+        if ($c['file']) {
+          include_once($c['file'] );
+          if (class_exists($c['class'])) {
+            $instances[$c['class']] =  new $c['class'];
+          }
+        }
+      }
+    }
+
+    if ($class) {
+      return @$instances[$class];
+    }
+    return $instances;
+  }
+  
   /**
    * Forena Repository manager 
    * Class factory

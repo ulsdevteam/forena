@@ -115,7 +115,7 @@ class FrxDataSource{
     if ($subdir) $path = $subdir . '/';
     $block_path .= $path . '*' . $search . '*';
     // Find sql files
-    drupal_set_message($block_path);
+
     $d = glob($block_path);
     if ($d) foreach ($d as $file_name) {
     	// Split off the extention
@@ -128,7 +128,7 @@ class FrxDataSource{
       	$ext = '';
       	$block_name = $file_name;
       }
-      drupal_set_message($file_name);
+      
       if (array_search($ext, $this->block_extensions)!==FALSE) {
     	  $block_list[] = str_replace($this->block_path . '/', '', $block_name);
       }

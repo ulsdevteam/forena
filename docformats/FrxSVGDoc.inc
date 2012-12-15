@@ -21,7 +21,6 @@ class FrxSVGDoc extends FrxDocument {
   	} else {
   	  $output = '<svg/>'; 
   	}
-
   	return $output;
   }
 }

@@ -1,12 +1,12 @@
 <?php
 class FrxChart extends FrxRenderer {
-	public function render($format='web') {
+	public function render() {
+
 		// Get data from source
 		$output = '';
 		$options = array();
 		$series = array();
 		$seriesx = array();
-		$output;
 		$data = array();
 		$attributes = $this->mergedAttributes();
 		$path = isset($attributes['xpath']) ? $attributes['xpath'] :  '*';
@@ -48,6 +48,7 @@ class FrxChart extends FrxRenderer {
 			$links = $this->xmlToValues($path, $link, $label);
 		}
 		if ($data) {
+
 			if (method_exists($this,'renderChart')) {
 				$output = $this->renderChart($type, $data, $options, $links);
 			}

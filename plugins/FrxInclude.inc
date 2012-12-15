@@ -19,7 +19,6 @@ class FrxInclude extends FrxRenderer {
 		parse_str($query_str, $query );
     $options = array('query' => $query);
 		$url = url($url, $options);
-
     if ($this->format=='web') {
       $output = $this->render_reference($url, $ext, $attributes);
     }

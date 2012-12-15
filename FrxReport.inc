@@ -206,7 +206,7 @@ class FrxReport {
       }
 
       // Determine if we have a custom renderer
-      $renderer = (string)$frx['renderer'];
+      $renderer = (string)$frx['renderer']; 
        // if we have a foreach in this node, we need to iterate the children
       if ((string)$frx['foreach'] ) {
         // Save xml
@@ -250,10 +250,11 @@ class FrxReport {
       elseif ($continue) {
       	if ($renderer) {
       		// Implement custom renderer.
-          $co = FrxReportGenerator::instance()->define_controls($renderer);
+          $co = Frx::Controls($renderer);
       	  if ($co) {
       	  	$co->initReportNode($dom_node, $this, $this->format);
       	  	$o = $co->render();
+ 
       	  }
       	}
       	else {
@@ -290,9 +291,7 @@ class FrxReport {
     $dom = $this->dom;
     $o='';
     // Push the data 
-    Frx::Data()->push($this->parms, 'parm');
     $body = $dom->getElementsByTagName('body')->item(0);
-
     foreach ($body->childNodes as $node) {
       $o .= $this->render_section($node);
     }
