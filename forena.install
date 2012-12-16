@@ -117,6 +117,10 @@ function forena_update_7201() {
    db_add_field('forena_reports', 'path', array('type' => 'varchar', 'length' => 255)); 
    db_add_index('forena_reports', 'path', array('path')); 
  }
+ 
+ function forena_install() { 
+   forena_sync_reports(); 
+ }
 
  /**
   * Implementation of hook uninstall
