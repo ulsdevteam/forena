@@ -42,7 +42,7 @@ class FrxBean extends BeanPlugin {
     $form['settings']['parms'] = array(
       '#type' => 'textfield',
       '#title' => 'URL Parameters', 
-      '#description' => 'Specify parameters as they would appeal on the report. ', 
+      '#description' => 'Specify parameters as they would appear on the url (e.g. state=wa&county=foo) ', 
       '#default_value' => @$bean->settings['parms'], 
       '#multiple' => FALSE, 
      ); 
