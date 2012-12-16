@@ -26,18 +26,46 @@ class FrxBean extends BeanPlugin {
       '#type' => 'textfield',
       '#title' => t('Select a report'),
       '#autocomplete_path' => 'forena/reports/autocomplete',
-      '#default_value' => isset($bean->settings['selected_report']) ? $bean->settings['selected_report'] : 0 ,
+      '#default_value' => isset($bean->settings['selected_report']) ? $bean->settings['selected_report'] : '' ,
       '#required' => TRUE,
       '#multiple' => FALSE,
     );
+    
+    $form['settings']['include_url_parameters'] = array(
+      '#type' => 'checkbox', 
+      '#title' => t('Use menu parameters from url'), 
+      '#description' => t('If checked, parameters from url or in menu path will be used when rendering this report.'), 
+      '#default_value' => @$bean->settings['include_url_parameters'], 
+      '#multiple' => FALSE, 
+    ); 
+    
+    $form['settings']['parms'] = array(
+      '#type' => 'textfield',
+      '#title' => 'URL Parameters', 
+      '#description' => 'Specify parameters as they would appeal on the report. ', 
+      '#default_vlue' => @$bean->settings['parms'], 
+      '#multiple' => FALSE, 
+     ); 
 
     return $form;
   }
 
 
   public function view($bean, $content, $view_mode = 'default', $langcode = NULL) {
+    $parms = array(); 
+    $parms = @parse_url($bean->settings['parms']); 
+    
+    if (!$parms) $parms = array(); 
     $report = $bean->settings['selected_report']; 
-    $output = forena_report_include($report); 
+    if ($bean->settings['include_url_parameters']) {
+      $query = $_GET; 
+      unset($query['q']);
+      $parms = array_merge($parms, $query);  
+      if (Frx::Data()->contextExists('parm')) $parms = array_merge($parms, Frx::Data()->getContext('parm')); 
+    }
+
+    
+    $output = forena_report_include($report, $parms); 
     return array('content' => array('#markup' => $output)); 
   }
 }
