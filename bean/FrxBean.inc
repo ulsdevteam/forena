@@ -43,7 +43,7 @@ class FrxBean extends BeanPlugin {
       '#type' => 'textfield',
       '#title' => 'URL Parameters', 
       '#description' => 'Specify parameters as they would appeal on the report. ', 
-      '#default_vlue' => @$bean->settings['parms'], 
+      '#default_value' => @$bean->settings['parms'], 
       '#multiple' => FALSE, 
      ); 
 
@@ -53,8 +53,8 @@ class FrxBean extends BeanPlugin {
 
   public function view($bean, $content, $view_mode = 'default', $langcode = NULL) {
     $parms = array(); 
-    $parms = @parse_url($bean->settings['parms']); 
-    
+    parse_str($bean->settings['parms'], $parms); 
+  
     if (!$parms) $parms = array(); 
     $report = $bean->settings['selected_report']; 
     if ($bean->settings['include_url_parameters']) {
@@ -63,7 +63,6 @@ class FrxBean extends BeanPlugin {
       $parms = array_merge($parms, $query);  
       if (Frx::Data()->contextExists('parm')) $parms = array_merge($parms, Frx::Data()->getContext('parm')); 
     }
-
     
     $output = forena_report_include($report, $parms); 
     return array('content' => array('#markup' => $output)); 

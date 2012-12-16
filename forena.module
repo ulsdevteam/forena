@@ -553,13 +553,11 @@ function forena_report_include($report_name, $parms=array()) {
     if (!$r || !$r->rpt_xml) {
     	return '';
     }
-
     //check for default parameters
     $r->processParameters();
     $format = $desc['format'];
     $r->render($format);
 
-    
     $o =  Frx::Document($format);
     if ($o) {
       $output = $o->render($r, $format,  array());
