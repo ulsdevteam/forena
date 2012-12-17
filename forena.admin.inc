@@ -1990,12 +1990,13 @@ function forena_delete_form_submit($form, &$form_state) {
   		$desc = Frx::Menu()->parseURL($report_name);
   		forena_delete_report($desc['name']);
   	}
-  	drupal_set_message(t('Deleted %s', array('%s' => $values['base_name'])));
+  	drupal_set_message(t('Deleted %s', array('%s' => $values['base_name']))); 
   }
   else {
     drupal_set_message(t('Deleted %s', array('%s' => $report_name)));
     forena_delete_report($report_name);
   }
+  menu_rebuild(); 
   $form_state['redirect'] = 'forena';
 }
 
