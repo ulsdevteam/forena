@@ -2140,6 +2140,7 @@ function forena_admin_params_form($formid, $form_state, $report_name) {
         $require = (string)$attrs['require'];
         $data_source = (string)$attrs['data_source'];
         $data_field = (string)$attrs['data_field'];
+        $class = (string)$attrs['class']; 
         $desc = (string)$attrs['desc'];
         $type = (string)$attrs['type'];
 
@@ -2217,7 +2218,14 @@ function forena_admin_params_form($formid, $form_state, $report_name) {
            ),
           '#description' => t('Enter a helpful description about this parameter. This will display on the form when the user is prompted to enter a parameter.'),
         );
-
+        
+        $form['params'][$id]['class'] = array(
+          '#type' => 'textfield', 
+          '#title' => t('Class'), 
+          '#description' => t('Specify the html class you wish to apply to this parameter'), 
+          '#default_value' => $class, 
+        ); 
+        
         $form['params'][$id]['delete_ind'] = array(
           '#type' => 'checkbox',
           '#title' => 'Remove this parameter',

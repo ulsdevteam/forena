@@ -178,6 +178,7 @@ function forena_parameter_form($formid, &$form_state, $rpt, $collapse=FALSE) {
 	        $id = (string)$node['id'];
 	        $data_source = (string)$node['data_source'];
 	        $data_field = (string)$node['data_field'];
+	        $class = (string)$node['class']; 
 
 	        $type = (string)$node['type'];
 	        if (isset($parms[$id])) {
@@ -237,6 +238,13 @@ function forena_parameter_form($formid, &$form_state, $rpt, $collapse=FALSE) {
 	          '#required' => $required,
 	          '#description' => t($desc),
 	        );
+	        
+	        // Add class to parmeter form. 
+	        if ($class) { 
+	          $form['params'][$id]['#attributes'] = array(
+	            'class' => @explode(' ', $class), 
+	          ); 
+	        }
 
 
 	        //if $list is not empty then push options
