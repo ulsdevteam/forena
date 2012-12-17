@@ -22,7 +22,6 @@ function forena_schema() {
        'category' => array('type' => 'varchar', 'length' => 255, 'not null' => FALSE),
        'hidden' => array('type' => 'int', 'not null' => FALSE, ),
        'cache' => array('type' => 'text'),
-       'src' => array('type' => 'text'),
        'modified' => array('type' => 'int'),
        'altered' => array('type' => 'int'),
        'path' => array('type' => 'varchar', 'length' => 255), 
@@ -116,6 +115,10 @@ function forena_update_7201() {
  function forena_update_7301() {
    db_add_field('forena_reports', 'path', array('type' => 'varchar', 'length' => 255)); 
    db_add_index('forena_reports', 'path', array('path')); 
+ }
+ 
+ function forena_update_7302() { 
+   db_drop_field('forena_reports', 'src'); 
  }
  
  function forena_install() { 
