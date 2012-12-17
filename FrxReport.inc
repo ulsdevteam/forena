@@ -334,7 +334,10 @@ class FrxReport {
     if ($format) {
       $value = FrxReportGenerator::$instance->format_data($value, $format, $format_str, $this->teng);
     }
-
+    
+    if (is_array($value)) { 
+      $value = implode(' ', $value); 
+    }
 
     // Default if specified
     if (!$value && $default) {

@@ -153,6 +153,7 @@ function forena_parameter_form($formid, &$form_state, $rpt, $collapse=FALSE) {
   }
   unset($parms['q']);
   $form = array();
+  $menu_parms = Frx::Data()->getContext('menu-parms'); 
 
   if ($r) {
 //      drupal_set_title($r->title);
@@ -223,6 +224,11 @@ function forena_parameter_form($formid, &$form_state, $rpt, $collapse=FALSE) {
 	           $type = 'textfield';
 	           $list = '';
 	        }
+	        
+	        if (isset($menu_parms[$id])) { 
+	          $type = 'item';  
+	          $value = $menu_parms[$id]; 
+	        }
 
 	        //If a data_source attr was found then create an array of
 	        //returned values filtered against data_field attr.
@@ -238,6 +244,11 @@ function forena_parameter_form($formid, &$form_state, $rpt, $collapse=FALSE) {
 	          '#required' => $required,
 	          '#description' => t($desc),
 	        );
+	        
+	        if ($type == 'item') { 
+	          $form['params'][$id]['#markup'] = $value; 
+	          
+	        }
 	        
 	        // Add class to parmeter form. 
 	        if ($class) { 
@@ -291,7 +302,7 @@ function forena_parameters_callback($form, &$form_state) {
 function forena_parameter_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   unset($values['submit']);
-  foreach($values['params'] as $key=>$value) {
+  if (isset($values['params'])) foreach($values['params'] as $key=>$value) {
   	if (is_array($value)) {
   		foreach ($value as $k => $val) {
   			if (!$val) {
@@ -305,7 +316,7 @@ function forena_parameter_form_submit($form, &$form_state) {
   		}
   	}
   }
-  $form_state['redirect']= array($_GET['q'], array('query' => $values['params']));
+  $form_state['redirect']= array($_GET['q'], array('query' => @$values['params']));
 }
 
 function forena_get_user_reports() {
@@ -321,7 +332,7 @@ function forena_get_user_reports() {
       $cache = unserialize($cache);
 
       // Check each callback function to see if we have an error.
-      if ($cache['access']) foreach ($cache['access'] as $callback => $args) {
+      if (@$cache['access']) foreach ($cache['access'] as $callback => $args) {
         if ($callback) foreach ($args as $arg) {
           $access = FALSE;
           if (function_exists($callback)) {
@@ -456,7 +467,6 @@ function forena_block_xml($block_name='') {
  */
 function forena_save_report($report_name, $report, $save_file = FALSE, $altered = 0) {
   static $save_count=0;
-
   if ($report && !is_object($report)) {
     try {
       $report = new SimpleXMLElement($report);
@@ -528,7 +538,7 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
   if (file_exists($filepath)) {
     $modified = filemtime($filepath);
     $result = db_query("SELECT report_name FROM {forena_reports} WHERE report_name=:report_name AND language=:language", array(':report_name' => $name, 'language' => $lang) );
-    $path = isset($cache['menu']) ? $cache['menu']['path'] : ''; 
+    $path = isset($cache['menu']) ? @$cache['menu']['path'] : ''; 
     if ($rpt = $result->fetchObject() ) {
       db_update('forena_reports')
         -> condition('report_name', $name)
