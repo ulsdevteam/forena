@@ -14,7 +14,9 @@ function forena_admin_reports() {
   GLOBAL $language;
   $data = array();
   $links[] = array('href' => 'reports/add', 'title' => 'Create New Report' );
-  $output = theme('links',
+  $content = drupal_get_form('forena_sync_form'); 
+  $output = drupal_render($content);
+  $output .= theme('links',
                      array(
                        'links' => $links,
                        'attributes' => array('class' => 'action-links'),
@@ -136,12 +138,11 @@ function forena_get_report_editor($report_name) {
 }
 
 /**
- * Forena admin settings form
- *
+ * Report syncronization form
+ * @param $formid
+ * @param $form_state
  */
-function forena_settings() {
-
-  $report_path = forena_report_path();
+function forena_sync_form($formid, &$form_state) { 
 
   $form['sync_overwrite'] = array(
     '#type' => 'checkbox',
@@ -154,6 +155,19 @@ function forena_settings() {
     '#value' => t('Clear Cache'),
     '#submit' => array('forena_settings_sync_submit'),
   );
+  
+  return $form; 
+
+}
+
+/**
+ * Forena admin settings form
+ *
+ */
+function forena_settings() {
+
+  $report_path = forena_report_path();
+
 
   $form['forena_report_repos'] = array(
     '#type' => 'textfield',

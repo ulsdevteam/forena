@@ -563,7 +563,6 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
           'category' => $data['category'],
           'hidden' => $data['hidden'],
           'cache' => $rpt_cache,
-          'src' => $r_xml,
           'altered' => $data['altered'],
           'modified' => $modified,
           'path' => $path, 
