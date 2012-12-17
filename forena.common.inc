@@ -253,7 +253,7 @@ function forena_parameter_form($formid, &$form_state, $rpt, $collapse=FALSE) {
 
 	      }
 
-	      $form['params']['submit'] = array(
+	      $form['submit'] = array(
 	        '#type' => 'submit',
 	        '#value' => t('Submit'),
 	      );
