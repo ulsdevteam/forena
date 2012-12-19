@@ -15,6 +15,7 @@ class FrxDataSource{
   public $block_ext;
   public $block_extensions;
   public $types;
+  public $block_name;
   protected $te;
   public function __construct($conf, $repos_path) {
     $this->conf = $conf;
@@ -54,6 +55,7 @@ class FrxDataSource{
    */
   function loadBlock($block_name) {
     $block = array();
+    $this->block_name = $block_name;
     $base_file = $this->block_path . '/' . $block_name;
     if (file_exists($base_file . '.sql')) {
       $contents = file_get_contents($base_file . '.sql');
@@ -128,7 +130,7 @@ class FrxDataSource{
       	$ext = '';
       	$block_name = $file_name;
       }
-      
+
       if (array_search($ext, $this->block_extensions)!==FALSE) {
     	  $block_list[] = str_replace($this->block_path . '/', '', $block_name);
       }
