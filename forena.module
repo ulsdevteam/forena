@@ -539,12 +539,12 @@ function forena_report($name_in, $parms = array(), $print = TRUE) {
 }
 
 /**
- * Render report as an inlcude.  Don't perform the output fuctnions for the document 
+ * Render report as an inlcude.  Don't perform the output fuctnions for the document
  * @param $report_name String
  * @param $parms array of parameters to include
  */
-function forena_report_include($report_name, $parms=array()) { 
-    $output = ''; 
+function forena_report_include($report_name, $parms=array()) {
+    $output = '';
     require_once 'forena.common.inc';
   	$desc= Frx::Menu()->parseURL($report_name);
 	  $name = $desc['name'];
@@ -595,7 +595,7 @@ function forena_check_all_access($checks) {
   // Check each callback function to see if we have an error.
   $access = FALSE;
   if ($checks) foreach ($checks as $callback => $args) {
-    if ($callback) foreach ($args as $arg) {
+    if ($callback && $args) foreach ($args as $arg) {
       if (function_exists($callback)) {
         $a = $callback($arg);
       }
@@ -823,8 +823,8 @@ function _forena_filter_process($text='') {
 
       $parms = array_merge($parms, $in_parms);
       // Render it
-      $output = forena_report_include($report_name, $parms); 
-         
+      $output = forena_report_include($report_name, $parms);
+
       // Finally replace the parameters
       $find[]=$match[0][$idx];
       $replace[]=$output;
@@ -1006,7 +1006,7 @@ function forena_sync_reports($copy_reports=FALSE) {
 	  }
 	}
   forena_db_sync();
-  menu_rebuild(); 
+  menu_rebuild();
 }
 
 function forena_theme() {
@@ -1062,7 +1062,7 @@ function forena_bean_types() {
       'class' => 'FrxBean',
       'parent' => 'bean',
       'path' => $plugin_path,
-      'file' => 'FrxBean.inc',      
+      'file' => 'FrxBean.inc',
     ),
     'path' => $plugin_path,
     'file' => 'FrxBean.inc',
