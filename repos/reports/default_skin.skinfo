@@ -8,4 +8,4 @@ name = Default Skin
 description = Default skin for use with Forena. 
 scripts[] = dataTables/media/js/jquery.dataTables.min.js
 scripts[] = default_skin.js
-stylesheets[all] = table_padding.css
+stylesheets[all][] = table_padding.css

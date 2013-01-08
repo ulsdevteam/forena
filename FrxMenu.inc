@@ -179,8 +179,7 @@ class FrxMenu {
       	  'page callback' => 'forena_report_menu_callback',
       	  'page arguments' => $page_args,
       	);
-
-        if ($access_callback === 'forena_check_all_access') $items[$new_path]['access arguments'] = $cache['access'];
+        if ($access_callback === 'forena_check_all_access') $items[$new_path]['access arguments'][] = $cache['access'];
       }
     }
   }

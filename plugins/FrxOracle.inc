@@ -112,7 +112,7 @@ class FrxOracle extends FrxDataSource {
         $msg .= htmlentities($e['sqltext']);
         //printf("\n%".($e['offset']+1)."s", "^");
         $msg .= "\n</pre>\n";
-        $this->error('Database error in ' . $block . ' see logs for info', $msg);
+        $this->error('Database error in ' . $this->block_name . ' see logs for info', $msg);
         return NULL;
       }
 
@@ -120,7 +120,7 @@ class FrxOracle extends FrxDataSource {
       if ($xml_text) {
         $xml = new SimpleXMLElement($xml_text);
         if ($xml->getName() == 'error') {
-          $msg = (string)$xml . ' in ' . $block . '.sql. ';
+          $msg = (string)$xml . ' in ' . $this->block_name . '.sql. ';
           $this->error($msg . 'See logs for more info', $msg . ' in <pre> ' . $sql . '</pre>');
         }
       }
