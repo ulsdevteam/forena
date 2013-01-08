@@ -122,6 +122,7 @@ function forena_update_7201() {
  }
  
  function forena_install() { 
+   require_once('forena.admin.inc'); 
    forena_sync_reports(TRUE); 
  }
 
