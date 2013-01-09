@@ -14,7 +14,7 @@ function forena_admin_reports() {
   GLOBAL $language;
   $data = array();
   $links[] = array('href' => 'reports/add', 'title' => 'Create New Report' );
-  $content = drupal_get_form('forena_sync_form'); 
+  $content = drupal_get_form('forena_sync_form');
   $output = drupal_render($content);
   $output .= theme('links',
                      array(
@@ -142,7 +142,7 @@ function forena_get_report_editor($report_name) {
  * @param $formid
  * @param $form_state
  */
-function forena_sync_form($formid, &$form_state) { 
+function forena_sync_form($formid, &$form_state) {
 
   $form['sync_overwrite'] = array(
     '#type' => 'checkbox',
@@ -155,8 +155,8 @@ function forena_sync_form($formid, &$form_state) {
     '#value' => t('Clear Cache'),
     '#submit' => array('forena_settings_sync_submit'),
   );
-  
-  return $form; 
+
+  return $form;
 
 }
 
@@ -188,8 +188,9 @@ function forena_settings() {
 
   $form['forena_default_form'] = array(
     '#type' => 'textfield',
-    '#title' => t('Default report form'),
-    '#description' => t('Indicates the default style sheet(s) that will be used when no tag is present in the report.'),
+    '#title' => t('Default report skin'),
+    '#description' => t('Specify the default skin to be used.   New skins can be created by creating .skinfo files in your reports directory.'
+      . ' Skins are basically css and javascript libraries added to your report.'),
     '#default_value' => variable_get('forena_default_form',''),
   );
 
@@ -257,9 +258,9 @@ function forena_format_form($formid, $form_state, $report_name) {
 
     $form['form'] = array(
       '#type' => 'textfield',
-      '#title' => t('Form'),
+      '#title' => t('Skin'),
       '#default_value' => $report_form,
-      '#description' => t('The page style of your report.  Specify the base filename of any css or js. ')
+      '#description' => t('The page style of your report.  The {skin}.skinfo file specifies css and js file in your report. ')
     );
 
     //begin checking doc generation options
@@ -2004,13 +2005,13 @@ function forena_delete_form_submit($form, &$form_state) {
   		$desc = Frx::Menu()->parseURL($report_name);
   		forena_delete_report($desc['name']);
   	}
-  	drupal_set_message(t('Deleted %s', array('%s' => $values['base_name']))); 
+  	drupal_set_message(t('Deleted %s', array('%s' => $values['base_name'])));
   }
   else {
     drupal_set_message(t('Deleted %s', array('%s' => $report_name)));
     forena_delete_report($report_name);
   }
-  menu_rebuild(); 
+  menu_rebuild();
   $form_state['redirect'] = 'forena';
 }
 
@@ -2155,7 +2156,7 @@ function forena_admin_params_form($formid, $form_state, $report_name) {
         $require = (string)$attrs['require'];
         $data_source = (string)$attrs['data_source'];
         $data_field = (string)$attrs['data_field'];
-        $class = (string)$attrs['class']; 
+        $class = (string)$attrs['class'];
         $desc = (string)$attrs['desc'];
         $type = (string)$attrs['type'];
 
@@ -2233,14 +2234,14 @@ function forena_admin_params_form($formid, $form_state, $report_name) {
            ),
           '#description' => t('Enter a helpful description about this parameter. This will display on the form when the user is prompted to enter a parameter.'),
         );
-        
+
         $form['params'][$id]['class'] = array(
-          '#type' => 'textfield', 
-          '#title' => t('Class'), 
-          '#description' => t('Specify the html class you wish to apply to this parameter'), 
-          '#default_value' => $class, 
-        ); 
-        
+          '#type' => 'textfield',
+          '#title' => t('Class'),
+          '#description' => t('Specify the html class you wish to apply to this parameter'),
+          '#default_value' => $class,
+        );
+
         $form['params'][$id]['delete_ind'] = array(
           '#type' => 'checkbox',
           '#title' => 'Remove this parameter',
