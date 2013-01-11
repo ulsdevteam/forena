@@ -1449,12 +1449,6 @@ function forena_add_data_block_form($formid, &$form_state, $report_name) {
       '#default_value' => @$form_state['storage']['parm_values'],
     );
 
-    $form['where_clause'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Where Clause'),
-      '#default_value' => @$form_state['storage']['where_clause'],
-      '#description' => t('Enter a where clause to filter your report.'),
-    );
     //If there are parameters in the data block allow the user to input data
     //Check if there is already a parameter of the same name in the existing report. If there is, use the report value.
     if ($params) {
@@ -1507,7 +1501,6 @@ function forena_add_data_block_form($formid, &$form_state, $report_name) {
 
    $config = isset($form_state['values']['template_data']) ? @$form_state['values']['template_data']['config'] : @$form_state['storage']['config'];
    $config['block'] = $form_state['storage']['data_block'];
-   $config['clause'] = $form_state['storage']['where_clause'];
 
 
 
