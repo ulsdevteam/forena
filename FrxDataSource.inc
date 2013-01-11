@@ -92,7 +92,7 @@ class FrxDataSource{
   /**
    * Load tokens from block source
    */
-  public function tokens($soucre) {
+  public function tokens($source) {
     $tokens = array();
     // If we have a regular expression token parser, then get the tokens out of the block.
     if ($this->te) {
