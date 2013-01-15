@@ -18,15 +18,15 @@ class FrxReport {
   public $access;
   public $parameters;
   public $options;
-  public $formats; 
+  public $formats;
   public $body;
   public $html;
-  public $skin; 
+  public $skin;
   private $ids;
   public $teng;
   public $parms;
   private $dom;
-  private $format; 
+  private $format;
 
 
   public function __construct($xhtml, $data=array()) {
@@ -51,13 +51,13 @@ class FrxReport {
       if ($rpt_xml->head) {
         $this->title = (string)$rpt_xml->head->title;
         $nodes = $rpt_xml->xpath('//frx:docgen/frx:doc');
-        $this->formats = array(); 
+        $this->formats = array();
         if ($nodes) foreach ($nodes as $value) {
             $arr = $value->attributes();
             $this->formats[] = (string)$arr['type'];
         }
- 
-        
+
+
         foreach ($rpt_xml->head->children(FRX_NS) as $name => $node) {
           switch ($name) {
             case 'fields':
@@ -94,8 +94,8 @@ class FrxReport {
               break;
           }
         }
-        
-        $this->skin = isset($this->options['skin']) ? $this->options['skin'] : @$this->options['form']; 
+
+        $this->skin = isset($this->options['skin']) ? $this->options['skin'] : @$this->options['form'];
       }
     }
   }
@@ -206,7 +206,7 @@ class FrxReport {
       }
 
       // Determine if we have a custom renderer
-      $renderer = (string)$frx['renderer']; 
+      $renderer = (string)$frx['renderer'];
        // if we have a foreach in this node, we need to iterate the children
       if ((string)$frx['foreach'] ) {
         // Save xml
@@ -233,6 +233,7 @@ class FrxReport {
           $i++;
           $odd = $i & 1;
           $row_class = $odd ? 'odd' : 'even';
+          unset($tmp_attrs['id']);
           $tmp_attrs['class'] = trim($attrs['class'] . ' ' . $row_class);
           $r_attr_text = '';
 
@@ -254,7 +255,7 @@ class FrxReport {
       	  if ($co) {
       	  	$co->initReportNode($dom_node, $this, $this->format);
       	  	$o = $co->render();
- 
+
       	  }
       	}
       	else {
@@ -286,9 +287,9 @@ class FrxReport {
    * @return unknown_type
    */
   public function render($format) {
-    if (!$format) $format = 'web'; 
-    Frx::Data()->push($this->parms, 'parm'); 
-    $this->format = $format; 
+    if (!$format) $format = 'web';
+    Frx::Data()->push($this->parms, 'parm');
+    $this->format = $format;
     $dom = $this->dom;
     $o='';
     $body = $dom->getElementsByTagName('body')->item(0);
@@ -334,9 +335,9 @@ class FrxReport {
     if ($format) {
       $value = FrxReportGenerator::$instance->format_data($value, $format, $format_str, $this->teng);
     }
-    
-    if (is_array($value)) { 
-      $value = implode(' ', $value); 
+
+    if (is_array($value)) {
+      $value = implode(' ', $value);
     }
 
     // Default if specified
@@ -531,12 +532,12 @@ class FrxReport {
 
   /**
    * Default the parameters ba
-   * @param $parms Array of parameters.  
-   * @return boolean indicating whether the required parameters are present. 
+   * @param $parms Array of parameters.
+   * @return boolean indicating whether the required parameters are present.
    */
-  public function processParameters() { 
-    $parms = $this->parms; 
-    $missing_parms = FALSE; 
+  public function processParameters() {
+    $parms = $this->parms;
+    $missing_parms = FALSE;
     foreach ($this->parameters as $key => $parm) {
       if ((@$parms[$key]=='' || @$parms[$key]==array()) && @$parm['value']) {
        $value = (string)$parm['value'];
@@ -552,8 +553,8 @@ class FrxReport {
         $missing_parms = TRUE;
       }
     }
-    $this->parms = $parms; 
-    return $missing_parms; 
+    $this->parms = $parms;
+    return $missing_parms;
   }
 
 
