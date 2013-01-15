@@ -9,7 +9,7 @@ select
     ELSE 'poor'
   end AS classification
 FROM states s join 
-  (SELECT state,sum(users) as total from user_distribution 
+  (SELECT state,sum(users) as total from user_distribution
     GROUP BY state) su
   ON su.state=s.code
 ORDER BY total desc

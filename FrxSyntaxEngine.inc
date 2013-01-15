@@ -191,4 +191,22 @@ class FrxSyntaxEngine {
   		return $data;
   	}
   }
+  
+  /**
+   * Test for TRUE/FALSE for conditions that are able to be represented using bind parameters
+   * Note that | are used to separate the different conditions and these are to be OR'd together. 
+   * @param  $condition String
+   */
+  public function test($condition) { 
+    $eval = TRUE; 
+    $tests = explode('&', $condition); 
+    if ($tests) foreach ($tests as $test) {
+      $t = trim($test);  
+      $res = $this->replace($t, TRUE); 
+      $res = (trim($res)) ? TRUE : FALSE;       
+      if (strpos($t, '!')===0) $res = !$res; 
+      $eval = $eval && $res;  
+    }
+    return $eval; 
+  }
 }
