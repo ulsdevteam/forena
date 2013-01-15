@@ -21,7 +21,8 @@
 		repos/drupal folder found in the modules source directory. &nbsp;
 		Below is the contents of the drupal/role_permissions data block that
 		demonstrates role permissions.&nbsp;</p>
-<pre>--ACCESS=administer permissions
+<pre>
+  --ACCESS=administer permissions
   SELECT * FROM {role_permission} p&nbsp;
     WHERE p.rid = :role
 </pre>
@@ -49,6 +50,26 @@
 		&nbsp; Tokens may be reference multiple times within the same SQL
 		query.&nbsp;
 	</p>
+	<h3>Conditional SQL</h3>
+	<p>
+	  When building data blocks you can specifcy sections of sql that are only
+	  included if a particular parameter is present.  This lets you creqte SQL 
+	  that has optional filters that can be of signifciant complexity and don't
+	  get included unless needed. The following example illustrates this technique
+	</p>
+	<pre>
+  --ACCESS=access content
+  SELECT * from states
+  --CONDITION=:state
+  WHERE code=:state
+  --CONDITION=none
+  ORDER BY NAME
+	</pre>
+	<p>
+	In the above example the Where clause is only added when there is a value
+	specified for :state, but the order by clause is always included. 
+	</p>
+
 	<ul id="forena-1" frx:block="forena_help/admin_topics">
 		<li id="forena-2" frx:foreach="*"><span>{title}</span>
 		</li>
