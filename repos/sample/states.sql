@@ -1,6 +1,8 @@
 --ACCESS=access demo reports
 select * from states
---CONDITION=:state
+--IF=:state
 WHERE code=:state
---CONDITION=true
-  ORDER BY name
+--END
+ORDER BY name
+
+
