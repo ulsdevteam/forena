@@ -8,7 +8,7 @@ class FrxXMLSource extends FrxRenderer {
 	  $output = '';
 		$node = $this->reportDocNode;
 		$xml = FrxData::instance()->currentContext();
-		if ($xml && is_callable($xml, 'asXML')) $output = htmlspecialchars($xml->asXML());
+		if ($xml && is_callable(array($xml, 'asXML'))) $output = htmlspecialchars($xml->asXML());
 		return $output;
 	}
 }
