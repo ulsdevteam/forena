@@ -191,7 +191,7 @@ class FrxDataSource{
     }
     return array('access' => $access, 'source' => $data);
   }
-  
+
 
   public function parseSQLFile($contents) {
   	$comment = $this->comment_prefix;
@@ -203,27 +203,33 @@ class FrxDataSource{
     $block = '';
     $parms = Frx::Data()->currentContext();
     $data = '';
-    $skip = FALSE; 
+    $skip = FALSE;
     while ($i<$cnt) {
       $l = trim($lines[$i], "\r");
       @list($d, $c) = explode($comment, $l, 2);
       if ($trim) $c = trim($c, $trim);
       if  ($c) {
-        list($a, $o) = explode('=', $c, 2);
+        @list($a, $o) = explode('=', $c, 2);
         $a = trim($a);
-        if ($a && $o) {
+        if (($a && $o) || $c == 'END' || $c == 'ELSE' ) {
 	        switch ($a) {
 	        	case 'ACCESS':
 	        		$access = trim($o);
 	        		break;
-	        	case 'CONDITION': 
-	        	  $skip = !$this->te->test(trim($o)); 
-	        	  break; 
+	        	case 'IF':
+	        	  $skip = !$this->te->test(trim($o));
+	        	  break;
+	        	case 'END':
+	        	  $skip = FALSE;
+	        	  break;
+	        	case 'ELSE':
+	        	  $skip = !$skip;
+	        	  break;
         }
         }
 
       }
-      if (!$skip) { 
+      if (!$skip) {
         if (strpos($l, $comment)!==0 && $l) {
           $data .= "$l\n";
         }
