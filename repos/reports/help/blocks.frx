@@ -60,14 +60,17 @@
 	<pre>
   --ACCESS=access content
   SELECT * from states
-  --CONDITION=:state
+  --IF=:state
   WHERE code=:state
-  --CONDITION=none
+  --ELSE
+  WHERE code='AL'
+  --END
   ORDER BY NAME
 	</pre>
 	<p>
 	In the above example the Where clause is only added when there is a value
-	specified for :state, but the order by clause is always included. 
+	specified for :state.  If no value for :state is provided the WHERE clause
+	limits the selection to code of 'AL'. The order by clause is always included. 
 	</p>
 
 	<ul id="forena-1" frx:block="forena_help/admin_topics">
