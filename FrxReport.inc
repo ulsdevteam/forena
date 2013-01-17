@@ -188,13 +188,7 @@ class FrxReport {
       //Implment if then logic
       if ((string)$frx['if']) {
         $cond = (string)$frx['if'];
-        if (strpos($cond, '!')===0) {
-          $cond = !($this->teng->replace(ltrim($cond,'!'),TRUE) == TRUE);
-        }
-        else {
-          $cond = $this->teng->replace($cond,TRUE) == TRUE;
-        }
-        if (!$cond) return '';
+        if (!$this->teng->test($cond)) return '';
       }
 
       // Preserve non frx attributes
