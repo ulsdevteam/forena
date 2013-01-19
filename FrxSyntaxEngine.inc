@@ -203,7 +203,7 @@ class FrxSyntaxEngine {
     if ($tests) foreach ($tests as $test) {
       $t = trim($test);  
       $res = $this->replace($t, TRUE); 
-      $res = (trim($res)) ? TRUE : FALSE;       
+      $res = (trim($res,' !')) ? TRUE : FALSE;       
       if (strpos($t, '!')===0) $res = !$res; 
       $eval = $eval && $res;  
     }
