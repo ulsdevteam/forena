@@ -67,4 +67,25 @@ class FrxCSVDoc extends FrxDocument {
     }
     return $output;
   }
+
+  /**
+   * (non-PHPdoc)
+   * @see FrxDocument::output()
+
+  public function output($csv) {
+    // This was pulled from Stackoverflow as a possible way to force CSV UTF-8 Encoding
+    // If it doesn't work we'll remove it.
+    header('Content-Description: File Transfer');
+  //  header('Content-Type: application/vnd.ms-excel');
+    header('Content-Disposition: attachment; filename='.$filename.'.csv');
+    header('Content-Transfer-Encoding: binary');
+    header('Expires: 0');
+    header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+    header('Pragma: public');
+    header('Content-Length: '. strlen($csv));
+    echo chr(255) . chr(254) . mb_convert_encoding($csv, 'UTF-16LE', 'UTF-8');
+    return TRUE;
+  }
+  */
 }
+
