@@ -1,12 +1,18 @@
 <?php
-class FrxXLSDoc extends FrxDocument { 
-  public function __construct() { 
-    $this->content_type = 'application/msexcel'; 
+/**
+ * @file FrxXLSWordDoc.inc
+ * Excel Document export.
+ * @author davidmetzler
+ *
+ */
+class FrxXLSDoc extends FrxDocument {
+  public function __construct() {
+    $this->content_type = 'application/msexcel';
   }
-  
-  
-  public function render($r, $format, $options = array()) { 
-    $body = $r->html; 
+
+
+  public function render($r, $format, $options = array()) {
+    $body = $r->html;
     $output = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
     $output .= '<?mso-application progid="Excel.Sheet"?>' . "\n";
     $output .= '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"' . "\n";
@@ -69,6 +75,6 @@ class FrxXLSDoc extends FrxDocument {
       $output .= '</Worksheet>' . "\n";
     }
     $output .= '</Workbook>';
-    return $output; 
+    return $output;
   }
 }

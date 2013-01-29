@@ -24,13 +24,13 @@ class FrxReportGenerator {
    *
    **/
   static public function instance() {
-    global $forena_application_class;
+    global $_forena_application_class;
     if (!self::$instance) {
-      if (!$forena_application_class) {
+      if (!$_forena_application_class) {
         $forena_application_class = 'FrxDrupalApplication';
       }
 
-      self::$instance = new FrxReportGenerator($forena_application_class);
+      self::$instance = new FrxReportGenerator($_forena_application_class);
     }
     return self::$instance;
   }
@@ -45,7 +45,7 @@ class FrxReportGenerator {
    * Clear session data because we want to reload.
    */
   public function clear_session() {
-  	if (isset($_SESSION['forena_access'])) unset($_SESSION['forena_access']);
+    if (isset($_SESSION['forena_access'])) unset($_SESSION['forena_access']);
   }
 
 
@@ -94,20 +94,20 @@ class FrxReportGenerator {
    *
   */
   function get_report($report_name, $data=array()) {
-    $r=null;
+    $r=NULL;
     $this->alter_parameters($report_name, $data);
     if ($report_name) {
       $r_text = $this->app->load_report($report_name);
-	    if ($r_text) {
-	      $r = new FrxReport($r_text, $data);
-	    }
+      if ($r_text) {
+        $r = new FrxReport($r_text, $data);
+      }
     }
     return $r;
   }
 
   function alter_parameters($report_name, &$data) {
-  	if (method_exists($this->app, 'alter_parameters')) {
-    	$this->app->alter_parameters($report_name, $data);
+    if (method_exists($this->app, 'alter_parameters')) {
+      $this->app->alter_parameters($report_name, $data);
     }
 
   }
@@ -165,7 +165,7 @@ class FrxReportGenerator {
   function get_templates($fkey) {
     $templates = $this->supported_templates();
     if (class_exists($fkey)) {
-    	return new $fkey();
+      return new $fkey();
     }
   }
 
@@ -175,12 +175,12 @@ class FrxReportGenerator {
    *
    */
   function supported_templates() {
-  	require_once('templates/FrxTemplate.inc');
-  	require_once('templates/FrxTable.inc');
-  	require_once('templates/FrxFieldTable.inc');
-   	require_once('templates/FrxEmailMerge.inc');
-   	require_once('templates/FrxGraphTemplate.inc');
-   	require_once('templates/FrxRptInclude.inc');
+    require_once('templates/FrxTemplate.inc');
+    require_once('templates/FrxTable.inc');
+    require_once('templates/FrxFieldTable.inc');
+     require_once('templates/FrxEmailMerge.inc');
+     require_once('templates/FrxGraphTemplate.inc');
+     require_once('templates/FrxRptInclude.inc');
     $templates = array(
       'FrxTable' => 'Table',
       'FrxTemplate' => 'Document',
@@ -220,8 +220,8 @@ function report($name_in, $parms = array(), $print=TRUE) {
   $filename = $desc['filename'];
   // Determine the data to get.
   if (!$parms) {
-  	$parms = array_merge($_GET, $_POST);
-  	unset($parms['q']);
+    $parms = array_merge($_GET, $_POST);
+    unset($parms['q']);
   }
   else $parms = (array)$parms;
 
@@ -229,8 +229,8 @@ function report($name_in, $parms = array(), $print=TRUE) {
   if ($name) {
     $r = @$this->get_report($name, $parms);
     if (!$r || !$r->rpt_xml) {
-    	$this->app->error('Could not load report. Check for invalid XML in ' . $name);
-    	return '';
+      $this->app->error('Could not load report. Check for invalid XML in ' . $name);
+      return '';
     }
 
     //check for default parameters
@@ -251,19 +251,19 @@ function report($name_in, $parms = array(), $print=TRUE) {
 }
 
 public function debug($short_message='', $log='') {
-	$this->app->debug($short_message, $log);
+  $this->app->debug($short_message, $log);
 }
 
 public function error($short_message='', $log='') {
-	$this->app->error($short_message, $log);
+  $this->app->error($short_message, $log);
 }
 
 public function configuration($name) {
-	return $this->app->configuration($name);
+  return $this->app->configuration($name);
 }
 
 public function report_path() {
-	return $this->app->configuration('report_repos');
+  return $this->app->configuration('report_repos');
 }
 
   public function link($title, $path, $options=array()) {
@@ -271,7 +271,7 @@ public function report_path() {
   }
 
 public function url($path, $options = array()) {
-	return $this->app->url($path, $options);
+  return $this->app->url($path, $options);
 }
 
 }

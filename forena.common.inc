@@ -26,19 +26,19 @@ function forena_load_cache($r_xhtml) {
   $cache = array();
   $blocks = array();
   $repos = array();
-  $nodes = array(); 
+  $nodes = array();
   if (is_object($r_xhtml)) {
-    $head = @$r_xhtml->head; 
+    $head = @$r_xhtml->head;
     if ($head) $nodes = $head->xpath('frx:menu');
-    $menu = array(); 
+    $menu = array();
     if ($nodes) {
-      $m = $nodes[0]; 
-      $attrs = $m->attributes(); 
-      foreach ($attrs as $key => $value) { 
-        $menu[$key] = (string)$value; 
+      $m = $nodes[0];
+      $attrs = $m->attributes();
+      foreach ($attrs as $key => $value) {
+        $menu[$key] = (string)$value;
       }
-    } 
-    if ($menu) $cache['menu'] = $menu; 
+    }
+    if ($menu) $cache['menu'] = $menu;
     $block_xml = $r_xhtml->xpath('//*[@frx:block]');
     // Extract all the blocks and organize by provider
 
@@ -148,12 +148,12 @@ function forena_parameter_form($formid, &$form_state, $rpt, $collapse=FALSE) {
   $parms = $_GET;
   $r = new FrxReport($rpt);
   if (isset($form_state['values'])) {
-  	$collapse=FALSE;
-  	$parms = array_merge($parms, $form_state['values']['params']);
+    $collapse=FALSE;
+    $parms = array_merge($parms, $form_state['values']['params']);
   }
   unset($parms['q']);
   $form = array();
-  $menu_parms = Frx::Data()->getContext('menu-parms'); 
+  $menu_parms = Frx::Data()->getContext('menu-parms');
 
   if ($r) {
 //      drupal_set_title($r->title);
@@ -163,120 +163,120 @@ function forena_parameter_form($formid, &$form_state, $rpt, $collapse=FALSE) {
       $nodes = $head->xpath('frx:parameters/frx:parm');
       if ($nodes) {
 
-	      $form['params'] = array(
-	        '#tree' => TRUE,
-	        '#title' => t('Parameters'),
-	        '#type' => 'fieldset',
-	        '#collapsible' => TRUE,
-	        '#collapsed' => $collapse,
-	        '#prefix' => '<div id="parameters-wrapper">',
-	        '#suffix' => '</div>',
-	      );
+        $form['params'] = array(
+          '#tree' => TRUE,
+          '#title' => t('Parameters'),
+          '#type' => 'fieldset',
+          '#collapsible' => TRUE,
+          '#collapsed' => $collapse,
+          '#prefix' => '<div id="parameters-wrapper">',
+          '#suffix' => '</div>',
+        );
 
 
-	      foreach ($nodes as $node) {
-	        $label = (string)$node['label'];
-	        $id = (string)$node['id'];
-	        $data_source = (string)$node['data_source'];
-	        $data_field = (string)$node['data_field'];
-	        $class = (string)$node['class']; 
+        foreach ($nodes as $node) {
+          $label = (string)$node['label'];
+          $id = (string)$node['id'];
+          $data_source = (string)$node['data_source'];
+          $data_field = (string)$node['data_field'];
+          $class = (string)$node['class'];
 
-	        $type = (string)$node['type'];
-	        if (isset($parms[$id])) {
-	        	$value = $parms[$id];
-	        	$multi_value=(array)$parms[$id];
-	        }
-	        else {
-	        	$value = (string)$node;
-	        	$multi_value = array();
-		        if (strpos($value, '|')!==FALSE) $multi_value = explode('|', $value);
-	        }
-	        $desc =  (string)$node['desc'];
-	        $label_field = (string)$node['label_field'];
+          $type = (string)$node['type'];
+          if (isset($parms[$id])) {
+            $value = $parms[$id];
+            $multi_value=(array)$parms[$id];
+          }
+          else {
+            $value = (string)$node;
+            $multi_value = array();
+            if (strpos($value, '|')!==FALSE) $multi_value = explode('|', $value);
+          }
+          $desc =  (string)$node['desc'];
+          $label_field = (string)$node['label_field'];
 
-	        (strcmp((string)$node['require'], "1") == 0) ? $required = TRUE : $required = FALSE;
+          (strcmp((string)$node['require'], "1") == 0) ? $required = TRUE : $required = FALSE;
 
-	        //Determine the form element type to be displayed
-	        //If select or radios is chosen then begin a $list array for display values.
-	        $multiselect = FALSE;
-	        $list = array();
-	        $ajax = FALSE;
-	        $add_null = FALSE;
-	        switch ($type) {
-	        	case 'multiselect':
-	        		$type = 'select';
-	        		$multiselect = TRUE;
-	        		$value = $multi_value;
-	        		break;
-	        	case 'checkboxes':
-	        		$value = $multi_value;
-	        		break;
-	        	case 'selectajax':
-	        		 $ajax = TRUE;
-	        		 $type = 'select';
-	        		 break;
-	          case 'select':
-	          	$add_null = TRUE;
-	          	break;
-	          case 'radios':
-	           break;
-	          default:
-	           $type = 'textfield';
-	           $list = '';
-	        }
-	        
-	        if (isset($menu_parms[$id])) { 
-	          $type = 'item';  
-	          $value = $menu_parms[$id]; 
-	        }
+          //Determine the form element type to be displayed
+          //If select or radios is chosen then begin a $list array for display values.
+          $multiselect = FALSE;
+          $list = array();
+          $ajax = FALSE;
+          $add_null = FALSE;
+          switch ($type) {
+            case 'multiselect':
+              $type = 'select';
+              $multiselect = TRUE;
+              $value = $multi_value;
+              break;
+            case 'checkboxes':
+              $value = $multi_value;
+              break;
+            case 'selectajax':
+               $ajax = TRUE;
+               $type = 'select';
+               break;
+            case 'select':
+              $add_null = TRUE;
+              break;
+            case 'radios':
+             break;
+            default:
+             $type = 'textfield';
+             $list = '';
+          }
 
-	        //If a data_source attr was found then create an array of
-	        //returned values filtered against data_field attr.
-	        if ($data_source) {
-	          $list = Frx::RepoMan()->dataBlockParams($data_source, $data_field, $label_field);
-	          if (!$required && $add_null) $list = array('' => '') + $list;
-	        }
+          if (isset($menu_parms[$id])) {
+            $type = 'item';
+            $value = $menu_parms[$id];
+          }
 
-	        $form['params'][$id] = array(
-	          '#type' => $type,
-	          '#title' => ($label) ? t($label) : t($id),
-	          '#default_value' => $value,
-	          '#required' => $required,
-	          '#description' => t($desc),
-	        );
-	        
-	        if ($type == 'item') { 
-	          $form['params'][$id]['#markup'] = $value; 
-	          
-	        }
-	        
-	        // Add class to parmeter form. 
-	        if ($class) { 
-	          $form['params'][$id]['#attributes'] = array(
-	            'class' => @explode(' ', $class), 
-	          ); 
-	        }
+          //If a data_source attr was found then create an array of
+          //returned values filtered against data_field attr.
+          if ($data_source) {
+            $list = Frx::RepoMan()->dataBlockParams($data_source, $data_field, $label_field);
+            if (!$required && $add_null) $list = array('' => '') + $list;
+          }
+
+          $form['params'][$id] = array(
+            '#type' => $type,
+            '#title' => ($label) ? t($label) : t($id),
+            '#default_value' => $value,
+            '#required' => $required,
+            '#description' => t($desc),
+          );
+
+          if ($type == 'item') {
+            $form['params'][$id]['#markup'] = $value;
+
+          }
+
+          // Add class to parmeter form.
+          if ($class) {
+            $form['params'][$id]['#attributes'] = array(
+              'class' => @explode(' ', $class),
+            );
+          }
 
 
-	        //if $list is not empty then push options
-	        //onto the array. options will cause an error for
-	        //textfield elements.
-	        if ($type != 'textfield') {
-	          $form['params'][$id]['#options'] = $list;
-	          $form['params'][$id]['#multiple'] = $multiselect;
-		        if ($ajax) {
-		        	$form['params'][$id]['#ajax'] = array('callback' => 'forena_parameters_callback',
-		            'wrapper' => 'parameters-wrapper');
-		        }
-	        }
+          //if $list is not empty then push options
+          //onto the array. options will cause an error for
+          //textfield elements.
+          if ($type != 'textfield') {
+            $form['params'][$id]['#options'] = $list;
+            $form['params'][$id]['#multiple'] = $multiselect;
+            if ($ajax) {
+              $form['params'][$id]['#ajax'] = array('callback' => 'forena_parameters_callback',
+                'wrapper' => 'parameters-wrapper');
+            }
+          }
 
-	      }
+        }
 
-	      $form['submit'] = array(
-	        '#type' => 'submit',
-	        '#value' => t('Submit'),
-	      );
-			  return $form;
+        $form['submit'] = array(
+          '#type' => 'submit',
+          '#value' => t('Submit'),
+        );
+        return $form;
       }
     }
 
@@ -290,7 +290,7 @@ function forena_parameter_form($formid, &$form_state, $rpt, $collapse=FALSE) {
  * @param unknown_type $form_state
  */
 function forena_parameters_callback($form, &$form_state) {
-	return $form['params'];
+  return $form['params'];
 }
 
 /**
@@ -302,25 +302,25 @@ function forena_parameters_callback($form, &$form_state) {
 function forena_parameter_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   unset($values['submit']);
-  if (isset($values['params'])) foreach($values['params'] as $key=>$value) {
-  	if (is_array($value)) {
-  		foreach ($value as $k => $val) {
-  			if (!$val) {
-	  			unset($values['params'][$key][$k]);
-  			}
-  		}
-  	}
-  	else {
-  	  if (strpos($value, '|')!==FALSE) {
-  	    $values['params'][$key] = explode('|', $value);
-  		}
-  	}
+  if (isset($values['params'])) foreach ($values['params'] as $key => $value) {
+    if (is_array($value)) {
+      foreach ($value as $k => $val) {
+        if (!$val) {
+          unset($values['params'][$key][$k]);
+        }
+      }
+    }
+    else {
+      if (strpos($value, '|')!==FALSE) {
+        $values['params'][$key] = explode('|', $value);
+      }
+    }
   }
   $form_state['redirect']= array($_GET['q'], array('query' => @$values['params']));
 }
 
 function forena_get_user_reports() {
-	GLOBAL $language;
+  GLOBAL $language;
 
   $result = db_query('SELECT * FROM {forena_reports} where hidden=0 and language=:language ORDER BY category,title asc', array(':language' => $language->language));
   $reports = array();
@@ -377,25 +377,25 @@ function forena_my_reports_block() {
  */
 function forena_confirm_email($formid, &$form_state, $docs, $count, $prompt_subject, $prompt_body) {
   if ($docs) {
-  	$values = @$form_state['values'];
-  	if ($prompt_subject) {
-  		$form['subject'] = array(
-  		  '#type' => 'textfield',
-  		  '#title' => t('Subject'),
-  		  '#default_value' => @$values['subject'],
+    $values = @$form_state['values'];
+    if ($prompt_subject) {
+      $form['subject'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Subject'),
+        '#default_value' => @$values['subject'],
 
-  		);
-  	}
+      );
+    }
 
-  	if ($prompt_body) {
-  		$form['body'] = array(
-  		  '#type' => 'text_format',
-  		  '#title' => t('Message'),
-  		  '#default_value' => @$values['body'],
+    if ($prompt_body) {
+      $form['body'] = array(
+        '#type' => 'text_format',
+        '#title' => t('Message'),
+        '#default_value' => @$values['body'],
         '#format' => variable_get('forena_email_input_format', filter_default_format())
 
-  		);
-  	}
+      );
+    }
 
 
     if (!variable_get('forena_email_override', FALSE)) {
@@ -422,21 +422,21 @@ function forena_confirm_email($formid, &$form_state, $docs, $count, $prompt_subj
 }
 
 function forena_confirm_email_submit($form, &$form_state) {
-	global $user;
+  global $user;
   $test_send = @$form_state['values']['send']=='test' ? TRUE : variable_get('forena_email_override', FALSE);
   $max = (integer)$form_state['values']['max'];
   $i = 0;
   if (isset($form_state['values']['body'])) {
-  	$body =  check_markup($form_state['values']['body'], variable_get('forena_input_format', filter_default_format()));
+    $body =  check_markup($form_state['values']['body'], variable_get('forena_input_format', filter_default_format()));
   }
   foreach ($form_state['storage']['docs'] as $doc) {
     $to = $test_send ? $user->mail : $doc['to'];
     $from = $doc['from'];
     if (isset($form_state['values']['body'])) {
-    	$doc['parms']['body'] = $body;
+      $doc['parms']['body'] = $body;
     }
     if (isset($form_state['values']['subject'])) {
-    	$doc['parms']['subject'] = $form_state['values']['subject'];
+      $doc['parms']['subject'] = $form_state['values']['subject'];
     }
     if ($test_send) $i++;
     if ($i <= $max) drupal_mail('forena', 'mailmerge', $to, language_default(), $doc['parms'], $from, TRUE);
@@ -449,14 +449,14 @@ function forena_confirm_email_submit($form, &$form_state) {
  * @param unknown_type $block_name
  */
 function forena_block_xml($block_name='') {
-	$block_name = str_replace('.', '/', $block_name);
-	$parms = $_GET;
-	unset($parms['q']);
-	$xml = Frx::RepoMan()->data($block_name, $parms);
-	if (is_object($xml)){
-		header('Content-Type: text/xml');
-		print $xml->asXML();
-	}
+  $block_name = str_replace('.', '/', $block_name);
+  $parms = $_GET;
+  unset($parms['q']);
+  $xml = Frx::RepoMan()->data($block_name, $parms);
+  if (is_object($xml)) {
+    header('Content-Type: text/xml');
+    print $xml->asXML();
+  }
 }
 
 /**
@@ -503,7 +503,7 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
 
     }
     else {
-        Frx::error(t('Insufficient privileges to write file.')); 
+        Frx::error(t('Insufficient privileges to write file.'));
     }
   }
 
@@ -511,7 +511,7 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
   if ($report) $cache = forena_load_cache($report); else $cache='';
   $rpt_cache='';
   if ($cache) $rpt_cache = serialize($cache);
- 
+
   // Set default interpretations of data
   $data['enabled'] = (isset($data['enabled']) && $data['enabled']) ? 1 : 0;
   if (isset($data['options']['hidden']) && (string)$data['options']['hidden']) {
@@ -526,7 +526,7 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
   // Save language info
   $lang = 'en';
   if (module_exists('locale')) {
-    @list($tlang, $tname) = explode('/', $name,2);
+    @list($tlang, $tname) = explode('/', $name, 2);
     if (array_key_exists($tlang, language_list())) {
       $lang = $tlang;
       $name = $tname;
@@ -538,7 +538,7 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
   if (file_exists($filepath)) {
     $modified = filemtime($filepath);
     $result = db_query("SELECT report_name FROM {forena_reports} WHERE report_name=:report_name AND language=:language", array(':report_name' => $name, 'language' => $lang) );
-    $path = isset($cache['menu']) ? @$cache['menu']['path'] : ''; 
+    $path = isset($cache['menu']) ? @$cache['menu']['path'] : '';
     if ($rpt = $result->fetchObject() ) {
       db_update('forena_reports')
         -> condition('report_name', $name)
@@ -565,7 +565,7 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
           'cache' => $rpt_cache,
           'altered' => $data['altered'],
           'modified' => $modified,
-          'path' => $path, 
+          'path' => $path,
           ))
         ->execute();
     }
@@ -583,8 +583,8 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
   $rpt_cache = NULL;
   // Destroy object to clear memory leaks.
   if ($r) {
-  	$r->__destruct();
-  	unset($r);
+    $r->__destruct();
+    unset($r);
   }
 
   return $save_count;

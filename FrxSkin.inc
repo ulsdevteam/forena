@@ -1,5 +1,6 @@
 <?php
 /**
+ * @file FrxSkin.inc
  * Skinning
  *
  * A skin is a collectio of css and js files that need to get used by
@@ -68,8 +69,8 @@ class FrxSkin {
         // Parse the info file using drupals stock version
         $this->info = drupal_parse_info_format(Frx::File()->contents($name . '.skinfo'));
         if (isset($this->info['stylesheets'])) {
-          foreach($this->info['stylesheets'] as $type => $sheets) {
-            if ($sheets) foreach($sheets as $sheet) {
+          foreach ($this->info['stylesheets'] as $type => $sheets) {
+            if ($sheets) foreach ($sheets as $sheet) {
               $this->addCSS($type, $sheet);
             }
           }
@@ -103,7 +104,7 @@ class FrxSkin {
    */
   public function loadSkinFiles($name) {
     $this->addCSS('all', $name . '.css');
-    foreach(Frx::Menu()->doc_formats  as $ext) {
+    foreach (Frx::Menu()->doc_formats  as $ext) {
       $this->addCSS($ext, $name . '-' . $ext . '.css');
     }
 

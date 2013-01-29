@@ -1,0 +1,19 @@
+<?php
+
+function forena_query_menu() { 
+  $items = array(); 
+  
+  $items['admin/structure/forena_query']  = array(
+    'title' => 'Forena Data ', 
+    'access arguments' => array('build forena data blocks'), 
+    'page callback' => 'drupal_get_form', 
+    'page arguments' => array('forena_query_edit_block_form'), 
+    'file' => 'forena.datablock.inc', 
+  ); 
+  
+  return $items; 
+}
+
+function forena_query_permission() { 
+  return array('build forena data blocks' => array('title' => 'Build Forena Data Blocks')); 
+}

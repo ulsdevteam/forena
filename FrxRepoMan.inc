@@ -1,6 +1,6 @@
 <?php
 /**
- *
+ * @file FrxRepoMan.inc
  * Enter description here ...
  * @author davidmetzler
  *
@@ -54,7 +54,7 @@ class FrxRepoMan {
     // Overide difinitions of the sample and drupal repositories.
     $path = drupal_get_path('module', 'forena');
     $repos['forena_help'] = array(
-      'path' => $path .'/repos/forena_help',
+      'path' => $path . '/repos/forena_help',
       'title' => 'Forena Help Reports',
     );
 
@@ -71,29 +71,29 @@ class FrxRepoMan {
     // Retrieve the repositories defined in the database;
     $results = db_query('SELECT * FROM {forena_repositories}');
     foreach ($results as $r) {
-    	if ($r->config) {
-    		$new_r = unserialize($r->config);
-    	}
-    	else {
-    		$new_r = array();
-    	}
-    	$r_name = $r->repository;
-    	if (is_array(@$repos[$r_name])) {
-    		$new_r = array_merge($new_r, $repos[$r_name]);
-    	}
-    	else {
-    		$new_r['source'] = 'user';
-    	}
-    	$new_r ['title'] = $r->title;
-    	$new_r ['enabled'] = $r->enabled;
+      if ($r->config) {
+        $new_r = unserialize($r->config);
+      }
+      else {
+        $new_r = array();
+      }
+      $r_name = $r->repository;
+      if (is_array(@$repos[$r_name])) {
+        $new_r = array_merge($new_r, $repos[$r_name]);
+      }
+      else {
+        $new_r['source'] = 'user';
+      }
+      $new_r ['title'] = $r->title;
+      $new_r ['enabled'] = $r->enabled;
 
-    	$repos[$r_name] = $new_r;
+      $repos[$r_name] = $new_r;
     }
 
     drupal_alter('forena_repos',  $repos);
 
     if ($_forena_repositories) {
-    	array_merge($repos, $_forena_repositories);
+      array_merge($repos, $_forena_repositories);
     }
 
     $this->repositories = $repos;
@@ -148,7 +148,7 @@ class FrxRepoMan {
       return $o;
     }
     else {
-      Frx::error('Data provider not found for '. $conf['title']);
+      Frx::error('Data provider not found for ' . $conf['title']);
     }
   }
 
@@ -187,13 +187,13 @@ class FrxRepoMan {
 
 
      if (isset($repos['enabled']) && !$repos['enabled']) {
-     	return '';
+       return '';
      }
      //Populate user callback.
      if (isset($repos['user callback'])) {
        $user_fn = $repos['user callback'];
        if (is_callable($user_fn)) {
-       	 $current_user =   $user_fn();
+          $current_user =   $user_fn();
          Frx::Data()->setValue('current_user', $current_user);
        }
      }
@@ -234,7 +234,7 @@ class FrxRepoMan {
    * @return boolean
    */
   function blockAccess($block, $path, $access, $cache=TRUE) {
-  	// PUBLIC always returns true.
+    // PUBLIC always returns true.
     if ($access=='PUBLIC') return TRUE;
     if (!isset($_SESSION['forena_access'])) $_SESSION['forena_access'] = array();
     if ($cache && isset($_SESSION['forena_access'][$block])) {
@@ -275,7 +275,7 @@ class FrxRepoMan {
  *
  */
 function dataBlockParams($data_block, $field, $label, $params=array()) {
-	Frx::Data()->push($params);
+  Frx::Data()->push($params);
   $xml = Frx::RepoMan()->data($data_block);
   Frx::Data()->pop();
 
@@ -288,10 +288,10 @@ function dataBlockParams($data_block, $field, $label, $params=array()) {
     //walk through the $xml.
     $rows = $xml->xpath('*');
     if ($rows) foreach ($rows as $row) {
-    	$value = $row->xpath($path);
-    	$label_field = $row->xpath($label_path);
-    	$label_value =  $label_field ? (string)$label_field[0] : (string)$value[0];
-    	$list[(string)$value[0]] = (string)$label_value;
+      $value = $row->xpath($path);
+      $label_field = $row->xpath($label_path);
+      $label_value =  $label_field ? (string)$label_field[0] : (string)$value[0];
+      $list[(string)$value[0]] = (string)$label_value;
 
     }
   }

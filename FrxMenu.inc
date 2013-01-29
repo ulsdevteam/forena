@@ -1,4 +1,10 @@
 <?php
+/**
+ * @file FrxMenu.inc
+ * Drupal menu builder
+ * @author davidmetzler
+ *
+ */
 class FrxMenu {
   public $doc_defaults;  // Default Dcoument formats to inlcude
   public $doc_formats;  // Supported document formats
@@ -16,15 +22,16 @@ class FrxMenu {
     $docs = variable_get('forena_doc_defaults', array());
 
     // Load settings array into normal array
-    if ($docs) foreach ($docs as $doc=>$enabled) {
+    if ($docs) foreach ($docs as $doc => $enabled) {
       if ($enabled) $this->doc_defaults[] = $doc;
-    } else {
+    }
+    else {
       $this->doc_formats = array('web');
     }
 
     // Load settings array into normal array
     $docs = variable_get('forena_doc_formats', array(''));
-    if ($docs) foreach ($docs as $doc=>$enabled) {
+    if ($docs) foreach ($docs as $doc => $enabled) {
       if ($enabled) $this->doc_formats[] = $doc;
     }
 
@@ -41,10 +48,10 @@ class FrxMenu {
    * @param $url path style name
    */
   public function parseURL($url) {
-  	global $language;
-  	$name = $url;
-  	// Determine if the report has an extention that is one of the docuemnt types
-  	$p = pathinfo($url);
+    global $language;
+    $name = $url;
+    // Determine if the report has an extention that is one of the docuemnt types
+    $p = pathinfo($url);
     if (isset($p['extension']) && array_search($p['extension'], $this->doc_formats)!==FALSE) {
       $name = $p['filename'];
       $format = $p['extension'];
@@ -60,32 +67,32 @@ class FrxMenu {
     $i_name = $base_name;
 
     // Determine lanugage from url or drupal language interface.
-  	$lang = $language->language;
+    $lang = $language->language;
     if (module_exists('locale')) {
 
-    	//First check to see if the report allready has a language in it
-  	  @list($tlang,	$tbase_name) = explode('/', $base_name, 2);
-  	  // FInd out if the starting name of the report is an installed language.
-  	  $lang_list = language_list();
-  	  if (array_key_exists($tlang, $lang_list )) {
-  	  	$base_name = $tbase_name;
-  	  	if ($lang != $tlang) {
-  	      $lang = $tlang;
-  	      $language = $lang_list[$lang];
-  	      $i_name = $t_lang . '/' . $base_name;
-  	  	}
-  	  	if ($tlang == 'en') {
-  	  		$name = $base_name = $tbase_name;
-  	  	}
-  	  }
-  	  else {
-  	    if ($lang != 'en') {
-    	    $name = $lang . '/' . $name;
-  	    }
-  	  }
+      //First check to see if the report allready has a language in it
+      @list($tlang,  $tbase_name) = explode('/', $base_name, 2);
+      // FInd out if the starting name of the report is an installed language.
+      $lang_list = language_list();
+      if (array_key_exists($tlang, $lang_list )) {
+        $base_name = $tbase_name;
+        if ($lang != $tlang) {
+          $lang = $tlang;
+          $language = $lang_list[$lang];
+          $i_name = $t_lang . '/' . $base_name;
+        }
+        if ($tlang == 'en') {
+          $name = $base_name = $tbase_name;
+        }
+      }
+      else {
+        if ($lang != 'en') {
+          $name = $lang . '/' . $name;
+        }
+      }
     }
 
-    $name = trim(str_replace('.', '/', $base_name),'/');
+    $name = trim(str_replace('.', '/', $base_name), '/');
     $filename = $name . '.frx';
 
     $desc['name'] = $this->name = $name;
@@ -117,7 +124,7 @@ class FrxMenu {
    * @param $path string path with Frx Tokens in them
    */
   public function tokens($path) {
-	  return $this->teng->tokens($path);
+    return $this->teng->tokens($path);
   }
 
 
@@ -158,27 +165,27 @@ class FrxMenu {
         }
 
         //Replace the tokens with drupal menu wildcards
-      	$tokens = $this->tokens($path);
-      	$new_path = $path;
-      	foreach($tokens as $i=>$token) {
-      	  $new_path = str_replace(':' . $token, '%', $new_path);
-      	  $args[] = $i;
-      	}
+        $tokens = $this->tokens($path);
+        $new_path = $path;
+        foreach ($tokens as $i => $token) {
+          $new_path = str_replace(':' . $token, '%', $new_path);
+          $args[] = $i;
+        }
         // Now generate the callback arguments
-      	$parts = explode( '/', $new_path);
-      	$page_args = array_keys($parts, '%');
+        $parts = explode( '/', $new_path);
+        $page_args = array_keys($parts, '%');
         $page_args = array_merge(array($path, $row->report_name), $page_args);
 
         // Set the access callback
         $access_callback = isset($cache['access']) ? 'forena_check_all_access' : TRUE;
 
-      	$items[$new_path] = array(
-      	  'type' => $menu_type,
-      	  'title' => $title,
-      	  'access callback' => $access_callback,
-      	  'page callback' => 'forena_report_menu_callback',
-      	  'page arguments' => $page_args,
-      	);
+        $items[$new_path] = array(
+          'type' => $menu_type,
+          'title' => $title,
+          'access callback' => $access_callback,
+          'page callback' => 'forena_report_menu_callback',
+          'page arguments' => $page_args,
+        );
         if ($access_callback === 'forena_check_all_access') $items[$new_path]['access arguments'][] = $cache['access'];
       }
     }

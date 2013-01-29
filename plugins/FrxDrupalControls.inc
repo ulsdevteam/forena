@@ -20,32 +20,32 @@ class FrxDrupalControls {
   public function format($value, $key, $data) {
     $db = Database::getConnection('default');
     if ($db) {
-	    if ($value=='')
-	      $value = 'NULL';
-	    else {
-	      if (is_array($value)) {
-	      	if ($value == array()) {
-	      		$value = 'NULL';
-	      	}
-	      	else {
-	      		// Build a array of values string
-		      	$i=0;
-		      	$val = '';
-		      	foreach ($value as $v) {
-		      		$i++;
-		      	  if ($i>1) {
-		    			  $val .= ',';
-		     		  }
-		    		$val .=   $db->quote($v);
-		    	  }
-		    	  $value = $val;
-	        }
-	      }
-	      else {
-	        $value = trim($value);
-	        $value =    $db->quote($value) ;
-	      }
-	    }
+      if ($value=='')
+        $value = 'NULL';
+      else {
+        if (is_array($value)) {
+          if ($value == array()) {
+            $value = 'NULL';
+          }
+          else {
+            // Build a array of values string
+            $i=0;
+            $val = '';
+            foreach ($value as $v) {
+              $i++;
+              if ($i>1) {
+                $val .= ',';
+               }
+            $val .=   $db->quote($v);
+            }
+            $value = $val;
+          }
+        }
+        else {
+          $value = trim($value);
+          $value =    $db->quote($value) ;
+        }
+      }
     }
     return $value;
   }
@@ -64,7 +64,7 @@ class FrxDrupalControls {
 
 
   public function drupal_node_content($nid, $format) {
-  	$nid = @(int)$nid;
+    $nid = @(int)$nid;
     $node = @node_load($nid, NULL, TRUE);
     if (!$node) {
       return '';
@@ -77,7 +77,7 @@ class FrxDrupalControls {
     }
     //If true, render the teaser
     //else render the body
-    $output = theme('node',node_view($node, $format));
+    $output = theme('node', node_view($node, $format));
     return $output;
 
   }

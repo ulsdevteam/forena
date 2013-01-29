@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file
  * Oracle specific driver that takes advantage of oracles native XML support
@@ -23,7 +22,7 @@ class FrxPostgres extends FrxDataSource {
     parent::__construct($conf, $repos_path);
     $this->use_postgres_xml = FALSE;
     $uri = $conf['uri'];
-    if (!empty($conf['password'])) $uri = trim($uri) . ' password='. $conf['password'];
+    if (!empty($conf['password'])) $uri = trim($uri) . ' password=' . $conf['password'];
     $this->debug = @$conf['debug'];
     if (isset($conf['postgres_xml'])) $this->use_postgres_xml = $conf['postgres_xml'];
     if ($uri) {
@@ -57,7 +56,7 @@ class FrxPostgres extends FrxDataSource {
    */
   public function sqlData($sql) {
     // Load the block from the file
-    $db = $this->db; 
+    $db = $this->db;
     $xml ='';
     if ($sql && $db) {
       $sql = $this->te->replace($sql);
@@ -69,7 +68,7 @@ class FrxPostgres extends FrxDataSource {
         $xml = $this->php_xml($sql);
       }
       if ($this->debug) {
-      	$d = '';
+        $d = '';
         if ($xml) $d = htmlspecialchars($xml->asXML());
         $this->debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "\n</pre>");
       }
@@ -94,7 +93,7 @@ class FrxPostgres extends FrxDataSource {
         $row = pg_fetch_row($rs);
         $xml_text = $row[0];
       }
-      $xml = null;
+      $xml = NULL;
       if ($xml_text) {
         $xml = new SimpleXMLElement($xml_text);
         if ($xml->getName() == 'error') {
@@ -136,26 +135,26 @@ class FrxPostgres extends FrxDataSource {
       $value = 'NULL';
     else {
       if (is_array($value)) {
-      	if ($value == array()) {
-      		$value = 'NULL';
-      	}
-      	else {
-      		// Build a array of values string
-	      	$i=0;
-	      	$val = '';
-	      	foreach ($value as $v) {
-	      		$i++;
-	      	  if ($i>1) {
-	    			  $val .= ',';
-	     		  }
-	    		$val .=  "'".   pg_escape_string($v) ."'";
-	    	  }
-	    	  $value = $val;
+        if ($value == array()) {
+          $value = 'NULL';
+        }
+        else {
+          // Build a array of values string
+          $i=0;
+          $val = '';
+          foreach ($value as $v) {
+            $i++;
+            if ($i>1) {
+              $val .= ',';
+             }
+          $val .=  "'" . pg_escape_string($v) . "'";
+          }
+          $value = $val;
         }
       }
       else {
         $value = trim($value);
-        $value =  "'".   pg_escape_string($value) ."'";
+        $value =  "'" . pg_escape_string($value) . "'";
       }
     }
     return $value;

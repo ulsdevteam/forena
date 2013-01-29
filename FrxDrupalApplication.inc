@@ -1,6 +1,6 @@
 <?php
-global $forena_application_class;
-$forena_application_class = 'FrxDrupalApplication';
+global $_forena_application_class;
+$_forena_application_class = 'FrxDrupalApplication';
 class FrxDrupalApplication {
   /**
    * @file HostApp.inc
@@ -9,36 +9,36 @@ class FrxDrupalApplication {
    * The base class here is drupal, so those
    */
 
-	private $default_config = array();
-	public function __construct() {
-	  $this->default_config['report_repos'] = drupal_get_path('forena', 'module') . '/repos/reports';
-	  $this->default_config['default_form'] = 'letter';
-	  $this->default_config['doc_defaults'] = array();
-	  $this->default_config['library_path'] = 'sites/all/libraries';
-	  $this->default_config['doc_formats'] = array();
-	}
+  private $default_config = array();
+  public function __construct() {
+    $this->default_config['report_repos'] = drupal_get_path('forena', 'module') . '/repos/reports';
+    $this->default_config['default_form'] = 'letter';
+    $this->default_config['doc_defaults'] = array();
+    $this->default_config['library_path'] = 'sites/all/libraries';
+    $this->default_config['doc_formats'] = array();
+  }
 
-	/**
-	 * Configuration retrieval method
-	 * Returns configuration varialbes used by forena.
-	 * @param unknown_type $var_name
-	 */
-	public function configuration($var_name) {
-	  $v = variable_get('forena_' . $var_name, @$this->default_config[$var_name]);
-	  return $v;
-	}
+  /**
+   * Configuration retrieval method
+   * Returns configuration varialbes used by forena.
+   * @param unknown_type $var_name
+   */
+  public function configuration($var_name) {
+    $v = variable_get('forena_' . $var_name, @$this->default_config[$var_name]);
+    return $v;
+  }
 
 
-	/**
-	 * Convert a relative link to appropriately rendered html
-	 * return html A properly formatted anchor tag
-	*/
-	public function link($title, $path, $options=array()) {
+  /**
+   * Convert a relative link to appropriately rendered html
+   * return html A properly formatted anchor tag
+  */
+  public function link($title, $path, $options=array()) {
     return l($title, $path, $options);
   }
 
   public function url($path, $options = array()) {
-  	return url($path, $options);
+    return url($path, $options);
   }
 
   /**
@@ -48,8 +48,8 @@ class FrxDrupalApplication {
    * @param unknown_type $doc_type
    */
   public function theme($r, $title, $doc_type) {
-  	$output = $r->html;
-  	$output = check_markup($output, variable_get('forena_input_format', filter_default_format()));
+    $output = $r->html;
+    $output = check_markup($output, variable_get('forena_input_format', filter_default_format()));
 
     if (!$doc_type || $doc_type='embed') {
       // Set the title and return the output
@@ -114,16 +114,16 @@ class FrxDrupalApplication {
  *
 */
 function load_report($report_name) {
-  $r=null;
+  $r=NULL;
   global $language;
   $r_text = '';
   if ($report_name) {
-  	$i_report_name = $report_name;
+    $i_report_name = $report_name;
     $report_path =  Frx::File()->path('');
     $int_filename = $language->language . '/' . $report_name . '.frx';
     $filename = $report_name . '.frx';
     if (Frx::File()->exists($int_filename) && @$_GET['language']!= 'en') {
-    	$i_report_name = $language->language . '/' . $report_name;
+      $i_report_name = $language->language . '/' . $report_name;
       $r_text = file_get_contents($int_filename);
       $modified = filemtime($int_filename);
       $filename = $int_filename;
@@ -136,18 +136,18 @@ function load_report($report_name) {
     array(':report_name' => $report_name, ':language' => $language->language));
     $save = FALSE;
     if ($rpt = $result->fetchObject()) {
-		    // If the file modification time has changed then save.
+        // If the file modification time has changed then save.
         if ($modified && $rpt->modified != $modified) {
           $save = TRUE;
         }
         // If the report has been altered by a user then use that.
-	      if ($rpt->altered == -1) {
-	        if ($rpt->src) {
-	          $r_text = $rpt->src;
-	        }
-	      }
+        if ($rpt->altered == -1) {
+          if ($rpt->src) {
+            $r_text = $rpt->src;
+          }
+        }
     }
-    else if ($r_text) {
+    elseif ($r_text) {
         $save = TRUE;
     }
 
@@ -254,7 +254,7 @@ public function repositories() {
   $path = $this->forena_path();
   // Overide difinitions of the sample and drupal repositories.
   $repos['forena_help'] = array(
-    'path' => $path .'/repos/forena_help',
+    'path' => $path . '/repos/forena_help',
     'title' => 'Forena Help Reports',
   );
   $repos['drupal'] = array(
@@ -268,23 +268,23 @@ public function repositories() {
   // Retrieve the repositories defined in the database;
   $results = db_query('SELECT * FROM {forena_repositories}');
   foreach ($results as $r) {
-  	if ($r->config) {
-  		$new_r = unserialize($r->config);
-  	}
-  	else {
-  		$new_r = array();
-  	}
-  	$r_name = $r->repository;
-  	if (is_array(@$repos[$r_name])) {
-  		$new_r = array_merge($new_r, $repos[$r_name]);
-  	}
-  	else {
-  		$new_r['source'] = 'user';
-  	}
-  	$new_r ['title'] = $r->title;
-  	$new_r ['enabled'] = $r->enabled;
+    if ($r->config) {
+      $new_r = unserialize($r->config);
+    }
+    else {
+      $new_r = array();
+    }
+    $r_name = $r->repository;
+    if (is_array(@$repos[$r_name])) {
+      $new_r = array_merge($new_r, $repos[$r_name]);
+    }
+    else {
+      $new_r['source'] = 'user';
+    }
+    $new_r ['title'] = $r->title;
+    $new_r ['enabled'] = $r->enabled;
 
-  	$repos[$r_name] = $new_r;
+    $repos[$r_name] = $new_r;
   }
 
 

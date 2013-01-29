@@ -1,50 +1,51 @@
 <?php
+/**
+ * @file FrxData.inc
+ * The FrxData class holds all of the data contexts during the report rendering process.
+ * The general idea is that during the report render, data objects are pushed on the stack with the id's of the block or foreach objects that invoke them.
+ * Rendering controls may then get current data contexts, and push data onto the stack or pop data onto the stack. They may also use this method to get the current data
+ * context from the stack.
+ *
+ * The static instance function of this object acts as a factory method that allows other code in forena to always be able to operate on the current context of the class.
+ * @var unknown_type
+ */
 class FrxData {
 
-	/**
-	 * The FrxData class holds all of the data contexts during the report rendering process.
-	 * The general idea is that during the report render, data objects are pushed on the stack with the id's of the block or foreach objects that invoke them.
-	 * Rendering controls may then get current data contexts, and push data onto the stack or pop data onto the stack. They may also use this method to get the current data
-	 * context from the stack.
-	 *
-	 * The static instance function of this object acts as a factory method that allows other code in forena to always be able to operate on the current context of the class.
-	 * @var unknown_type
-	 */
-	public $id;
-	private $cur_context;  // The data of the xml;
-	private $data_sources = array();
+  public $id;
+  private $cur_context;  // The data of the xml;
+  private $data_sources = array();
   private $data_stack = array();
   private $id_stack = array();
-  
-  // For backward compatibility. 
-  public static function instance() { 
-    return Frx::Data(); 
+
+  // For backward compatibility.
+  public static function instance() {
+    return Frx::Data();
   }
 
-	/**
-	 * Return the current data context
-	 *
-	 */
-	public function currentContext() {
-		return $this->cur_context;
-	}
+  /**
+   * Return the current data context
+   *
+   */
+  public function currentContext() {
+    return $this->cur_context;
+  }
 
-	/**
-	 * Allows override of a value for the current context.
-	 * @param String $key
-	 * @param String $value
-	 */
+  /**
+   * Allows override of a value for the current context.
+   * @param String $key
+   * @param String $value
+   */
   public function setValue($key, $value) {
      if (is_array($this->cur_context)) {
        $this->cur_context[$key] = $value;
      }
      elseif (is_object($this->cur_context)) {
-     	 if (strpos($key, '@')===0) {
-     	   $this->cur_context[$key] = $value;
-     	 }
-     	 else {
+        if (strpos($key, '@')===0) {
+          $this->cur_context[$key] = $value;
+        }
+        else {
          $this->cur_context->$key = $value;
-     	 }
+        }
      }
   }
 
@@ -58,14 +59,14 @@ class FrxData {
    * @return unknown_type
    */
   public function push($data, $id='') {
-  	$this->data_stack[] = $this->cur_context;
-  	$this->id_stack[] = $this->id;
+    $this->data_stack[] = $this->cur_context;
+    $this->id_stack[] = $this->id;
     $this->id = $id;
     $this->cur_context = $data;
 
     if ($id) {
 /*    if (@is_array($this->data_sources[$id]) && is_array($data)) {
-        $data = array_merge($this->data_sources[$id], $data); 
+        $data = array_merge($this->data_sources[$id], $data);
       }
       */
       $this->data_sources[$id] = $data;
@@ -73,7 +74,7 @@ class FrxData {
   }
 
   public function setContext($id, $data) {
-  	$this->data_sources[$id] = $data;
+    $this->data_sources[$id] = $data;
   }
 
   /**
@@ -83,7 +84,7 @@ class FrxData {
    * @return mixed
    */
   public function pop() {
-  	$this->id = array_pop($this->id_stack);
+    $this->id = array_pop($this->id_stack);
     $this->cur_context = array_pop($this->data_stack);
   }
 
@@ -94,10 +95,10 @@ class FrxData {
    * @return boolean
    */
   public function contextExists($id) {
-  	if (array_key_exists($id, $this->data_sources)){
-  		return TRUE;
-  	}
-  	else return FALSE;
+    if (array_key_exists($id, $this->data_sources)) {
+      return TRUE;
+    }
+    else return FALSE;
   }
 
   /**
@@ -106,7 +107,7 @@ class FrxData {
    * @param unknown_type $id
    */
   public function getContext($id) {
-  	return @$this->data_sources[$id];
+    return @$this->data_sources[$id];
   }
 
 }

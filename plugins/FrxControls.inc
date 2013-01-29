@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file contains various methods for extending report
  * formating, layout, transformation and design.
@@ -24,8 +23,8 @@ class FrxControls {
                      );
     return $formats;
   }
-  
-  
+
+
   private function is_number($value) {
            $non_numeric_chars = trim($value, ' +-.,0123456789');
           // Determine if it contains +- in the interior
@@ -38,26 +37,26 @@ class FrxControls {
 
   // Custom formats based on translation string
   public function drupal_translation($value, $format_str, $teng) {
-  	 $field = '';
+     $field = '';
      if ($format_str) $field = '{' . $format_str . '}';
-     $field = $teng->replace($field, null, TRUE);
+     $field = $teng->replace($field, NULL, TRUE);
      $vars = array();
      if ($field) {
-     	$vars = (array) @unserialize($field);
+       $vars = (array) @unserialize($field);
      }
      return t($value, $vars);
   }
 
     // Custom formats based on translation string
   public function drupal_text_format($value, $format_str, $teng) {
-  	 $field = '';
+     $field = '';
      if ($format_str) $field = $format_str;
-     $field = $teng->replace($field, null, TRUE);
+     $field = $teng->replace($field, NULL, TRUE);
      if ($field) {
-     	$format = $field;
+       $format = $field;
      }
      else {
-     	$format = filter_default_format();
+       $format = filter_default_format();
      }
      return check_markup(html_entity_decode($value, ENT_QUOTES, 'UTF-8'), $format);
   }
@@ -84,7 +83,7 @@ class FrxControls {
          $format = $format_str;
      }
      if ($value) {
-     	  $value = function_exists('format_date') ? format_date($value, $type, $format) : date($format, $value);
+         $value = function_exists('format_date') ? format_date($value, $type, $format) : date($format, $value);
      }
      return $value;
   }
@@ -95,10 +94,10 @@ class FrxControls {
   }
 
   public function xhtml($value, $format_str, $teng) {
-  	if ($value) {
-  		$value = html_entity_decode($value, ENT_QUOTES, 'UTF-8');
-  	}
-  	return $value;
+    if ($value) {
+      $value = html_entity_decode($value, ENT_QUOTES, 'UTF-8');
+    }
+    return $value;
   }
 
   public function sprintf($value, $format_str, $teng) {

@@ -118,13 +118,13 @@ class FrxSyntaxEngine {
    * @return unknown_type
    */
   public function replace($text, $raw=FALSE) {
-  	if (is_array($text)) {
-  	  foreach ($text as $key => $value) {
-  		  $text[$key] = $this->replace($value, $raw);
-  	  }
+    if (is_array($text)) {
+      foreach ($text as $key => $value) {
+        $text[$key] = $this->replace($value, $raw);
+      }
       return $text;
-  	}
-  	//Otherswise assume text
+    }
+    //Otherswise assume text
     $match=array();
     $o_text = $text;
     // Put the data on the stack.
@@ -175,38 +175,38 @@ class FrxSyntaxEngine {
    * method, do the same for it.
    */
   public function object_to_array($data) {
-  	if (is_object($data)) {
-  		$ar = array();
-  		foreach ($data as $key => $value) {
-  			$ar[$key] = (string)$value;
-  		}
-  		if (method_exists($data, 'attributes')) {
-  			foreach ($data->attributes() as $key => $value) {
-  				$ar[$key] = (string)$value;
-  			}
-  		}
-  		return $ar;
-  	}
-  	else {
-  		return $data;
-  	}
+    if (is_object($data)) {
+      $ar = array();
+      foreach ($data as $key => $value) {
+        $ar[$key] = (string)$value;
+      }
+      if (method_exists($data, 'attributes')) {
+        foreach ($data->attributes() as $key => $value) {
+          $ar[$key] = (string)$value;
+        }
+      }
+      return $ar;
+    }
+    else {
+      return $data;
+    }
   }
-  
+
   /**
    * Test for TRUE/FALSE for conditions that are able to be represented using bind parameters
-   * Note that | are used to separate the different conditions and these are to be OR'd together. 
+   * Note that | are used to separate the different conditions and these are to be OR'd together.
    * @param  $condition String
    */
-  public function test($condition) { 
-    $eval = TRUE; 
-    $tests = explode('&', $condition); 
+  public function test($condition) {
+    $eval = TRUE;
+    $tests = explode('&', $condition);
     if ($tests) foreach ($tests as $test) {
-      $t = trim($test);  
-      $res = $this->replace($t, TRUE); 
-      $res = (trim($res,' !')) ? TRUE : FALSE;       
-      if (strpos($t, '!')===0) $res = !$res; 
-      $eval = $eval && $res;  
+      $t = trim($test);
+      $res = $this->replace($t, TRUE);
+      $res = (trim($res, ' !')) ? TRUE : FALSE;
+      if (strpos($t, '!')===0) $res = !$res;
+      $eval = $eval && $res;
     }
-    return $eval; 
+    return $eval;
   }
 }

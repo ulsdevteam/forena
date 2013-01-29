@@ -67,8 +67,8 @@ class FrxReport {
               $this->category = (string)$node;
               break;
             case 'descriptor':
-            	$this->descriptor = (string)$node;
-            	break;
+              $this->descriptor = (string)$node;
+              break;
             case 'options':
               foreach ($node->attributes() as $key => $value) {
                 $this->options[$key] = (string)$value;
@@ -101,9 +101,9 @@ class FrxReport {
   }
 
   function __destruct() {
-  	foreach ($this as $key=>$value) {
-  		unset($this->$key);
-  	}
+    foreach ($this as $key => $value) {
+      unset($this->$key);
+    }
   }
 
 
@@ -115,21 +115,21 @@ class FrxReport {
   private function get_data($block, $clause='', $id='', $data_uri='') {
     //@TODO: Merge xml data parameters into the report paramters
     if ($data_uri) {
-    	parse_str($data_uri, $data);
-    	if (is_array($data)) foreach ($data as $key=>$value) {
-    		$data[$key] = $this->teng->replace($value);
+      parse_str($data_uri, $data);
+      if (is_array($data)) foreach ($data as $key => $value) {
+        $data[$key] = $this->teng->replace($value);
 
-    	}
-    	$id .= '-parm';
-    	Frx::Data()->push($data, $id);
+      }
+      $id .= '-parm';
+      Frx::Data()->push($data, $id);
     }
 
-    $xml = Frx::RepoMan()->data($block, null);
+    $xml = Frx::RepoMan()->data($block, NULL);
 
     if ($data_uri) Frx::Data()->pop();
 
     if ($xml) {
-    	$this->blocks_loaded = TRUE;
+      $this->blocks_loaded = TRUE;
     }
     return $xml;
   }
@@ -161,7 +161,7 @@ class FrxReport {
     $node = simplexml_import_dom($dom_node);
     // Special catch to make sure we don't process bad nodes
     if (!is_object($node)) {
-	    return '';
+      return '';
     }
 
 
@@ -181,7 +181,7 @@ class FrxReport {
           Frx::Data()->push($xml, $id);
         }
         else {
-        	return '';
+          return '';
         }
       }
 
@@ -208,15 +208,15 @@ class FrxReport {
         $data = Frx::Data()->currentContext();
 
         if (is_object($data)) {
-        	if (method_exists($data, 'xpath')) {
-	          $nodes = $data->xpath($path);
-        	}
-        	else {
-        		$nodes = $data;
-        	}
+          if (method_exists($data, 'xpath')) {
+            $nodes = $data->xpath($path);
+          }
+          else {
+            $nodes = $data;
+          }
         }
         else {
-        	$nodes = (array)$data;
+          $nodes = (array)$data;
         }
         $i=0;
 
@@ -239,31 +239,31 @@ class FrxReport {
             $o .= $this->render_section($child);
           }
           $o .= '</' . $tag . '>';
-	        Frx::Data()->pop();
+          Frx::Data()->pop();
         }
       }
       elseif ($continue) {
-      	if ($renderer) {
-      		// Implement custom renderer.
+        if ($renderer) {
+          // Implement custom renderer.
           $co = Frx::Controls($renderer);
-      	  if ($co) {
-      	  	$co->initReportNode($dom_node, $this, $this->format);
-      	  	$o = $co->render();
+          if ($co) {
+            $co->initReportNode($dom_node, $this, $this->format);
+            $o = $co->render();
 
-      	  }
-      	}
-      	else {
-	        $o .= $this->teng->replace('<' . $tag . $attr_text . '>');
+          }
+        }
+        else {
+          $o .= $this->teng->replace('<' . $tag . $attr_text . '>');
 
-	        // None found, so render children
-	        foreach ($dom_node->childNodes as $child) {
-	          $o .= $this->render_section($child);
-	        }
-	        $o .= '</' . $tag . '>';
-      	}
+          // None found, so render children
+          foreach ($dom_node->childNodes as $child) {
+            $o .= $this->render_section($child);
+          }
+          $o .= '</' . $tag . '>';
+        }
       }
       if ($is_data_block && $continue) {
-      	Frx::Data()->pop();
+        Frx::Data()->pop();
       }
     }
     else {
@@ -340,17 +340,17 @@ class FrxReport {
     }
 
     if ($link) {
-    	$attributes = array();
-    	$target = $this->teng->replace($target, TRUE);
-    	// use the target attribute to open links in new tabs or as popups.
-      if (@strpos(strtolower($target),'popup')===0) {
+      $attributes = array();
+      $target = $this->teng->replace($target, TRUE);
+      // use the target attribute to open links in new tabs or as popups.
+      if (@strpos(strtolower($target), 'popup')===0) {
         $opts = 'status=1';
-      	$options = "status=1";
+        $options = "status=1";
         $attributes = array('onclick' =>
-          'window.open(this.href,\''. $target . '\', "' . $options . '"); return false;');
+          'window.open(this.href, \'' . $target . '\', "' . $options . '"); return false;');
       }
       else {
-      	if ($target) $attributes['target'] = $target;
+        if ($target) $attributes['target'] = $target;
       }
       if ($rel) $attributes['rel'] = $this->teng->replace($rel, TRUE);
       if ($class) $attributes['class'] = $this->teng->replace($class, TRUE);
@@ -536,7 +536,7 @@ class FrxReport {
       if ((@$parms[$key]=='' || @$parms[$key]==array()) && @$parm['value']) {
        $value = (string)$parm['value'];
        if (strpos($value, '|')!==FALSE) {
-       	$value = explode('|', $value);
+         $value = explode('|', $value);
        }
        $parms[$key] = $value;
        $reload_params = TRUE;

@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file
  * General database engine used to do sql queries.
@@ -32,7 +31,7 @@ class FrxPDO extends FrxDataSource {
 
       $options = array();
       if (@$conf['mysql_charset']) {
-      	$options = array(
+        $options = array(
             PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . $conf['mysql_charset'],
         );
       }
@@ -50,7 +49,7 @@ class FrxPDO extends FrxDataSource {
           $db = new PDO($uri, $conf['user'], $conf['password'], $options);
         }
         else {
-          $db = new PDO($uri,NULL,NULL,$options);
+          $db = new PDO($uri, NULL, NULL, $options);
         }
         $this->db = $db;
         if (!is_object($db)) {
@@ -123,24 +122,24 @@ class FrxPDO extends FrxDataSource {
     $db = $this->db;
     if ($db) {
       if ($value=='' || $value == array()) {
-	      $value = 'NULL';
+        $value = 'NULL';
       }
       elseif (is_array($value)) {
-      	if ($value == array()) {
-      		$value = 'NULL';
-      	}
-      	else {
-      		// Build a array of values string
-	      	$i=0;
-	      	$val ='';
-	      	foreach ($value as $v) {
-	      		$i++;
-	      	  if ($i!=1) {
-	    			  $val .= ',';
-	     		  }
-	    		$val .= $db->quote($v);
-	    	  }
-	    	$value = $val;
+        if ($value == array()) {
+          $value = 'NULL';
+        }
+        else {
+          // Build a array of values string
+          $i=0;
+          $val ='';
+          foreach ($value as $v) {
+            $i++;
+            if ($i!=1) {
+              $val .= ',';
+             }
+          $val .= $db->quote($v);
+          }
+        $value = $val;
         }
       }
       else  $value =  $db -> quote($value);

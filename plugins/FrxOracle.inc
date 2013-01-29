@@ -64,7 +64,7 @@ class FrxOracle extends FrxDataSource {
     if ($sql && $db) {
       // See if this block matches a declare begin end; syntax.
       if (stripos($sql, 'end;')>= stripos($sql, 'begin') && stripos($sql, 'begin')!==FALSE) {
-      	$params = $this->te->object_to_array(Frx::Data()->currentContext());
+        $params = $this->te->object_to_array(Frx::Data()->currentContext());
         $this->call($sql, $params, array('return' => 'clob'));
         $xml = $params['return'];
         if (trim($xml)) $xml = new SimpleXMLElement($xml);
@@ -277,29 +277,29 @@ class FrxOracle extends FrxDataSource {
       $value = 'NULL';
     else {
       if (is_array($value)) {
-      	if ($value == array()) {
-      		$value = 'NULL';
-      	}
-      	else {
-      		// Build a array of values string
-	      	$i=0;
-	      	$val = '';
-	      	foreach ($value as $v) {
-	      		$i++;
-	      	  if ($i==1) {
-	      			$val .= '(';
-	      		}
-	     		  else {
-	    			  $val .= ',';
-	     		  }
-	    		$val .=  "'".  str_replace("'", "''", $v) ."'";
-	    	  }
-	    	$value = $val . ')';
+        if ($value == array()) {
+          $value = 'NULL';
+        }
+        else {
+          // Build a array of values string
+          $i=0;
+          $val = '';
+          foreach ($value as $v) {
+            $i++;
+            if ($i==1) {
+              $val .= '(';
+            }
+             else {
+              $val .= ',';
+             }
+          $val .=  "'" . str_replace("'", "''", $v) . "'";
+          }
+        $value = $val . ')';
         }
       }
       else {
         $value = trim($value);
-        $value =  "'".  str_replace("'", "''", $value) ."'";
+        $value =  "'" . str_replace("'", "''", $value) . "'";
       }
     }
     return $value;

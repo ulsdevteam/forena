@@ -33,14 +33,14 @@ class FrxMSSQL extends FrxDataSource {
         return;
       }
       try {
-      	ini_set('mssql.textlimit', 2147483647);
+        ini_set('mssql.textlimit', 2147483647);
         ini_set('mssql.textsize', 2147483647);
         $db = mssql_connect($uri, $conf['user'], $conf['password']);
         $this->db = $db;
 
         if ($db) {
-        	mssql_select_db($conf['database'], $db);
-        	mssql_query("SET QUOTED_IDENTIFIER ON");
+          mssql_select_db($conf['database'], $db);
+          mssql_query("SET QUOTED_IDENTIFIER ON");
         }
       } catch (Exception $e) {
         FrxReportGenerator::instance()->error('Unable to connect to database ' . $conf['title'], $e->getMessage());

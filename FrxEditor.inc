@@ -1,5 +1,6 @@
 <?php
 /**
+ * @file FrxEditor.inc
  * Wrapper XML class for working with DOM object.
  * It provides helper
  * Enter description here ...
@@ -29,8 +30,8 @@ class FrxEditor {
 
     // Load a new one or build the empty XML Document
     if ($xml_string) {
-    	// Eliminate the xml headers that don't have encoding info
-    	$xml_string = str_ireplace('<?xml version="1.0"?>','',$xml_string);
+      // Eliminate the xml headers that don't have encoding info
+      $xml_string = str_ireplace('<?xml version="1.0"?>', '', $xml_string);
       // If the <?xml code is missing assume UTF-8
       if (strpos($xml_string, '<?xml')===FALSE) {
         $xml_string = $this->doc_prefix . "\n" . $xml_string;
@@ -104,7 +105,7 @@ class FrxEditor {
       return TRUE;
     }
     else {
-    	return FALSE;
+      return FALSE;
     }
   }
 
@@ -115,16 +116,16 @@ class FrxEditor {
    * @param html $body
    */
   public function setBody($body) {
-  	$dom = $this->dom;
-  	$nodes = $dom->getElementsByTagName('body');
-  	$cur_body = $nodes->item(0);
-  	// Make sure that we have a body tag.
+    $dom = $this->dom;
+    $nodes = $dom->getElementsByTagName('body');
+    $cur_body = $nodes->item(0);
+    // Make sure that we have a body tag.
     if (strpos($body, '<body')===FALSE) {
-    	$body = '<body>' . $body . '</body>';
+      $body = '<body>' . $body . '</body>';
     }
     // Attempt to parse the xml
     $body_doc = new DOMDocument('1.0', 'UTF-8');
-    $body_xml = $this->doc_prefix . '<html xmlns:frx="'. $this->xmlns.'">' . $body . '</html>';
+    $body_xml = $this->doc_prefix . '<html xmlns:frx="' . $this->xmlns . '">' . $body . '</html>';
     try {
       $body_doc->loadXML($body_xml);
       $new_body = $dom->importNode($body_doc->getElementsByTagName('body')->item(0), TRUE);
@@ -133,8 +134,8 @@ class FrxEditor {
     }
     catch (Exception $e) {
 
-    	forena_error('Malformed report body', '<pre>' . $e->getMessage() .
-    	  $e->getTraceAsString() . '</pre>');
+      forena_error('Malformed report body', '<pre>' . $e->getMessage() .
+        $e->getTraceAsString() . '</pre>');
     }
   }
   /**
@@ -142,27 +143,27 @@ class FrxEditor {
    * Enter description here ...
    */
   public function verifyHeaderElements($required_elements = array()) {
-  	if (!$required_elements) $required_elements = array(
-  	  'category',
-  	  'options',
-  	  'fields',
-  	  'parameters',
-  	  'docgen',
-  	);
+    if (!$required_elements) $required_elements = array(
+      'category',
+      'options',
+      'fields',
+      'parameters',
+      'docgen',
+    );
     $dom = $this->dom;
     $head = $dom->getElementsByTagName('head')->item(0);
     // Make sure the report title exists.
-    if ($dom->getElementsByTagName('title')->length==0){
+    if ($dom->getElementsByTagName('title')->length==0) {
        $n = $dom->createElement('title');
        $head->appendChild($n);
     }
     // Make sure each of these exists in the header
     foreach ($required_elements as $tag) {
-	    if($dom->getElementsByTagNameNS($this->xmlns, $tag)->length ==0 ) {
-	      $n = $dom->createElementNS($this->xmlns, $tag);
-	      $head->appendChild($n);
-	    }
-  	}
+      if ($dom->getElementsByTagNameNS($this->xmlns, $tag)->length == 0 ) {
+        $n = $dom->createElementNS($this->xmlns, $tag);
+        $head->appendChild($n);
+      }
+    }
   }
 
   /**
@@ -176,46 +177,46 @@ class FrxEditor {
    * @param unknown_type $id_field name of field containint node id
    */
   public function setFrxHeader($parent, $element, $element_array, $attributes, $element_field='', $id_field = 'id') {
-  	$dom = $this->dom;
-  	$xpq = $this->xpq;
-  	$this->verifyHeaderElements(array($parent));
-  	$pnode = $dom->getElementsByTagNameNS($this->xmlns, $parent)->item(0);
+    $dom = $this->dom;
+    $xpq = $this->xpq;
+    $this->verifyHeaderElements(array($parent));
+    $pnode = $dom->getElementsByTagNameNS($this->xmlns, $parent)->item(0);
 
-  	// Iterate through all child arrays in the header
-  	$tnode = $dom->createTextNode("\n");
+    // Iterate through all child arrays in the header
+    $tnode = $dom->createTextNode("\n");
     $pnode->appendChild($tnode);
-  	foreach ($element_array as $element_data) {
+    foreach ($element_array as $element_data) {
       $id = $element_data[$id_field];
       $path = '//frx:' . $parent . '/frx:' . $element . '[@' . $id_field . '="' . $id . '"]';
       $nodes = $xpq->query($path);
-  	  $value = null;
+      $value = NULL;
       if ($element && isset($element_data[$element_field])) {
         $value = $element_data[$element_field];
       }
 
-      $node = $dom->createElementNS($this->xmlns, $element,trim($value,"|"));
+      $node = $dom->createElementNS($this->xmlns, $element, trim($value, "|"));
       if ($nodes->length == 0) {
-      	$tnode = $dom->createTextNode("  ");
-      	$pnode->appendChild($tnode);      	$pnode->appendChild($node);
-      	$tnode = $dom->createTextNode("\n");
-      	$pnode->appendChild($tnode);
+        $tnode = $dom->createTextNode("  ");
+        $pnode->appendChild($tnode);        $pnode->appendChild($node);
+        $tnode = $dom->createTextNode("\n");
+        $pnode->appendChild($tnode);
       }
       else {
-      	$src_node = $nodes->item(0);
-      	$pnode->replaceChild($node, $src_node);
+        $src_node = $nodes->item(0);
+        $pnode->replaceChild($node, $src_node);
       }
 
       foreach ($attributes as $attribute) {
-      	if (!empty($element_data[$attribute])) {
-      		$node->setAttribute($attribute, $element_data[$attribute]);
-      	}
-      	else {
-      		if ($node->hasAttribute( $attribute)) {
-      			$node->removeAttribute($attribute);
-      		}
-      	}
+        if (!empty($element_data[$attribute])) {
+          $node->setAttribute($attribute, $element_data[$attribute]);
+        }
+        else {
+          if ($node->hasAttribute( $attribute)) {
+            $node->removeAttribute($attribute);
+          }
+        }
       }
-  	}
+    }
 
 
 
@@ -227,12 +228,12 @@ class FrxEditor {
    * @param $fieldElements
    */
   public function setFields($fieldElements) {
-  	$dom = $this->dom;
+    $dom = $this->dom;
     $newFields = $dom->createElementNS($this->xmlns, 'fields');
-  	$this->verifyHeaderElements(array('fields'));
-  	$fnode = $dom->getElementsByTagNameNS($this->xmlns, 'fields')->item(0);
-  	$p = $fnode->parentNode;
-  	$p->replaceChild($newFields, $fnode);
+    $this->verifyHeaderElements(array('fields'));
+    $fnode = $dom->getElementsByTagNameNS($this->xmlns, 'fields')->item(0);
+    $p = $fnode->parentNode;
+    $p->replaceChild($newFields, $fnode);
 
     $this->setFrxHeader('fields', 'field',
       $fieldElements,
@@ -247,7 +248,7 @@ class FrxEditor {
    * @param unknown_type $docgenElements
    */
   public function setDocgen($docgenElements) {
-  	$dom = $this->dom;
+    $dom = $this->dom;
     $newDocs = $dom->createElementNS($this->xmlns, 'docgen');
     $this->verifyHeaderElements(array('docgen'));
     $dnode = $dom->getElementsByTagNameNS($this->xmlns, 'docgen')->item(0);
@@ -256,7 +257,7 @@ class FrxEditor {
     $this->setFrxHeader('docgen', 'doc',
       $docgenElements,
       array('type'),
-      null,
+      NULL,
       'type'
     );
   }
@@ -267,23 +268,23 @@ class FrxEditor {
    * @param array $parmElements array
    */
   public function setParameters($parmElements) {
-  	$dom = $this->dom;
+    $dom = $this->dom;
     $newParms = $dom->createElementNS($this->xmlns, 'parameters');
-  	$this->verifyHeaderElements(array('parameters'));
-  	$fnode = $dom->getElementsByTagNameNS($this->xmlns, 'parameters')->item(0);
-  	$p = $fnode->parentNode;
-  	$p->replaceChild($newParms, $fnode);
+    $this->verifyHeaderElements(array('parameters'));
+    $fnode = $dom->getElementsByTagNameNS($this->xmlns, 'parameters')->item(0);
+    $p = $fnode->parentNode;
+    $p->replaceChild($newParms, $fnode);
 
-  	$this->setFrxHeader('parameters', 'parm',
+    $this->setFrxHeader('parameters', 'parm',
       $parmElements,
       array('id', 'label', 'require', 'desc', 'data_source', 'data_field', 'type', 'class'),
       'value');
   }
 
   public function addParameter($parm) {
-  	$parms= array();
-  	$parms[$parm['id']] = $parm;
-  	$this->setFrxHeader('parameters', 'parm',
+    $parms= array();
+    $parms[$parm['id']] = $parm;
+    $this->setFrxHeader('parameters', 'parm',
       $parms,
       array('id', 'label', 'require', 'desc', 'data_source', 'data_field', 'type'),
       'value');
@@ -307,35 +308,35 @@ class FrxEditor {
    * @param unknown_type $cateogry
    */
   public function setCategory($category) {
-  	$ret = array();
-  	$dom = $this->dom;
-  	$this->verifyHeaderElements(array('category'));
-  	$head = $dom->getElementsByTagName('head')->item(0);
-  	$cnode = $dom->getElementsByTagNameNS($this->xmlns, 'category')->item(0);
-  	$node = $dom->createElementNS($this->xmlns, 'category', $category);
-  	$head->replaceChild($node, $cnode);
+    $ret = array();
+    $dom = $this->dom;
+    $this->verifyHeaderElements(array('category'));
+    $head = $dom->getElementsByTagName('head')->item(0);
+    $cnode = $dom->getElementsByTagNameNS($this->xmlns, 'category')->item(0);
+    $node = $dom->createElementNS($this->xmlns, 'category', $category);
+    $head->replaceChild($node, $cnode);
   }
 
   public function getCategory() {
-  	$dom = $this->dom;
-  	$this->verifyHeaderElements(array('category'));
-  	$cnode = $dom->getElementsByTagNameNS($this->xmlns, 'category')->item(0);
-  	return $cnode->textContent;
+    $dom = $this->dom;
+    $this->verifyHeaderElements(array('category'));
+    $cnode = $dom->getElementsByTagNameNS($this->xmlns, 'category')->item(0);
+    return $cnode->textContent;
   }
 
   /**
    * Retrieve options element in array form
    */
   public function getOptions() {
-  	$dom = $this->dom;
-  	$this->verifyHeaderElements(array('options'));
-  	$opts = $dom->getElementsByTagNameNS($this->xmlns, 'options')->item(0);
+    $dom = $this->dom;
+    $this->verifyHeaderElements(array('options'));
+    $opts = $dom->getElementsByTagNameNS($this->xmlns, 'options')->item(0);
     $ret = array();
-  	// Simplexml is easier to work with
-  	$options = simplexml_import_dom($opts);
-  	foreach ($options->attributes() as $key =>$value) {
-  	  $ret[(string)$key] = (string)$value;
-  	}
+    // Simplexml is easier to work with
+    $options = simplexml_import_dom($opts);
+    foreach ($options->attributes() as $key => $value) {
+      $ret[(string)$key] = (string)$value;
+    }
     return $ret;
   }
 
@@ -345,18 +346,18 @@ class FrxEditor {
    * @param unknown_type $option_data
    */
   public function setOptions($option_data) {
-  	$dom = $this->dom;
-  	$this->verifyHeaderElements(array('options'));
-  	$options = $dom->getElementsByTagNameNS($this->xmlns, 'options')->item(0);
+    $dom = $this->dom;
+    $this->verifyHeaderElements(array('options'));
+    $options = $dom->getElementsByTagNameNS($this->xmlns, 'options')->item(0);
     foreach ($option_data as $key => $value) {
-    	if ($value) {
-    		$options->setAttribute($key, $value);
-    	}
-    	else {
-    		if ($options->hasAttribute($key)) {
-    			$options->removeAttribute($key);
-    		}
-    	}
+      if ($value) {
+        $options->setAttribute($key, $value);
+      }
+      else {
+        if ($options->hasAttribute($key)) {
+          $options->removeAttribute($key);
+        }
+      }
     }
   }
 
@@ -364,15 +365,15 @@ class FrxEditor {
    * Retrieve menu data for the report
    */
   public function getMenu() {
-  	$dom = $this->dom;
-  	$this->verifyHeaderElements(array('menu'));
-  	$opts = $dom->getElementsByTagNameNS($this->xmlns, 'menu')->item(0);
+    $dom = $this->dom;
+    $this->verifyHeaderElements(array('menu'));
+    $opts = $dom->getElementsByTagNameNS($this->xmlns, 'menu')->item(0);
     $ret = array();
-  	// Simplexml is easier to work with
-  	$options = simplexml_import_dom($opts);
-  	foreach ($options->attributes() as $key =>$value) {
-  	  $ret[(string)$key] = (string)$value;
-  	}
+    // Simplexml is easier to work with
+    $options = simplexml_import_dom($opts);
+    foreach ($options->attributes() as $key => $value) {
+      $ret[(string)$key] = (string)$value;
+    }
     return $ret;
 
   }
@@ -382,26 +383,26 @@ class FrxEditor {
    * @param $menu_data array of key values for menu options.
    */
   public function setMenu($menu_data) {
-  	$dom = $this->dom;
-  	$this->verifyHeaderElements(array('menu'));
-  	$options = $dom->getElementsByTagNameNS($this->xmlns, 'menu')->item(0);
+    $dom = $this->dom;
+    $this->verifyHeaderElements(array('menu'));
+    $options = $dom->getElementsByTagNameNS($this->xmlns, 'menu')->item(0);
     foreach ($menu_data as $key => $value) {
-    	if ($value) {
-    		$options->setAttribute($key, $value);
-    	}
-    	else {
-    		if ($options->hasAttribute($key)) {
-    			$options->removeAttribute($key);
-    		}
-    	}
+      if ($value) {
+        $options->setAttribute($key, $value);
+      }
+      else {
+        if ($options->hasAttribute($key)) {
+          $options->removeAttribute($key);
+        }
+      }
     }
   }
 
   public function removeParm($id) {
-  	$dom = $this->dom;
-  	$xpq = $this->xpq;
+    $dom = $this->dom;
+    $xpq = $this->xpq;
 
-  	$pnode = $dom->getElementsByTagNameNS($this->xmlns, 'parameters')->item(0);
+    $pnode = $dom->getElementsByTagNameNS($this->xmlns, 'parameters')->item(0);
     $path = '//frx:parameters/frx:parm[@id="' . $id . '"]';
 
     $nodes = $xpq->query($path);

@@ -1,5 +1,6 @@
 <?php
 /**
+ * @file forena.drush.inc
  * Implementation of drush command hook.
  */
 function forena_drush_command() {
@@ -24,7 +25,7 @@ function forena_drush_command() {
  */
 function drush_forena_clear_forena_cache() {
   require_once 'forena.common.inc';
-  forena_sync_reports(FALSE); 
+  forena_sync_reports(FALSE);
 }
 
 /**

@@ -1,4 +1,10 @@
 <?php
+/**
+ * @file FrxTemplate
+ * Base Class for all tmeplates.  By default simply renders a document with all the possible tokens in it.
+ * @author davidmetzler
+ *
+ */
 class FrxTemplate {
 
   public $dom;
@@ -34,8 +40,8 @@ class FrxTemplate {
   }
 
 
-	public function columns($xml, $path='/*/*') {
-		    //create an array of columns
+  public function columns($xml, $path='/*/*') {
+        //create an array of columns
     $rows = $xml->xpath($path);
     $column_array = array();
 
@@ -44,77 +50,77 @@ class FrxTemplate {
         $column_array[$name] = $name;
       }
       if (is_object($xml) && method_exists($xml, 'attributes')) {
-      	foreach ($xml->attributes() as $name => $value) {
-      	  $column_array['@' . $name] = '@' . $name;
-      	}
+        foreach ($xml->attributes() as $name => $value) {
+          $column_array['@' . $name] = '@' . $name;
+        }
       }
     }
-		return $column_array;
-	}
+    return $column_array;
+  }
 
-	/**
-	 * Returns the section
-	 * Enter description here ...
-	 */
-	public function config_form($config, $xml='') {
-		$form_ctl = array();
+  /**
+   * Returns the section
+   * Enter description here ...
+   */
+  public function config_form($config, $xml='') {
+    $form_ctl = array();
 
-		$form_ctl['heading'] = array(
-		  '#type' => 'textfield',
-		  '#title' => t('Heading'),
-		  '#default_value' => @$config['heading'],
-		);
+    $form_ctl['heading'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Heading'),
+      '#default_value' => @$config['heading'],
+    );
 
-		$form_ctl['description'] = array(
-		  '#type' => 'textarea',
-		  '#title' => t('Description'),
-		  '#rows' => 2,
-		  '#default_value' => @$config['description'],
-		);
+    $form_ctl['description'] = array(
+      '#type' => 'textarea',
+      '#title' => t('Description'),
+      '#rows' => 2,
+      '#default_value' => @$config['description'],
+    );
 
-		$form_ctl['include'] = array(
-		  '#type' => 'textfield',
-		  '#title' => 'Include Report (graph/image)',
+    $form_ctl['include'] = array(
+      '#type' => 'textfield',
+      '#title' => 'Include Report (graph/image)',
       '#autocomplete_path' => 'forena/reports/autocomplete',
-		  '#default_value' => @$config['include']
-		);
-		return $form_ctl;
-	}
+      '#default_value' => @$config['include']
+    );
+    return $form_ctl;
+  }
 
   function addNode($cur_node, $indent=0, $tag='div', $value='', $attributes=array(), $frx_attributes=array()) {
-  	$dom = $this->dom;
-  	if (!$cur_node) {
-  		return;
-  	}
-  	if ($indent!==FALSE) {
-  	  $tnode = $dom->createTextNode("\n" . str_repeat(' ', $indent));
-  	  $cur_node->appendChild($tnode);
-  	}
+    $dom = $this->dom;
+    if (!$cur_node) {
+      return;
+    }
+    if ($indent!==FALSE) {
+      $tnode = $dom->createTextNode("\n" . str_repeat(' ', $indent));
+      $cur_node->appendChild($tnode);
+    }
     $pnode = $dom->createElement($tag, $value);
-  	if ($attributes) foreach ($attributes as $key => $value) {
-  		if ($value) {
-  			$attr = $dom->createAttribute($key);
-  			$attr->value = $value;
-  			$pnode->appendChild($attr);
-  		}
-  	}
-  	if ($frx_attributes) foreach ($frx_attributes as $key => $value) {
+    if ($attributes) foreach ($attributes as $key => $value) {
       if ($value) {
-	      $attr = $dom->createAttributeNS($this->xmlns, $key);
-	      $attr->value = htmlentities($value);
-	      $pnode->appendChild($attr);
+        $attr = $dom->createAttribute($key);
+        $attr->value = $value;
+        $pnode->appendChild($attr);
       }
-  	}
-  	$cur_node->appendChild($pnode);
-  	return $pnode;
+    }
+    if ($frx_attributes) foreach ($frx_attributes as $key => $value) {
+      if ($value) {
+        $attr = $dom->createAttributeNS($this->xmlns, $key);
+        $attr->value = htmlentities($value);
+        $pnode->appendChild($attr);
+      }
+    }
+    $cur_node->appendChild($pnode);
+    return $pnode;
   }
 
 
   function addText($cur_node, $text) {
-  	$dom = $this->dom;
-  	$tnode = $dom->createTextNode($text);
-  	$cur_node->appendChild($tnode);
-  	return $tnode;
+    $dom = $this->dom;
+    $tnode = $dom->createTextNode($text);
+    $cur_node->appendChild($tnode);
+    return $tnode;
   }
 
   /**
@@ -124,12 +130,12 @@ class FrxTemplate {
    * @param array $config
    */
   public function extract($key, &$config) {
-  	$value = '';
-  	if (isset($config[$key])) {
-  		$value = $config[$key];
-  		unset($config[$key]);
-  	}
-  	return $value;
+    $value = '';
+    if (isset($config[$key])) {
+      $value = $config[$key];
+      unset($config[$key]);
+    }
+    return $value;
   }
 
   /**
@@ -150,7 +156,7 @@ class FrxTemplate {
       $id = $this->idFromBlock($block);
     }
     $class = $this->extract('class', $config);
-  	$frx_attributes = array(
+    $frx_attributes = array(
       'block' => $block,
       'foreach' => $foreach,
     );
@@ -162,27 +168,27 @@ class FrxTemplate {
 
     $node = $this->addNode($body, 2, 'div', $text, $attributes, $frx_attributes);
     if ($heading) {
-    	$this->addNode($node, 4, 'h2', $heading);
+      $this->addNode($node, 4, 'h2', $heading);
     }
     if ($descr) {
-    	$this->addNode($node, 4, 'p', $descr);
+      $this->addNode($node, 4, 'p', $descr);
     }
     if ($include) {
-    	$src = 'reports/' . str_replace('/', '.',$include);
-    	$this->addNode($node, 4, 'div', null, null, array('renderer' => 'FrxInclude', 'src' => $src));
+      $src = 'reports/' . str_replace('/', '.', $include);
+      $this->addNode($node, 4, 'div', NULL, NULL, array('renderer' => 'FrxInclude', 'src' => $src));
     }
 
-  	return $node;
+    return $node;
   }
 
-	/**
-	 *
-	 * Enter description here ...
-	 * @param string $data_block
-	 * @param SimpleXMLElement $xml
-	 * @param array $config
-	 */
-	public function generate($xml , $config) {
+  /**
+   *
+   * Enter description here ...
+   * @param string $data_block
+   * @param SimpleXMLElement $xml
+   * @param array $config
+   */
+  public function generate($xml , $config) {
 
 
     if (!@$config['foreach']) $config['foreach']='*';
@@ -191,24 +197,24 @@ class FrxTemplate {
     $columns = $this->columns($xml);
     $text = '';
     if ($columns) foreach ($columns as $col) {
-    	$text .= ' {' . $col . '}';
+      $text .= ' {' . $col . '}';
     }
     $this->blockDiv($config, $text);
 
   }
 
   public function template() {
-  	$body = $this->body;
-  	$output = '';
-  	foreach ($body->childNodes as $node) {
-  		$output .= $this->dom->saveXML($node);
-  	}
-  	return $output;
+    $body = $this->body;
+    $output = '';
+    foreach ($body->childNodes as $node) {
+      $output .= $this->dom->saveXML($node);
+    }
+    return $output;
   }
 
 
   public function asXML() {
-  	return $this->dom->saveXML();
+    return $this->dom->saveXML();
   }
 
   public function idFromBlock($block) {

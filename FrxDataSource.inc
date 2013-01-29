@@ -23,7 +23,7 @@ class FrxDataSource{
     $this->block_ext = 'sql';
     $this->block_path = $repos_path;
     $this->app = FrxReportGenerator::instance()->app;
-    $this->block_extensions = array('inc','sql','xml');
+    $this->block_extensions = array('inc', 'sql', 'xml');
   }
 
   /**
@@ -120,19 +120,19 @@ class FrxDataSource{
 
     $d = glob($block_path);
     if ($d) foreach ($d as $file_name) {
-    	// Split off the extention
-    	$p = strripos($file_name, '.');
+      // Split off the extention
+      $p = strripos($file_name, '.');
       if ($p!==FALSE) {
-  	    $ext = substr($file_name, $p+1);
-  	    $block_name = substr($file_name, 0, $p);
+        $ext = substr($file_name, $p+1);
+        $block_name = substr($file_name, 0, $p);
       }
       else {
-      	$ext = '';
-      	$block_name = $file_name;
+        $ext = '';
+        $block_name = $file_name;
       }
 
       if (array_search($ext, $this->block_extensions)!==FALSE) {
-    	  $block_list[] = str_replace($this->block_path . '/', '', $block_name);
+        $block_list[] = str_replace($this->block_path . '/', '', $block_name);
       }
     }
 
@@ -148,16 +148,16 @@ class FrxDataSource{
   }
 
   public function debug($msg='', $log='') {
-  	FrxReportGenerator::instance()->app->debug($msg, $log);
+    FrxReportGenerator::instance()->app->debug($msg, $log);
   }
 
   public function error($msg='', $log='') {
-  	FrxReportGenerator::instance()->app->error($msg, $log);
+    FrxReportGenerator::instance()->app->error($msg, $log);
   }
 
   public function parseXMLFile($contents) {
-  	$comment = $this->comment_prefix;
-  	$trim = $this->comment_suffix;
+    $comment = $this->comment_prefix;
+    $trim = $this->comment_suffix;
     $lines = explode("\n", $contents);
     $cnt = count($lines);
     $access = '';
@@ -172,11 +172,11 @@ class FrxDataSource{
         list($a, $o) = explode('=', $c, 2);
         $a = trim($a);
         if ($a && $o) {
-	        switch ($a) {
-	        	case 'ACCESS':
-	        		$access = trim($o);
-	        		break;
-	        	default:
+          switch ($a) {
+            case 'ACCESS':
+              $access = trim($o);
+              break;
+            default:
 
 
         }
@@ -194,8 +194,8 @@ class FrxDataSource{
 
 
   public function parseSQLFile($contents) {
-  	$comment = $this->comment_prefix;
-  	$trim = $this->comment_suffix;
+    $comment = $this->comment_prefix;
+    $trim = $this->comment_suffix;
     $lines = explode("\n", $contents);
     $cnt = count($lines);
     $access = '';
@@ -212,19 +212,19 @@ class FrxDataSource{
         @list($a, $o) = explode('=', $c, 2);
         $a = trim($a);
         if (($a && $o) || $c == 'END' || $c == 'ELSE' ) {
-	        switch ($a) {
-	        	case 'ACCESS':
-	        		$access = trim($o);
-	        		break;
-	        	case 'IF':
-	        	  $skip = !$this->te->test(trim($o));
-	        	  break;
-	        	case 'END':
-	        	  $skip = FALSE;
-	        	  break;
-	        	case 'ELSE':
-	        	  $skip = !$skip;
-	        	  break;
+          switch ($a) {
+            case 'ACCESS':
+              $access = trim($o);
+              break;
+            case 'IF':
+              $skip = !$this->te->test(trim($o));
+              break;
+            case 'END':
+              $skip = FALSE;
+              break;
+            case 'ELSE':
+              $skip = !$skip;
+              break;
         }
         }
 
