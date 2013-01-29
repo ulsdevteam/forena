@@ -50,6 +50,7 @@ class FrxMenu {
   public function parseURL($url) {
     global $language;
     $name = $url;
+    $tlang = '';
     // Determine if the report has an extention that is one of the docuemnt types
     $p = pathinfo($url);
     if (isset($p['extension']) && array_search($p['extension'], $this->doc_formats)!==FALSE) {
@@ -92,7 +93,7 @@ class FrxMenu {
       }
     }
 
-    $name = trim(str_replace('.', '/', $base_name), '/');
+    //$name = trim(str_replace('.', '/', $base_name), '/');
     $filename = $name . '.frx';
 
     $desc['name'] = $this->name = $name;
