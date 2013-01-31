@@ -44,7 +44,19 @@ function forena_pdf_configure($formid, &$form_state)  {
   $pdf_generator = variable_get('forena_pdf_generator','');
 
   $mpdf_path = t('MDPF Libarary not found. Please install so sites/all/libraries/mpdf/mpdf.php exists.');
+  if (file_exists('sites/all/libraries/mpdf/mpdf.php')) {
+    $mpdf_path = 'sites/all/libraries/mpdf';
+  }
+  else {
+    unset($pdf_options['FrxMPDF']);
+  }
   $prince_path = t('Prince XML library not found.  Please install so sites/all/libraries/prince/prince.php exists.');
+  if (file_exists('sites/all/libraries/prince/prince.php')) {
+    $prince_path = 'sites/all/libraries/prince';
+  }
+  else {
+    unset($pdf_options['FrxPrincePDF']);
+  }
 
   $form['forena_pdf_generator'] = array(
   	'#type' => 'select',
@@ -55,10 +67,17 @@ function forena_pdf_configure($formid, &$form_state)  {
   $form['mpdf'] = array('#type' => 'fieldset', '#title' => t('MPDF library'));
   $form['mpdf']['library'] = array(
     '#type' => 'item',
-    '#value' => $mpdf_path,
+    '#title' => 'Installation path',
+    '#markup' => $mpdf_path,
   );
 
   $form['prince'] = array('#type' => 'fieldset', '#title' => t('Prince XML'));
+
+  $form['prince']['library'] = array(
+    '#type' => 'item',
+    '#title' => 'PHP Library path',
+    '#markup' => $prince_path,
+  );
 
   $form['prince']['forena_pdf_prince_path'] = array(
     '#type' => 'textfield',
