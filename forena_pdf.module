@@ -98,12 +98,6 @@ function forena_pdf_configure($formid, &$form_state)  {
   return $form;
 }
 
-function forena_pdf_configure_validate($form, &$form_state) {
-  if (!file_exists($form_state['values']['forena_pdf_prince_path'])) {
-    form_set_error('fornena_pdf_prince_path', t('could Not find libary.  Is Prince installed in this location?'));
-  }
-}
-
 function forena_pdf_configure_submit($form, &$form_state) {
   variable_set('forena_pdf_generator', $form_state['values']['forena_pdf_generator']);
   variable_set('forena_pdf_prince_path', $form_state['values']['forena_pdf_prince_path']);
