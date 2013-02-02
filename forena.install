@@ -121,8 +121,13 @@ function forena_update_7201() {
    db_drop_field('forena_reports', 'src');
  }
 
+ function fornea_update_7303() {
+   require_once 'forena.admin.inc';
+   forena_sync_reports(FALSE);
+ }
+
  function forena_install() {
-   require_once('forena.admin.inc');
+   require_once 'forena.admin.inc';
    forena_sync_reports(TRUE);
  }
 
@@ -139,4 +144,5 @@ function forena_update_7201() {
    variable_del('forena_input_format');
    variable_del('forena_last_report_path');
    variable_del('forena_report_repos');
+   variable_del('forena_skins');
  }

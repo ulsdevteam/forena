@@ -165,6 +165,7 @@ function forena_sync_form($formid, &$form_state) {
  *
  */
 function forena_settings() {
+  $skins = variable_get('forena_skins', array());
 
   $report_path = forena_report_path();
 
@@ -187,8 +188,9 @@ function forena_settings() {
   $form['forena_input_format'] = forena_filter_element(variable_get('forena_input_format',''));
 
   $form['forena_default_form'] = array(
-    '#type' => 'textfield',
+    '#type' => 'select',
     '#title' => t('Default report skin'),
+    '#options' => $skins,
     '#description' => t('Specify the default skin to be used.   New skins can be created by creating .skinfo files in your reports directory.'
       . ' Skins are basically css and javascript libraries added to your report.'),
     '#default_value' => variable_get('forena_default_form',''),
@@ -250,6 +252,8 @@ function forena_format_form($formid, $form_state, $report_name) {
     $report_form = @$frx_options['form'];
 
     $doclist = Frx::Menu()->doc_formats;
+    $skins[''] = t('Use Default');
+    $skins = array_merge(variable_get('forena_skins', array()), $skins);
 
     $form['report_name'] = array(
        '#type' => 'value',
@@ -257,8 +261,9 @@ function forena_format_form($formid, $form_state, $report_name) {
     );
 
     $form['form'] = array(
-      '#type' => 'textfield',
+      '#type' => 'select',
       '#title' => t('Skin'),
+      '#options' => $skins,
       '#default_value' => $report_form,
       '#description' => t('The page style of your report.  The {skin}.skinfo file specifies css and js file in your report. ')
     );
@@ -339,7 +344,6 @@ function forena_format_form_submit($form, &$form_state) {
 function forena_layout_form($form, $form_state, $report_name) {
   $name_in = $report_name;
   $desc = Frx::Menu()->parseURL($report_name);
-
   $name = $desc['name'];
   global $language;
   //determine if this is an add new report request
@@ -347,6 +351,7 @@ function forena_layout_form($form, $form_state, $report_name) {
   $filename = $desc['filename'];
   $format = @$desc['format'];
   if ($name) {
+
     if ((isset($desc['exists']) && $desc['exists'])) {
       $save_name = $name;
       //set the name to empty string for new reports

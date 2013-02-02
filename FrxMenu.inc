@@ -80,7 +80,7 @@ class FrxMenu {
         if ($lang != $tlang) {
           $lang = $tlang;
           $language = $lang_list[$lang];
-          $i_name = $t_lang . '/' . $base_name;
+          $i_name = $tlang . '/' . $base_name;
         }
         if ($tlang == 'en') {
           $name = $base_name = $tbase_name;

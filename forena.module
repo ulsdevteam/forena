@@ -939,6 +939,7 @@ function _forena_copy_reports($src_dir, $overwrite=FALSE, $subdir=FALSE) {
  */
 function forena_db_sync($subdir='') {
   static $prefix = '';
+  static $skins = '';
   if (!$subdir) {
     $prefix = '';
      db_delete('forena_reports')
@@ -952,24 +953,36 @@ function forena_db_sync($subdir='') {
     $src_file = trim($d->path, '/') . '/' . trim($rpt_file, '/');
     $dest_file = $path . '/' . trim($rpt_file, '/');
     if (is_file($src_file)) {
-      list($report_name, $ext) = explode('.', $rpt_file, 2);
-      if ($ext == 'frx') {
-        $report_name = trim($prefix . '/' . $report_name, '/');
+      list($base_file, $ext) = explode('.', $rpt_file, 2);
+      switch($ext) {
+        // Load Forena Reports
+        case 'frx':
+          $base_file = trim($prefix . '/' . $base_file, '/');
 
-        try {
-          $r_xml =file_get_contents($src_file);
-        } catch (Exception $e) {
-          $s = t('unable to load Report %s', $r_xml);
-          forena_error($s, $s . $e->getMessage());
+          try {
+            $r_xml =file_get_contents($src_file);
+          } catch (Exception $e) {
+            $s = t('unable to load Report %s', $r_xml);
+            forena_error($s, $s . $e->getMessage());
 
-        }
+          }
 
-        // Load the report
+          // Load the report
 
-        $r = new FrxReport($r_xml);
-        $save_count = forena_save_report($report_name, $r_xml, FALSE);
-        $r->__destruct();
-        unset($r);
+          $r = new FrxReport($r_xml);
+          $save_count = forena_save_report($base_file, $r_xml, FALSE);
+          $r->__destruct();
+          unset($r);
+          break;
+
+        //load into list of skins
+        case 'skinfo':
+          $data = file_get_contents($src_file);
+          $skin = drupal_parse_info_format($data);
+          $skin_name = @$skin['name'] ? $skin['name'] : $base_file;
+          $skins[$skin['name']] = $skin_name;
+          break;
+
       }
     }
     elseif (is_dir($src_file)) {
@@ -983,8 +996,14 @@ function forena_db_sync($subdir='') {
     }
   }
   if ($d) $d->close();
-  // Rebuild menu
-  if (!$subdir) menu_rebuild();
+  // Done with cache sync.
+  if (!$subdir) {
+    // Cache the skins found
+    asort($skins);
+    variable_set('forena_skins', $skins);
+    // Rebuild menus.
+    menu_rebuild();
+  }
   return $save_count;
 }
 
