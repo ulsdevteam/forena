@@ -10,8 +10,8 @@
  */
 class FrxFiles extends FrxDataSource {
   private $path;
-  public function __construct($conf, $repos_path) {
-    parent::__construct($conf, $repos_path);
+  public function __construct($conf, $repos_path, $name) {
+    parent::__construct($conf, $repos_path, $name);
     $this->comment_prefix = '<!--';
     $this->comment_suffix = '-->';
     $this->block_ext = 'xml';
@@ -23,6 +23,6 @@ class FrxFiles extends FrxDataSource {
   public function getName() {
     return 'XML File';
   }
-  
+
 
 }

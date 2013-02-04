@@ -47,6 +47,8 @@ function forena_schema() {
     'fields' => array(
        'repository' => array('type' => 'varchar', 'length' => '63', 'not null' => TRUE),
        'block_name' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE),
+       'block_type' => array('type' => 'varchar', 'length' => 30, 'not null' => TRUE),
+       'access' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE),
        'title' => array('type' => 'varchar', 'length' => 63, 'not null' => FALSE),
        'descriptor' => array('type' => 'varchar', 'length' => '255'),
        'category' => array('type' => 'varchar', 'length' => 255, 'not null' => FALSE),
@@ -121,9 +123,14 @@ function forena_update_7201() {
    db_drop_field('forena_reports', 'src');
  }
 
- function fornea_update_7303() {
+ function forena_update_7303() {
+   // Clear cache to load skins
    require_once 'forena.admin.inc';
    forena_sync_reports(FALSE);
+
+   // New block access field.
+   db_add_field('forena_data_blocks', 'access', array('type' => 'varchar', 'length' => 255, 'not null' => TRUE));
+   db_add_field('forena_data_blocks', 'block_type', array('type' => 'varchar', 'length' => 30, 'not null' => TRUE));
  }
 
  function forena_install() {

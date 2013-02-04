@@ -108,7 +108,7 @@ class FrxRepoMan {
     // Now determine if the object exists
     if (isset($this->repositories[$name])) {
       if (@!is_object($this->repositories[$name]['data'])) {
-        $this->load_repository($this->repositories[$name]);
+        $this->load_repository($this->repositories[$name], $name);
       }
       return $this->repositories[$name]['data'];
     }
@@ -118,7 +118,7 @@ class FrxRepoMan {
   }
 
   // Putting this in a function to sandbox the repository settings
-  public function load_repository(&$repo) {
+  public function load_repository(&$repo, $name) {
     // First determine if the class file exisits
     $path = @$repo['path'];
     $conf = array();
@@ -129,7 +129,7 @@ class FrxRepoMan {
     }
 
     $repo = array_merge($conf, $repo);
-    if (!isset($repos['data'])||!is_object($repo['data'])) $repo['data'] = $this->load_provider($repo, $path);
+    if (!isset($repos['data'])||!is_object($repo['data'])) $repo['data'] = $this->load_provider($repo, $path, $name);
 
   }
 
@@ -139,12 +139,12 @@ class FrxRepoMan {
    * @param string $name
    * @return object The data provider object
    */
-  public function load_provider($conf, $repo_path) {
+  public function load_provider($conf, $repo_path, $repos_name) {
     @$name = isset($conf['data provider'])? $conf['data provider'] : $conf['data_engine'];
     $this->define_plugins();
     // Instantiate the path
     if (class_exists($name)) {
-      $o = new $name($conf, $repo_path);
+      $o = new $name($conf, $repo_path, $repos_name);
       return $o;
     }
     else {
@@ -153,6 +153,11 @@ class FrxRepoMan {
   }
 
 
+  /**
+   * Load Block
+   * Enter description here ...
+   * @param $data_block string name of data block.
+   */
   public function loadBlock($data_block) {
     $block = array();
     list($provider, $block_name) = explode('/', $data_block, 2);
@@ -169,6 +174,23 @@ class FrxRepoMan {
 
     return $block;
   }
+
+  /**
+   * Save a data block ...
+   * @param unknown_type $data_block
+   * @param unknown_type $data
+   */
+  public function saveBlock($data_block, $data) {
+    $block = array();
+    list($provider, $block_name) = explode('/', $data_block, 2);
+    $repos = @$this->repositories[$provider];
+
+    $o = $this->repository($provider);
+    if ($o) {
+      $block = $o->saveBlock($block_name, $data);
+    }
+  }
+
 
 
   /**
@@ -202,7 +224,7 @@ class FrxRepoMan {
      $xml = '';
      if ($o) {
        $access = TRUE;
-       $block = $o->loadBlock($block_name);
+       $block = $this->loadBlock($data_block);
        $right = @$block['access'];
        if ($block && $o->access($right)) {
          switch ($block['type'])  {

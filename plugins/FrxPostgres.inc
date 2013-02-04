@@ -18,8 +18,8 @@ class FrxPostgres extends FrxDataSource {
    * @param unknown_type $uri Database connection string.
    * @param string $repos_path Path to location of data block definitions
    */
-  public function __construct($conf, $repos_path) {
-    parent::__construct($conf, $repos_path);
+  public function __construct($conf, $repos_path, $name) {
+    parent::__construct($conf, $repos_path, $name);
     $this->use_postgres_xml = FALSE;
     $uri = $conf['uri'];
     if (!empty($conf['password'])) $uri = trim($uri) . ' password=' . $conf['password'];

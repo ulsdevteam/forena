@@ -656,7 +656,6 @@ function forena_add_report_form($formid, $form_state, $report_name='') {
     '#default_value' => $name,
   );
 
-
   $form['save'] = array(
     '#type' => 'submit',
     '#value' => 'Create',

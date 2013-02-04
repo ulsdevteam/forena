@@ -7,7 +7,7 @@ require_once('forena.common.inc');
  *
  */
 class FrxDataSource{
-
+  public $name;
   public $conf;
   public $block_path;
   public $comment_prefix;
@@ -17,13 +17,14 @@ class FrxDataSource{
   public $types;
   public $block_name;
   protected $te;
-  public function __construct($conf, $repos_path) {
+  public function __construct($conf, $repos_path, $name) {
     $this->conf = $conf;
     $this->comment_prefix = '--';
     $this->block_ext = 'sql';
     $this->block_path = $repos_path;
     $this->app = FrxReportGenerator::instance()->app;
     $this->block_extensions = array('inc', 'sql', 'xml');
+    $this->name = $name;
   }
 
   /**
@@ -49,13 +50,47 @@ class FrxDataSource{
     }
   }
 
-  /**
-   * Load blcok data from filesystem
-   * @param $block_name
-   */
-  function loadBlock($block_name) {
+  protected function loadBlockFromDB($block_name) {
     $block = array();
-    $this->block_name = $block_name;
+      // IF load from the database if forena_query is there.
+    if (module_exists('forena_query')) {
+
+      // See if we have one in the database first
+      $sql = 'SELECT * FROM {forena_data_blocks} WHERE repository=:repos AND block_name = :block_name';
+      $rs = db_query(
+        $sql,
+        array(
+          ':repos' => $this->name,
+          ':block_name' => $block_name,
+        )
+      );
+
+      if ($b = $rs->fetchObject()) {
+        $block = array(
+          'repository' => $b->repository,
+          'block_name' => $b->block_name,
+          'type' => $b->block_type,
+          'source' => $b->src,
+          'access' => $b->access,
+          'title' => $b->title,
+          'locked' => $b->locked,
+          'modified' => $b->modified,
+        );
+        switch ($block['type']) {
+          case 'sql':
+            $block = array_merge($block, $this->parseSQLFile($block['source']));
+            break;
+          case 'xml':
+            $block = array_merge($block, $this->parseXMLFile($block['source']));
+            break;
+        }
+
+      }
+    }
+    return $block;
+  }
+
+  protected function loadBlockFromFile($block_name) {
     $base_file = $this->block_path . '/' . $block_name;
     if (file_exists($base_file . '.sql')) {
       $contents = file_get_contents($base_file . '.sql');
@@ -85,6 +120,26 @@ class FrxDataSource{
         }
       }
     }
+    else {
+      return array();
+    }
+    $block['locked']=1;
+    return $block;
+  }
+
+
+  /**
+   * Load blcok data from filesystem
+   * @param $block_name
+   */
+  function loadBlock($block_name) {
+
+    $block = array();
+    $this->block_name = $block_name;
+    $block = $this->loadBlockFromDB($block_name);
+    if (!$block) {
+      $block = $this->loadBlockFromFile($block_name);
+    }
     return $block;
   }
 
@@ -103,6 +158,7 @@ class FrxDataSource{
 
     return $tokens;
   }
+
 
   /**
    * Find all the blocks matching a provided search string
@@ -267,6 +323,47 @@ class FrxDataSource{
   public function phpData($method, $paremeters) {
     $xml = '';
     return $xml;
+  }
+
+  /**
+   * Save a data block
+   * @param $block_name String name of block to save
+   * @param $data array fields of block to save.
+   */
+  public function saveBlock($block_name, $data) {
+    $modified = time();
+    $rs = db_query('SELECT * from {forena_data_blocks} WHERE repository=:repos AND
+      block_name = :block_name',
+      array(
+        ':repos' => $this->name,
+        ':block_name' => $block_name,
+        )
+      );
+    if ($block = $rs->fetchObject()) {
+      db_update('forena_data_blocks')
+        ->fields(array(
+          'src' => $data['source'],
+          'access' => $data['access'],
+          'modified' => $modified,
+        ))
+        ->condition('repository', $this->name)
+        ->condition('block_name', $block_name)
+        ->execute();
+    }
+    else {
+      db_insert('forena_data_blocks')
+        ->fields( array(
+          'repository' => $this->name,
+          'block_name' => $block_name,
+          'block_type' => $data['type'],
+          'src' => $data['source'],
+          'access' => $data['access'],
+          'locked' => 0,
+          'modified' => $modified,
+        ))
+        ->execute();
+
+    }
   }
 }
 

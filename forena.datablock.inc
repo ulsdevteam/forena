@@ -32,8 +32,34 @@ function forena_query_edit_block_form($form, &$form_state) {
   $form['source'] = array(
     '#type' => 'textarea',
     '#title' => t('Source'),
+    '#disabled' => @$data['locked'],
     '#default_value' => @$data['source'],
   );
+
+  // Only allow save as of sql data blocks.
+  if ($data && $data['type']=='sql') {
+    if (!@$data['locked']) {
+      $form['save'] = array(
+        '#type' => 'submit',
+        '#value' => 'Save',
+        '#submit' => array('forena_query_save_existing_block')
+      );
+    }
+
+    $form['save_as'] = array('#type' => 'fieldset', '#title' => 'Save As');
+    $form['save_as']['save_as_name'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Name'),
+      '#description' => t('Indicate a proper path to save the data.  '),
+    );
+
+    $form['save_as']['save_as_submit'] = array(
+      '#type' => 'submit',
+      '#validate' => array('forena_query_validate_new_block'),
+      '#submit' => array('forena_query_save_new_block'),
+      '#value' => t('Save As')
+    );
+  }
 
   if (@$data['tokens']) {
 
@@ -69,5 +95,55 @@ function forena_query_block_preview($form, &$form_state) {
 function forena_query_load_block($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
   $form_state['storage']['block'] = Frx::RepoMan()->loadBlock($form_state['values']['block']);
+  $form_state['storage']['block_name'] = $form_state['values']['block'];
   $form_state['input']['source'] = $form_state['storage']['block']['source'];
+}
+
+function forena_query_validate_new_block($form, &$form_state) {
+
+  // Check to make sure a filename is specified.
+
+  $block_name = $form_state['values']['save_as_name'];
+  if (!$block_name) {
+    form_set_error('save_as_name',  t("Block_name is required!"));
+    return;
+  }
+
+  list($src_repos, $name) = @explode('/', $form_state['values']['block']);
+  list($dest_repos, $name) = @explode('/', $block_name);
+  if ($src_repos != $dest_repos) {
+    form_set_error('save_as_name', t('Block must be in the same data source/repository'));
+    return;
+  }
+
+  $block = Frx::RepoMan()->loadBlock($block_name);
+  if ($block) {
+    form_set_error('save_as_name', t('Block already exists'));
+    return;
+  }
+}
+
+/**
+ * Save one block as another.
+ * @param unknown_type $form
+ * @param unknown_type $form_state
+ */
+function forena_query_save_new_block($form, &$form_state) {
+  $form_state['rebuild'] = TRUE;
+  $block_name = $form_state['values']['save_as_name'];
+  $data = $form_state['storage']['block'];
+  Frx::RepoMan()->saveBlock($block_name, $data);
+  $form_state['input']['block'] = $block_name;
+  $form_state['storage']['block_name'] = $block_name;
+  drupal_set_message('Block Saved');
+}
+
+function forena_query_save_existing_block($form, &$form_state) {
+  $block_name = $form_state['storage']['block_name'];
+  $data = $form_state['storage']['block'];
+  $data['source'] = $form_state['values']['source'];
+  Frx::RepoMan()->saveBlock($block_name, $data);
+  drupal_set_message('Block Saved');
+  $form_state['input']['block'] = $block_name;
+  $form_state['rebuild'] = TRUE;
 }

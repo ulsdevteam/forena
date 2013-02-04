@@ -19,9 +19,9 @@ class FrxMSSQL extends FrxDataSource {
    * @param unknown_type $uri Database connection string.
    * @param string $repos_path Path to location of data block definitions
    */
-  public function __construct($conf, $repos_path) {
+  public function __construct($conf, $repos_path, $name) {
 
-    parent::__construct($conf, $repos_path);
+    parent::__construct($conf, $repos_path, $name);
     $this->use_mssql_xml = FALSE;
     $uri = $conf['uri'];
     $this->debug = $conf['debug'];
