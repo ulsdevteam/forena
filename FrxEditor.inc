@@ -185,7 +185,7 @@ class FrxEditor {
     // Iterate through all child arrays in the header
     $tnode = $dom->createTextNode("\n");
     $pnode->appendChild($tnode);
-    foreach ($element_array as $element_data) {
+    foreach ($element_array as $element_data) if ($element_data) {
       $id = $element_data[$id_field];
       $path = '//frx:' . $parent . '/frx:' . $element . '[@' . $id_field . '="' . $id . '"]';
       $nodes = $xpq->query($path);
