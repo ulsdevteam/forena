@@ -25,6 +25,7 @@ function forena_drush_command() {
  */
 function drush_forena_clear_forena_cache() {
   require_once 'forena.common.inc';
+  require_once 'forena.admin.inc';
   forena_sync_reports(FALSE);
 }
 
@@ -33,5 +34,6 @@ function drush_forena_clear_forena_cache() {
  */
 function drush_forena_deliver_forena_reports() {
   require_once 'forena.common.inc';
+  require_once 'forena.admin.inc';
   forena_sync_reports(TRUE);
 }
