@@ -159,6 +159,18 @@ class FrxDataSource{
     return $tokens;
   }
 
+  public function listDBBlocks($search) {
+    $data_blocks = array();
+    $search = '%' . $search . '%';
+    $sql = 'SELECT * from {forena_data_blocks} WHERE repository=:repos
+      AND block_name like :search ';
+    $rs = db_query($sql, array(':repos' => $this->name, ':search' => $search ));
+    foreach ($rs as $block) {
+      $data_blocks[] = $block->block_name;
+    }
+    return $data_blocks;
+  }
+
 
   /**
    * Find all the blocks matching a provided search string
@@ -199,7 +211,11 @@ class FrxDataSource{
         $block_list += $this->list_blocks($search, $dir_name, $block_list);
       }
     }
-
+    // Date
+    if (!$subdir && module_exists('forena_query'))  {
+      $block_list += $this->listDBBlocks($search);
+      asort($block_list);
+    }
     return $block_list;
   }
 
