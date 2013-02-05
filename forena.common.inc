@@ -272,7 +272,7 @@ function forena_parameter_form($formid, &$form_state, $rpt, $collapse=FALSE) {
 
         }
 
-        $form['submit'] = array(
+        $form['params']['submit'] = array(
           '#type' => 'submit',
           '#value' => t('Submit'),
         );
@@ -301,7 +301,7 @@ function forena_parameters_callback($form, &$form_state) {
  */
 function forena_parameter_form_submit($form, &$form_state) {
   $values = $form_state['values'];
-  unset($values['submit']);
+  unset($values['params']['submit']);
   if (isset($values['params'])) foreach ($values['params'] as $key => $value) {
     if (is_array($value)) {
       foreach ($value as $k => $val) {
