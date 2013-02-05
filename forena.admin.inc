@@ -2333,7 +2333,6 @@ function forena_add_param_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   $name = $values['rpt_name'];
   $param = $values['params'];
-
   $r = forena_get_report_editor($name);
   //add the new parms
   $r->addParameter($param);
@@ -2350,7 +2349,8 @@ function forena_admin_params_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   $name = $values['rpt_name'];
   $params = $values['params'];
-
+  // Hack because in rare cases the forms api adds this parmeter.
+  unset($params['params__active_tab']);
   $r = forena_get_report_editor($name);
   //add the new parms
   $r->setParameters($params);
