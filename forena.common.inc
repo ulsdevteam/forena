@@ -589,3 +589,99 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
 
   return $save_count;
 }
+
+/**
+ * Render a special form with an embedded forena report.
+ * @param unknown_type $variables
+ */
+function theme_forena_form($variables) {
+  $form = $variables['form'];
+  $build = '';
+  $output = '';
+  // Render the elements
+  foreach ($form as $key => $value) if (strpos($key,'#')===FALSE) {
+    $value['#theme_wrappers'] = array('forena_form_element');
+    $elements[$key] = drupal_render($value);
+    $build .= $elements[$key];
+  }
+  // Return the form
+  $form['#children'] = $build;
+  return $build;
+}
+
+/**
+ * Renders forena reprot as
+ * @param unknown_type $variables
+ */
+function theme_forena_form_element($variables) {
+  $element = &$variables['element'];
+  // This is also used in the installer, pre-database setup.
+  $t = get_t();
+
+ // drupal_set_message ('<pre>' . print_r($variables,1) . '</pre>');
+
+
+  // This function is invoked as theme wrapper, but the rendered form element
+  // may not necessarily have been processed by form_builder().
+  $element += array(
+    '#title_display' => 'before',
+  );
+
+  // Add element #id for #type 'item'.
+  if (isset($element['#markup']) && !empty($element['#id'])) {
+    $attributes['id'] = $element['#id'];
+  }
+  // Add element's #type and #name as class to aid with JS/CSS selectors.
+  $attributes['class'] = array('form-item');
+  if (!empty($element['#type'])) {
+    $attributes['class'][] = 'form-type-' . strtr($element['#type'], '_', '-');
+  }
+  if (!empty($element['#name'])) {
+    $attributes['class'][] = 'form-item-' . strtr($element['#name'], array(' ' => '-', '_' => '-', '[' => '-', ']' => ''));
+  }
+  // Add a class for disabled elements to facilitate cross-browser styling.
+  if (!empty($element['#attributes']['disabled'])) {
+    $attributes['class'][] = 'form-disabled';
+  }
+  $output = '';
+  $output = '<span' . drupal_attributes($attributes) . '>' . "\n";
+  //drupal_set_message('<pre>'. print_r($element,1) . '</pre>');
+
+  $element['#title_display'] = 'none';
+
+  $prefix = isset($element['#field_prefix']) ? '<span class="field-prefix">' . $element['#field_prefix'] . '</span> ' : '';
+  $suffix = isset($element['#field_suffix']) ? ' <span class="field-suffix">' . $element['#field_suffix'] . '</span>' : '';
+
+  switch ($element['#title_display']) {
+    case 'before':
+    case 'invisible':
+      $output .= ' ' . theme('form_element_label', $variables);
+      $output .= ' ' . $prefix . $element['#children'] . $suffix . "\n";
+      break;
+
+    case 'after':
+      $output .= ' ' . $prefix . $element['#children'] . $suffix;
+      $output .= ' ' . theme('form_element_label', $variables) . "\n";
+      break;
+
+    case 'none':
+    case 'attribute':
+      // Output no label and no required marker, only the children.
+      $output .= ' ' . $prefix . $element['#children'] . $suffix . "\n";
+      break;
+  }
+
+  // No descriptions or titles.
+  /*
+  if (!empty($element['#description'])) {
+    $output .= '<div class="description">' . $element['#description'] . "</div>\n";
+  }
+  */
+
+
+  $output .= "</span>\n";
+
+  return $output;
+}
+
+

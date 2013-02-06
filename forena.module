@@ -721,24 +721,29 @@ function forena_forena_controls() {
   );
 
   $controls[] = array(
-    'file' => 'plugins/FrxSource.inc',
+    'file' => 'renderers/FrxSource.inc',
     'class' => 'FrxSource',
   );
   $controls[] = array(
-    'file' => 'plugins/FrxXMLSource.inc',
+    'file' => 'renderers/FrxXMLSource.inc',
     'class' => 'FrxXMLSource',
   );
 
   $controls[] = array(
-    'file' => 'plugins/FrxInclude.inc',
+    'file' => 'renderers/FrxInclude.inc',
     'class' => 'FrxInclude',
+  );
+
+  $controls[] = array(
+    'file' => 'renderers/FrxParameterForm.inc',
+    'class' => 'FrxParameterForm',
   );
 
 	$library_dir = FrxReportGenerator::instance()->configuration('library_path');
   $library = rtrim($library_dir,'/') . '/SVGGraph/SVGGraph.php';
   if (file_exists($library)) {
     $controls[] = array(
-      'file' => 'plugins/FrxSVGGraph.inc',
+      'file' => 'renderers/FrxSVGGraph.inc',
       'class' => 'FrxSVGGraph'
     );
   }
@@ -1033,6 +1038,15 @@ function forena_theme() {
     'forena_web_report' => array(
       'variables' => array('doc_types' => NULL, 'parameters' => NULL, 'content' => NULL),
     ),
+    'forena_form' => array(
+      'render element' => 'form',
+      'file' => 'forena.common.inc',
+    ),
+    'forena_form_element' => array(
+      'render element' => 'element',
+      'file' => 'forena.common.inc',
+    ),
+
   );
 }
 
@@ -1087,6 +1101,16 @@ function forena_bean_types() {
     'file' => 'FrxBean.inc',
   );
   return $plugins;
+}
+
+/**
+ * Function to reflect back forms that are built by classes
+ * @param $formid
+ * @param $form_state form state array
+ * @param $form array of form elements to be reflected
+ */
+function forena_form_reflector($formid, &$form_state, $form) {
+  return $form;
 }
 
 

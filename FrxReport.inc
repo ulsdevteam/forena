@@ -113,19 +113,19 @@ class FrxReport {
    * @return unknown_type
    */
   private function get_data($block, $clause='', $id='', $data_uri='') {
-    //@TODO: Merge xml data parameters into the report paramters
     if ($data_uri) {
       parse_str($data_uri, $data);
       if (is_array($data)) foreach ($data as $key => $value) {
         $data[$key] = $this->teng->replace($value);
-
       }
+
+      // Merge in current_context
+      $data = array_merge(Frx::Data()->currentContextArray(), $data);
       $id .= '-parm';
       Frx::Data()->push($data, $id);
     }
 
     $xml = Frx::RepoMan()->data($block, NULL);
-
     if ($data_uri) Frx::Data()->pop();
 
     if ($xml) {
@@ -549,6 +549,139 @@ class FrxReport {
     }
     $this->parms = $parms;
     return $missing_parms;
+  }
+
+  public function parametersForm($collapse=FALSE) {
+  $r = $this;
+
+  //unset($parms['q']);
+  $form = array();
+  $menu_parms = Frx::Data()->getContext('menu-parms');
+
+  if ($r) {
+      $head = $r->rpt_xml->head;
+
+      FrxReportGenerator::instance()->alter_parameters('', $parms);
+      $nodes = $head->xpath('frx:parameters/frx:parm');
+      if ($nodes) {
+
+        $form['params'] = array(
+          '#tree' => TRUE,
+          '#title' => t('Parameters'),
+          '#type' => 'fieldset',
+          '#collapsible' => TRUE,
+          '#collapsed' => $collapse,
+          '#prefix' => '<div id="parameters-wrapper">',
+          '#suffix' => '</div>',
+        );
+
+
+        foreach ($nodes as $node) {
+          $label = (string)$node['label'];
+          $id = (string)$node['id'];
+          $data_source = (string)$node['data_source'];
+          $data_field = (string)$node['data_field'];
+          $class = (string)$node['class'];
+
+          $type = (string)$node['type'];
+          if (isset($parms[$id])) {
+            $value = $parms[$id];
+            $multi_value=(array)$parms[$id];
+          }
+          else {
+            $value = (string)$node;
+            $multi_value = array();
+            if (strpos($value, '|')!==FALSE) $multi_value = explode('|', $value);
+          }
+          $desc =  (string)$node['desc'];
+          $label_field = (string)$node['label_field'];
+
+          (strcmp((string)$node['require'], "1") == 0) ? $required = TRUE : $required = FALSE;
+
+          //Determine the form element type to be displayed
+          //If select or radios is chosen then begin a $list array for display values.
+          $multiselect = FALSE;
+          $list = array();
+          $ajax = FALSE;
+          $add_null = FALSE;
+          switch ($type) {
+            case 'multiselect':
+              $type = 'select';
+              $multiselect = TRUE;
+              $value = $multi_value;
+              break;
+            case 'checkboxes':
+              $value = $multi_value;
+              break;
+            case 'selectajax':
+               $ajax = TRUE;
+               $type = 'select';
+               break;
+            case 'select':
+              $add_null = TRUE;
+              break;
+            case 'radios':
+             break;
+            default:
+             $type = 'textfield';
+             $list = '';
+          }
+
+          if (isset($menu_parms[$id])) {
+            $type = 'item';
+            $value = $menu_parms[$id];
+          }
+
+          //If a data_source attr was found then create an array of
+          //returned values filtered against data_field attr.
+          if ($data_source) {
+            $list = Frx::RepoMan()->dataBlockParams($data_source, $data_field, $label_field);
+            if (!$required && $add_null) $list = array('' => '') + $list;
+          }
+
+          $form['params'][$id] = array(
+            '#type' => $type,
+            '#title' => ($label) ? t($label) : t($id),
+            '#default_value' => $value,
+            '#required' => $required,
+            '#description' => t($desc),
+          );
+
+          if ($type == 'item') {
+            $form['params'][$id]['#markup'] = $value;
+
+          }
+
+          // Add class to parmeter form.
+          if ($class) {
+            $form['params'][$id]['#attributes'] = array(
+              'class' => @explode(' ', $class),
+            );
+          }
+
+
+          //if $list is not empty then push options
+          //onto the array. options will cause an error for
+          //textfield elements.
+          if ($type != 'textfield') {
+            $form['params'][$id]['#options'] = $list;
+            $form['params'][$id]['#multiple'] = $multiselect;
+            if ($ajax) {
+              $form['params'][$id]['#ajax'] = array('callback' => 'forena_parameters_callback',
+                'wrapper' => 'parameters-wrapper');
+            }
+          }
+
+        }
+
+        $form['submit'] = array(
+          '#type' => 'submit',
+          '#value' => t('Submit'),
+        );
+        return $form;
+      }
+    }
+
   }
 
 

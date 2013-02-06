@@ -541,7 +541,7 @@ function forena_layout_form_submit($form, &$form_state) {
   // Body
   $r->setBody($values['body']['value']);
   // If there are no frx attributes in the body then replace them with the old values.
-  $frx_nodes = $r->simplexml->xpath('body//*[@frx:block]');
+  $frx_nodes = $r->simplexml->xpath('body//*[@frx:*]');
   if (!$frx_nodes) {
     $r->save_attributes_by_id($values['attributes']);
   }

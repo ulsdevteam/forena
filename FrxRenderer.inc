@@ -15,6 +15,7 @@ class FrxRenderer {
   public $name;
   public $id;
   public $format;
+  public $frxReport;  // The report object being used.
 
 
   public function __construct($domNode = NULL, $teng = NULL, $frxReport = NULL) {
@@ -42,7 +43,6 @@ class FrxRenderer {
   }
 
   public function render() {
-    $this->initNode($domNode, $teng);
     // Get the data that we're working with
     $xml = $this->dataProvider->getCurrentContext();
     $node = $this->nodes;
@@ -65,6 +65,32 @@ class FrxRenderer {
       $attributes[$key] = (String)$data;
     }
     return $attributes;
+  }
+
+  /**
+   * Return the inside xml of the current node
+   *
+   */
+  public function innerXML() {
+    $xml = $this->reportDocNode;
+    $tag = $xml->getName();
+    $text = '';
+    if (is_object($xml) && is_object($xml->$tag)) {
+      $text = $xml->asXML();
+      $text = preg_replace("/<\/?" . $tag . "(.|\s)*?>/", "", $text);
+    }
+    return $text;
+  }
+
+  /**
+   * Render a drupal form in a forena template
+   * @param $form array
+   */
+  public function renderForm($form) {
+    $form['#forena_template'] = $this->innerXML();
+    if ($form) $form = drupal_get_form('forena_form_reflector', $form);
+    $output = drupal_render($form);
+    return $output;
   }
 
 

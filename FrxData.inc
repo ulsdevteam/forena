@@ -31,6 +31,31 @@ class FrxData {
   }
 
   /**
+   * Return current context as key value pairs
+   * Enter description here
+   */
+  public function currentContextArray() {
+    $data = $this->cur_context;
+    if (is_array($data)) {
+      return $data;
+    }
+
+    $parms = array();
+    if (is_object($data)) {
+      // Get attributes
+      $data = get_object_vars($data);
+      if (method_exists($data, 'attributes')) {
+        foreach ($data->attributes() as $key=>$value) {
+          $data[$key] = (string)$value;
+        }
+      }
+
+      return $data;
+    }
+
+  }
+
+  /**
    * Allows override of a value for the current context.
    * @param String $key
    * @param String $value
@@ -109,5 +134,6 @@ class FrxData {
   public function getContext($id) {
     return @$this->data_sources[$id];
   }
+
 
 }
