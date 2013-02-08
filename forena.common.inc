@@ -594,26 +594,65 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
  * Render a special form with an embedded forena report.
  * @param unknown_type $variables
  */
-function theme_forena_form($variables) {
+function theme_forena_inline_form($variables) {
   $form = $variables['form'];
   $build = '';
   $output = '';
-  // Render the elements
-  foreach ($form as $key => $value) if (strpos($key,'#')===FALSE) {
-    $value['#theme_wrappers'] = array('forena_form_element');
-    $elements[$key] = drupal_render($value);
-    $build .= $elements[$key];
-  }
+  $fields = array();
+
+  // Convert interior elements into inline fields
+  _forena_set_inline_theme($form);
+  // Render the inline fields and store them into the array.
+  _forena_render_inline_elements($form, $fields);
+
+  // Render the child form in the template.
+  $teng = new FrxSyntaxEngine(FRX_TOKEN_EXP,'{}');
+  $o = Frx::Data()->push($fields, 'form-fields');
+  $build = $teng->replace($form['#forena_form_template'], TRUE);
+  $o = Frx::Data()->pop();
+
   // Return the form
   $form['#children'] = $build;
+
   return $build;
+}
+
+function _forena_render_inline_elements(&$elements, &$fields) {
+  foreach ($elements as $key => $value) if (strpos($key, '#')===FALSE) {
+    if (@$value['#type'] != 'fieldset') {
+      $fields[$key] = drupal_render($value);
+    }
+    else {
+      _forena_render_inline_elements($elements[$key], $fields);
+    }
+  }
+}
+
+function _forena_set_inline_theme(&$elements) {
+  foreach ($elements as $key => $value) if (strpos($key,'#')===FALSE) {
+    $type = @$value['#type'];
+    // Set theme functions for specific types to be inline forms.
+    switch ($type) {
+      case 'fieldset':
+      case 'submit':
+      case '':
+      case NULL:
+        _forena_set_inline_theme($elements[$key]);
+        break;
+      default:
+        $elements[$key]['#theme_wrappers'] = array('forena_inline_form_element');
+
+
+    }
+
+  }
 }
 
 /**
  * Renders forena reprot as
  * @param unknown_type $variables
  */
-function theme_forena_form_element($variables) {
+function theme_forena_inline_form_element($variables) {
   $element = &$variables['element'];
   // This is also used in the installer, pre-database setup.
   $t = get_t();

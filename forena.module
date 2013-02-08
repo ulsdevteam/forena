@@ -1038,11 +1038,11 @@ function forena_theme() {
     'forena_web_report' => array(
       'variables' => array('doc_types' => NULL, 'parameters' => NULL, 'content' => NULL),
     ),
-    'forena_form' => array(
+    'forena_inline_form' => array(
       'render element' => 'form',
       'file' => 'forena.common.inc',
     ),
-    'forena_form_element' => array(
+    'forena_inline_form_element' => array(
       'render element' => 'element',
       'file' => 'forena.common.inc',
     ),

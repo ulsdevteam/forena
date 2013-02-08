@@ -35,8 +35,13 @@ class FrxWebDoc extends FrxDocument {
 
     // Build the parameters form
     $parameters='';
-    $f = drupal_get_form('forena_parameter_form', $r->rpt_xml->asXML(), $r->blocks_loaded);
-    if ($f) $parameters = drupal_render($f);
+    /*
+    $form_templates = $r->rpt_xml->xpath('//*[@frx:renderer="FrxParameterForm"]');
+    if (!$form_templates) {
+      $f = drupal_get_form('forena_parameter_form', $r->rpt_xml->asXML(), $r->blocks_loaded);
+      if ($f) $parameters = drupal_render($f);
+    }
+    */
 
     // @TODO: Refactor to support theming of document links.
     // Build Links for document.

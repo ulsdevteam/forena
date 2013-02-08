@@ -87,7 +87,6 @@ class FrxRenderer {
    * @param $form array
    */
   public function renderForm($form) {
-    $form['#forena_template'] = $this->innerXML();
     if ($form) $form = drupal_get_form('forena_form_reflector', $form);
     $output = drupal_render($form);
     return $output;

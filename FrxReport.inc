@@ -283,9 +283,14 @@ class FrxReport {
   public function render($format) {
     if (!$format) $format = 'web';
     Frx::Data()->push($this->parms, 'parm');
+
     $this->format = $format;
     $dom = $this->dom;
     $o='';
+    if (!$this->rpt_xml->xpath('//*[@frx:renderer="FrxParameterForm"]') && $format=='web') {
+      $form = drupal_get_form('forena_form_reflector', $this->parametersForm());
+      $o .= drupal_render($form);
+    }
     $body = $dom->getElementsByTagName('body')->item(0);
     foreach ($body->childNodes as $node) {
       $o .= $this->render_section($node);
@@ -551,8 +556,10 @@ class FrxReport {
     return $missing_parms;
   }
 
-  public function parametersForm($collapse=FALSE) {
+  public function parametersForm() {
     $r = $this;
+    $collapse = $this->blocks_loaded;
+    $parms = array_merge($_POST, $_GET);
 
     //unset($parms['q']);
     $form = array();
@@ -673,9 +680,10 @@ class FrxReport {
 
       }
 
-      $form['submit'] = array(
+      $form['params']['submit'] = array(
         '#type' => 'submit',
         '#value' => t('Submit'),
+        '#submit' => array('forena_parameter_form_submit'),
       );
       return $form;
     }
