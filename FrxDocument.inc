@@ -67,6 +67,8 @@ class FrxDocument {
       header('Content-Type: ' . $this->content_type);
       header('Cache-Control:');
       header('Pragma:');
+      $file_name = basename($_GET['q']);
+      header('Content-Disposition: attachment; filename="'. $file_name . '"');
       header('Cache-Control: must-revalidate');
       print  $output;
       return TRUE;
