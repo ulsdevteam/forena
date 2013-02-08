@@ -296,10 +296,8 @@ class FrxRepoMan {
  * @where_clause: Where clause for data block to be filtered against.
  *
  */
-function dataBlockParams($data_block, $field, $label, $params=array()) {
-  Frx::Data()->push($params);
+function dataBlockParams($data_block, $field, $label) {
   $xml = Frx::RepoMan()->data($data_block);
-  Frx::Data()->pop();
 
   $list = array();
   if ($xml) {

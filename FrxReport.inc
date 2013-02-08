@@ -559,15 +559,15 @@ class FrxReport {
   public function parametersForm() {
     $r = $this;
     $collapse = $this->blocks_loaded;
-    $parms = array_merge($_POST, $_GET);
+    $parms = Frx::Data()->currentContextArray();
 
-    //unset($parms['q']);
+    unset($parms['q']);
     $form = array();
-    $menu_parms = Frx::Data()->getContext('menu-parms');
+    //$menu_parms = Frx::Data()->getContext('menu-parms');
 
     $head = $r->rpt_xml->head;
 
-    FrxReportGenerator::instance()->alter_parameters('', $parms);
+    //FrxReportGenerator::instance()->alter_parameters('', $parms);
     $nodes = $head->xpath('frx:parameters/frx:parm');
     if ($nodes) {
 
