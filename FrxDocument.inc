@@ -68,11 +68,21 @@ class FrxDocument {
       header('Cache-Control:');
       header('Pragma:');
       header('Cache-Control: must-revalidate');
-      print $output;
+      print  $output;
       return TRUE;
     }
     else {
       return FALSE;
     }
+  }
+
+  public function convertCharset($data) {
+    if (isset($_SERVER['HTTP_ACCEPT_CHARSET'])) {
+      $parts = @explode(';', $_SERVER['HTTP_ACCEPT_CHARSET']);
+      $parts = @explode(',', $parts[0]);
+      $to_encoding=@$parts[0];
+      if ($to_encoding) $data = mb_convert_encoding($data, $to_encoding, 'UTF-8');
+    }
+    return $data;
   }
 }

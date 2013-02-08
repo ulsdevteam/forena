@@ -13,7 +13,7 @@ class FrxWordDoc extends FrxDocument {
   public function render($r, $format, $options = array()) {
     $css = $this->loadCSSFiles($format);
     $output = '<html><head>';
-    $output .= '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>';
+    $output .= '<meta http-equiv="Content-Type" content="text/html"/>';
     if ($options['css']) {
       $output .= '<style type="text/css">';
       $output .= $css;
@@ -21,5 +21,10 @@ class FrxWordDoc extends FrxDocument {
     }
     $output .= '<title>' . $r->title . '</title></head><body class="forena-report">' . $r->html . '</body></html>';
     return $output;
+  }
+
+  public function output($output) {
+    parent::output($this->convertCharset($output));
+    return TRUE;
   }
 }
