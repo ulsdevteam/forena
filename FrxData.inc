@@ -135,5 +135,4 @@ class FrxData {
     return @$this->data_sources[$id];
   }
 
-
 }

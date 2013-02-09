@@ -14,9 +14,18 @@ function forena_menu() {
   Frx::Menu()->addMenuItems($items);
 
 
-  $items['admin/structure/reports'] = array(
+  $items['admin/structure/forena'] = array(
     'type' => MENU_NORMAL_ITEM,
     'title' => 'Forena Reports',
+    'description' => 'Build reports based on data in your sites databases.',
+    'page callback' => 'forena_admin_reports',
+    'access arguments' => array('design any report'),
+    'file' => 'forena.admin.inc',
+  );
+
+  $items['admin/structure/forena/reports'] = array(
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'title' => 'Reports',
     'description' => 'Build reports based on data in your sites databases.',
     'page callback' => 'forena_admin_reports',
     'access arguments' => array('design any report'),

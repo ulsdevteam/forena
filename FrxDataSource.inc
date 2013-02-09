@@ -96,13 +96,11 @@ class FrxDataSource{
       $contents = file_get_contents($base_file . '.sql');
       $block = $this->parseSQLFile($contents);
       $block['type'] = 'sql';
-      $block['tokens'] = $this->tokens($block['source']);
     }
     elseif (file_exists($base_file . '.xml')) {
       $contents = file_get_contents($base_file . '.xml');
       $block = $this->parseXMLFile($contents);
       $block['type'] = 'xml';
-      $block['tokens'] = $this->tokens($block['source']);
     }
     elseif (file_exists($base_file . '.inc')) {
       $parts = pathinfo($base_file . '.inc');
@@ -261,7 +259,7 @@ class FrxDataSource{
       }
       $i++;
     }
-    return array('access' => $access, 'source' => $data);
+    return array('access' => $access, 'source' => $data, 'tokens' => $this->tokens($data));
   }
 
 
@@ -310,7 +308,8 @@ class FrxDataSource{
       $i++;
     }
 
-    return array('access' => $access, 'source' => $data, 'file' => trim($contents, " \n"));
+    return array('access' => $access, 'source' => $data, 'file' => trim($contents, " \n"),
+    	'tokens' => $this->tokens($contents));
   }
 
   /**

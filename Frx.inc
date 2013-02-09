@@ -8,6 +8,7 @@ define('FRX_SQL_TOKEN', '/:([a-z]|[0-9]|{A-Z]|[_\.])+/');
 
 class Frx {
 
+
   /**
    * Skin Factory
    * @return FrxSkin
@@ -108,6 +109,18 @@ class Frx {
       return @$instances[$class];
     }
     return $instances;
+  }
+
+  /**
+  * Returns an object of the template class
+  * that has a method named templates.
+  * @return FrxTemplate
+  */
+  public static function Template($class) {
+    FrxReportGenerator::instance()->supported_templates();
+    if (class_exists($class)) {
+      return new $class();
+    }
   }
 
   /**

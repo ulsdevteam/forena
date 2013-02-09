@@ -178,9 +178,9 @@ class FrxReportGenerator {
     require_once('templates/FrxTemplate.inc');
     require_once('templates/FrxTable.inc');
     require_once('templates/FrxFieldTable.inc');
-     require_once('templates/FrxEmailMerge.inc');
-     require_once('templates/FrxGraphTemplate.inc');
-     require_once('templates/FrxRptInclude.inc');
+    require_once('templates/FrxEmailMerge.inc');
+    require_once('templates/FrxGraphTemplate.inc');
+    require_once('templates/FrxRptInclude.inc');
     $templates = array(
       'FrxTable' => 'Table',
       'FrxTemplate' => 'Document',

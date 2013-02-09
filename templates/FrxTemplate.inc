@@ -12,10 +12,7 @@ class FrxTemplate {
   public $simplexml;
   public $body;
 
-  public $doc_prefix = '<?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE root [
-    <!ENTITY nbsp "&#160;">
-    ]>';
+  public $doc_prefix = '<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE root [ <!ENTITY nbsp "&#160;"> ]>';
 
 
   public $xmlns = 'urn:FrxReports';
@@ -211,7 +208,6 @@ class FrxTemplate {
     }
     return $output;
   }
-
 
   public function asXML() {
     return $this->dom->saveXML();

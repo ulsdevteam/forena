@@ -6,10 +6,13 @@
 require_once('FrxTemplate.inc');
 class FrxTable extends FrxTemplate {
   public function generate($xml, $config) {
-    $block = $config['block'];
-    $id = $this->idFromBlock($block);
-    $config['id'] = $id . '_block';
-    $config['class'] = 'FrxTable';
+    $block = @$config['block'];
+    $id = @$config['id'];
+    if ($block) {
+      $id = $this->idFromBlock($block);
+      $config['id'] = $id . '_block';
+    }
+    $config['class'] = @$config['class'] ? $config['class'] . ' FrxTable' : 'FrxTable';
     $div = $this->blockDiv($config);
     $columns = $this->columns($xml);
     $table = $this->addNode($div, 4, 'table');

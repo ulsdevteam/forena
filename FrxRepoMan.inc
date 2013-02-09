@@ -281,6 +281,22 @@ class FrxRepoMan {
      return $xml;
   }
 
+  /**
+   * Parse a block into its data
+   * @param $source Text data of the SQL block definition
+   * @return array block definition.
+   */
+  public function sqlBlock($provider, $source) {      //Intstantiate the provider
+     $o = $this->repository($provider);
+
+     $repos = @$this->repositories[$provider];
+     if (isset($repos['enabled']) && !$repos['enabled']) {
+       return '';
+     }
+     if ($o)
+     return $o->parseSQLFile($source);
+  }
+
 
   /**
    * Check access control using the block in a data block.  In this case
