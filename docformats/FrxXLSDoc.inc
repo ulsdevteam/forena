@@ -30,7 +30,6 @@ class FrxXLSDoc extends FrxDocument {
     $output .= '    <Protection/>' . "\n";
     $output .= '  </Style>' . "\n";
     $output .= '</Styles>' . "\n";
-
     $doc = new DOMDocument();
     $doc->strictErrorChecking = FALSE;
     $doc->loadHTML($body);

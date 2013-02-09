@@ -275,6 +275,7 @@ class FrxDataSource{
     $block = '';
     $parms = Frx::Data()->currentContext();
     $data = '';
+    $source = '';
     $skip = FALSE;
     while ($i<$cnt) {
       $l = trim($lines[$i], "\r");
@@ -309,7 +310,7 @@ class FrxDataSource{
       $i++;
     }
 
-    return array('access' => $access, 'source' => $data);
+    return array('access' => $access, 'source' => $data, 'file' => trim($contents, " \n"));
   }
 
   /**
@@ -336,7 +337,7 @@ class FrxDataSource{
     return $xml;
   }
 
-  public function phpData($method, $paremeters) {
+  public function phpData($method, $parameters) {
     $xml = '';
     return $xml;
   }

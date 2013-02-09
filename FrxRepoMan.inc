@@ -103,6 +103,7 @@ class FrxRepoMan {
   /**
    * Load repository
    * @param $name Name of the repository
+   * @return FrxDataSource
    */
   public function repository($name) {
     // Now determine if the object exists
@@ -196,9 +197,7 @@ class FrxRepoMan {
   /**
    * Extract the data by running a block
    *
-   * @param unknown_type $data_block
-   * @param unknown_type $parameters
-   * @param string $clause order / where cause
+   * @param $data_block String name ob block to load
    * @return unknown
    */
   function data($data_block) {
@@ -206,8 +205,6 @@ class FrxRepoMan {
      //Intstantiate the provider
      $o = $this->repository($provider);
      $repos = @$this->repositories[$provider];
-
-
      if (isset($repos['enabled']) && !$repos['enabled']) {
        return '';
      }
@@ -246,6 +243,44 @@ class FrxRepoMan {
        return '';
      }
   }
+
+  /**
+   * Execute sql on a provider
+   * @param $provider String Data provider index to reference
+   * @param $sql String sql command to execute
+   */
+  public function sqlData($provider, $sql, $parms = array()) {
+     $xml = '';
+
+     //Intstantiate the provider
+     $o = $this->repository($provider);
+
+     $repos = @$this->repositories[$provider];
+     if (isset($repos['enabled']) && !$repos['enabled']) {
+       return '';
+     }
+     //Populate user callback.
+     if (isset($repos['user callback'])) {
+       $user_fn = $repos['user callback'];
+       if (is_callable($user_fn)) {
+          $current_user =   $user_fn();
+         Frx::Data()->setValue('current_user', $current_user);
+       }
+     }
+
+     if ($o && $sql) {
+       Frx::Data()->push($parms, 'parm');
+
+       // Parse the sql file
+       $data = $o->parseSQLFile($sql);
+       //now get the built SQL back
+       $sql = $data['source'];
+       $xml = $o->sqlData($sql);
+       Frx::Data()->pop();
+     }
+     return $xml;
+  }
+
 
   /**
    * Check access control using the block in a data block.  In this case

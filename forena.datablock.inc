@@ -46,7 +46,7 @@ function forena_query_edit_block_form($form, &$form_state) {
       );
     }
 
-    $form['save_as'] = array('#type' => 'fieldset', '#title' => 'Save As');
+    $form['save_as'] = array('#type' => 'fieldset', '#title' => 'Save As', '#collapsed' => TRUE, '#collapsible' => TRUE);
     $form['save_as']['save_as_name'] = array(
       '#type' => 'textfield',
       '#title' => t('Name'),
@@ -86,7 +86,12 @@ function forena_query_edit_block_form($form, &$form_state) {
 
 function forena_query_block_preview($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
-  $data = forena_xml($form_state['values']['block'], @$form_state['values']['parameters']);
+  $block = $form_state['values']['block'];
+  list($provider, $block_name) = @explode('/', $block, 2);
+  $parms = isset($form_state['values']['parameters']) ? $form_state['values']['parameters'] : array();
+  $sql = $form_state['values']['source'];
+  FrxReportGenerator::instance()->alter_parameters('', $parms);
+  $data = Frx::RepoMan()->sqlData($provider, $sql, $parms);
   if (is_object($data)) $data = $data->asXML();
   $form_state['storage']['preview'] = htmlspecialchars($data);
 
