@@ -206,12 +206,12 @@ class FrxDataSource{
     $d = glob($path . '*');
     if ($d) foreach ($d as $dir_name) {
       if (is_dir($dir_name)) {
-        $block_list += $this->list_blocks($search, $dir_name, $block_list);
+        $block_list =  array_merge($block_list, $this->list_blocks($search, $dir_name, $block_list));
       }
     }
     // Date
     if (!$subdir && module_exists('forena_query'))  {
-      $block_list += $this->listDBBlocks($search);
+      $block_list = array_merge($block_list,  $this->listDBBlocks($search));
       asort($block_list);
     }
     return $block_list;
