@@ -7,6 +7,10 @@
  * @author metzlerd
  */
 class FrxSQLQueryBuilder {
+  private $repository;
+  private $provider;
+  private $block_name;
+  private $sql;
   private $clauses = array();
   private $descriptions = array();
   private $where_clause = array();
@@ -19,6 +23,30 @@ class FrxSQLQueryBuilder {
     'LIKE' => 'is like',
   );
   private $data;
+
+  /**
+   * @param unknown_type $block
+   * @return FrxSQLQueryBuilder
+   */
+  public function block($block) {
+    list($provider, $block_name) = @explode('/', $block, 2);
+    $this->provider = $provider;
+    $this->block_name = $block_name;
+    $this->repository = Frx::RepoMan()->repository($provider);
+    $this->loadBlock();
+    return $this;
+  }
+
+  /**
+   * @return FrxSQLQueryBuilder
+   */
+  protected  function loadblock() {
+    if ($this->repository && $this->block_name) {
+      $this->block = $this->repository->loadBlock($This->block_name);
+    }
+    return $this;
+  }
+
 
   /**
    * Starts the query builder
@@ -81,7 +109,7 @@ class FrxSQLQueryBuilder {
    * @param unknown_type $comparison
    * @param unknown_type $value
    */
-  public function condition($field, $comparison, $value) {
+  public function condition($field, $value, $comparison='=') {
     $this->data[$field] = $value;
     $this->filter($field, $comparison);
   }

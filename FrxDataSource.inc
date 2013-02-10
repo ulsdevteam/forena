@@ -130,10 +130,10 @@ class FrxDataSource{
    * Load blcok data from filesystem
    * @param $block_name
    */
-  function loadBlock($block_name) {
+  function loadBlock($block_name, $include=FALSE) {
 
     $block = array();
-    $this->block_name = $block_name;
+    if ($include) $this->block_name = $block_name;
     $block = $this->loadBlockFromDB($block_name);
     if (!$block) {
       $block = $this->loadBlockFromFile($block_name);
@@ -262,6 +262,14 @@ class FrxDataSource{
     return array('access' => $access, 'source' => $data, 'tokens' => $this->tokens($data));
   }
 
+  public function getSQLInclude($block_name) {
+    //@TODO: allow relative block includes
+    $block = $this->loadBlock($block_name, TRUE);
+    if ($block['type'] == 'sql') {
+      return $block;
+    }
+  }
+
 
   public function parseSQLFile($contents) {
     $comment = $this->comment_prefix;
@@ -275,6 +283,7 @@ class FrxDataSource{
     $data = '';
     $source = '';
     $skip = FALSE;
+    $tokens = array();
     while ($i<$cnt) {
       $l = trim($lines[$i], "\r");
       @list($d, $c) = explode($comment, $l, 2);
@@ -296,6 +305,13 @@ class FrxDataSource{
             case 'ELSE':
               $skip = !$skip;
               break;
+            case 'INCLUDE':
+              $inc_block = $this->getSQLInclude(trim($o));
+              if ($inc_block) {
+                $data .= $inc_block['source'];
+                array_merge($tokens, $inc_block['tokens']);
+              }
+              break;
         }
         }
 
@@ -307,9 +323,9 @@ class FrxDataSource{
       }
       $i++;
     }
-
+    $tokens = array_merge($tokens, $this->tokens($contents));
     return array('access' => $access, 'source' => $data, 'file' => trim($contents, " \n"),
-    	'tokens' => $this->tokens($contents));
+    	'tokens' => $tokens);
   }
 
   /**

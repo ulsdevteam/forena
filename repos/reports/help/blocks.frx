@@ -72,6 +72,24 @@
 	specified for :state.  If no value for :state is provided the WHERE clause
 	limits the selection to code of 'AL'. The order by clause is always included. 
 	</p>
+	<h3>Inlcudes</h3>
+	<p>
+	  Blocks can be build from other data blocks.  To accomplish this use the
+	  --INCLUDE directive as follows: 
+	</p>
+	<pre>
+	--ACCESS=access content
+	SELECT * FROM (
+	--INCLUDE=users_by_state
+	) t
+	WHERE state=:state
+	</pre>
+	<p>
+	Note that when icluding other data blocks you can only include blocks within
+	the same repository, and that the security of the new datablock is the 
+	security that is used for that data.  The --ACCESS line of the inluded block 
+	is ignored. 
+	</p>
 
 	<ul id="forena-1" frx:block="forena_help/admin_topics">
 		<li id="forena-2" frx:foreach="*"><span>{title}</span>

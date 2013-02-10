@@ -8,6 +8,7 @@
 class FrxRepoMan {
 
   public $repositories;
+  private $repository;
 
 
   /**

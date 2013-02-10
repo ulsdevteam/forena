@@ -11,15 +11,11 @@ class FrxTemplate {
   public $document_root;
   public $simplexml;
   public $body;
-
   public $doc_prefix = '<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE root [ <!ENTITY nbsp "&#160;"> ]>';
-
-
   public $xmlns = 'urn:FrxReports';
+  public $columns;
 
   public function __construct($xml_string = '') {
-
-
     $this->dom = new DOMDocument('1.0', 'UTF-8');
     $dom = $this->dom;
 
@@ -30,7 +26,7 @@ class FrxTemplate {
       $dom->loadXML($xml_string);
     }
     catch (Exception $e) {
-      forena_error('Invalid or malformed tmeplate document', '<pre>' .
+      forena_error('Invalid or malformed template document', '<pre>' .
         $e->getMessage() . $e->getTraceAsString() . '</pre>');
     }
     $this->body = $dom->getElementsByTagName('body')->item(0);
@@ -38,13 +34,14 @@ class FrxTemplate {
 
 
   public function columns($xml, $path='/*/*') {
-        //create an array of columns
+    //create an array of columns
     $rows = $xml->xpath($path);
     $column_array = array();
-
+    $this->columns = array();
     foreach ($rows as $columns) {
       foreach ($columns as $name => $value) {
         $column_array[$name] = $name;
+        $this->columns[] = $name;
       }
       if (is_object($xml) && method_exists($xml, 'attributes')) {
         foreach ($xml->attributes() as $name => $value) {

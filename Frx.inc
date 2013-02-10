@@ -168,9 +168,29 @@ class Frx {
     }
   }
 
+  /**
+   * Factory for token replacement syntax engine object
+   * @param $regexp string regular expression for finding tokens
+   * @param $trim string to trim off the end of tokens.
+   * @return FrxSyntaxEngine
+   */
   public static function SyntaxEngine($regexp, $trim) {
     require_once 'FrxSyntaxEngine.inc';
     return new FrxSyntaxEngine($regexp, $trim);
+  }
+
+  /**
+   * Facotry for SQL Query builder object
+   * @param $new Boolean value that forces a new object
+   * @return FrxSQLQueryBuilder
+   */
+  public static function SQLQueryBuilder($new = FALSE) {
+    static $o = '';
+    require_once 'FrxSQLQueryBuilder.inc';
+    if (!$o || $new) {
+      $o = new FrxSQLQueryBuilder();
+    }
+    return $o;
   }
 
 }
