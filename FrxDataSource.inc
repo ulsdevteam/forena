@@ -70,7 +70,7 @@ class FrxDataSource{
           'repository' => $b->repository,
           'block_name' => $b->block_name,
           'type' => $b->block_type,
-          'source' => $b->src,
+          'file' => $b->src,
           'access' => $b->access,
           'title' => $b->title,
           'locked' => $b->locked,
@@ -78,10 +78,10 @@ class FrxDataSource{
         );
         switch ($block['type']) {
           case 'sql':
-            $block = array_merge($block, $this->parseSQLFile($block['source']));
+            $block = array_merge($block, $this->parseSQLFile($block['file']));
             break;
           case 'xml':
-            $block = array_merge($block, $this->parseXMLFile($block['source']));
+            $block = array_merge($block, $this->parseXMLFile($block['file']));
             break;
         }
 
@@ -282,6 +282,7 @@ class FrxDataSource{
     $parms = Frx::Data()->currentContext();
     $data = '';
     $source = '';
+    $file = '';
     $skip = FALSE;
     $tokens = array();
     while ($i<$cnt) {
@@ -312,20 +313,29 @@ class FrxDataSource{
                 array_merge($tokens, $inc_block['tokens']);
               }
               break;
-        }
-        }
+          }
 
+        }
+        if ($a != 'ACCESS') $file .= "$l\n";
+
+      }
+      else {
+
+        $file .= "$l\n";
       }
       if (!$skip) {
         if (strpos($l, $comment)!==0 && $l) {
           $data .= "$l\n";
         }
       }
+
       $i++;
     }
     $tokens = array_merge($tokens, $this->tokens($contents));
-    return array('access' => $access, 'source' => $data, 'file' => trim($contents, " \n"),
+    $block = array( 'source' => $data, 'file' => trim($file, " \n"),
     	'tokens' => $tokens);
+    if ($access) $block['access'] = $access;
+    return $block;
   }
 
   /**
@@ -374,7 +384,7 @@ class FrxDataSource{
     if ($block = $rs->fetchObject()) {
       db_update('forena_data_blocks')
         ->fields(array(
-          'src' => $data['source'],
+          'src' => $data['file'],
           'access' => $data['access'],
           'modified' => $modified,
         ))
@@ -388,7 +398,7 @@ class FrxDataSource{
           'repository' => $this->name,
           'block_name' => $block_name,
           'block_type' => $data['type'],
-          'src' => $data['source'],
+          'src' => $data['file'],
           'access' => $data['access'],
           'locked' => 0,
           'modified' => $modified,

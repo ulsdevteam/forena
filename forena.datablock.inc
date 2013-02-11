@@ -54,11 +54,11 @@ function forena_query_edit_block_form($form, &$form_state) {
     '#markup' => $data['access'],
   );
 
-  $form['source'] = array(
+  $form['file'] = array(
     '#type' => 'textarea',
     '#title' => t('Source'),
     '#disabled' => @$data['locked'],
-    '#default_value' => @$data['source'],
+    '#default_value' => @$data['file'],
   );
 
 
@@ -88,7 +88,7 @@ function forena_query_block_preview($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
   $block = $form_state['values']['block'];
   $block_def = isset($form_state['storage']['block']) ? $form_state['storage']['block'] : array();
-  $sql = $form_state['values']['source'];
+  $sql = $form_state['values']['file'];
   list($provider, $block_name) = @explode('/', $block, 2);
   $new_block = Frx::RepoMan()->sqlBlock($provider, $sql);
   if ($new_block) $block_def = array_merge($block_def, $new_block);
@@ -104,8 +104,10 @@ function forena_query_block_preview($form, &$form_state) {
     $rpt = new FrxReport($report, $data);
     $form_state['storage']['preview'] = $rpt->render('web');
   }
+  else {
+    $form_state['storage']['preview'] = '';
+  }
   if (is_object($data)) $data = $data->asXML();
-  //$form_state['storage']['preview'] = htmlspecialchars($data);
 
 }
 
@@ -113,7 +115,7 @@ function forena_query_load_block($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
   $form_state['storage']['block'] = Frx::RepoMan()->loadBlock($form_state['values']['block']);
   $form_state['storage']['block_name'] = $form_state['values']['block'];
-  $form_state['input']['source'] = $form_state['values']['source'] = $form_state['storage']['block']['source'];
+  $form_state['input']['file'] = $form_state['values']['file'] = $form_state['storage']['block']['file'];
 }
 
 function forena_query_validate_new_block($form, &$form_state) {
@@ -159,7 +161,7 @@ function forena_query_save_new_block($form, &$form_state) {
 function forena_query_save_existing_block($form, &$form_state) {
   $block_name = $form_state['storage']['block_name'];
   $data = $form_state['storage']['block'];
-  $data['source'] = $form_state['values']['source'];
+  $data['file'] = $form_state['values']['file'];
   Frx::RepoMan()->saveBlock($block_name, $data);
   drupal_set_message('Block Saved');
   $form_state['input']['block'] = $block_name;
