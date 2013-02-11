@@ -582,8 +582,8 @@ function forena_report_menu_callback() {
   $args = func_get_args();
 	$path = array_shift($args);
 	$report_name = array_shift($args);
-	$parms = array();
-
+	$parms = $_GET;
+	unset($parms['q']);
   $tokens = Frx::Menu()->tokens($path);
 	if ($args && $tokens) {
 	  foreach ($args as $i=> $value) {
