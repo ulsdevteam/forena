@@ -22,9 +22,11 @@ function forena_query_edit_block_form($form, &$form_state) {
     '#submit' => array('forena_query_load_block', 'forena_query_block_preview'),
     '#value' => 'Load',
   );
+
   // Only allow save as of sql data blocks.
   if ($data && $data['type']=='sql') {
-    if (!@$data['locked']) {
+    $access = forena_query_access_repository($form_state['storage']['block_name']);
+    if (!@$data['locked'] && $access) {
       $form['save'] = array(
         '#type' => 'submit',
         '#value' => 'Save',
@@ -32,20 +34,22 @@ function forena_query_edit_block_form($form, &$form_state) {
       );
     }
     $form['submit'] = array('#type' => 'submit', '#value' => 'Preview', '#submit' => array('forena_query_block_preview'));
+    if ($access) {
+      $form['save_as'] = array('#type' => 'fieldset', '#title' => 'Save As', '#collapsed' => TRUE, '#collapsible' => TRUE);
+      $form['save_as']['save_as_name'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Name'),
+        '#description' => t('Indicate a proper path to save the data.  '),
+      );
 
-    $form['save_as'] = array('#type' => 'fieldset', '#title' => 'Save As', '#collapsed' => TRUE, '#collapsible' => TRUE);
-    $form['save_as']['save_as_name'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Name'),
-      '#description' => t('Indicate a proper path to save the data.  '),
-    );
 
-    $form['save_as']['save_as_submit'] = array(
-      '#type' => 'submit',
-      '#validate' => array('forena_query_validate_new_block'),
-      '#submit' => array('forena_query_save_new_block'),
-      '#value' => t('Save As')
-    );
+      $form['save_as']['save_as_submit'] = array(
+        '#type' => 'submit',
+        '#validate' => array('forena_query_validate_new_block'),
+        '#submit' => array('forena_query_save_new_block'),
+        '#value' => t('Save As')
+      );
+    }
   }
 
   $form['access'] = array(

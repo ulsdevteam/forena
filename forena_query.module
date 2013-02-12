@@ -1,12 +1,20 @@
 <?php
+/**
+ * @file
+ * Provides the ability to create saved queries
+ * and to test sql data blocks.
+ */
 
+/**
+ * Implementation of hook_menu
+ */
 function forena_query_menu() {
   $items = array();
 
   $items['admin/structure/forena/data']  = array(
     'type' => MENU_LOCAL_TASK,
     'title' => 'Data Blocks',
-    'access arguments' => array('build forena data blocks'),
+    'access arguments' => array('build forena sql blocks'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('forena_query_edit_block_form'),
     'file' => 'forena.datablock.inc',
@@ -15,6 +23,25 @@ function forena_query_menu() {
   return $items;
 }
 
+/**
+ * Implementation of hook_permission
+ */
 function forena_query_permission() {
-  return array('build forena data blocks' => array('title' => 'Build Forena Data Blocks'));
+  $perms =  array('build forena sql blocks' => array('title' => 'Build Forena Data Blocks using SQL',
+    'description' => 'Use with care as this has security implications'));
+  foreach (Frx::RepoMan()->repositories as $repos => $conf) {
+    $name = $conf['title'] ? $conf['title'] : $repos;
+    $perms['create '. $repos . ' blocks'] = array('title' =>  'Create ' . $name . ' Data Blocks');
+  }
+  return $perms;
+}
+
+/**
+ * Return permission as to whether the user can save data
+ * in the repository.
+ * @param $repos string
+ */
+function forena_query_access_repository($repos) {
+  list($repos, $block) = @explode('/', $repos, 2);
+  return user_access('create ' . $repos . ' blocks');
 }
