@@ -610,6 +610,7 @@ function theme_forena_inline_form($variables) {
   $o = Frx::Data()->push($fields, 'form-fields');
   $build = $teng->replace($form['#forena_form_template'], TRUE);
   $o = Frx::Data()->pop();
+  $build .= $fields['form_build_id'] . $fields['form_token'] . $fields['form_id'];
 
   // Return the form
   $form['#children'] = $build;
