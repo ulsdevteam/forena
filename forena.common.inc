@@ -314,6 +314,9 @@ function forena_parameter_form_submit($form, &$form_state) {
       if (strpos($value, '|')!==FALSE) {
         $values['params'][$key] = explode('|', $value);
       }
+      elseif ($value==='' || $value===NULL) {
+        unset($values['params'][$key]);
+      }
     }
   }
   $form_state['redirect']= array($_GET['q'], array('query' => @$values['params']));
