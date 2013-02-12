@@ -42,7 +42,6 @@ function forena_query_edit_block_form($form, &$form_state) {
         '#description' => t('Indicate a proper path to save the data.  '),
       );
 
-
       $form['save_as']['save_as_submit'] = array(
         '#type' => 'submit',
         '#validate' => array('forena_query_validate_new_block'),
@@ -64,7 +63,6 @@ function forena_query_edit_block_form($form, &$form_state) {
     '#disabled' => @$data['locked'],
     '#default_value' => @$data['file'],
   );
-
 
   if (@$data['tokens']) {
 

@@ -4,3 +4,4 @@ core = 7.x
 files[] = forena.test
 files[] = ForenaViewsPlugin.inc
 testing_api = 2.x
+package = Forena
