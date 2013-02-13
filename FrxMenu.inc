@@ -179,6 +179,21 @@ class FrxMenu {
 
         // Set the access callback
         $access_callback = isset($cache['access']) ? 'forena_check_all_access' : TRUE;
+        if ($menu_type == MENU_DEFAULT_LOCAL_TASK) {
+          $parts = explode('/', $path);
+          array_pop($parts);
+          $parent_path = implode('/', $parts);
+          // build the parent menu because we are also building the local task
+          $items[$parent_path] = array(
+           'type' => MENU_NORMAL_ITEM,
+           'title' => $row->title,
+           'access callback' => $access_callback,
+           'page callback' => 'forena_report_menu_callback',
+           'page arguments' => $page_args,
+          );
+          if ($access_callback === 'forena_check_all_access') $items[$parent_path]['access arguments'][] = $cache['access'];
+
+        }
 
         $items[$new_path] = array(
           'type' => $menu_type,
