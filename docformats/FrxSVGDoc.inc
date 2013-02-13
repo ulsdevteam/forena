@@ -30,4 +30,22 @@ class FrxSVGDoc extends FrxDocument {
     }
     return $output;
   }
+
+  /**
+   * Output SVG content type headers.
+   */
+  public function output($output) {
+    if ($this->content_type) {
+
+      header('Content-Type: ' . $this->content_type);
+      header('Cache-Control:');
+      header('Pragma:');
+      header('Cache-Control: must-revalidate');
+      print  $output;
+      return TRUE;
+    }
+    else {
+      return FALSE;
+    }
+  }
 }
