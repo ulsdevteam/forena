@@ -2224,6 +2224,7 @@ function forena_admin_params_form($formid, $form_state, $report_name) {
           '#default_value' => $type,
           '#options' => array
            ('textfield' => 'Text',
+           'hidden' => 'Hidden',
            'radios' => 'Radios',
            'select' => 'Select',
            'selectajax' => 'Select with Refresh',

@@ -220,6 +220,9 @@ function forena_parameter_form($formid, &$form_state, $rpt, $collapse=FALSE) {
               break;
             case 'radios':
              break;
+            case 'hidden':
+              $list='';
+              break;
             default:
              $type = 'textfield';
              $list = '';
@@ -249,6 +252,10 @@ function forena_parameter_form($formid, &$form_state, $rpt, $collapse=FALSE) {
             $form['params'][$id]['#markup'] = $value;
 
           }
+
+         if ($type == 'hidden') {
+          $form['params'][$id]['#value'] = $value;
+         }
 
           // Add class to parmeter form.
           if ($class) {

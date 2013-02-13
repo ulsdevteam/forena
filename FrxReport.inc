@@ -322,6 +322,7 @@ class FrxReport {
            //@TODO: Replace the default extraction with something that will get sub elements of the string
            $default = (string)$formatter;
            $link = (string)$formatter['link'];
+           $incparms =
            $class = (string)$formatter['class'];
            $rel = (string)$formatter['rel'];
            $format = (string) $formatter['format'];
@@ -623,6 +624,9 @@ class FrxReport {
              $ajax = TRUE;
              $type = 'select';
              break;
+          case 'hidden':
+             $list='';
+             break;
           case 'select':
             $add_null = TRUE;
             break;
@@ -655,7 +659,9 @@ class FrxReport {
 
         if ($type == 'item') {
           $form['params'][$id]['#markup'] = $value;
-
+        }
+        if ($type == 'hidden') {
+          $form['params'][$id]['#value'] = $value;
         }
 
         // Add class to parmeter form.
