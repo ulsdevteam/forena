@@ -121,7 +121,7 @@ class FrxPDO extends FrxDataSource {
   public function format($value, $key, $data) {
     $db = $this->db;
     if ($db) {
-      if ($value=='' || $value == array()) {
+      if ($value==='' || $value ===NULL || $value == array()) {
         $value = 'NULL';
       }
       elseif (is_array($value)) {

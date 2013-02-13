@@ -131,7 +131,7 @@ class FrxPostgres extends FrxDataSource {
    * @param unknown_type $data
    */
   public function format($value, $key, $data) {
-    if ($value=='')
+    if ($value===''||$value===NULL)
       $value = 'NULL';
     else {
       if (is_array($value)) {

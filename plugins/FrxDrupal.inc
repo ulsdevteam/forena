@@ -61,7 +61,7 @@ class FrxDrupal extends FrxDataSource {
   public function format($value, $key, $data) {
     $db = Database::getConnection('default');
     if ($db) {
-      if ($value=='')
+      if ($value==='' || $value===NULL)
         $value = 'NULL';
       else {
         if (is_array($value)) {

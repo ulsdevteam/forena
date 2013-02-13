@@ -138,7 +138,7 @@ class FrxMSSQL extends FrxDataSource {
    * @param unknown_type $data
    */
   public function format($value, $key, $data) {
-    if ($value=='') $value = 'NULL'; else $value = "'" . str_replace("'", "''", $value) . "'";
+    if ($value===''||$value===NULL) $value = 'NULL'; else $value = "'" . str_replace("'", "''", $value) . "'";
     return $value;
   }
 
