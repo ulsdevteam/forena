@@ -184,14 +184,17 @@ class FrxMenu {
           array_pop($parts);
           $parent_path = implode('/', $parts);
           // build the parent menu because we are also building the local task
-          $items[$parent_path] = array(
-           'type' => MENU_NORMAL_ITEM,
-           'title' => $row->title,
-           'access callback' => $access_callback,
-           'page callback' => 'forena_report_menu_callback',
-           'page arguments' => $page_args,
-          );
-          if ($access_callback === 'forena_check_all_access') $items[$parent_path]['access arguments'][] = $cache['access'];
+          // but onlu do so if another report doesn't define the parent.
+          if (!isset($items[$parent_path])) {
+            $items[$parent_path] = array(
+             'type' => MENU_NORMAL_ITEM,
+             'title' => $row->title,
+             'access callback' => $access_callback,
+             'page callback' => 'forena_report_menu_callback',
+             'page arguments' => $page_args,
+            );
+            if ($access_callback === 'forena_check_all_access') $items[$parent_path]['access arguments'][] = $cache['access'];
+          }
 
         }
 
