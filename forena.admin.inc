@@ -1327,6 +1327,13 @@ function forena_fields_form($formid, $form_state, $report_name) {
           '#description' => t('Create a link that incorporates this field, e.g "profile/{field_name}" will create a link to this field_name\'s profile. *Note the field must be wrapped in {}.')
         );
 
+        $form['fields'][$i]['add-query'] = array(
+          '#type' => 'checkbox',
+          '#title' => t('Pass through url parameters'),
+          '#default_value' => @$attr['add-query'],
+          '#description' => t('Automatically pass through url parameters on this link'),
+        );
+
         $form['fields'][$i]['rel'] = array(
           '#type' => 'textfield',
           '#title' => t('rel') ,
