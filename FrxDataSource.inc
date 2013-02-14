@@ -92,6 +92,10 @@ class FrxDataSource{
 
   protected function loadBlockFromFile($block_name) {
     $base_file = $this->block_path . '/' . $block_name;
+    $parts = @explode('.', $block_name);
+    $php_method = array_pop($parts);
+    $php_class = implode('.', $parts);
+    $php_file = $this->block_path . '/' . $php_class . '.inc';
     if (file_exists($base_file . '.sql')) {
       $contents = file_get_contents($base_file . '.sql');
       $block = $this->parseSQLFile($contents);
@@ -102,19 +106,19 @@ class FrxDataSource{
       $block = $this->parseXMLFile($contents);
       $block['type'] = 'xml';
     }
-    elseif (file_exists($base_file . '.inc')) {
-      $parts = pathinfo($base_file . '.inc');
-      @list($class, $method) = explode('.', $parts['filename']);
-      $inc = $base_file . '.inc';
-      require_once $inc;
-      if (class_exists($class)) {
-        $o = new $class();
+    elseif (file_exists($php_file)) {
+      require_once $php_file;
+      if (class_exists($php_class)) {
+        $o = new $php_class();
         $block['type'] = 'php';
         $block['access'] = @$o->access;
         $block['object'] = $o;
-        $block['method'] = $method;
+        $block['method'] = $php_method;
         if (method_exists($o, 'tokens' )) {
           $block['tokens'] = $o->tokens();
+        }
+        else {
+          $block['tokens'] = array();
         }
       }
     }
@@ -196,9 +200,22 @@ class FrxDataSource{
         $ext = '';
         $block_name = $file_name;
       }
+      switch ($ext) {
+        case 'inc':
+          require_once $file_name;
+          $class = str_replace($this->block_path . '/', '', $block_name);
+          $methods = get_class_methods($class);
+          if ($methods) foreach($methods as $method) {
+            if ($method != 'tokens') {
+              $block_list[] = $class . '.' . $method;
+            }
+          }
 
-      if (array_search($ext, $this->block_extensions)!==FALSE) {
-        $block_list[] = str_replace($this->block_path . '/', '', $block_name);
+          break;
+        default:
+          if (array_search($ext, $this->block_extensions)!==FALSE) {
+            $block_list[] = str_replace($this->block_path . '/', '', $block_name);
+          }
       }
     }
 
@@ -363,9 +380,12 @@ class FrxDataSource{
     return $xml;
   }
 
-  public function phpData($method, $parameters) {
-    $xml = '';
-    return $xml;
+  public function phpData($o, $method, $parameters = array()) {
+    $data = NULL;
+    if (is_object($o) && is_callable(array($o, $method))) {
+      $data = $o->$method($parameters);
+    }
+    return $data;
   }
 
   /**

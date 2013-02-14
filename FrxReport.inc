@@ -544,7 +544,7 @@ class FrxReport {
     $parms = $this->parms;
     $missing_parms = FALSE;
     foreach ($this->parameters as $key => $parm) {
-      if ((@$parms[$key]=='' || @$parms[$key]==array()) && @$parm['value']) {
+      if ((@$parms[$key]==='' || @$parms[$key]===array() || @$parms[$key]===NULL) && @$parm['value']) {
        $value = (string)$parm['value'];
        if (strpos($value, '|')!==FALSE) {
          $value = explode('|', $value);
