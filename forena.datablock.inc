@@ -56,13 +56,14 @@ function forena_query_edit_block_form($form, &$form_state) {
     '#title' => 'Access',
     '#markup' => $data['access'],
   );
-
-  $form['file'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Source'),
-    '#disabled' => @$data['locked'],
-    '#default_value' => @$data['file'],
-  );
+  if ($data && $data['type']=='sql') {
+    $form['file'] = array(
+      '#type' => 'textarea',
+      '#title' => t('Source'),
+      '#disabled' => @$data['locked'],
+      '#default_value' => @$data['file'],
+    );
+  }
 
   if (@$data['tokens']) {
 
@@ -90,16 +91,22 @@ function forena_query_block_preview($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
   $block = $form_state['values']['block'];
   $block_def = isset($form_state['storage']['block']) ? $form_state['storage']['block'] : array();
-  $sql = $form_state['values']['file'];
-  list($provider, $block_name) = @explode('/', $block, 2);
-  $new_block = Frx::RepoMan()->sqlBlock($provider, $sql);
-  if ($new_block) $block_def = array_merge($block_def, $new_block);
-  $form_state['storage']['block'] = $block_def;
   $parms = isset($form_state['values']['parameters']) ? $form_state['values']['parameters'] : array();
+  $block_name = $form_state['storage']['block_name'];
   FrxReportGenerator::instance()->alter_parameters('', $parms);
-  $data = Frx::RepoMan()->sqlData($provider, $sql, $parms);
+  if ($block_def['type'] == 'sql') {
+    $sql = $form_state['values']['file'];
+    list($provider, $block_name) = @explode('/', $block, 2);
+    $new_block = Frx::RepoMan()->sqlBlock($provider, $sql);
+    if ($new_block) $block_def = array_merge($block_def, $new_block);
+    $form_state['storage']['block'] = $block_def;
+    $data = Frx::RepoMan()->sqlData($provider, $sql, $parms);
+  }
+  else {
+    $data = Frx::RepoMan()->data($block_name);
+  }
   $t = Frx::Template('FrxTable');
-  $config = array('class' => 'dataTable', 'id' => 'sqldata');
+  $config = array('class' => 'dataTable', 'id' => 'preview-data');
   if ($data && $t) {
     $t->generate($data, $config);
     $report = $t->asXML();
@@ -117,7 +124,7 @@ function forena_query_load_block($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
   $form_state['storage']['block'] = Frx::RepoMan()->loadBlock($form_state['values']['block']);
   $form_state['storage']['block_name'] = $form_state['values']['block'];
-  $form_state['input']['file'] = $form_state['values']['file'] = $form_state['storage']['block']['file'];
+  $form_state['input']['file'] = $form_state['values']['file'] = @$form_state['storage']['block']['file'];
 }
 
 function forena_query_validate_new_block($form, &$form_state) {
