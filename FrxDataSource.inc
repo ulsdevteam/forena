@@ -200,9 +200,22 @@ class FrxDataSource{
         $ext = '';
         $block_name = $file_name;
       }
+      switch ($ext) {
+        case 'inc':
+          require_once $file_name;
+          $class = str_replace($this->block_path . '/', '', $block_name);
+          $methods = get_class_methods($class);
+          if ($methods) foreach($methods as $method) {
+            if ($method != 'tokens') {
+              $block_list[] = $class . '.' . $method;
+            }
+          }
 
-      if (array_search($ext, $this->block_extensions)!==FALSE) {
-        $block_list[] = str_replace($this->block_path . '/', '', $block_name);
+          break;
+        default:
+          if (array_search($ext, $this->block_extensions)!==FALSE) {
+            $block_list[] = str_replace($this->block_path . '/', '', $block_name);
+          }
       }
     }
 
