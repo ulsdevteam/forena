@@ -290,6 +290,7 @@ class FrxDataSource{
       @list($d, $c) = explode($comment, $l, 2);
       if ($trim) $c = trim($c, $trim);
       if  ($c) {
+        $c = trim($c);
         @list($a, $o) = explode('=', $c, 2);
         $a = trim($a);
         if (($a && $o) || $c == 'END' || $c == 'ELSE' ) {
