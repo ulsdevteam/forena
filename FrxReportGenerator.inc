@@ -241,7 +241,7 @@ function report($name_in, $parms = array(), $print=TRUE) {
     $o =  Frx::Document($format);
     if ($o) {
       $output .= $o->render($r, $format,  array());
-      $output = check_markup($output, variable_get('forena_input_format', filter_default_format()));
+      $output = check_markup($output, variable_get('forena_input_format', 'full_html'));
       $printed = $o->output($output);
       if (!$printed) {
         return  $output;
