@@ -287,14 +287,15 @@ class FrxReport {
     $this->format = $format;
     $dom = $this->dom;
     $o='';
-    if (!$this->rpt_xml->xpath('//*[@frx:renderer="FrxParameterForm"]') && $format=='web') {
-      $form = drupal_get_form('forena_form_reflector', $this->parametersForm());
-      $o .= drupal_render($form);
-    }
     $body = $dom->getElementsByTagName('body')->item(0);
     foreach ($body->childNodes as $node) {
       $o .= $this->render_section($node);
     }
+    if (!$this->rpt_xml->xpath('//*[@frx:renderer="FrxParameterForm"]') && $format=='web') {
+      $form = drupal_get_form('forena_form_reflector', $this->parametersForm());
+      $o = drupal_render($form) . $o;
+    }
+
     $this->html = $o;
     Frx::Data()->pop();
     return $o ;
