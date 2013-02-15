@@ -33,15 +33,6 @@ class FrxWebDoc extends FrxDocument {
       drupal_add_js($script);
     }
 
-    // Build the parameters form
-    $parameters='';
-    /*
-    $form_templates = $r->rpt_xml->xpath('//*[@frx:renderer="FrxParameterForm"]');
-    if (!$form_templates) {
-      $f = drupal_get_form('forena_parameter_form', $r->rpt_xml->asXML(), $r->blocks_loaded);
-      if ($f) $parameters = drupal_render($f);
-    }
-    */
 
     // @TODO: Refactor to support theming of document links.
     // Build Links for document.
@@ -49,6 +40,7 @@ class FrxWebDoc extends FrxDocument {
     $formats = '';
     if ($r->html) {
       //Building the document links
+      $supported_doctypes = Frx::documentTypes();
       $default_doctypes = variable_get('forena_doc_defaults', array());
       $m = Frx::Menu();
       $link = str_replace('/', '.' , $m->base_name);

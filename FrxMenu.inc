@@ -19,6 +19,7 @@ class FrxMenu {
   private $teng;
 
   public function __construct() {
+
     $docs = variable_get('forena_doc_defaults', array());
 
     // Load settings array into normal array
@@ -30,7 +31,8 @@ class FrxMenu {
     }
 
     // Load settings array into normal array
-    $docs = variable_get('forena_doc_formats', array(''));
+
+    $docs = variable_get('forena_doc_formats', Frx::documentTypes(TRUE));
     if ($docs) foreach ($docs as $doc => $enabled) {
       if ($enabled) $this->doc_formats[] = $doc;
     }

@@ -808,12 +808,7 @@ function forena_create_trans_form_submit($form, &$form_state) {
  */
 function forena_doc_formats_settings() {
   // Invoke doc_type hook to see which document types are there.
-  $doc_types = module_invoke_all('forena_document_types');
-  unset($doc_types['web']);
-  $supported_doctypes = array();
-  foreach ($doc_types as $type=>$doc) {
-    $supported_doctypes[$type] = $type;
-  }
+  $supported_doctypes = Frx::documentTypes();
 
   $form['forena_doc_formats'] = array(
     '#type' => 'checkboxes',
