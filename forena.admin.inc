@@ -2059,22 +2059,22 @@ function forena_clean_xhtml($xhtml) {
 function forena_user_data_blocks($search) {
   $repos = Frx::RepoMan()->repositories;
   $blocks= array();
+
   foreach ($repos as $name => $r) {
     // Make really sure the data provider objects have been instantiated
     $o = Frx::RepoMan()->repository($name);
     if (method_exists($o, 'list_blocks')) {
       $o->list_blocks($search, $blocks);
-
+      foreach ($blocks as $block) {
+        $block_info = $o->loadBlock($block);
+        if (method_exists($o, 'access')) {
+          $allow = $o->access($block_info['access']);
+          if ($allow) $user_blocks[] = $name . '/' . $block;
+        }
+      }
     }
   }
-  asort($blocks);
-  foreach ($blocks as $block) {
-    $block_info = $o->loadBlock($block);
-    if (method_exists($o, 'access')) {
-      $allow = $o->access($block_info['access']);
-      if ($allow) $user_blocks[] = $name . '/' . $block;
-    }
-  }
+  asort($user_blocks);
   return $user_blocks;
 }
 

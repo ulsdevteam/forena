@@ -213,6 +213,7 @@ class FrxDataSource{
         default:
           if (array_search($ext, $this->block_extensions)!==FALSE) {
             $block_list[] = str_replace($this->block_path . '/', '', $block_name);
+
           }
       }
     }
@@ -221,8 +222,8 @@ class FrxDataSource{
     $d = glob($path . '*');
     if ($d) foreach ($d as $dir_name) {
       if (is_dir($dir_name)) {
-        $dir_name = str_replace($this->block_path . '/', '', $block_name);
-        $block_list =  $this->list_blocks($search, $dir_name, $block_list);
+        $dir_name = str_replace($this->block_path . '/', '', $dir_name);
+        $this->list_blocks($search, $block_list, $dir_name);
       }
     }
     // Date
