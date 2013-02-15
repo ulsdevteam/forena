@@ -1,6 +1,6 @@
 <?php
 /**
- * @file FrxEmailMergeDoc
+ * @file FrxEmailMergeDoc.inc
  * email merge document.
  * @author davidmetzler
  *
@@ -44,4 +44,6 @@ class FrxEmailMergeDoc extends FrxDocument {
    }
    return $output;
   }
+
+
 }

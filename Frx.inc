@@ -95,12 +95,11 @@ class Frx {
    * @param unknown_type $all
    */
   public static function documentTypes($all = FALSE) {
-    static $doc_types = '';
-    if (!$doc_types || $all) {
+    static $supported_doctypes = '';
+    if (!$supported_doctypes || $all) {
       $doc_types = module_invoke_all('forena_document_types');
       if (!$all) unset($doc_types['web']);
       $supported_doctypes = array();
-
       foreach ($doc_types as $type=>$doc) {
         $supported_doctypes[$type] = $type;
       }

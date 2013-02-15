@@ -62,7 +62,6 @@ class FrxWebDoc extends FrxDocument {
 
     // Use a theme function to make sure the report gets themed.
     $variables = array(
-      'parameters' => $parameters,
       'doc_links' => $formats,
       'content' => $r->html,
     );

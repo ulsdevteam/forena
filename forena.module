@@ -687,7 +687,7 @@ function forena_forena_document_types() {
     'title' => t('Comma separated values'),
   );
 
-  $itmes['email'] = array(
+  $items['email'] = array(
     'class' => 'FrxEmailMergeDoc',
     'title' => t('Email Merge Document'),
   );
