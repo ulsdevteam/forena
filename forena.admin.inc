@@ -2064,6 +2064,7 @@ function forena_user_data_blocks($search) {
     // Make really sure the data provider objects have been instantiated
     $o = Frx::RepoMan()->repository($name);
     if (method_exists($o, 'list_blocks')) {
+      $blocks = array();
       $o->list_blocks($search, $blocks);
       foreach ($blocks as $block) {
         $block_info = $o->loadBlock($block);
