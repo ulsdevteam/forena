@@ -161,8 +161,7 @@ class FrxDataSource{
     return $tokens;
   }
 
-  public function listDBBlocks($search) {
-    $data_blocks = array();
+  public function listDBBlocks($search, &$data_blocks) {
     $search = '%' . $search . '%';
     $sql = 'SELECT * from {forena_data_blocks} WHERE repository=:repos
       AND block_name like :search ';
@@ -170,7 +169,6 @@ class FrxDataSource{
     foreach ($rs as $block) {
       $data_blocks[] = $block->block_name;
     }
-    return $data_blocks;
   }
 
 
@@ -180,12 +178,12 @@ class FrxDataSource{
    * @param string $search part block names to search for
    * @return unknown
    */
-  public function list_blocks($search, $subdir='', $this_list=array()) {
-    $block_list = $this_list;
+  public function list_blocks($search, &$block_list, $subdir='') {
+    static $count=0;
     // First find files that match the search string
     $path = $this->block_path . '/';
-    if ($subdir) $path = $subdir . '/';
-    $block_path .= $path . '*' . $search . '*';
+    if ($subdir) $path .= $subdir . '/';
+    $block_path = $path . '*' . $search . '*';
     // Find sql files
 
     $d = glob($block_path);
@@ -218,20 +216,19 @@ class FrxDataSource{
           }
       }
     }
-
+    $count++;
     // Find directories
     $d = glob($path . '*');
     if ($d) foreach ($d as $dir_name) {
       if (is_dir($dir_name)) {
-        $block_list =  array_merge($block_list, $this->list_blocks($search, $dir_name, $block_list));
+        $dir_name = str_replace($this->block_path . '/', '', $block_name);
+        $block_list =  $this->list_blocks($search, $dir_name, $block_list);
       }
     }
     // Date
     if (!$subdir && module_exists('forena_query'))  {
-      $block_list = array_merge($block_list,  $this->listDBBlocks($search));
-      asort($block_list);
+      $this->listDBBlocks($search, $block_list);
     }
-    return $block_list;
   }
 
   public function debug($msg='', $log='') {
