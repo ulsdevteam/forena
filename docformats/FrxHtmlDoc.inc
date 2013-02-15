@@ -22,5 +22,6 @@ class FrxHtmlDoc extends FrxDocument {
 
   public function output($output) {
     print $output;
+    return TRUE;
   }
 }
