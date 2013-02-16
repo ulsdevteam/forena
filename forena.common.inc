@@ -616,14 +616,18 @@ function theme_forena_inline_form($variables) {
   _forena_render_inline_elements($form, $fields);
 
   // Render the child form in the template.
-  $teng = new FrxSyntaxEngine(FRX_TOKEN_EXP,'{}');
-  $o = Frx::Data()->push($fields, 'form-fields');
-  $build = $teng->replace($form['#forena_form_template'], TRUE);
-  $o = Frx::Data()->pop();
-  $build .= $fields['form_build_id'] . $fields['form_token'] . $fields['form_id'];
+  if (isset($form['#forena_form_template'])) {
+    $teng = new FrxSyntaxEngine(FRX_TOKEN_EXP,'{}');
+    $o = Frx::Data()->push($fields, 'form-fields');
+    $build = $teng->replace($form['#forena_form_template'], TRUE);
+    $o = Frx::Data()->pop();
+    $build .= $fields['form_build_id'] . $fields['form_token'] . $fields['form_id'];
+    $form['#children'] = $build;
+  } else {
+    $build = $form['#children'];
+  }
 
-  // Return the form
-  $form['#children'] = $build;
+  // Return the for
 
   return $build;
 }

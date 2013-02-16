@@ -1,0 +1,4 @@
+@CHARSET "UTF-8";
+#forena-query-builder-form .forena-filter div {
+	 display: inline-block; 
+}

@@ -68,7 +68,7 @@ class Frx {
 
     static $doc_types = '';
     static $objects = '';
-
+    require_once 'FrxDocument.inc';
     // Invoke doc_type hook to see which document types are there.
     if (!$doc_types) $doc_types = module_invoke_all('forena_document_types');
 
@@ -95,6 +95,7 @@ class Frx {
    * @param unknown_type $all
    */
   public static function documentTypes($all = FALSE) {
+    require_once 'FrxDocument.inc';
     static $supported_doctypes = '';
     if (!$supported_doctypes || $all) {
       $doc_types = module_invoke_all('forena_document_types');

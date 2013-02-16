@@ -2,4 +2,5 @@ name = Forena Query Builder
 description = Generate dynamic your own data blocks (Experimental)
 core = 7.x
 dependencies[] = forena
+stylesheets[all][] = forena_query.css
 package = Forena
