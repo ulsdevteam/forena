@@ -135,4 +135,8 @@ class FrxData {
     return @$this->data_sources[$id];
   }
 
+  public function dumpContext() {
+    drupal_set_message('cur_context ' . $this->id . '<br/>Stack<br/><pre>' . print_r($this->cur_context,1) . '</pre>');
+  }
+
 }
