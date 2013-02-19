@@ -193,6 +193,22 @@ class FrxRepoMan {
     }
   }
 
+  /**
+   * Save a data block ...
+   * @param unknown_type $data_block
+   * @param unknown_type $data
+   */
+  public function deleteBlock($data_block) {
+    $block = array();
+    list($provider, $block_name) = explode('/', $data_block, 2);
+    $repos = @$this->repositories[$provider];
+
+    $o = $this->repository($provider);
+    if ($o) {
+      $block = $o->deleteBlock($block_name);
+    }
+  }
+
 
 
   /**

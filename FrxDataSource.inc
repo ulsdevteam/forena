@@ -435,8 +435,19 @@ class FrxDataSource{
           'modified' => $modified,
         ))
         ->execute();
-
     }
+  }
+
+  /**
+   *
+   * Delete data block stored in database.
+   * @param $block_name Data block to delete
+   */
+  public function deleteBlock($block_name) {
+    db_delete('forena_data_blocks')
+      ->condition('repository', $this->name)
+      ->condition('block_name', $block_name)
+      ->execute();
   }
 
   /**
@@ -454,7 +465,16 @@ class FrxDataSource{
         $clause .= $conj . ' (' . $this->buildFilterSQL($cond) . ')';
       }
       else {
-        $clause .= $conj . $cond['field'] . ' ' .  $cond['op'] . ' ' . $this->format($cond['value'], $cond['field'], array());
+
+        switch ($cond['op']) {
+          case 'IS NULL':
+          case 'IS NOT NULL':
+            $expr = $cond['field'] . ' ' . $cond['op'];
+            break;
+          default:
+            $expr = $cond['field'] . ' ' .  $cond['op'] . ' ' . $this->format($cond['value'], $cond['field'], array());
+        }
+        $clause .= $conj . $expr;
       }
     }
     return $clause;

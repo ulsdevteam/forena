@@ -27,8 +27,10 @@ function forena_query_menu() {
  * Implementation of hook_permission
  */
 function forena_query_permission() {
-  $perms =  array('build forena sql blocks' => array('title' => 'Build Forena Data Blocks using SQL',
-    'description' => 'Use with care as this has security implications'));
+  $perms =  array(
+    'build forena sql blocks' => array('title' => 'Build Forena Data Blocks using SQL',
+    	'description' => 'Direct access to SQL should not be given without understanding of security ramifications')
+  );
   foreach (Frx::RepoMan()->repositories as $repos => $conf) {
     $name = $conf['title'] ? $conf['title'] : $repos;
     $perms['create '. $repos . ' blocks'] = array('title' =>  'Create ' . $name . ' Data Blocks');
