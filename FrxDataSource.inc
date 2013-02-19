@@ -267,8 +267,6 @@ class FrxDataSource{
               $access = trim($o);
               break;
             default:
-
-
         }
 
         }
@@ -462,7 +460,7 @@ class FrxDataSource{
       $i++;
       $conj = ($i==1) ? '' : $op. ' ';
       if (isset($cond['filter'])) {
-        $clause .= $conj . ' (' . $this->buildFilterSQL($cond) . ')';
+        $clause .= $conj . ' (' . $this->buildFilterSQL($cond) . " )\n";
       }
       else {
 
@@ -474,7 +472,7 @@ class FrxDataSource{
           default:
             $expr = $cond['field'] . ' ' .  $cond['op'] . ' ' . $this->format($cond['value'], $cond['field'], array());
         }
-        $clause .= $conj . $expr;
+        $clause .= ' ' . $conj . $expr;
       }
     }
     return $clause;
