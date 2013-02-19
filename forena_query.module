@@ -20,24 +20,6 @@ function forena_query_menu() {
     'file' => 'forena_query.inc',
   );
 
-  $items['admin/structure/forena/data/block']  = array(
-    'type' => MENU_LOCAL_TASK,
-    'title' => 'SQL',
-    'access arguments' => array('build forena sql blocks'),
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('forena_query_edit_block_form'),
-    'file' => 'forena_query.inc',
-  );
-
-  $items['admin/structure/forena/data/builder'] = array(
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'title' => 'Wizard',
-    'access arguments' => array('build forena sql blocks'),
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('forena_query_builder_form'),
-    'file' => 'forena_query.inc',
-   );
-
   return $items;
 }
 

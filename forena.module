@@ -13,7 +13,6 @@ function forena_menu() {
   // First build menu items.
   Frx::Menu()->addMenuItems($items);
 
-
   $items['admin/structure/forena'] = array(
     'type' => MENU_NORMAL_ITEM,
     'title' => 'Forena Reports',
@@ -119,7 +118,6 @@ function forena_menu() {
      'type' => MENU_LOCAL_TASK,
      'file' => 'forena.admin.inc',
     );
-
 
    if (module_exists('locale')) {
      $items['reports/%/translations'] = array(

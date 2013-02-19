@@ -71,6 +71,7 @@ class FrxDataSource{
           'block_name' => $b->block_name,
           'type' => $b->block_type,
           'file' => $b->src,
+          'builder' => $b->builder,
           'access' => $b->access,
           'title' => $b->title,
           'locked' => $b->locked,
@@ -83,6 +84,9 @@ class FrxDataSource{
           case 'xml':
             $block = array_merge($block, $this->parseXMLFile($block['file']));
             break;
+        }
+        if ($block['builder']) {
+          $block['builder'] = unserialize($block['builder']);
         }
 
       }
@@ -394,6 +398,11 @@ class FrxDataSource{
    */
   public function saveBlock($block_name, $data) {
     $modified = time();
+    $builder = @$data['builder'];
+    if (is_array($builder)) {
+      $builder = serialize($builder);
+    }
+
     $rs = db_query('SELECT * from {forena_data_blocks} WHERE repository=:repos AND
       block_name = :block_name',
       array(
@@ -405,6 +414,7 @@ class FrxDataSource{
       db_update('forena_data_blocks')
         ->fields(array(
           'src' => $data['file'],
+          'builder' => $builder,
           'access' => $data['access'],
           'modified' => $modified,
         ))
@@ -419,6 +429,7 @@ class FrxDataSource{
           'block_name' => $block_name,
           'block_type' => $data['type'],
           'src' => $data['file'],
+          'builder' => $builder,
           'access' => $data['access'],
           'locked' => 0,
           'modified' => $modified,
@@ -427,5 +438,27 @@ class FrxDataSource{
 
     }
   }
+
+  /**
+   * Build the SQL clause based on builder data.
+   * @param  $data
+   */
+  public function buildFilterSQL($data) {
+    $clause = '';
+    $op = $data['op'];
+    $i=0;
+    if ($data['filter']) foreach($data['filter'] as $cond) {
+      $i++;
+      $conj = ($i==1) ? '' : $op. ' ';
+      if (isset($cond['filter'])) {
+        $clause .= $conj . ' (' . $this->buildFilterSQL($cond) . ')';
+      }
+      else {
+        $clause .= $conj . $cond['field'] . ' ' .  $cond['op'] . ' ' . $this->format($cond['value'], $cond['field'], array());
+      }
+    }
+    return $clause;
+  }
 }
+
 

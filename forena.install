@@ -54,6 +54,7 @@ function forena_schema() {
        'category' => array('type' => 'varchar', 'length' => 255, 'not null' => FALSE),
        'modified' => array('type' => 'int'),
        'src' => array('type' => 'text'),
+       'builder' => array('type' => 'text'),
        'locked' => array('type' => 'int', 'not null' => TRUE),
     ),
     'primary key' => array('block_name'),
@@ -131,6 +132,10 @@ function forena_update_7201() {
    // New block access field.
    db_add_field('forena_data_blocks', 'access', array('type' => 'varchar', 'length' => 255, 'not null' => TRUE));
    db_add_field('forena_data_blocks', 'block_type', array('type' => 'varchar', 'length' => 30, 'not null' => TRUE));
+ }
+
+ function forena_update_7304() {
+   db_add_field('forena_data_blocks', 'builder', array('type' => 'text'));
  }
 
  function forena_install() {

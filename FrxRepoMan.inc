@@ -213,7 +213,7 @@ class FrxRepoMan {
      if (isset($repos['user callback'])) {
        $user_fn = $repos['user callback'];
        if (is_callable($user_fn)) {
-          $current_user =   $user_fn();
+         $current_user =   $user_fn();
          Frx::Data()->setValue('current_user', $current_user);
        }
      }
@@ -296,6 +296,27 @@ class FrxRepoMan {
      }
      if ($o)
      return $o->parseSQLFile($source);
+  }
+
+  /**
+   * Build an SQL statement from the data provider
+   * @param $provider string data provider name
+   * @param $builder Array containing build information.
+   */
+  public function buildSQL($provider, $builder) {
+    $repos = @$this->repositories[$provider];
+    if (isset($repos['enabled']) && !$repos['enabled']) {
+       return '';
+    }
+    $o = $this->repository($provider);
+    $sql = "SELECT * FROM (\n";
+    $sql .= '--INCLUDE=' . $builder['block_name'] . "\n";
+    $sql .= ") t\n";
+    if (@$builder['where']) {
+      $sql .= "WHERE " . $o->buildFilterSQL($builder['where']);
+    }
+    return $sql;
+
   }
 
 

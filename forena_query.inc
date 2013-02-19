@@ -4,105 +4,215 @@
  * Data block building and testing forms.
  */
 require_once 'FrxDataSource.inc';
-function forena_query_edit_block_form($form, &$form_state) {
-
-  // Extract off the arguemnts for loading the block.
-  $data = @$form_state['storage']['block'];
-
-  $form['block'] = array(
-    '#type' => 'textfield',
-    '#autocomplete_path' => 'forena/data_block/autocomplete',
-    '#title' => 'Data Block',
-    '#required' => TRUE,
-    '#description' => t('The data block to be used as the source for the data in the report.'),
+function forena_query_builder_form($formid, &$form_state) {
+  // Define an empty block
+  $access = TRUE;
+  $default_storage = array(
+    'block' => array(),
+    'block_name' => '',
+    'parameters' => array(),
+    'provider' => '',
+    'builder' => array(
+      'columns' => array(),
+      'block' => '',
+      'where' => array(
+        'op' => 'AND',
+        'filter' => array(
+          array('field' => '', 'op' => '', 'value' => ''),
+        ),
+      ),
+      'group' => array(),
+      'order' => array(),
+      ),
+    'fields' => array(),
+    'step' => 'block',
+    'preview' => '',
   );
 
-  $form['load'] = array(
-    '#type' => 'submit',
-    '#submit' => array('forena_query_load_block', 'forena_query_block_preview'),
-    '#value' => 'Load',
-  );
+  // Work with the existing block or load default
+  if (!isset($form_state['storage']))  {
+    $form_state['storage'] = $default_storage;
 
-  // Only allow save as of sql data blocks.
-  if ($data && $data['type']=='sql') {
+  }
+  $data = &$form_state['storage'];
+  $step = $form_state['storage']['step'];
+
+  /**
+   * Block select portion of ofrm
+   */
+  // First stage is to either load an existing block or create a new one
+  if ($step == 'block') {
+
+    $form['block'] = array(
+      '#type' => 'textfield',
+      '#autocomplete_path' => 'forena/data_block/autocomplete',
+      '#title' => 'Data Block',
+      '#required' => TRUE,
+      '#description' => t('Select an exising block or create a new one derived from the selected block.'),
+    );
+
+    $form['load_include'] = array(
+      '#type' => 'submit',
+      '#submit' => array('forena_query_load_include', 'forena_query_block_preview'),
+      '#value' => t('New'),
+    );
+
+    $form['load'] = array(
+      '#type' => 'submit',
+      '#submit' => array('forena_query_load_block', 'forena_query_block_preview'),
+      '#value' => t('Load'),
+    );
+
+  }
+  // If we're not on the first form than we need to verify the acces for the block
+  else {
+     $access = forena_query_access_repository($form_state['storage']['block_name']);
+  }
+
+  /**
+   * Edit WHERE clause portion of form.
+   */
+  if ($step == 'builder') {
+    $form['where'] = array('#tree' => TRUE);
+    $form['save'] = array(
+    	'#type' => 'submit',
+      '#value' => t('Save'),
+      '#submit' => array('forena_query_update_builder'),
+    );
+
+    $form['where'] = array(
+      '#type' => 'fieldset',
+      '#title' => 'Filter Criteria',
+      '#tree' => TRUE,
+    );
+    _forena_query_filter_ctl($data['builder']['where'], $form['where'], $form_state['storage']['fields']);
+  }
+
+  /**
+   * Edit SQL directly.
+   */
+  if ($step == 'sql') {
+    $block = $data['block'];
+    if ($block && $block['type']=='sql') {
+      $form['file'] = array(
+        '#type' => 'textarea',
+        '#title' => t('Source'),
+        '#disabled' => @$block['locked'],
+        '#default_value' => @$block['file'],
+      );
+    }
+
+    if (@$block['tokens']) {
+
+      $form['parameters'] = array(
+        '#title' => 'Parameters',
+        '#type' => 'fieldset',
+        '#tree' => TRUE
+      );
+
+      foreach ($block['tokens'] as $name) {
+        $ctl = array(
+          '#type' => 'textfield',
+          '#title' => check_plain($name),
+        );
+        $form['parameters'][$name] = $ctl;
+      }
+    }
+
     $access = forena_query_access_repository($form_state['storage']['block_name']);
-    if (!@$data['locked'] && $access) {
+    if (!@$block['locked'] && $access) {
       $form['save'] = array(
         '#type' => 'submit',
         '#value' => 'Save',
         '#submit' => array('forena_query_save_existing_block')
       );
     }
-    $form['submit'] = array('#type' => 'submit', '#value' => 'Preview', '#submit' => array('forena_query_block_preview'));
-    if ($access) {
-      $form['save_as'] = array('#type' => 'fieldset', '#title' => 'Save As', '#collapsed' => TRUE, '#collapsible' => TRUE);
-      $form['save_as']['save_as_name'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Name'),
-        '#description' => t('Indicate a proper path to save the data.  '),
-      );
-
-      $form['save_as']['save_as_submit'] = array(
-        '#type' => 'submit',
-        '#validate' => array('forena_query_validate_new_block'),
-        '#submit' => array('forena_query_save_new_block'),
-        '#value' => t('Save As')
-      );
-    }
+    $form['submit'] = array('#type' => 'submit', '#value' => 'Preview', '#submit' => array('forena_query_update_sql', 'forena_query_block_preview'));
+    $form['cancel'] = array('#type' => 'submit', '#value' => 'Close', '#submit' => array('forena_query_close'));
+    $form['preview'] = array('#markup' => @$form_state['storage']['preview']);
   }
 
-  $form['access'] = array(
-    '#type' => 'item',
-    '#title' => 'Access',
-    '#markup' => $data['access'],
-  );
-  if ($data && $data['type']=='sql') {
-    $form['file'] = array(
-      '#type' => 'textarea',
-      '#title' => t('Source'),
-      '#disabled' => @$data['locked'],
-      '#default_value' => @$data['file'],
-    );
-  }
-
-  if (@$data['tokens']) {
-
-    $form['parameters'] = array(
-      '#title' => 'Parameters',
-      '#type' => 'fieldset',
-      '#tree' => TRUE
+  /**
+   * Section of form for finally saving the report.
+   */
+  if ($access && $step == 'save_as') {
+    $form['save_as'] = array('#type' => 'fieldset', '#title' => 'Save As', '#collapsed' => TRUE, '#collapsible' => TRUE);
+    $form['save_as']['save_as_name'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Name'),
+      '#description' => t('Indicate the name of the report to save.  '),
     );
 
-    foreach ($data['tokens'] as $name) {
-      $ctl = array(
-        '#type' => 'textfield',
-        '#title' => check_plain($name),
-      );
-      $form['parameters'][$name] = $ctl;
-    }
+    $form['save_as']['save_as_submit'] = array(
+      '#type' => 'submit',
+      '#validate' => array('forena_query_validate_new_block'),
+      '#submit' => array('forena_query_save_new_block'),
+      '#value' => t('Save As')
+    );
   }
-
-  $form['preview'] = array('#markup' => @$form_state['storage']['preview']);
 
   return $form;
+
+}
+
+function forena_query_load_block($form, &$form_state) {
+  $form_state['rebuild'] = TRUE;
+  $form_state['storage']['block'] = $block_def = Frx::RepoMan()->loadBlock($form_state['values']['block']);
+  list($provider, $block) = @explode('/',$form_state['values']['block'],2);
+  $form_state['storage']['provider'] = $provider;
+  $form_state['storage']['block_name'] = $form_state['values']['block'];
+  if (@$block_def['builder']) {
+    $form_state['storage']['builder'] = $block_def['builder'];
+    $form_state['storage']['step'] = 'builder';
+  }
+  else {
+    $form_state['storage']['step'] =  'sql';
+  }
+
+}
+
+/**
+ * Load include block as source of builder.
+ * @param $form
+ * @param $form_state
+ */
+function forena_query_load_include($form, &$form_state) {
+  $form_state['rebuild'] = TRUE;
+  $form_state['storage']['block'] = Frx::RepoMan()->loadBlock($form_state['values']['block']);
+  list($provider, $block) = @explode('/',$form_state['values']['block'],2);
+  $form_state['storage']['provider'] = $provider;
+  $form_state['storage']['builder']['block_name'] = $block;
+  $form_state['storage']['block_name'] = $form_state['values']['block'];
+  $form_state['storage']['new_block'] = TRUE;
+  $form_state['storage']['step'] = 'builder';
+  $form_state['input']['file'] = $form_state['values']['file'] = @$form_state['storage']['block']['file'];
+}
+
+/**
+ * Submit handler to update the form fields.
+ */
+function forena_query_update_sql($form, &$form_state) {
+  $file = $form_state['values']['file'];
+  $provider = $form_state['storage']['provider'];
+  $block_def = $form_state['storage']['block'];
+  $block_def['builder'] = '';
+  $new_block = Frx::RepoMan()->sqlBlock($provider, $file);
+  if ($new_block) $block_def = array_merge($block_def, $new_block);
+  $form_state['storage']['block'] = $block_def;
 }
 
 function forena_query_block_preview($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
-  $block = $form_state['values']['block'];
-  $block_def = isset($form_state['storage']['block']) ? $form_state['storage']['block'] : array();
-  $parms = isset($form_state['values']['parameters']) ? $form_state['values']['parameters'] : array();
-  $block_name = $form_state['storage']['block_name'];
+  $provider = $form_state['storage']['provider'];
+  $block_def = $form_state['storage']['block'];
+  $parms = $form_state['storage']['parameters'];
   FrxReportGenerator::instance()->alter_parameters('', $parms);
   if ($block_def['type'] == 'sql') {
-    $sql = $form_state['values']['file'];
-    list($provider, $block_name) = @explode('/', $block, 2);
-    $new_block = Frx::RepoMan()->sqlBlock($provider, $sql);
-    if ($new_block) $block_def = array_merge($block_def, $new_block);
-    $form_state['storage']['block'] = $block_def;
+    $sql = $block_def['file'];
     $data = Frx::RepoMan()->sqlData($provider, $sql, $parms);
   }
   else {
+    $block_name = $form_state['storage']['block_name'];
     $data = Frx::RepoMan()->data($block_name);
   }
   $t = Frx::Template('FrxTable');
@@ -121,13 +231,6 @@ function forena_query_block_preview($form, &$form_state) {
   }
   if (is_object($data)) $data = $data->asXML();
 
-}
-
-function forena_query_load_block($form, &$form_state) {
-  $form_state['rebuild'] = TRUE;
-  $form_state['storage']['block'] = Frx::RepoMan()->loadBlock($form_state['values']['block']);
-  $form_state['storage']['block_name'] = $form_state['values']['block'];
-  $form_state['input']['file'] = $form_state['values']['file'] = @$form_state['storage']['block']['file'];
 }
 
 function forena_query_validate_new_block($form, &$form_state) {
@@ -173,11 +276,29 @@ function forena_query_save_new_block($form, &$form_state) {
 function forena_query_save_existing_block($form, &$form_state) {
   $block_name = $form_state['storage']['block_name'];
   $data = $form_state['storage']['block'];
-  $data['file'] = $form_state['values']['file'];
   Frx::RepoMan()->saveBlock($block_name, $data);
   drupal_set_message('Block Saved');
   $form_state['input']['block'] = $block_name;
   $form_state['rebuild'] = TRUE;
+}
+
+function forena_query_close($form, &$form_state) {
+  $form_state['rebuild'] = FALSE;
+}
+
+function forena_query_save_as($form, &$form_state) {
+  $form_state['rebuild'] = TRUE;
+  $form_state['step'] = 'save_as';
+}
+
+function fornea_query_sql_view($form, &$form_state) {
+  $form_state['rebuild'] = TRUE;
+  $form_state['step'] = 'sql';
+}
+
+function forena_query_builder_view($form, &$form_state) {
+  $form_state['rebuild'] = TRUE;
+  $form_state['step'] = 'builder';
 }
 
 /**
@@ -202,74 +323,6 @@ function _forena_query_clean_values(&$values, &$elements) {
  * @param $formid
  * @param $form_state
  */
-function forena_query_builder_form($formid, &$form_state) {
-  // Define an empty block
-  $default_storage = array(
-    'block' => array(),
-    'block_name' => '',
-    'builder' => array(
-      'where' => array(
-        'op' => 'AND',
-        'filter' => array(
-          array('field' => '', 'op' => '', 'value' => ''),
-        ),
-      ),
-      'group' => array(),
-      'columns' => array(),
-      ),
-    'fields' => array(),
-    'step' => 'block',
-    'preview' => '',
-  );
-
-  // Work with the existing block or load default
-  if (!isset($form_state['storage'])) $form_state['storage'] = $default_storage;
-  $data = &$form_state['storage'];
-
-  if ($data['step'] == 'block') {
-    $form['block'] = array(
-      '#type' => 'textfield',
-      '#autocomplete_path' => 'forena/data_block/autocomplete',
-      '#title' => 'Data Block',
-      '#required' => TRUE,
-      '#description' => t('The source data block for the report'),
-    );
-
-    $form['load'] = array(
-      '#type' => 'submit',
-      '#submit' => array('forena_query_load_block', 'forena_query_block_preview', 'forena_query_builder_next'),
-      '#value' => 'Load',
-    );
-
-    $form['next'] = array(
-     '#type' => 'value',
-     '#value' => 'where',
-    );
-  }
-
-  if ($data['step'] == 'where') {
-    $form['where'] = array('#tree' => TRUE);
-    $form['save'] = array(
-    	'#type' => 'submit',
-      '#value' => t('Save'),
-      '#submit' => array('forena_query_builder_save'),
-    );
-    $form['preview'] = array(
-      '#type' => 'markup',
-      '#markup' => $data['preview'],
-    );
-    $form['where'] = array(
-      '#type' => 'fieldset',
-      '#title' => 'Filter Criteria',
-      '#tree' => TRUE,
-    );
-    _forena_query_filter_ctl($data['builder']['where'], $form['where'], $form_state['storage']['fields']);
-  }
-
-
-  return $form;
-
-}
 
 /**
  * Recursively build query form.
@@ -317,11 +370,32 @@ function _forena_query_filter_ctl(&$data, &$ctl, $fields) {
   $ctl['filter']['add_filter'] = array('#type' => 'submit', '#value' => '+', '#submit' => array('forena_query_add_filter'), '#name' => $i);
 }
 
-function forena_query_builder_save($form, &$form_state) {
+function forena_query_update_builder($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
   $values = $form_state['values'];
   _forena_query_clean_values($values['where'], $form['where']);
-  $form_state['storage']['preview'] = '<pre>' . print_r($values['where'],1) . '</pre>';
+  $form_state['storage']['builder']['where'] = $values['where'];
+  $provider = $form_state['storage']['provider'];
+  $sql = Frx::RepoMan()->buildSQL($provider, $form_state['storage']['builder']);
+  $block_def['file'] = $sql;
+  $block_def['builder'] = $form_state['storage']['builder'];
+  $form_state['storage']['preview'] = '<pre>' . $sql . "\n" . print_r($form_state['storage']['builder'],1) .  '</pre>';
+
+}
+
+/**
+ * Submit handler that processes the where clause and rebuilds the SQL.
+ * @param unknown_type $form
+ * @param unknown_type $form_state
+ */
+function forena_query_builder_update_where($form, &$form_state) {
+  $form_state['rebuild'] = TRUE;
+  $values = $form_state['values'];
+  _forena_query_clean_values($values['where'], $form['where']);
+  $form_state['storage']['builder']['where'] = $values['where'];
+  $provider = $form_state['storage']['provider'];
+  $sql = Frx::RepoMan()->buildSQL($provider, $form_state['storage']['builder']);
+  $form_state['storage']['block']['file'] = $sql;
 
 }
 
@@ -470,6 +544,17 @@ function forena_query_builder_next($form, &$form_state) {
       $step = 'block';
   }
   $form_state['storage']['step'] = $step;
+}
+
+/**
+ * Build SQL query from data
+ *
+ */
+function forena_query_build_sql($form, &$form_state) {
+  $builder = $formstate['storage']['builder'];
+  foreach ($builder as $filter) {
+
+  }
 }
 
 
