@@ -8,7 +8,7 @@
 // Include Report renderer.
 require_once 'Frx.inc';
 require_once 'FrxReport.inc';
-require 'FrxDocument.inc';
+require_once 'FrxDocument.inc';
 require_once('FrxDataSource.inc');
 require_once('FrxReportGenerator.inc');
 require_once('FrxSQLQueryBuilder.inc');
