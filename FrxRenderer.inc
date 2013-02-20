@@ -86,8 +86,7 @@ class FrxRenderer {
    * Render a drupal form in a forena template
    * @param $form array
    */
-  public function renderForm($form) {
-    if ($form) $form = drupal_get_form('forena_form_reflector', $form);
+  public function drupalRender($form) {
     $output = drupal_render($form);
     return $output;
   }

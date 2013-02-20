@@ -453,6 +453,192 @@ function forena_parameters_report() {
   }
 }
 
+function forena_parameter_form($formid, &$form_state, $parameters, $collapse=FALSE, $template='') {
+  $parms = $_GET;
+  if (isset($form_state['values'])) {
+    $collapse=FALSE;
+    $parms = array_merge($parms, $form_state['values']['params']);
+    Frx::Data()->push($parms, 'parm');
+  }
+  unset($parms['q']);
+  $form = array();
+  $menu_parms = Frx::Data()->getContext('menu-parms');
+  $form['#forena_form_template'] = $template;
+  if (trim($form['#forena_form_template'])) $form['#theme'] = 'forena_inline_form';
+  if ($parameters) {
+      $report_name = '';
+      drupal_alter('forena_parameters', $report_name,  $parms);
+
+      if ($parameters) {
+
+        $form['params'] = array(
+          '#tree' => TRUE,
+          '#title' => t('Parameters'),
+          '#type' => 'fieldset',
+          '#collapsible' => TRUE,
+          '#collapsed' => $collapse,
+          '#prefix' => '<div id="parameters-wrapper">',
+          '#suffix' => '</div>',
+        );
+
+
+        foreach ($parameters as $node) {
+
+          $label = @(string)$node['label'];
+          $id = @(string)$node['id'];
+          $data_source = @(string)$node['data_source'];
+          $data_field = @(string)$node['data_field'];
+          $class = @(string)$node['class'];
+
+          $type = @(string)$node['type'];
+          if (isset($parms[$id])) {
+            $value = $parms[$id];
+            $multi_value=(array)$parms[$id];
+          }
+          else {
+            $value = @(string)$node['default'];
+            $multi_value = array();
+            if (strpos($value, '|')!==FALSE) $multi_value = explode('|', $value);
+          }
+          $desc =  @(string)$node['desc'];
+          $label_field = @(string)$node['label_field'];
+
+          @(strcmp((string)$node['require'], "1") == 0) ? $required = TRUE : $required = FALSE;
+
+          //Determine the form element type to be displayed
+          //If select or radios is chosen then begin a $list array for display values.
+          $multiselect = FALSE;
+          $list = array();
+          $ajax = FALSE;
+          $add_null = FALSE;
+          switch ($type) {
+            case 'multiselect':
+              $type = 'select';
+              $multiselect = TRUE;
+              $value = $multi_value;
+              break;
+            case 'checkboxes':
+              $value = $multi_value;
+              break;
+            case 'selectajax':
+               $ajax = TRUE;
+               $type = 'select';
+               break;
+            case 'select':
+              $add_null = TRUE;
+              break;
+            case 'radios':
+             break;
+            case 'hidden':
+              $list='';
+              break;
+            default:
+             $type = 'textfield';
+             $list = '';
+          }
+
+          if (isset($menu_parms[$id]) && $type=='textfield') {
+            $type = 'item';
+            $value = $menu_parms[$id];
+          }
+
+          //If a data_source attr was found then create an array of
+          //returned values filtered against data_field attr.
+          if ($data_source) {
+            $list = Frx::RepoMan()->dataBlockParams($data_source, $data_field, $label_field);
+            if (!$required && $add_null) $list = array('' => '') + $list;
+          }
+
+          $form['params'][$id] = array(
+            '#type' => $type,
+            '#title' => ($label) ? t($label) : t($id),
+            '#default_value' => $value,
+            '#required' => $required,
+            '#description' => t($desc),
+          );
+
+          if ($type == 'item') {
+            $form['params'][$id]['#markup'] = $value;
+
+          }
+
+         if ($type == 'hidden') {
+          $form['params'][$id]['#value'] = $value;
+         }
+
+          // Add class to parmeter form.
+          if ($class) {
+            $form['params'][$id]['#attributes'] = array(
+              'class' => @explode(' ', $class),
+            );
+          }
+
+
+          //if $list is not empty then push options
+          //onto the array. options will cause an error for
+          //textfield elements.
+          if ($type != 'textfield') {
+            $form['params'][$id]['#options'] = $list;
+            $form['params'][$id]['#multiple'] = $multiselect;
+            if ($ajax) {
+              $form['params'][$id]['#ajax'] = array('callback' => 'forena_parameters_callback',
+                'wrapper' => 'parameters-wrapper');
+            }
+          }
+
+        }
+
+        $form['params']['submit'] = array(
+          '#type' => 'submit',
+          '#value' => t('Submit'),
+        );
+      }
+      return $form;
+    }
+
+
+}
+
+
+/**
+ *
+ * gets the values from the params form
+ * redirects to the report page with the values in
+ * the querystring.
+ */
+function forena_parameter_form_submit($form, &$form_state) {
+  $values = $form_state['values'];
+  unset($values['params']['submit']);
+  if (isset($values['params'])) foreach ($values['params'] as $key => $value) {
+    if (is_array($value)) {
+      foreach ($value as $k => $val) {
+        if (!$val) {
+          unset($values['params'][$key][$k]);
+        }
+      }
+    }
+    else {
+      if (strpos($value, '|')!==FALSE) {
+        $values['params'][$key] = explode('|', $value);
+      }
+      elseif ($value==='' || $value===NULL) {
+        unset($values['params'][$key]);
+      }
+    }
+  }
+  $form_state['redirect']= array($_GET['q'], array('query' => @$values['params']));
+}
+
+/**
+ * Ajax form callback function
+ * Enter description here ...
+ * @param unknown_type $form
+ * @param unknown_type $form_state
+ */
+function forena_parameters_callback($form, &$form_state) {
+  return $form['params'];
+}
+
 /**
  * Implementation of hook_perm
  *
@@ -582,14 +768,16 @@ function forena_report_menu_callback() {
 	$report_name = array_shift($args);
 	$parms = $_GET;
 	unset($parms['q']);
+	$menu_parms = array();
   $tokens = Frx::Menu()->tokens($path);
 	if ($args && $tokens) {
 	  foreach ($args as $i=> $value) {
-	    @$parms[$tokens[$i]] = $value;
+	    @$menu_parms[$tokens[$i]] = $value;
 	  }
 	}
 
-	Frx::Data()->setContext('menu-parms', $parms);
+	Frx::Data()->setContext('menu-parms', $menu_parms);
+	$parms = array_merge($parms, $menu_parms);
 	$output = forena_report($report_name, $parms);
 	if ($output) return $output;
 }
