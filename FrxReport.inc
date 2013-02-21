@@ -19,6 +19,8 @@ class FrxReport {
   public $parameters;
   public $options;
   public $formats;
+  public $title;
+  public $frx_title;
   public $body;
   public $html;
   public $skin;
@@ -66,6 +68,7 @@ class FrxReport {
             case 'category':
               $this->category = (string)$node;
               break;
+
             case 'descriptor':
               $this->descriptor = (string)$node;
               break;
@@ -73,6 +76,9 @@ class FrxReport {
               foreach ($node->attributes() as $key => $value) {
                 $this->options[$key] = (string)$value;
               }
+              break;
+            case 'title':
+              $this->frx_title = (string)$node;
               break;
             case 'form':
               $this->form = (string) $value;
@@ -291,11 +297,15 @@ class FrxReport {
     foreach ($body->childNodes as $node) {
       $o .= $this->render_section($node);
     }
+    // Default in dynamic title from head.
+    if ($this->frx_title) {
+      $title = check_plain($this->teng->replace($this->frx_title));
+      if ($title) $title = $this->title = $title;
+    }
     if (!$this->rpt_xml->xpath('//*[@frx:renderer="FrxParameterForm"]') && $format=='web') {
       $form = $this->parametersForm();
       $o = drupal_render($form) . $o;
     }
-
     $this->html = $o;
     Frx::Data()->pop();
     return $o ;
