@@ -17,7 +17,7 @@ class ForenaReportTestCase extends DrupalWebTestCase {
   }
 
   public function setup() {
-    parent::setup('forena');
+    parent::setup('forena', 'devel');
     // Create and log in our privileged user.
     $this->privileged_user = $this->drupalCreateUser(array(
       'access demo reports',
@@ -25,23 +25,15 @@ class ForenaReportTestCase extends DrupalWebTestCase {
       'list reports',
       ));
     $this->drupalLogin($this->privileged_user);
-    variable_set('forena_report_path', 'sites/default/files/reports');
-    $edit= array('sync_overwrite' => 1 );
-    $this->drupalPost('admin/config/content/forena', $edit, t('Clear Cache'));
-    $edit= array('sync_overwrite' => 1 );
-    $this->drupalPost('admin/config/content/forena', $edit, t('Clear Cache'));
   }
 
   public function testConfig() {
     $this->drupalGet('forena');
-    $this->assertText('Simple Table');
-  }
-
-  public function testSimpleReport() {
-    $this->drupalGet('forena');
     $this->drupalGet('reports/sample.states');
+    $this->assertText('Simple Table');
     $this->assertText('Alaska');
   }
+
 
 
 }
