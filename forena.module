@@ -938,6 +938,11 @@ function forena_forena_controls() {
     'class' => 'FrxParameterForm',
   );
 
+  $controls[] = array(
+    'file' => 'renderers/FrxTitle.inc',
+    'class' => 'FrxTitle',
+  );
+
 	$library_dir = FrxReportGenerator::instance()->configuration('library_path');
   $library = rtrim($library_dir,'/') . '/SVGGraph/SVGGraph.php';
   if (file_exists($library)) {
