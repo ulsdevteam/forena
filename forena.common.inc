@@ -425,38 +425,31 @@ function theme_forena_inline_form($variables) {
   $build = '';
   $output = '';
   $fields = array();
+  $template = @$form['#forena_form_template'];
 
   // Convert interior elements into inline fields
-  _forena_set_inline_theme($form);
-  // Render the inline fields and store them into the array.
-  _forena_render_inline_elements($form, $fields);
-
-  // Render the child form in the template.
-  if (isset($form['#forena_form_template'])) {
-    $teng = new FrxSyntaxEngine(FRX_TOKEN_EXP,'{}');
-    $o = Frx::Data()->push($fields, 'form-fields');
-    $build = $teng->replace($form['#forena_form_template'], TRUE);
-    $o = Frx::Data()->pop();
+  if ($template) {
+    _forena_set_inline_theme($form, $template);
+    // Render the inline fields and store them into the array.
+    $build = _forena_render_inline_elements($form, $fields, $template);
     $build .= $fields['form_build_id'] . $fields['form_token'] . $fields['form_id'];
-    $form['#children'] = $build;
-  } else {
+  }
+  else {
     $build = $form['#children'];
   }
 
-  // Return the for
-
+  // Return the form
   return $build;
 }
 
-function _forena_render_inline_elements(&$elements, &$fields) {
-  foreach ($elements as $key => $value) if (strpos($key, '#')===FALSE) {
-    if (@$value['#type'] != 'fieldset') {
-      $fields[$key] = drupal_render($value);
-    }
-    else {
-      _forena_render_inline_elements($elements[$key], $fields);
-    }
-  }
+function _forena_render_form_template($fields, $template) {
+  static $teng = '';
+  if (!$teng) $teng = new FrxSyntaxEngine(FRX_TOKEN_EXP,'{}');
+    $o = Frx::Data()->push($fields, 'form-fields');
+  $build = $teng->replace($template, TRUE);
+  $o = Frx::Data()->pop();
+
+  return $build;
 }
 
 function _forena_set_inline_theme(&$elements) {
@@ -465,15 +458,12 @@ function _forena_set_inline_theme(&$elements) {
     // Set theme functions for specific types to be inline forms.
     switch ($type) {
       case 'fieldset':
-      case 'submit':
-      case '':
       case NULL:
-        _forena_set_inline_theme($elements[$key]);
+      case 'submit':
+      case '';
         break;
       default:
         $elements[$key]['#theme_wrappers'] = array('forena_inline_form_element');
-
-
     }
 
   }
@@ -487,9 +477,6 @@ function theme_forena_inline_form_element($variables) {
   $element = &$variables['element'];
   // This is also used in the installer, pre-database setup.
   $t = get_t();
-
- // drupal_set_message ('<pre>' . print_r($variables,1) . '</pre>');
-
 
   // This function is invoked as theme wrapper, but the rendered form element
   // may not necessarily have been processed by form_builder().
@@ -547,9 +534,28 @@ function theme_forena_inline_form_element($variables) {
     $output .= '<div class="description">' . $element['#description'] . "</div>\n";
   }
   */
-
-
   $output .= "</span>\n";
+
+  return $output;
+}
+
+function theme_forena_fieldset_template(&$variables) {
+
+  $element = $variables['fieldset'];
+  element_set_attributes($element, array('id'));
+  _form_set_class($element, array('form-wrapper'));
+  $output = '';
+
+  $fields = array();
+  foreach($element as $key => $value ) if (strpos($key, '#') ===FALSE) {
+    $fields[$key] = drupal_render($value);
+  }
+
+  $output .= _forena_render_form_template($fields, $element['#forena-template']);
+  if (isset($element['#value'])) {
+    $output .= $element['#value'];
+  }
+
 
   return $output;
 }

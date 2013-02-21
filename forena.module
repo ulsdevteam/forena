@@ -463,12 +463,9 @@ function forena_parameter_form($formid, &$form_state, $parameters, $collapse=FAL
   unset($parms['q']);
   $form = array();
   $menu_parms = Frx::Data()->getContext('menu-parms');
-  $form['#forena_form_template'] = $template;
-  if (trim($form['#forena_form_template'])) $form['#theme'] = 'forena_inline_form';
   if ($parameters) {
       $report_name = '';
       drupal_alter('forena_parameters', $report_name,  $parms);
-
       if ($parameters) {
 
         $form['params'] = array(
@@ -481,9 +478,9 @@ function forena_parameter_form($formid, &$form_state, $parameters, $collapse=FAL
           '#suffix' => '</div>',
         );
 
-
         foreach ($parameters as $node) {
 
+          $disabled = FALSE;
           $label = @(string)$node['label'];
           $id = @(string)$node['id'];
           $data_source = @(string)$node['data_source'];
@@ -538,8 +535,7 @@ function forena_parameter_form($formid, &$form_state, $parameters, $collapse=FAL
           }
 
           if (isset($menu_parms[$id]) && $type=='textfield') {
-            $type = 'item';
-            $value = $menu_parms[$id];
+            $disabled = TRUE;
           }
 
           //If a data_source attr was found then create an array of
@@ -553,6 +549,7 @@ function forena_parameter_form($formid, &$form_state, $parameters, $collapse=FAL
             '#type' => $type,
             '#title' => ($label) ? t($label) : t($id),
             '#default_value' => $value,
+            '#disabled' => $disabled,
             '#required' => $required,
             '#description' => t($desc),
           );
@@ -588,10 +585,17 @@ function forena_parameter_form($formid, &$form_state, $parameters, $collapse=FAL
 
         }
 
+        if ($template) {
+          $form['params']['#forena-template'] = $template;
+          $form['params']['#theme'] = 'forena_fieldset_template';
+          _forena_set_inline_theme($form['params']);
+        }
+
         $form['params']['submit'] = array(
           '#type' => 'submit',
           '#value' => t('Submit'),
         );
+
       }
       return $form;
     }
@@ -1233,12 +1237,12 @@ function forena_theme() {
     'forena_web_report' => array(
       'variables' => array('doc_types' => NULL, 'parameters' => NULL, 'content' => NULL),
     ),
-    'forena_inline_form' => array(
-      'render element' => 'form',
-      'file' => 'forena.common.inc',
-    ),
     'forena_inline_form_element' => array(
       'render element' => 'element',
+      'file' => 'forena.common.inc',
+    ),
+    'forena_fieldset_template' => array(
+      'render element' => 'fieldset',
       'file' => 'forena.common.inc',
     ),
 
