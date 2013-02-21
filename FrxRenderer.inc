@@ -70,10 +70,10 @@ class FrxRenderer {
   public function replacedAttributes() {
     $attributes = array();
     if (isset($this->frxAttributes)) foreach ($this->frxAttributes as $key => $data) {
-      $attributes[$key] =  $this->teng->replace((string)$data,TRUE);
+      $attributes[$key] =  $this->teng->replace((string)$data, TRUE);
     }
     if (isset($this->htmlAttributes)) foreach ($this->htmlAttributes as $key => $data) {
-      $attributes[$key] = $this->teng->replace((string)$data,TRUE);
+      $attributes[$key] = $this->teng->replace((string)$data, TRUE);
     }
     return $attributes;
   }

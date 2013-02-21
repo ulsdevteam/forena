@@ -1,4 +1,9 @@
 <?php
+/**
+ * @file
+ * Forena pdf generation module
+ * @author metzlerd
+ */
 
 /**
  * Implementation of hook_menu
@@ -21,9 +26,9 @@ function forena_pdf_menu() {
 function forena_pdf_forena_document_types() {
   //require_once 'docformats/FrxPrincePDF.inc';
   $items = array();
-  $pdf_generator = variable_get('forena_pdf_generator','');
+  $pdf_generator = variable_get('forena_pdf_generator', '');
   if ($pdf_generator) {
-    include_once ('docformats/' . $pdf_generator . '.inc');
+    include_once('docformats/' . $pdf_generator . '.inc');
     $items['pdf'] = array(
       'class' => $pdf_generator,
       'title' => t('PDF Document'),
@@ -41,7 +46,7 @@ function forena_pdf_configure($formid, &$form_state)  {
   $path = variable_get('forena_pdf_prince_path', '/usr/local/bin/prince');
   $disable_links = variable_get('forena_pdf_disable_links', TRUE);
   $pdf_options = array('' => t('None') , 'FrxPrincePDF' => t('Prince XML'), 'FrxMPDF' => t('MPDF'));
-  $pdf_generator = variable_get('forena_pdf_generator','');
+  $pdf_generator = variable_get('forena_pdf_generator', '');
 
   $mpdf_path = t('MDPF Libarary not found. Please install so sites/all/libraries/mpdf/mpdf.php exists.');
   if (file_exists('sites/all/libraries/mpdf/mpdf.php')) {
@@ -59,7 +64,7 @@ function forena_pdf_configure($formid, &$form_state)  {
   }
 
   $form['forena_pdf_generator'] = array(
-  	'#type' => 'select',
+    '#type' => 'select',
     '#title' => t('PDF Generation Method'),
     '#options' => $pdf_options,
     '#default_value' => $pdf_generator,

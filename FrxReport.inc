@@ -584,7 +584,7 @@ class FrxReport {
       foreach ($nodes as $node) {
         $parm_def=array();
         $parm_def['default'] = (string)$node;
-        foreach ($node->attributes() as $key=>$value) {
+        foreach ($node->attributes() as $key => $value) {
           $parm_def[$key] = (string)$value;
         }
         $id = @$parm_def['id'];

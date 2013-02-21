@@ -444,7 +444,7 @@ function theme_forena_inline_form($variables) {
 
 function _forena_render_form_template($fields, $template) {
   static $teng = '';
-  if (!$teng) $teng = new FrxSyntaxEngine(FRX_TOKEN_EXP,'{}');
+  if (!$teng) $teng = new FrxSyntaxEngine(FRX_TOKEN_EXP, '{}');
     $o = Frx::Data()->push($fields, 'form-fields');
   $build = $teng->replace($template, TRUE);
   $o = Frx::Data()->pop();
@@ -453,7 +453,7 @@ function _forena_render_form_template($fields, $template) {
 }
 
 function _forena_set_inline_theme(&$elements) {
-  foreach ($elements as $key => $value) if (strpos($key,'#')===FALSE) {
+  foreach ($elements as $key => $value) if (strpos($key, '#')===FALSE) {
     $type = @$value['#type'];
     // Set theme functions for specific types to be inline forms.
     switch ($type) {
@@ -547,7 +547,7 @@ function theme_forena_fieldset_template(&$variables) {
   $output = '';
 
   $fields = array();
-  foreach($element as $key => $value ) if (strpos($key, '#') ===FALSE) {
+  foreach ($element as $key => $value ) if (strpos($key, '#') ===FALSE) {
     $fields[$key] = drupal_render($value);
   }
 

@@ -82,7 +82,7 @@ function forena_query_builder_form($formid, &$form_state) {
     if (@$form_state['storage']['delete']) {
       $form['question'] = array(
         '#type' => 'markup',
-        '#markup' => '<p>Are you sure you want to delete '. $data['block_name'] . '?</p>',
+        '#markup' => '<p>Are you sure you want to delete ' . $data['block_name'] . '?</p>',
       );
 
       $form['confirm'] = array(
@@ -181,7 +181,7 @@ function forena_query_load_block($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
   $form_state['storage']['new'] = FALSE;
   $form_state['storage']['block'] = $block_def = Frx::RepoMan()->loadBlock($form_state['values']['block']);
-  list($provider, $block) = @explode('/',$form_state['values']['block'],2);
+  list($provider, $block) = @explode('/', $form_state['values']['block'], 2);
   $form_state['storage']['provider'] = $provider;
   $form_state['storage']['block_name'] = $form_state['values']['block'];
   if (@$block_def['builder']) {
@@ -203,7 +203,7 @@ function forena_query_load_include($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
   $form_state['storage']['block'] = Frx::RepoMan()->loadBlock($form_state['values']['block']);
   $form_state['storage']['block']['locked'] = FALSE;
-  list($provider, $block) = @explode('/',$form_state['values']['block'],2);
+  list($provider, $block) = @explode('/', $form_state['values']['block'], 2);
   $form_state['storage']['provider'] = $provider;
   $form_state['storage']['builder']['block_name'] = $block;
   $form_state['storage']['block_name'] = $form_state['values']['block'];
@@ -291,7 +291,7 @@ function forena_query_delete_block($form, &$form_state) {
   $block_name = $form_state['storage']['block_name'];
   Frx::RepoMan()->deleteBlock($block_name);
   $form_state['rebuild'] = FALSE;
-  drupal_set_message('Deleted '. $block_name);
+  drupal_set_message(t('Deleted %s', array('%s' => $block_name)));
 }
 
 function forena_query_close($form, &$form_state) {
@@ -325,7 +325,7 @@ function forena_query_try_delete($form, &$form_state) {
  * @param $values
  */
 function _forena_query_clean_values(&$values, &$elements) {
-  foreach($elements as $key=>$value) if (strpos($key, '#')!==0) {
+  foreach ($elements as $key => $value) if (strpos($key, '#')!==0) {
     if (@$value['#type']=='submit') {
       unset($values[$key]);
     }
@@ -373,7 +373,7 @@ function _forena_query_filter_ctl(&$data, &$ctl, $fields) {
     '#weight' => 1);
 
   $i++;
-  foreach ($data['filter'] as $k=>$crit) {
+  foreach ($data['filter'] as $k => $crit) {
     $i++;
     if (isset($crit['filter'])) {
       $cnd = array();
@@ -453,7 +453,7 @@ function forena_query_add_filter($form, &$form_state) {
   $parents = $form_state['triggering_element']['#parents'];
   array_shift($parents);
   array_pop($parents);
-  $field = array_fill_keys(array('field', 'op', 'value'),'');
+  $field = array_fill_keys(array('field', 'op', 'value'), '');
   _forena_query_add_parent_data($where, $parents, $field);
   $form_state['storage']['builder']['where'] = $where;
   $form_state['rebuild'] = TRUE;
@@ -513,7 +513,7 @@ function forena_query_remove_group($form, &$form_state) {
   array_pop($parents);
   _forena_query_remove_parent_data($where, $parents);
   if (!$where['filter']) {
-    $where['filter'][] =  array_fill_keys(array('field', 'op', 'value'),'');
+    $where['filter'][] =  array_fill_keys(array('field', 'op', 'value'), '');
   }
   $form_state['storage']['builder']['where'] = $where;
   $form_state['rebuild'] = TRUE;

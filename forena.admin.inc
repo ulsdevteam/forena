@@ -66,7 +66,7 @@ function forena_delete_report($report_name, $delete_file = TRUE) {
       ->execute();
   }
   else {
-    drupal_set_message('Unable to delete file ' . $info['basename'], 'error');
+    drupal_set_message(t('Unable to delete file %s', array('%s' => $info['basename'])), 'error');
   }
 }
 
@@ -185,7 +185,7 @@ function forena_settings() {
   );
 
 
-  $form['forena_input_format'] = forena_filter_element(variable_get('forena_input_format',''));
+  $form['forena_input_format'] = forena_filter_element(variable_get('forena_input_format', ''));
 
   $form['forena_default_form'] = array(
     '#type' => 'select',
@@ -193,7 +193,7 @@ function forena_settings() {
     '#options' => $skins,
     '#description' => t('Specify the default skin to be used.   New skins can be created by creating .skinfo files in your reports directory.'
       . ' Skins are basically css and javascript libraries added to your report.'),
-    '#default_value' => variable_get('forena_default_form',''),
+    '#default_value' => variable_get('forena_default_form', ''),
   );
 
   $form =  system_settings_form($form);
@@ -265,7 +265,7 @@ function forena_format_form($formid, $form_state, $report_name) {
       '#title' => t('Skin'),
       '#options' => $skins,
       '#default_value' => $report_form,
-      '#description' => t('The page style of your report.  The {skin}.skinfo file specifies css and js file in your report. ')
+      '#description' => t('The page style of your report.  The {skin}.skinfo file specifies css and js file in your report.')
     );
 
     //begin checking doc generation options
@@ -319,7 +319,7 @@ function forena_format_form_submit($form, &$form_state) {
   // Doc gen settings.
   if (isset($form['docgen'])) {
     $docgen = array();
-    if($selected = array_filter(@$values['docgen']['docs'])) {
+    if ($selected = array_filter(@$values['docgen']['docs'])) {
       if ($selected) foreach ($selected as $key => $value) {
        if ($value) $docgen[] = array('type' => $key);
       }
@@ -451,7 +451,7 @@ function forena_layout_form($form, $form_state, $report_name) {
       $form['menu']['title'] = array(
         '#type' => 'textfield',
         '#title' => t('Menu Title'),
-        '#description' => t('Title of menu item.  Leave blank to use the report title as the menu title. '),
+        '#description' => t('Title of menu item.  Leave blank to use the report title as the menu title.'),
       );
 
       $menu_options = array(
@@ -551,7 +551,7 @@ function forena_layout_form_submit($form, &$form_state) {
   $filename = $report_path . '/' . $report_name . '.frx';
 
   if (forena_save_report($report_name, $r->asXML(), TRUE) == 1) {
-    drupal_set_message(t('Your report, %s has been saved.', array('%s'=>$report_name)));
+    drupal_set_message(t('Your report, %s has been saved.', array('%s' => $report_name)));
   }
   // If we changed the menu we need to rebuild it.
   if ($rebuild_menu) {
@@ -631,7 +631,7 @@ function forena_add_report_form($formid, $form_state, $report_name='') {
     '#type' => 'textfield',
     '#title' => t('Title'),
     '#default_value' => $title,
-    '#required' => true,
+    '#required' => TRUE,
   );
 
   $form['category'] = array(
@@ -699,7 +699,7 @@ function forena_add_report_form_submit($form, &$form_state) {
   $filename = $desc['filename'];
 
   if (forena_save_report($report_name, $r->asXML(), TRUE) == 1) {
-    drupal_set_message(t('Your report, %s has been saved.', array('%s'=>$report_name)));
+    drupal_set_message(t('Your report, %s has been saved.', array('%s' => $report_name)));
     //if this is a new report then redirect to data blocks
     if ($values['report_name']) {
       $edit = '/edit';
@@ -707,7 +707,7 @@ function forena_add_report_form_submit($form, &$form_state) {
     else {
       $edit = '/edit/data/add';
     }
-    $form_state['redirect']= $desc['i_link']  . $edit;
+    $form_state['redirect']= $desc['i_link'] . $edit;
 
   }
 }
@@ -740,7 +740,7 @@ function forena_create_trans_form($formid, $form_state, $report_name) {
     '#value' => $name,
   );
 
-  foreach ($languages as $key=>$obj) {
+  foreach ($languages as $key => $obj) {
     $languages[$key] = $obj->native;
   }
   $form['report_lang'] = array(
@@ -760,7 +760,7 @@ function forena_create_trans_form($formid, $form_state, $report_name) {
     '#type' => 'textfield',
     '#title' => t('Title'),
     '#default_value' => $title,
-    '#required' => true,
+    '#required' => TRUE,
   );
 
 
@@ -775,7 +775,7 @@ function forena_create_trans_form($formid, $form_state, $report_name) {
 function forena_create_trans_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   $base_name = $values['base_name'];
-  $new_name = $values['save_report_language']. '/' . $base_name;
+  $new_name = $values['save_report_language'] . '/' . $base_name;
 
   $desc = Frx::Menu()->parseURL($new_name);
   $filename = $desc['filename'];
@@ -794,10 +794,9 @@ function forena_create_trans_form_submit($form, &$form_state) {
   }
 
   if (forena_save_report($report_name, $r->asXML(), TRUE) == 1) {
-    drupal_set_message(t('Translation,  %s has been created. Switch languages to translate  ', array('%s'=>$values['title'])));
+    drupal_set_message(t('Translation,  %s has been created. Switch languages to translate.', array('%s' => $values['title'])));
     //if this is a new report then redirect to data blocks
     $form_state['redirect']= array( $desc['i_link'] . '/edit/layout');
-
   }
 }
 
@@ -829,10 +828,10 @@ function forena_doc_formats_settings() {
   $form['forena_email_override'] = array(
     '#type' => 'checkbox',
     '#title' => 'Run email merges in test mode' ,
-    '#default_value' => variable_get('forena_email_override',FALSE),
+    '#default_value' => variable_get('forena_email_override', FALSE),
     '#description' => t('When this box is checked emails are sent to the currently logged in user.  Useful for testing environments.'),
   );
-  $form['forena_email_input_format'] = forena_filter_element(variable_get('forena_email_input_format',''));
+  $form['forena_email_input_format'] = forena_filter_element(variable_get('forena_email_input_format', 'full_text'));
   $form['forena_email_input_format']['#title'] = t('Email Input Format');
 
   return system_settings_form($form);
@@ -844,19 +843,19 @@ function forena_doc_formats_settings() {
 function forena_data_settings() {
   $repos = Frx::RepoMan()->repositories;
   $r_list = array();
-  $headers = array(t('Name'),t('Description'), t('Path'), t('Operation'));
-  foreach ($repos as $name=>$r) {
+  $headers = array(t('Name'), t('Description'), t('Path'), t('Operation'));
+  foreach ($repos as $name => $r) {
     $r_list[] = array(
       $name,
       $r['title'],
       $r['path'],
-      l('configure', 'admin/config/content/forena/data/configure/'. $name)
+      l(t('configure'), 'admin/config/content/forena/data/configure/' . $name)
     );
 
   }
 
-  $output = '<ul class="action-links"><li>' . l('Add data source', 'admin/config/content/forena/data/add') . '</li></ul>';
-  $output .= theme_table(array('header' => $headers, 'rows' => $r_list, 'attributes' => array(), 'caption' => '', 'sticky' => true, 'colgroups' => array(), 'empty' => ''));
+  $output = '<ul class="action-links"><li>' . l(t('Add data source'), 'admin/config/content/forena/data/add') . '</li></ul>';
+  $output .= theme_table(array('header' => $headers, 'rows' => $r_list, 'attributes' => array(), 'caption' => '', 'sticky' => TRUE, 'colgroups' => array(), 'empty' => ''));
   return $output;
 }
 
@@ -957,7 +956,7 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
   // Access method list
   $access = array(
     'callback' => t('Use drupal permissions'),
-    'block' => t('Match values provided by a data block. '),
+    'block' => t('Match values provided by a data block.'),
   );
 
   $form['access_method'] = array(
@@ -966,7 +965,7 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
     '#disabled' => $locked,
     '#title' => t('Data security method'),
     '#default_value' => empty($config['access block']) ? 'callback' : 'block',
-    '#description' => t('Specify how the ACCESS defined for a data block is to be interpreted. '),
+    '#description' => t('Specify how the ACCESS defined for a data block is to be interpreted.'),
     '#ajax' => array(
       'callback' => 'forena_access_info_callback',
       'wrapper' => 'access-details',
@@ -1006,7 +1005,7 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
   $drivers = array(
     'FrxDrupal' => t('Drupal'),
     'FrxOracle' => t('Oracle Database'),
-    'FrxPDO' => t('PDO other than Drupal '),
+    'FrxPDO' => t('PDO other than Drupal'),
     'FrxPostgres' => t('Postgres Database'),
     'FrxMSSQL' => t('MSSQL Database'),
     'FrxFiles' => t('XML Files'),
@@ -1407,7 +1406,7 @@ function forena_add_data_block_form($formid, &$form_state, $report_name) {
     $format = isset($desc['format']) ? $desc['format'] : '';
     $r = forena_get_report_editor($desc['name']);
     $form_state['storage']['title'] = $r->title;
-    if(!@$desc['exists']) {
+    if (!@$desc['exists']) {
       drupal_not_found();
       return;
     }
@@ -1751,7 +1750,7 @@ function forena_data_block_form($formid, &$form_state, $report_name) {
         '#value' => $name,
      );
     $links = array();
-    $links[] = array('href' => $desc['link']. '/edit/data/add', 'title' => 'Add Data' );
+    $links[] = array('href' => $desc['link'] . '/edit/data/add', 'title' => 'Add Data' );
     $form['add_link'] = array(
       '#type' => 'markup',
       '#markup' => theme('links',
@@ -1790,7 +1789,7 @@ function forena_data_block_form($formid, &$form_state, $report_name) {
       $parameters = (string)$attrs['parameters'];
       $block_info = Frx::RepoMan()->loadBlock($block);
       $access = @$block_info['access'];
-      $data_block_array[$id] = $block . ": <i>" .  ' security "' . $access . '"</i>';
+      $data_block_array[$id] = $block . ": <i>" . ' security "' . $access . '"</i>';
 
       $ctl = array(
         '#type' => 'fieldset',
@@ -1905,25 +1904,25 @@ function forena_report_translations($name_in='') {
   $headers = array(t('Language'), t('Title'), t('Last Modified'), t('Operation'));
   // Generate list of all existing tranlsations and their status.
   $report_path = FrxReportGenerator::instance()->report_path();
-  foreach ($languages as $key=>$language) {
+  foreach ($languages as $key => $language) {
     $i_name = ($key=='en') ? $name : $key . '/' . $name;
     $i_link = $key . '.' . $name;
     if (file_exists($report_path . '/' . $i_name . '.frx')) {
       $modified = format_date(filemtime($report_path . '/' . $i_name . '.frx'));
       $r = forena_get_report_editor($i_name);
       $title = $r->title;
-      $edit = l(t('Edit'), 'reports/' . str_replace('/', '.', $i_link) . '/edit',array('query' => array('language' => $key)));
+      $edit = l(t('Edit'), 'reports/' . str_replace('/', '.', $i_link) . '/edit', array('query' => array('language' => $key)));
     }
     else {
       $modified = '';
       $title ='';
-      $edit = l(t('Add'), 'reports/' .$name_in. '/translate', array('query' => array('language' => $key)));
+      $edit = l(t('Add'), 'reports/' . $name_in . '/translate', array('query' => array('language' => $key)));
     }
     $data[] = array($language->native, $title, $modified, $edit);
 
   }
 
-  return theme_table(array('header' => $headers, 'rows' => $data, 'attributes' => array(), 'caption' => '', 'sticky' => true, 'colgroups' => array(), 'empty' => ''));
+  return theme_table(array('header' => $headers, 'rows' => $data, 'attributes' => array(), 'caption' => '', 'sticky' => TRUE, 'colgroups' => array(), 'empty' => ''));
 }
 
 /**
@@ -2000,7 +1999,7 @@ function forena_delete_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   $report_name = $values['report_name'];
   if (isset($values['delete_all_languages']) && $values['delete_all_languages']=='all') {
-    foreach(language_list() as $language) {
+    foreach (language_list() as $language) {
       $report_name = $language->language . '/' . $values['base_name'];
       $desc = Frx::Menu()->parseURL($report_name);
       forena_delete_report($desc['name']);
@@ -2134,7 +2133,7 @@ function forena_admin_params_form($formid, $form_state, $report_name) {
     );
 
     $links = array();
-    $links[] = array('href' => $desc['link']. '/edit/params/add', 'title' => 'Add Parameter' );
+    $links[] = array('href' => $desc['link'] . '/edit/params/add', 'title' => 'Add Parameter' );
     $form['add_link'] = array(
       '#type' => 'markup',
       '#markup' => theme('links',

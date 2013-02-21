@@ -208,7 +208,7 @@ class FrxDataSource{
           require_once $file_name;
           $class = str_replace($this->block_path . '/', '', $block_name);
           $methods = get_class_methods($class);
-          if ($methods) foreach($methods as $method) {
+          if ($methods) foreach ($methods as $method) {
             if ($method != 'tokens') {
               $block_list[] = $class . '.' . $method;
             }
@@ -352,7 +352,7 @@ class FrxDataSource{
     }
     $tokens = array_merge($tokens, $this->tokens($contents));
     $block = array( 'source' => $data, 'file' => trim($file, " \n"),
-    	'tokens' => $tokens);
+      'tokens' => $tokens);
     if ($access) $block['access'] = $access;
     return $block;
   }
@@ -456,9 +456,9 @@ class FrxDataSource{
     $clause = '';
     $op = $data['op'];
     $i=0;
-    if ($data['filter']) foreach($data['filter'] as $cond) {
+    if ($data['filter']) foreach ($data['filter'] as $cond) {
       $i++;
-      $conj = ($i==1) ? '' : $op. ' ';
+      $conj = ($i==1) ? '' : $op . ' ';
       if (isset($cond['filter'])) {
         $clause .= $conj . ' (' . $this->buildFilterSQL($cond) . " )\n";
       }
@@ -470,7 +470,7 @@ class FrxDataSource{
             $expr = $cond['field'] . ' ' . $cond['op'];
             break;
           default:
-            $expr = $cond['field'] . ' ' .  $cond['op'] . ' ' . $this->format($cond['value'], $cond['field'], array());
+            $expr = $cond['field'] . ' ' . $cond['op'] . ' ' . $this->format($cond['value'], $cond['field'], array());
         }
         $clause .= ' ' . $conj . $expr;
       }

@@ -1,4 +1,10 @@
 <?php
+/**
+ * @file
+ * Returns configuration data as XML for reporting.
+ * @author metzlerd
+ *
+ */
 class FrxConfigData {
   public $access = 'access content';
   /**
@@ -7,7 +13,7 @@ class FrxConfigData {
   public function sources() {
     $data = Frx::RepoMan()->repositories;
     $node = new SimpleXMLElement('<repos/>');
-    foreach ($data as $key=>$config) {
+    foreach ($data as $key => $config) {
       $row = $node->addChild('row');
       $row->name = $key;
       $row->title = @$config['title'];

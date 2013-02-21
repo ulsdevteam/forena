@@ -45,7 +45,7 @@ class FrxMPDF extends FrxDocument {
            case 'print':
            case 'screen':
            case 'pdf':
-             $mpdf->WriteHTML(file_get_contents($sheet),1);
+             $mpdf->WriteHTML(file_get_contents($sheet), 1);
            //echo $sheet;
            break;
         }
@@ -75,7 +75,7 @@ class FrxMPDF extends FrxDocument {
       // 'Content-Disposition' => 'attachment; filename="a_report_name.pdf"',
     );
 
-    foreach ($http_headers as $name=>$value) {
+    foreach ($http_headers as $name => $value) {
       $value = preg_replace('/\r?\n(?!\t| )/', '', $value);
       drupal_add_http_header($name, $value);
     }

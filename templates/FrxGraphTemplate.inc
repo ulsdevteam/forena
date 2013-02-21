@@ -87,13 +87,13 @@ class FrxGraphTemplate extends FrxTemplate {
       if ($xvalues) {
         $form_ctl['seriesx'][$i] = array(
           '#type' => 'textfield',
-          '#title' => (string)($i + 1) ,
+          '#title' => check_plain((string)($i + 1)),
           '#default_value' => $config['seriesx'][$i]
         );
       }
       $form_ctl['series'][$i] = array(
         '#type' => 'textfield',
-        '#title' => (string)($i + 1),
+        '#title' => check_plain((string)($i + 1)),
         '#default_value' => $config['series'][$i],
         );
 

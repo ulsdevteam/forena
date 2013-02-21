@@ -1,3 +1,7 @@
+/**
+ * @file
+ * Legacy forena behaviors.  These are deprecated. 
+ */
 (function ($) {
 
   Drupal.behaviors.forenaCallback = {

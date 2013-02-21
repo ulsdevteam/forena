@@ -86,7 +86,7 @@ class Frx {
       return $o;
     }
     else {
-      drupal_set_message(t('Unsupported document type:') . $type, 'error');
+      drupal_set_message(t('Unsupported document type: &s'), array('%s' => $type), 'error');
     }
 
   }
@@ -102,7 +102,7 @@ class Frx {
       $doc_types = module_invoke_all('forena_document_types');
       if (!$all) unset($doc_types['web']);
       $supported_doctypes = array();
-      foreach ($doc_types as $type=>$doc) {
+      foreach ($doc_types as $type => $doc) {
         $supported_doctypes[$type] = $type;
       }
     }

@@ -45,7 +45,7 @@ class FrxData {
       // Get attributes
       $data = get_object_vars($data);
       if (method_exists($data, 'attributes')) {
-        foreach ($data->attributes() as $key=>$value) {
+        foreach ($data->attributes() as $key => $value) {
           $data[$key] = (string)$value;
         }
       }
@@ -136,7 +136,7 @@ class FrxData {
   }
 
   public function dumpContext() {
-    drupal_set_message('cur_context ' . $this->id . '<br/>Stack<br/><pre>' . print_r($this->cur_context,1) . '</pre>');
+    drupal_set_message(filter_xss('cur_context ' . $this->id . '<br/>Stack<br/><pre>' . print_r($this->cur_context, 1) . '</pre>'));
   }
 
 }
