@@ -303,7 +303,8 @@ class FrxReport {
       if ($title) $title = $this->title = $title;
     }
     if (!$this->rpt_xml->xpath('//*[@frx:renderer="FrxParameterForm"]') && $format=='web') {
-      $form = $this->parametersForm();
+      $variables = array('collapse' => $this->blocks_loaded);
+      $form = $this->parametersForm($variables);
       $o = drupal_render($form) . $o;
     }
     $this->html = $o;
@@ -593,9 +594,11 @@ class FrxReport {
     return $parameters;
   }
 
-  public function parametersForm($template='') {
+  public function parametersForm($variables = array()) {
+
     $parms = $this->parametersArray();
-    return drupal_get_form('forena_parameter_form', $parms, $this->blocks_loaded, $template);
+
+    return drupal_get_form('forena_parameter_form', $parms, $variables);
   }
 
 }

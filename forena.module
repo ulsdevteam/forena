@@ -453,13 +453,18 @@ function forena_parameters_report() {
   }
 }
 
-function forena_parameter_form($formid, &$form_state, $parameters, $collapse=FALSE, $template='') {
+function forena_parameter_form($formid, &$form_state, $parameters, $attributes= array()) {
   $parms = $_GET;
   if (isset($form_state['values'])) {
     $collapse=FALSE;
     $parms = array_merge($parms, $form_state['values']['params']);
     Frx::Data()->push($parms, 'parm');
   }
+  $collapse = isset($attributes['collapse']) ? $attributes['collapse'] : FALSE;
+  $template = @$attributes['template'];
+  $collapsible = isset($attributes['collapsible']) ? $attributes['collapsible'] : TRUE;
+  $title = isset($attributes['title']) ? $attributes['title'] : t('Parameters');
+  $submit_value = isset($attributes['submit']) ? $attributes['submit'] : t('Submit');
   unset($parms['q']);
   $form = array();
   $menu_parms = Frx::Data()->getContext('menu-parms');
@@ -470,9 +475,9 @@ function forena_parameter_form($formid, &$form_state, $parameters, $collapse=FAL
 
         $form['params'] = array(
           '#tree' => TRUE,
-          '#title' => t('Parameters'),
+          '#title' => $title,
           '#type' => 'fieldset',
-          '#collapsible' => TRUE,
+          '#collapsible' => $collapsible,
           '#collapsed' => $collapse,
           '#prefix' => '<div id="parameters-wrapper">',
           '#suffix' => '</div>',
@@ -593,7 +598,7 @@ function forena_parameter_form($formid, &$form_state, $parameters, $collapse=FAL
 
         $form['params']['submit'] = array(
           '#type' => 'submit',
-          '#value' => t('Submit'),
+          '#value' => $submit_value,
         );
 
       }
