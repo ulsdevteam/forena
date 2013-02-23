@@ -130,13 +130,15 @@ function forena_query_builder_form($formid, &$form_state) {
           '#default_value' => @$block['file'],
         );
 
-        if ($block['builder']) {
+        if (@$block['builder']) {
           $form['builder_view'] = array(
             '#type' => 'submit',
             '#value' => t('Query Builder'),
             '#submit' => array('forena_query_builder_view'),
           );
         }
+
+
       }
 
 
@@ -157,6 +159,20 @@ function forena_query_builder_form($formid, &$form_state) {
         $form['parameters'][$name] = $ctl;
       }
     }
+
+    if (!@$form_state['storage']['new'] && $step != $block) {
+      $form['block'] = array(
+        '#type' => 'value',
+        '#value' => $data['block_name'],
+      );
+
+      $form['load'] = array(
+        '#type' => 'submit',
+        '#submit' => array('forena_query_load_block', 'forena_query_preview'),
+        '#value' => t('Reload'),
+        );
+
+      }
 
     if (!@$block['locked'] && $access) {
       $form['save'] = array(
