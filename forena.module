@@ -529,12 +529,19 @@ function forena_parameter_form($formid, &$form_state, $parameters, $attributes= 
               $multiselect = TRUE;
               $value = $multi_value;
               break;
+            case 'multiselectajax':
+              $type = 'select';
+              $multiselect = TRUE;
+              $value = $multi_value;
+              $ajax = TRUE;
+              break;
             case 'checkboxes':
               $value = $multi_value;
               break;
             case 'selectajax':
                $ajax = TRUE;
                $type = 'select';
+               $add_null = TRUE;
                break;
             case 'select':
               $add_null = TRUE;
