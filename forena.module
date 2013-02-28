@@ -552,6 +552,7 @@ function forena_parameter_form($formid, &$form_state, $parameters, $attributes= 
             case 'select':
               $add_null = TRUE;
               break;
+            case 'date_text':
             case 'date_select':
             case 'date_popup':
               if (@$options['date_format']) {
@@ -559,6 +560,9 @@ function forena_parameter_form($formid, &$form_state, $parameters, $attributes= 
               }
               if (@$options['date_year_range']) {
                 $ctl_attrs['#date_year_range'] = $options['date_year_range'];
+              }
+              if (@$options['date_label_position']) {
+                $ctl_attrs['#date_label_position'] = $options['date_label_position'];
               }
               $list='';
               break;
@@ -598,7 +602,7 @@ function forena_parameter_form($formid, &$form_state, $parameters, $attributes= 
             '#description' => t($desc),
           );
 
-          array_merge($form['params'][$id], $ctl_attrs);
+          $form['params'][$id] = array_merge($form['params'][$id], $ctl_attrs);
 
           if ($type == 'item') {
             $form['params'][$id]['#markup'] = $value;
