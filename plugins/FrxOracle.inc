@@ -45,6 +45,11 @@ class FrxOracle extends FrxDataSource {
     else {
       $this->error('No database connection string specified', 'No database connection: ' . print_r($conf, 1));
     }
+    // Set the date format that drupal expects using the date api.
+    if ($this->db) {
+      $stmt = oci_parse($this->db, "alter session set NLS_DATE_FORMAT='yyyy-mm-dd hh24:mi:ss'");
+      oci_execute($stmt);
+    }
 
     // Set up the stuff required to translate.
     $this->te = new FrxSyntaxEngine(FRX_SQL_TOKEN, ':', $this);
