@@ -2162,6 +2162,7 @@ function forena_admin_params_form($formid, $form_state, $report_name) {
         $class = (string)$attrs['class'];
         $desc = (string)$attrs['desc'];
         $type = (string)$attrs['type'];
+        $options = (string)$attrs['options'];
 
         //make a subtree for each param
         $form['params'][$id] = array(
@@ -2222,21 +2223,36 @@ function forena_admin_params_form($formid, $form_state, $report_name) {
           '#default_value' => $data_field,
           '#description' => t('Column in data block to be used for ID'),
         );
+        $control_types= array('textfield' => 'Text',
+          'hidden' => 'Hidden',
+          'radios' => 'Radios',
+          'checkbox' => 'Checkbox',
+          'checkboxes' => 'Checkboxes',
+          'select' => 'Select',
+          'selectajax' => 'Select with Refresh',
+          'multiselect' => 'Multi-Select',
+          'multiselectajax' => 'Multi-select With Refresh',
+        );
 
-         $form['params'][$id]['type'] = array(
+        if (module_exists('date_api')) {
+          $control_types['date_select'] =  'Date Select';
+        }
+        if (module_exists('date_popup')) {
+          $control_types['date_popup'] = 'Date Popup';
+        }
+        $form['params'][$id]['type'] = array(
           '#type' => 'select',
           '#title' => t('Input Control Type'),
           '#default_value' => $type,
-          '#options' => array
-           ('textfield' => 'Text',
-           'hidden' => 'Hidden',
-           'radios' => 'Radios',
-           'select' => 'Select',
-           'selectajax' => 'Select with Refresh',
-           'multiselect' => 'Multi-Select',
-           'checkboxes' => 'Checkboxes'
-           ),
+          '#options' => $control_types,
           '#description' => t('Enter a helpful description about this parameter. This will display on the form when the user is prompted to enter a parameter.'),
+        );
+
+        $form['params'][$id]['options'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Options'),
+          '#default_value' => $options,
+          '#description' => t('Used to configure the control type above options depend on the control type above.')
         );
 
         $form['params'][$id]['class'] = array(
