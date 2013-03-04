@@ -16,7 +16,7 @@ class FrxFile {
     if (!$report_path) {
       $report_path = variable_get('file_' . file_default_scheme() . '_path', conf_path() . '/files/reports');
     }
-    $this->dir = trim($report_path, '/');
+    $this->dir = rtrim($report_path, '/');
   }
 
   /**
