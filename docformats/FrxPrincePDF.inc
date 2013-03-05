@@ -9,7 +9,7 @@ class FrxPrincePDF extends FrxDocument {
   private $p;
 
   public function __construct() {
-    include_once('sites/all/libraries/prince.php');
+    include_once('sites/all/libraries/prince/prince.php');
     $this->content_type='application/pdf';
     $prince_path = variable_get('forena_pdf_prince_path', '/usr/local/bin/prince');
     if (class_exists('Prince') && file_exists($prince_path)) {

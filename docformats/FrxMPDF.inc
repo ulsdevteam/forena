@@ -55,7 +55,6 @@ class FrxMPDF extends FrxDocument {
     $mpdf->WriteHTML($output);
     // $pdf = $mpdf->Output('', 'S');
     $pdf = $mpdf->Output();
-
     return $pdf;
   }
 
