@@ -281,9 +281,10 @@ class FrxRepoMan {
        $user_fn = $repos['user callback'];
        if (is_callable($user_fn)) {
           $current_user =   $user_fn();
-         Frx::Data()->setValue('current_user', $current_user);
+          $parms['current_user'] = $current_user;
        }
      }
+
 
      if ($o && $sql) {
        Frx::Data()->push($parms, 'parm');
