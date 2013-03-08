@@ -11,7 +11,7 @@ class FrxHtmlDoc extends FrxDocument {
     $output = '<html><head>';
     $output .= '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>';
     $title = $r->title;
-    if (@$options['css']) {
+    if ($css) {
       $output .= '<style type="text/css">';
       $output .= $css;
       $output .= '</style>';

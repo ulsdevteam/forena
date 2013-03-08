@@ -186,7 +186,6 @@ function forena_settings() {
 
 
   $form['forena_input_format'] = forena_filter_element(variable_get('forena_input_format', ''));
-
   $form['forena_default_form'] = array(
     '#type' => 'select',
     '#title' => t('Default report skin'),

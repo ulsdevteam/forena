@@ -33,11 +33,13 @@ class FrxSkin {
    */
   public function addCSS($type, $sheet) {
     if (Frx::File()->exists($sheet)) {
+
       $this->stylesheets[$type][] = Frx::File()->path($sheet);
     }
     elseif (file_exists($sheet)) {
       $this->stylesheets[$type][] = $sheet;
     }
+
   }
 
   /**

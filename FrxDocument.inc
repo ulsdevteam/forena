@@ -10,7 +10,7 @@ class FrxDocument {
   public $content_type='';
 
 
-  public function loadCSSFIles($format) {
+  public function loadCSSFiles($format) {
     // Add css files
     $css = '';
     foreach (Frx::Skin()->stylesheets as $type => $sheets) {
