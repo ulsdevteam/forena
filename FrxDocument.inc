@@ -18,7 +18,7 @@ class FrxDocument {
         switch ($type) {
           case 'all':
           case $format:
-            $css .= Frx::File()->contents($sheet);
+            $css .= file_get_contents($sheet);
             break;
         }
       }
