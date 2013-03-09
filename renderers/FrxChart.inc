@@ -64,7 +64,7 @@ class FrxChart extends FrxRenderer {
   }
 
 
-  public function xmlToValues($path, $data_path, $label_path='') {
+  public function xmlToValues($path, $data_path, $label_path='', $pairs = TRUE) {
     $do = Frx::Data();
     $data = $do->currentContext();
     $values = array();
@@ -80,7 +80,14 @@ class FrxChart extends FrxRenderer {
         else {
           $key = $i;
         }
-        $values[$key] = $val;
+        if ($pairs && $label_path) {
+          $values[] = array(floatval($key), floatval($val));
+        }
+        else {
+          $values[$key] = $val;
+        }
+
+
         $do->pop();
       }
     }
