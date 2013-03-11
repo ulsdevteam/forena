@@ -96,6 +96,10 @@ class FrxControls {
   public function xhtml($value, $format_str, $teng) {
     if ($value) {
       $value = html_entity_decode($value, ENT_QUOTES, 'UTF-8');
+
+      if ($format_str && filter_format_exists($format_str)) {
+        $value = check_markup($value, $format_str);
+      }
     }
     return $value;
   }
