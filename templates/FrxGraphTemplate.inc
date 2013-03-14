@@ -46,6 +46,7 @@ class FrxGraphTemplate extends FrxTemplate {
       '#options' => $graph_types,
       '#default_value' => $config['type'],
     );
+
     forena_template_ajax($form_ctl['type']);
 
     $form_ctl['gen_table'] = array(
@@ -77,7 +78,8 @@ class FrxGraphTemplate extends FrxTemplate {
     if ($xvalues) {
       $form_ctl['seriesx'] = array(
         '#type' => 'fieldset',
-        '#title' => t('Series X')
+        '#title' => t('Series X'),
+        '#description' => t('Forena token expression to get the X value (.e.g. {years}'),
       );
       $form_ctl['series']['#title'] = t('Series Y');
     }
@@ -88,13 +90,15 @@ class FrxGraphTemplate extends FrxTemplate {
         $form_ctl['seriesx'][$i] = array(
           '#type' => 'textfield',
           '#title' => check_plain((string)($i + 1)),
-          '#default_value' => $config['seriesx'][$i]
+          '#default_value' => $config['seriesx'][$i],
+          '#description' => t('Forena token expressioin for series %s x value. (e.g. {total} )', array('%s' => $i+1)),
         );
       }
       $form_ctl['series'][$i] = array(
         '#type' => 'textfield',
         '#title' => check_plain((string)($i + 1)),
         '#default_value' => $config['series'][$i],
+        '#description' => t('Forena token expressioin for series %s. (e.g. {total} )', array('%s' => $i+1)),
         );
 
     }

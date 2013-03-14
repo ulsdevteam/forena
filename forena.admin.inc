@@ -2428,7 +2428,7 @@ function forena_get_categories($string='') {
     return $categories;
 }
 
-function forena_template_ajax($form_element) {
+function forena_template_ajax(&$form_element) {
   $form_element['#ajax'] = array(
         'callback' => 'forena_template_info_callback',
         'wrapper' => 'template-wrapper',

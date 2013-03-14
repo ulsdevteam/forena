@@ -20,24 +20,31 @@ class FrxChart extends FrxRenderer {
     $links = '';
     $type = $attributes['type'];
     $link = @$attributes['link'];
+    // Legacy options.  New charts should be generated using Frx:attribute syntax
     if (isset($attributes['options'])) {
       parse_str($attributes['options'], $options);
-      $series = @$options['series'];
-      if (isset($options['seriesx']))  {
-        $seriesx = $options['seriesx'];
-        unset($options['seriesx']);
-      }
-      if (isset($options['label'])) {
-        $label =  $options['label'];
-        unset($options['label']);
-      }
-      foreach ($options as $key => $value) {
-        $options[$key] = $this->teng->replace($value);
-      }
+      unset($attributes['options']);
+      $options  = array_merge($attributes, $options);
+    }
+    else {
+      $options = $attributes;
     }
 
-   if (isset($attributes['height'])) $options['height'] = $this->teng->replace($attributes['height']);
-   if (isset($attributes['width'])) $options['width'] = $this->teng->replace($attributes['width']);
+    $series = @$options['series'];
+    if (isset($options['seriesx']))  {
+      $seriesx = $options['seriesx'];
+      unset($options['seriesx']);
+    }
+    if (isset($options['label'])) {
+      $label =  $options['label'];
+      unset($options['label']);
+    }
+    foreach ($options as $key => $value) {
+      $options[$key] = $this->teng->replace($value);
+    }
+
+    if (isset($attributes['height'])) $options['height'] = $this->teng->replace($attributes['height']);
+    if (isset($attributes['width'])) $options['width'] = $this->teng->replace($attributes['width']);
 
     // Extract chart series data from xml.
     if ($series) {
@@ -50,6 +57,7 @@ class FrxChart extends FrxRenderer {
         }
       }
     }
+
     if ($link) {
       $links = $this->xmlToValues($path, $link, $label);
     }

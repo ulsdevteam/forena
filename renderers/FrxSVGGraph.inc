@@ -17,6 +17,8 @@ class FrxSVGGraph extends FrxChart {
   }
 
   function renderChart($type, $data, $options, $links ) {
+    $options['width'] = @$options['width'] ? $options['width'] : 600;
+    $options['height'] = @$options['height'] ? $options['height'] : 400;
     $this->links = $links;
     if ($data) {
         switch ($type) {

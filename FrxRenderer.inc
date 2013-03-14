@@ -52,6 +52,17 @@ class FrxRenderer {
     return $o;
   }
 
+  public static function addAttributes(&$attributes, $key, $value) {
+    @list($part, $suff) = explode('_', $key);
+    // If we have _0 _1 _2 attributes convert them into arrays.
+    if ((int)$suff || $suff === '0') {
+      $attributes[$part][] = (string)$value;
+    }
+    else {
+      $attributes[$key] = (string)$value;
+    }
+  }
+
   /**
    * Standard php array containing merged attributes
    * Enter description here ...
@@ -59,10 +70,10 @@ class FrxRenderer {
   public function mergedAttributes() {
     $attributes = array();
     if (isset($this->frxAttributes)) foreach ($this->frxAttributes as $key => $data) {
-      $attributes[$key] = (string)$data;
+      FrxRenderer::addAttributes($attributes, $key, $data);
     }
     if (isset($this->htmlAttributes)) foreach ($this->htmlAttributes as $key => $data) {
-      $attributes[$key] = (String)$data;
+      FrxRenderer::addAttributes($attributes, $key, $data);
     }
     return $attributes;
   }
