@@ -35,7 +35,7 @@ class FrxMPDF extends FrxDocument {
      $output .= $css;
      $output .= '</style>';
     }
-    $output .= '<title>' . $r->title . "</title></head><body class='forena-report $link_class'><h1>" . $r->title . '</h1>' . $r->html;
+    $output .= '<title>' . $r->title . "</title></head><body class='forena-report $link_class'><h1>" . $this->check_markup($r->title) . '</h1>' . $r->html;
     $output .= '</body></html>';
 
     foreach (Frx::Skin()->stylesheets as $type => $sheets) {

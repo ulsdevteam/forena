@@ -31,7 +31,7 @@ class FrxPrincePDF extends FrxDocument {
       $output .= '</style>';
     }
 
-    $output .= '<title>' . $r->title . "</title></head><body class='forena-report $link_class'><h1>" . $r->title . '</h1>' . $r->html . '</body></html>';
+    $output .= '<title>' . $r->title . "</title></head><body class='forena-report $link_class'><h1>" . $r->title . '</h1>' . $this->check_markup($r->html) . '</body></html>';
     $prince_css = drupal_get_path('module', 'forena_pdf') . '/forena_pdf_prince.css';
     // Generate the document
     if ($this->p) {

@@ -19,7 +19,7 @@ class FrxWordDoc extends FrxDocument {
       $output .= $css;
       $output .= '</style>';
     }
-    $output .= '<title>' . $r->title . '</title></head><body class="forena-report">' . $r->html . '</body></html>';
+    $output .= '<title>' . $r->title . '</title></head><body class="forena-report">' . $this->check_markup($r->html) . '</body></html>';
     return $output;
   }
 

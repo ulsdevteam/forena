@@ -78,6 +78,14 @@ class FrxDocument {
     }
   }
 
+  /**
+   * Wrapper function for check output to default the right type.
+   * @param $output
+   */
+  public function check_markup($output) {
+    return check_markup($output, variable_get('forena_input_format', filter_default_format()));
+  }
+
   public function convertCharset($data) {
     if (isset($_SERVER['HTTP_ACCEPT_CHARSET'])) {
       $parts = @explode(';', $_SERVER['HTTP_ACCEPT_CHARSET']);

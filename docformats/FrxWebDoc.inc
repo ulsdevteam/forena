@@ -63,7 +63,7 @@ class FrxWebDoc extends FrxDocument {
     // Use a theme function to make sure the report gets themed.
     $variables = array(
       'doc_links' => $formats,
-      'content' => $r->html,
+      'content' => $this->check_markup($r->html),
     );
 
     $output = theme('forena_web_report', $variables);

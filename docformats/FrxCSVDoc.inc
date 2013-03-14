@@ -24,7 +24,7 @@ class FrxCSVDoc extends FrxDocument {
   }
 
   public function render($r, $format, $options = array()) {
-    $doc = $r->html;
+    $doc = $this->check_markup($r->html);
     $dom = new DOMDocument();
     $dom->strictErrorChecking = FALSE;
     $xmlBody = '<?xml version="1.0" encoding="UTF-8"?>' . $doc;
