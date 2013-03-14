@@ -43,10 +43,10 @@ class FrxChart extends FrxRenderer {
     if ($series) {
       foreach ((array)$series as $i => $d) {
         if ($seriesx) {
-          $data[] = $this->xmlToValues($path, $d, $seriesx[$i]);
+          $data[] = $this->xmlToValues($path, $d, $seriesx[$i], TRUE);
         }
         else {
-          $data[] = $this->xmlToValues($path, $d, $label);
+          $data[] = $this->xmlToValues($path, $d, $label, FALSE);
         }
       }
     }
@@ -64,7 +64,7 @@ class FrxChart extends FrxRenderer {
   }
 
 
-  public function xmlToValues($path, $data_path, $label_path='', $pairs = TRUE) {
+  public function xmlToValues($path, $data_path, $label_path='', $pairs = FALSE) {
     $do = Frx::Data();
     $data = $do->currentContext();
     $values = array();
