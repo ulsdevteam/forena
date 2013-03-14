@@ -100,9 +100,25 @@ class FrxTemplate {
     }
     if ($frx_attributes) foreach ($frx_attributes as $key => $value) {
       if ($value) {
-        $attr = $dom->createAttributeNS($this->xmlns, $key);
-        $attr->value = htmlentities($value);
-        $pnode->appendChild($attr);
+        // If the value is an array create multiple attributes
+        // that are of the form key_1, key_2 .... etc.
+
+        if (is_array($value)) {
+          $i=0;
+          foreach ($value as $v) {
+            $i++;
+            $k = $key . '_' . trim((string)$i);
+            $attr = $dom->createAttributeNS($this->xmlns, $k);
+            $attr->value = htmlentities($v);
+            $pnode->appendChild($attr);
+          }
+        }
+        // A normal value.
+        else {
+          $attr = $dom->createAttributeNS($this->xmlns, $key);
+          $attr->value = htmlentities($value);
+          $pnode->appendChild($attr);
+        }
       }
     }
     $cur_node->appendChild($pnode);

@@ -131,8 +131,8 @@ class FrxGraphTemplate extends FrxTemplate {
         'type' => $type,
         'renderer' => 'FrxSVGGraph',
         'xpath' => $xpath,
-        'options' => forena_query_string($config),
       );
+      $frxparms = array_merge($config, $frxparms);
       $svg = $this->addNode($div, 2, 'svg', NULL, NULL, $frxparms);
       if ($gen_table) {
         $columns = $this->columns($xml);
