@@ -110,6 +110,22 @@ class FrxPDO extends FrxDataSource {
   }
 
   /**
+   * Wrapper method cause some ODBC providers do not support
+   * quoting.   We're going to assume the MSSQL method of quoting.
+   * @param $value
+   */
+  public function quote($value) {
+    $new_value =  $this->db->quote($value);
+    if (($value==='' || $value===NULL) && !$new_value) {
+     $value = "'" . str_replace("'", "''", $value) . "'";
+    }
+    else {
+     $value = $new_value;
+    }
+    return $value;
+  }
+
+  /**
    * Implement custom SQL formatter to make sure that strings are properly escaped.
    * Ideally we'd replace this with something that handles prepared statements, but it
    * wouldn't work for
@@ -137,12 +153,12 @@ class FrxPDO extends FrxDataSource {
             if ($i!=1) {
               $val .= ',';
              }
-          $val .= $db->quote($v);
+          $val .= $this->quote($v);
           }
         $value = $val;
         }
       }
-      else  $value =  $db -> quote($value);
+      else  $value =  $this->quote($value);
     }
     return (string)$value;
   }
