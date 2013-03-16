@@ -75,6 +75,18 @@ class FrxRenderer {
     if (isset($this->htmlAttributes)) foreach ($this->htmlAttributes as $key => $data) {
       FrxRenderer::addAttributes($attributes, $key, $data);
     }
+    $skin_data = Frx::Data()->getContext('skin');
+    $class = get_class($this);
+    if (isset($skin_data[$class])) {
+      $attributes = array_merge($attributes, $skin_data[$class]);
+    }
+    $classes = class_parents($this);
+    array_pop($classes);
+    if ($classes) foreach ($classes as $class) {
+      if (isset($skin_data[$class])) {
+        $attributes = array_merge($attributes, $skin_data[$class]);
+      }
+    }
     return $attributes;
   }
 
