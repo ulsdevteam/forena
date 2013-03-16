@@ -69,6 +69,7 @@ class FrxSkin {
 
         // Parse the info file using drupals stock version
         $this->info = drupal_parse_info_format(Frx::File()->contents($name . '.skinfo'));
+        Frx::Data()->setContext('skin', $this->info);
         if (isset($this->info['stylesheets'])) {
           foreach ($this->info['stylesheets'] as $type => $sheets) {
             if ($sheets) foreach ($sheets as $sheet) {

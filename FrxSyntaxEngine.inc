@@ -106,7 +106,7 @@ class FrxSyntaxEngine {
       $retvar = $f->format($retvar, $raw_key, $data);
     }
 
-    $retvar = trim((string)$retvar);
+    if (!is_array($retvar)) $retvar = trim((string)$retvar);
     return $retvar;
   }
 
@@ -127,19 +127,27 @@ class FrxSyntaxEngine {
     //Otherswise assume text
     $match=array();
     $o_text = $text;
+
     // Put the data on the stack.
     if (preg_match_all($this->tpattern, $o_text, $match)) {
+      // If we are replacing a single value then return exactly
+      // the single value in its native type;
+      $single_value = ($match && count($match[0]) == 1 && $match[0][0]==$text && $raw);
       //list($params) = $match[1];
       $i=0;
 
       foreach ($match[0] as $match_num => $token) {
-         $path = trim($token, $this->trim_chars);
-         $value = $this->get_value($path, $raw);
-
+        $path = trim($token, $this->trim_chars);
+        $value = $this->get_value($path, $raw);
+        if ($single_value) {
+         return $value;
+        }
+        else {
           $pos = strpos($text, $token);
           if ($pos !== FALSE) {
             $text = substr_replace($text, $value, $pos, strlen($token));
           }
+        }
       }
     }
     return $text;

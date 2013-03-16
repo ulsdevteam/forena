@@ -40,7 +40,7 @@ class FrxChart extends FrxRenderer {
       unset($options['label']);
     }
     foreach ($options as $key => $value) {
-      $options[$key] = $this->teng->replace($value);
+      $options[$key] = $this->teng->replace($value, TRUE);
     }
 
     if (isset($attributes['height'])) $options['height'] = $this->teng->replace($attributes['height']);
