@@ -1,4 +1,4 @@
 @CHARSET "UTF-8";
-.prince-no-link a { 
-	link: none; 
+a { 
+	link: none !important; 
 }

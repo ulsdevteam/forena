@@ -22,6 +22,12 @@ class FrxMPDF extends FrxDocument {
 // To Do
 // The option switch off links on PDF will bee good here too
 
+    $disable_links = variable_get('forena_pdf_disable_links', TRUE);
+    $html = $this->check_markup($r->html);
+    if ($disable_links) {
+      $html = preg_replace('/<a href=\"(.*?)\">(.*?)<\/a>/', "\\2", $html);
+    }
+
     $mpdf = new mPDF('UTF-8');
     $mpdf->AddPageByArray(array(
       'orientation' => 'P'
@@ -35,7 +41,7 @@ class FrxMPDF extends FrxDocument {
      $output .= $css;
      $output .= '</style>';
     }
-    $output .= '<title>' . $r->title . "</title></head><body class='forena-report $link_class'><h1>" . $this->check_markup($r->title) . '</h1>' . $r->html;
+    $output .= '<title>' . $r->title . "</title></head><body class='forena-report $link_class'><h1>" . $r->title . '</h1>' . $html;
     $output .= '</body></html>';
 
     foreach (Frx::Skin()->stylesheets as $type => $sheets) {

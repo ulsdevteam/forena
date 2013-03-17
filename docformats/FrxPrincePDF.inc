@@ -22,6 +22,11 @@ class FrxPrincePDF extends FrxDocument {
   public function render($r, $format, $options = array()) {
 
     $disable_links = variable_get('forena_pdf_disable_links', TRUE);
+    $html = $this->check_markup($r->html);
+    if ($disable_links) {
+      $html = preg_replace('/<a href=\"(.*?)\">(.*?)<\/a>/', "\\2", $html);
+    }
+
     $link_class = $disable_links ? 'prince-disable-links': '';
     $output = '<html><head>';
     $output .= '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>';
@@ -31,12 +36,11 @@ class FrxPrincePDF extends FrxDocument {
       $output .= '</style>';
     }
 
-    $output .= '<title>' . $r->title . "</title></head><body class='forena-report $link_class'><h1>" . $r->title . '</h1>' . $this->check_markup($r->html) . '</body></html>';
+    $output .= '<title>' . $r->title . "</title></head><body class='forena-report $link_class'><h1>" . $r->title . '</h1>' . $html . '</body></html>';
     $prince_css = drupal_get_path('module', 'forena_pdf') . '/forena_pdf_prince.css';
     // Generate the document
     if ($this->p) {
       $p = $this->p;
-      $p->addStyleSheet($prince_css);
       foreach (Frx::Skin()->stylesheets as $type => $sheets) {
         foreach ($sheets as $sheet) {
           switch ($type) {
