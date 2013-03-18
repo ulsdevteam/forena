@@ -73,7 +73,7 @@ function forena_delete_report($report_name, $delete_file = TRUE) {
 
 
 
-function forena_filter_element($fmt) {
+function forena_filter_element($fmt, $name) {
   global $user;
   $element['format'] =  array(
     '#type' => 'fieldset',
@@ -94,7 +94,7 @@ function forena_filter_element($fmt) {
   }
   $element['format']['guidelines']['#weight']=12;
 
-  $element['format']['forena_input_format'] = array(
+  $element['format'][$name] = array(
     '#type' => 'select',
     '#title' => t('Text format'),
     '#options' => $options,
@@ -185,7 +185,7 @@ function forena_settings() {
   );
 
 
-  $form['forena_input_format'] = forena_filter_element(variable_get('forena_input_format', ''));
+  $form['forena_input_format'] = forena_filter_element(variable_get('forena_input_format', ''), 'forena_input_format');
   $form['forena_default_form'] = array(
     '#type' => 'select',
     '#title' => t('Default report skin'),
@@ -830,7 +830,7 @@ function forena_doc_formats_settings() {
     '#default_value' => variable_get('forena_email_override', FALSE),
     '#description' => t('When this box is checked emails are sent to the currently logged in user.  Useful for testing environments.'),
   );
-  $form['forena_email_input_format'] = forena_filter_element(variable_get('forena_email_input_format', 'full_text'));
+  $form['forena_email_input_format'] = forena_filter_element(variable_get('forena_email_input_format', 'full_text'), 'forena_email_input_format');
   $form['forena_email_input_format']['#title'] = t('Email Input Format');
 
   return system_settings_form($form);
