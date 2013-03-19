@@ -63,6 +63,8 @@ class FrxPrincePDF extends FrxDocument {
         watchdog('pdf error', print_r($msg,1));
         $output = '';
       }
+      // We don't care if this fails because it's temproary.
+      @unlink($pdf_file);
       return $output;
     }
     else {
