@@ -53,6 +53,16 @@ class FrxPrincePDF extends FrxDocument {
           }
         }
       }
+      $msg = array();
+      $pdf_file = tempnam(file_directory_temp(), 'prince_pdf');
+      if ($p->convert_string_to_file($output, $pdf_file, $msg)) {
+        $output = file_get_contents($pdf_file);
+      }
+      else {
+        drupal_set_message('Could not generate PDF File', 'Error');
+        watchdog('pdf error', print_r($msg,1));
+        $output = '';
+      }
       return $output;
     }
     else {
@@ -62,11 +72,13 @@ class FrxPrincePDF extends FrxDocument {
   }
 
   public function output($output) {
-      header('Content-Type: ' . $this->content_type);
-      header('Cache-Control:');
-      header('Pragma:');
-      header('Cache-Control: must-revalidate');
-      $this->p->convert_string_to_passthru($output);
-      return TRUE;
+      if ($output) {
+        header('Content-Type: ' . $this->content_type);
+        header('Cache-Control:');
+        header('Pragma:');
+        header('Cache-Control: must-revalidate');
+        print $output;
+        return TRUE;
+      }
   }
 }
