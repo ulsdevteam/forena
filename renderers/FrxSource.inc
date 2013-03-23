@@ -8,7 +8,7 @@
 class FrxSource extends FrxRenderer {
   public function render() {
     $node = $this->reportDocNode;
-    $output = htmlspecialchars($node->asXML());
+    $output = "<pre>\n" . htmlspecialchars($node->asXML()) . "\n</pre>";
     return $output;
   }
 }

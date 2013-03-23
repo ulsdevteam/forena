@@ -2421,7 +2421,7 @@ function forena_get_categories($string='') {
           }
         }
       }
-      if ($access && !$categories[$row->category]) {
+      if ($access && !isset($categories[$row->category])) {
         $categories[$row->category] = $row->category;
       }
     }
