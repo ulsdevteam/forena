@@ -39,12 +39,12 @@ class FrxDrupal extends FrxDataSource {
 
     $xml = new SimpleXMLElement('<table/>');
     foreach ($rs as $data) {
-        $row_node = $xml->addChild('row');
+      $row_node = $xml->addChild('row');
 
-        foreach ($data as $key => $value) {
-          $row_node->addChild($key, htmlspecialchars($value));
-          //$row_node->$key = $value;
-        }
+      foreach ($data as $key => $value) {
+        $row_node->addChild($key, htmlspecialchars($value));
+        //$row_node->$key = $value;
+      }
     }
     return $xml;
   }
@@ -62,7 +62,7 @@ class FrxDrupal extends FrxDataSource {
     $db = Database::getConnection('default');
     if ($db) {
       if ($value==='' || $value===NULL)
-        $value = 'NULL';
+      $value = 'NULL';
       else {
         if (is_array($value)) {
           if ($value == array()) {
@@ -76,8 +76,8 @@ class FrxDrupal extends FrxDataSource {
               $i++;
               if ($i>1) {
                 $val .= ',';
-               }
-            $val .=   $db->quote($v);
+              }
+              $val .=   $db->quote($v);
             }
             $value = $val;
           }

@@ -116,7 +116,7 @@ function forena_inner_xml($xml, $tag) {
  *
  * Returns the string within the html tag name
  *
-*/
+ */
 function forena_get_html($tag, $r_text) {
   $open = strpos($r_text, $tag);
   $close = strpos($r_text, '>', $open);
@@ -324,12 +324,12 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
 
   if ($save_file) {
     if (!file_exists($filepath) || is_writeable($filepath)) {
-        // Serialize the report for saving
-        file_put_contents($filepath, $r_xml);
+      // Serialize the report for saving
+      file_put_contents($filepath, $r_xml);
 
     }
     else {
-        Frx::error(t('Insufficient privileges to write file.'));
+      Frx::error(t('Insufficient privileges to write file.'));
     }
   }
 
@@ -367,9 +367,9 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
     $path = isset($cache['menu']) ? @$cache['menu']['path'] : '';
     if ($rpt = $result->fetchObject() ) {
       db_update('forena_reports')
-        -> condition('report_name', $name)
-        -> condition('language', $lang)
-        ->fields(array(
+      -> condition('report_name', $name)
+      -> condition('language', $lang)
+      ->fields(array(
           'title' => $data['title'],
           'descriptor' => $data['descriptor'],
           'category' => $data['category'],
@@ -378,11 +378,11 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
           'altered' => $data['altered'],
           'modified' => $modified,
           'path' => $path))
-        ->execute();
+      ->execute();
     }
     else {
       db_insert('forena_reports')->
-        fields( array('report_name' => $name,
+      fields( array('report_name' => $name,
           'language' => $lang,
           'title' => $data['title'],
           'descriptor' => $data['descriptor'],
@@ -392,8 +392,8 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
           'altered' => $data['altered'],
           'modified' => $modified,
           'path' => $path,
-          ))
-        ->execute();
+      ))
+      ->execute();
     }
 
     $save_count++;
@@ -445,7 +445,7 @@ function theme_forena_inline_form($variables) {
 function _forena_render_form_template($fields, $template) {
   static $teng = '';
   if (!$teng) $teng = new FrxSyntaxEngine(FRX_TOKEN_EXP, '{}');
-    $o = Frx::Data()->push($fields, 'form-fields');
+  $o = Frx::Data()->push($fields, 'form-fields');
   $build = $teng->replace($template, TRUE);
   $o = Frx::Data()->pop();
 
@@ -461,7 +461,7 @@ function _forena_set_inline_theme(&$elements) {
       case NULL:
       case 'submit':
       case '';
-        break;
+      break;
       default:
         $elements[$key]['#theme_wrappers'] = array('forena_inline_form_element');
     }
@@ -531,7 +531,7 @@ function theme_forena_inline_form_element($variables) {
   // No descriptions or titles.
   /*
   if (!empty($element['#description'])) {
-    $output .= '<div class="description">' . $element['#description'] . "</div>\n";
+  $output .= '<div class="description">' . $element['#description'] . "</div>\n";
   }
   */
   $output .= "</span>\n";

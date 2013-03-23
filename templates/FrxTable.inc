@@ -20,10 +20,10 @@ class FrxTable extends FrxTemplate {
     $throw = $this->addNode($thead, 8, 'tr');
     $tbody = $this->addNode($table, 6, 'tbody');
     $tdrow = $this->addNode($tbody, 8, 'tr', NULL, array('id' => $id),
-      array('foreach' => '*'));
+    array('foreach' => '*'));
     if ($columns) foreach ($columns as $col) {
-       $this->addNode($throw, 10, 'th', $col);
-       $this->addNode($tdrow, 10, 'td', '{' . $col . '}');
+      $this->addNode($throw, 10, 'th', $col);
+      $this->addNode($tdrow, 10, 'td', '{' . $col . '}');
     }
   }
 }

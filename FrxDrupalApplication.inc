@@ -32,7 +32,7 @@ class FrxDrupalApplication {
   /**
    * Convert a relative link to appropriately rendered html
    * return html A properly formatted anchor tag
-  */
+   */
   public function link($title, $path, $options=array()) {
     return l($title, $path, $options);
   }
@@ -71,7 +71,7 @@ class FrxDrupalApplication {
    * @param unknown_type $css_file
    */
   public function add_css($css_file) {
-     drupal_add_css($css_file, 'module');
+    drupal_add_css($css_file, 'module');
   }
 
   /**
@@ -80,7 +80,7 @@ class FrxDrupalApplication {
    * @param unknown_type $js_file
    */
   public function add_js($js_file) {
-     drupal_add_js($js_file);
+    drupal_add_js($js_file);
   }
 
   /**
@@ -97,45 +97,45 @@ class FrxDrupalApplication {
    * Enter description here ...
    */
   public function not_found($name) {
-   require_once('forena.admin.inc');
-   forena_delete_report($name);
-   return 'Report Not Found';
+    require_once('forena.admin.inc');
+    forena_delete_report($name);
+    return 'Report Not Found';
   }
 
   public function forena_path() {
-     return drupal_get_path('module', 'forena');
+    return drupal_get_path('module', 'forena');
   }
 
 
-/**
- * Accepts the name of a file
- *
- * Returns a xml object of the file.
- *
-*/
-function load_report($report_name) {
-  $r=NULL;
-  global $language;
-  $r_text = '';
-  if ($report_name) {
-    $i_report_name = $report_name;
-    $report_path =  Frx::File()->path('');
-    $int_filename = $language->language . '/' . $report_name . '.frx';
-    $filename = $report_name . '.frx';
-    if (Frx::File()->exists($int_filename) && @$_GET['language']!= 'en') {
-      $i_report_name = $language->language . '/' . $report_name;
-      $r_text = file_get_contents($int_filename);
-      $modified = filemtime($int_filename);
-      $filename = $int_filename;
-    }
-    elseif (Frx::File()->exists($filename)) {
-      $r_text = Frx::File()->contents($filename);
-      $modified = filemtime(Frx::File()->path($filename));
-    }
-    $result = db_query("SELECT * FROM {forena_reports} WHERE report_name=:report_name AND language=:language",
-    array(':report_name' => $report_name, ':language' => $language->language));
-    $save = FALSE;
-    if ($rpt = $result->fetchObject()) {
+  /**
+   * Accepts the name of a file
+   *
+   * Returns a xml object of the file.
+   *
+   */
+  function load_report($report_name) {
+    $r=NULL;
+    global $language;
+    $r_text = '';
+    if ($report_name) {
+      $i_report_name = $report_name;
+      $report_path =  Frx::File()->path('');
+      $int_filename = $language->language . '/' . $report_name . '.frx';
+      $filename = $report_name . '.frx';
+      if (Frx::File()->exists($int_filename) && @$_GET['language']!= 'en') {
+        $i_report_name = $language->language . '/' . $report_name;
+        $r_text = file_get_contents($int_filename);
+        $modified = filemtime($int_filename);
+        $filename = $int_filename;
+      }
+      elseif (Frx::File()->exists($filename)) {
+        $r_text = Frx::File()->contents($filename);
+        $modified = filemtime(Frx::File()->path($filename));
+      }
+      $result = db_query("SELECT * FROM {forena_reports} WHERE report_name=:report_name AND language=:language",
+      array(':report_name' => $report_name, ':language' => $language->language));
+      $save = FALSE;
+      if ($rpt = $result->fetchObject()) {
         // If the file modification time has changed then save.
         if ($modified && $rpt->modified != $modified) {
           $save = TRUE;
@@ -146,159 +146,159 @@ function load_report($report_name) {
             $r_text = $rpt->src;
           }
         }
-    }
-    elseif ($r_text) {
+      }
+      elseif ($r_text) {
         $save = TRUE;
+      }
+
+      if ($save) {
+        require_once('forena.admin.inc');
+        forena_save_report($i_report_name, $r_text, FALSE);
+      }
+      return $r_text;
     }
+  }
 
-    if ($save) {
-      require_once('forena.admin.inc');
-      forena_save_report($i_report_name, $r_text, FALSE);
+  /**
+   * General wrapper procedure for reporting erros
+   *
+   * @param string $short_message Message that will be displayed to the users
+   * @param string $log Message that will be recorded in the logs.
+   */
+  function error($short_message='', $log='') {
+    if ($short_message) {
+      drupal_set_message(check_markup($short_message), 'error');
     }
-    return $r_text;
+    if ($log) {
+      watchdog('forena', $log, NULL, WATCHDOG_ERROR);
+    }
   }
-}
 
-/**
- * General wrapper procedure for reporting erros
- *
- * @param string $short_message Message that will be displayed to the users
- * @param string $log Message that will be recorded in the logs.
- */
-function error($short_message='', $log='') {
-  if ($short_message) {
-    drupal_set_message(check_markup($short_message), 'error');
+  /**
+   * Debug handler
+   * Enter description here ...
+   * @param unknown_type $short_message
+   * @param unknown_type $log
+   */
+  function debug($short_message='', $log='') {
+    if ($log) {
+      watchdog('forena debug', $log, NULL);
+    }
+    if ($short_message) {
+      drupal_set_message(check_markup($short_message));
+    }
   }
-  if ($log) {
-    watchdog('forena', $log, NULL, WATCHDOG_ERROR);
-  }
-}
 
-/**
- * Debug handler
- * Enter description here ...
- * @param unknown_type $short_message
- * @param unknown_type $log
- */
-function debug($short_message='', $log='') {
-  if ($log) {
-    watchdog('forena debug', $log, NULL);
-  }
-  if ($short_message) {
-    drupal_set_message(check_markup($short_message));
-  }
-}
-
-/**
- * Invokes the hooks required for forena plugin registration.
- * Each module returns an array structure that defines multiple plugins
- *
- * class - Indicates the name of the class that will be used to define the plugins behaviors.
- *
- */
-function plugins() {
-  static $plugins = '';
-  if (!$plugins) {
-    $plugins = array();
-    foreach (module_list() as $module) {
-      $function = $module . '_forena_plugins';
-      if (function_exists($function)) {
-        $returned_plugins = $function();
-        if ($returned_plugins) foreach ((array)$returned_plugins as $p) {
-          $p['module'] = $module;
-          $p['file'] = drupal_get_path('module' , $p['module']) . '/' . $p['file'];
-          $plugins[]=$p;
+  /**
+   * Invokes the hooks required for forena plugin registration.
+   * Each module returns an array structure that defines multiple plugins
+   *
+   * class - Indicates the name of the class that will be used to define the plugins behaviors.
+   *
+   */
+  function plugins() {
+    static $plugins = '';
+    if (!$plugins) {
+      $plugins = array();
+      foreach (module_list() as $module) {
+        $function = $module . '_forena_plugins';
+        if (function_exists($function)) {
+          $returned_plugins = $function();
+          if ($returned_plugins) foreach ((array)$returned_plugins as $p) {
+            $p['module'] = $module;
+            $p['file'] = drupal_get_path('module' , $p['module']) . '/' . $p['file'];
+            $plugins[]=$p;
+          }
         }
       }
     }
+    return $plugins;
   }
-  return $plugins;
-}
 
 
 
-/**
- * Builds a global array of available controls
- * and returns the array.
- */
-function controls() {
-  static $controls = '';
-  if (!$controls) {
-    $controls = array();
-    foreach (module_list() as $module) {
-      $function = $module . '_forena_controls';
-      if (function_exists($function)) {
-        $returned_controls = $function();
-        if ($returned_controls) foreach ((array)$returned_controls as $c) {
-          $c['module'] = $module;
-          $c['file'] = drupal_get_path('module' , $c['module']) . '/' . trim($c['file'], '/');
-          $controls[]=$c;
+  /**
+   * Builds a global array of available controls
+   * and returns the array.
+   */
+  function controls() {
+    static $controls = '';
+    if (!$controls) {
+      $controls = array();
+      foreach (module_list() as $module) {
+        $function = $module . '_forena_controls';
+        if (function_exists($function)) {
+          $returned_controls = $function();
+          if ($returned_controls) foreach ((array)$returned_controls as $c) {
+            $c['module'] = $module;
+            $c['file'] = drupal_get_path('module' , $c['module']) . '/' . trim($c['file'], '/');
+            $controls[]=$c;
+          }
         }
       }
     }
+    return $controls;
   }
-  return $controls;
-}
 
-/**
- * Return the repositories configured for this applicaiton.
- */
-public function repositories() {
-  global $_forena_repositories;
+  /**
+   * Return the repositories configured for this applicaiton.
+   */
+  public function repositories() {
+    global $_forena_repositories;
 
-  $repos = array();
-  // Load the repository list from the global settings.php file.
-  if ($_forena_repositories) {
-    $repos = $_forena_repositories;
-  }
-  $path = $this->forena_path();
-  // Overide difinitions of the sample and drupal repositories.
-  $repos['forena_help'] = array(
+    $repos = array();
+    // Load the repository list from the global settings.php file.
+    if ($_forena_repositories) {
+      $repos = $_forena_repositories;
+    }
+    $path = $this->forena_path();
+    // Overide difinitions of the sample and drupal repositories.
+    $repos['forena_help'] = array(
     'path' => $path . '/repos/forena_help',
     'title' => 'Forena Help Reports',
-  );
-  $repos['drupal'] = array(
+    );
+    $repos['drupal'] = array(
     'path' => $path . '/repos/drupal',
     'title' => 'Drupal Reports',
-  );
-  $repos['sampledb'] = array(
+    );
+    $repos['sampledb'] = array(
     'path' => $path . '/repos/sample',
     'title' => 'Sample DB Repository'
-  );
-  // Retrieve the repositories defined in the database;
-  $results = db_query('SELECT * FROM {forena_repositories}');
-  foreach ($results as $r) {
-    if ($r->config) {
-      $new_r = unserialize($r->config);
-    }
-    else {
-      $new_r = array();
-    }
-    $r_name = $r->repository;
-    if (is_array(@$repos[$r_name])) {
-      $new_r = array_merge($new_r, $repos[$r_name]);
-    }
-    else {
-      $new_r['source'] = 'user';
-    }
-    $new_r ['title'] = $r->title;
-    $new_r ['enabled'] = $r->enabled;
+    );
+    // Retrieve the repositories defined in the database;
+    $results = db_query('SELECT * FROM {forena_repositories}');
+    foreach ($results as $r) {
+      if ($r->config) {
+        $new_r = unserialize($r->config);
+      }
+      else {
+        $new_r = array();
+      }
+      $r_name = $r->repository;
+      if (is_array(@$repos[$r_name])) {
+        $new_r = array_merge($new_r, $repos[$r_name]);
+      }
+      else {
+        $new_r['source'] = 'user';
+      }
+      $new_r ['title'] = $r->title;
+      $new_r ['enabled'] = $r->enabled;
 
-    $repos[$r_name] = $new_r;
+      $repos[$r_name] = $new_r;
+    }
+
+
+    drupal_alter('forena_repos',  $repos);
+    return $repos;
   }
 
-
-  drupal_alter('forena_repos',  $repos);
-  return $repos;
-}
-
-/**
- * Allow modules to alter the parameters of a report.
- * @param unknown_type $report_name
- * @param unknown_type $parms
- */
-function alter_parameters($report_name, &$parms) {
-  drupal_alter('forena_parameters', $report_name, $parms );
-}
+  /**
+   * Allow modules to alter the parameters of a report.
+   * @param unknown_type $report_name
+   * @param unknown_type $parms
+   */
+  function alter_parameters($report_name, &$parms) {
+    drupal_alter('forena_parameters', $report_name, $parms );
+  }
 
 }

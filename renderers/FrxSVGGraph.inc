@@ -11,9 +11,9 @@ class FrxSVGGraph extends FrxChart {
   private $graph;
   private $links;
   function __construct() {
-      $directory = FrxReportGenerator::instance()->configuration('library_path');
-      $library = rtrim($directory, '/') . '/SVGGraph/SVGGraph.php';
-      require_once $library;
+    $directory = FrxReportGenerator::instance()->configuration('library_path');
+    $library = rtrim($directory, '/') . '/SVGGraph/SVGGraph.php';
+    require_once $library;
   }
 
   function renderChart($type, $data, $options, $links ) {
@@ -21,32 +21,32 @@ class FrxSVGGraph extends FrxChart {
     $options['height'] = @$options['height'] ? $options['height'] : 400;
     $this->links = $links;
     if ($data) {
-        switch ($type) {
-          case 'bargraph':
-            $output = $this->barGraph($data[0], $options);
-            break;
-          case 'piechart':
-            $output = $this->pieChart($data[0], $options);
-            break;
-          case 'stackedbargraph':
-            $output = $this->stackedBarGraph($data, $options);
-            break;
-          case 'groupedbargraph':
-            $output = $this->groupedBarGraph($data, $options);
-            break;
-          case 'linegraph':
-            $output = $this->lineGraph($data[0], $options);
-            break;
-          case 'multilinegraph':
-            $output = $this->multiLineGraph($data, $options);
-            break;
-          case 'scatterplot':
-            $output = $this->scatterPlot($data, $options);
-            break;
-          case 'multiscatterplot':
-            $output = $this->multiScatterPlot($data, $options);
-            break;
-        }
+      switch ($type) {
+        case 'bargraph':
+          $output = $this->barGraph($data[0], $options);
+          break;
+        case 'piechart':
+          $output = $this->pieChart($data[0], $options);
+          break;
+        case 'stackedbargraph':
+          $output = $this->stackedBarGraph($data, $options);
+          break;
+        case 'groupedbargraph':
+          $output = $this->groupedBarGraph($data, $options);
+          break;
+        case 'linegraph':
+          $output = $this->lineGraph($data[0], $options);
+          break;
+        case 'multilinegraph':
+          $output = $this->multiLineGraph($data, $options);
+          break;
+        case 'scatterplot':
+          $output = $this->scatterPlot($data, $options);
+          break;
+        case 'multiscatterplot':
+          $output = $this->multiScatterPlot($data, $options);
+          break;
+      }
     }
     return $output;
   }

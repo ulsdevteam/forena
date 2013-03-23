@@ -61,17 +61,17 @@ class FrxData {
    * @param String $value
    */
   public function setValue($key, $value) {
-     if (is_array($this->cur_context)) {
-       $this->cur_context[$key] = $value;
-     }
-     elseif (is_object($this->cur_context)) {
-        if (strpos($key, '@')===0) {
-          $this->cur_context[$key] = $value;
-        }
-        else {
-         $this->cur_context->$key = $value;
-        }
-     }
+    if (is_array($this->cur_context)) {
+      $this->cur_context[$key] = $value;
+    }
+    elseif (is_object($this->cur_context)) {
+      if (strpos($key, '@')===0) {
+        $this->cur_context[$key] = $value;
+      }
+      else {
+        $this->cur_context->$key = $value;
+      }
+    }
   }
 
   /**
@@ -90,10 +90,10 @@ class FrxData {
     $this->cur_context = $data;
 
     if ($id) {
-/*    if (@is_array($this->data_sources[$id]) && is_array($data)) {
-        $data = array_merge($this->data_sources[$id], $data);
-      }
-      */
+      /*    if (@is_array($this->data_sources[$id]) && is_array($data)) {
+       $data = array_merge($this->data_sources[$id], $data);
+       }
+       */
       $this->data_sources[$id] = $data;
     }
   }

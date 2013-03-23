@@ -47,7 +47,7 @@ class FrxEditor {
     }
     catch (Exception $e) {
       forena_error('Invalid or malformed report document', '<pre>' .
-        $e->getMessage() . $e->getTraceAsString() . '</pre>');
+      $e->getMessage() . $e->getTraceAsString() . '</pre>');
     }
 
     $this->verifyHeaderElements();
@@ -135,7 +135,7 @@ class FrxEditor {
     catch (Exception $e) {
 
       forena_error('Malformed report body', '<pre>' . $e->getMessage() .
-        $e->getTraceAsString() . '</pre>');
+      $e->getTraceAsString() . '</pre>');
     }
   }
   /**
@@ -154,8 +154,8 @@ class FrxEditor {
     $head = $dom->getElementsByTagName('head')->item(0);
     // Make sure the report title exists.
     if ($dom->getElementsByTagName('title')->length==0) {
-       $n = $dom->createElement('title');
-       $head->appendChild($n);
+      $n = $dom->createElement('title');
+      $head->appendChild($n);
     }
     // Make sure each of these exists in the header
     foreach ($required_elements as $tag) {
@@ -236,8 +236,8 @@ class FrxEditor {
     $p->replaceChild($newFields, $fnode);
 
     $this->setFrxHeader('fields', 'field',
-      $fieldElements,
-      array('id', 'link', 'format', 'format-string', 'target', 'rel', 'class', 'add-query'),
+    $fieldElements,
+    array('id', 'link', 'format', 'format-string', 'target', 'rel', 'class', 'add-query'),
       'default');
 
   }
@@ -255,11 +255,11 @@ class FrxEditor {
     $p = $dnode->parentNode;
     $p->replaceChild($newDocs, $dnode);
     $this->setFrxHeader('docgen', 'doc',
-      $docgenElements,
-      array('type'),
-      NULL,
+    $docgenElements,
+    array('type'),
+    NULL,
       'type'
-    );
+      );
   }
 
   /**
@@ -276,8 +276,8 @@ class FrxEditor {
     $p->replaceChild($newParms, $fnode);
 
     $this->setFrxHeader('parameters', 'parm',
-      $parmElements,
-      array('id', 'label', 'require', 'desc', 'data_source', 'data_field', 'type', 'class', 'options'),
+    $parmElements,
+    array('id', 'label', 'require', 'desc', 'data_source', 'data_field', 'type', 'class', 'options'),
       'value');
   }
 
@@ -285,8 +285,8 @@ class FrxEditor {
     $parms= array();
     $parms[$parm['id']] = $parm;
     $this->setFrxHeader('parameters', 'parm',
-      $parms,
-      array('id', 'label', 'require', 'desc', 'data_source', 'data_field', 'type'),
+    $parms,
+    array('id', 'label', 'require', 'desc', 'data_source', 'data_field', 'type'),
       'value');
   }
 
@@ -415,47 +415,47 @@ class FrxEditor {
    * Make sure all xml elements have ids
    */
   private function parse_ids() {
-     $i=0;
-     if ($this->simplexml) {
-       $this->simplexml->registerXPathNamespace('frx', FRX_NS);
-       $frx_attributes = array();
-       $frx_nodes = $this->simplexml->xpath('body//*[@frx:*]');
+    $i=0;
+    if ($this->simplexml) {
+      $this->simplexml->registerXPathNamespace('frx', FRX_NS);
+      $frx_attributes = array();
+      $frx_nodes = $this->simplexml->xpath('body//*[@frx:*]');
 
-       if ($frx_nodes) foreach ($frx_nodes as $node) {
-          $attr_nodes = $node->attributes(FRX_NS);
-          if ($attr_nodes) {
-            // Make sure every element has an id
-            $i++;
-            $id = 'forena-' . $i;
+      if ($frx_nodes) foreach ($frx_nodes as $node) {
+        $attr_nodes = $node->attributes(FRX_NS);
+        if ($attr_nodes) {
+          // Make sure every element has an id
+          $i++;
+          $id = 'forena-' . $i;
 
-            if (!(string)$node['id']) {
-              $node->addAttribute('id', $id);
+          if (!(string)$node['id']) {
+            $node->addAttribute('id', $id);
 
+          }
+          else {
+            if (strpos((string)$node['id'], 'forena-')===0) {
+              // Reset the id to the numerically generated one
+              $node['id'] = $id;
             }
             else {
-              if (strpos((string)$node['id'], 'forena-')===0) {
-                // Reset the id to the numerically generated one
-                $node['id'] = $id;
-              }
-              else {
-                // Use the id of the element
-                $id = (string)$node['id'];
-              }
+              // Use the id of the element
+              $id = (string)$node['id'];
             }
-
-            // Save away the frx attributes in case we need them later.
-            $attr_nodes = $node->attributes(FRX_NS);
-            $attrs = array();
-            if ($attr_nodes) foreach ($attr_nodes as $key => $value) {
-              $attrs[$key] = (string)$value;
-            }
-            // Save away the attributes
-            $frx_attributes[$id] = $attrs;
           }
-       }
 
-       $this->frx_attributes = $frx_attributes;
-     }
+          // Save away the frx attributes in case we need them later.
+          $attr_nodes = $node->attributes(FRX_NS);
+          $attrs = array();
+          if ($attr_nodes) foreach ($attr_nodes as $key => $value) {
+            $attrs[$key] = (string)$value;
+          }
+          // Save away the attributes
+          $frx_attributes[$id] = $attrs;
+        }
+      }
+
+      $this->frx_attributes = $frx_attributes;
+    }
   }
 
   /**

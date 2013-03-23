@@ -18,12 +18,12 @@ function forena_query_builder_form($formid, &$form_state) {
       'where' => array(
         'op' => 'AND',
         'filter' => array(
-          array('field' => '', 'op' => '', 'value' => ''),
-        ),
-      ),
+  array('field' => '', 'op' => '', 'value' => ''),
+  ),
+  ),
       'group' => array(),
       'order' => array(),
-      ),
+  ),
     'fields' => array(),
     'step' => 'block',
     'preview' => '',
@@ -67,8 +67,8 @@ function forena_query_builder_form($formid, &$form_state) {
   }
   // If we're not on the first form than we need to verify the acces for the block
   else {
-     $access = forena_query_access_repository($form_state['storage']['block_name']);
-     /**
+    $access = forena_query_access_repository($form_state['storage']['block_name']);
+    /**
      * Section of form for finally saving the report.
      */
     if ($access && $form_state['storage']['new']) {
@@ -170,9 +170,9 @@ function forena_query_builder_form($formid, &$form_state) {
         '#type' => 'submit',
         '#submit' => array('forena_query_load_block', 'forena_query_preview'),
         '#value' => t('Reload'),
-        );
+      );
 
-      }
+    }
 
     if (!@$block['locked'] && $access) {
       $form['save'] = array(
@@ -484,7 +484,7 @@ function forena_query_add_filter($form, &$form_state) {
  * @param $to_add element to add
  */
 function _forena_query_remove_parent_data(&$values, &$parents) {
-   if ($parents) {
+  if ($parents) {
     $key = array_shift($parents);
     if (!$parents) {
       unset($values[$key]);
@@ -557,7 +557,7 @@ function _forena_query_group_parent_data(&$values, &$parents) {
  * @param unknown_type $form_state
  */
 function forena_query_group_filter($form, &$form_state) {
-   $where = $form_state['values']['where'];
+  $where = $form_state['values']['where'];
   _forena_query_clean_values($where, $form['where']);
   // Determine containing field of pressed button.
   $parents = $form_state['triggering_element']['#parents'];

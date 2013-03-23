@@ -29,7 +29,7 @@ class FrxOracle extends FrxDataSource {
     if (isset($conf['schema'])) $this->schema = $conf['schema'];
     if ($conf['oracle_xml']) $this->use_oracle_xml = TRUE;
     if ($uri) {
-         // Test for postgres suport
+      // Test for postgres suport
       if (!is_callable('oci_connect')) {
         $this->error('OCI support not installed.', 'OCI support not installed.');
         return;
@@ -100,58 +100,58 @@ class FrxOracle extends FrxDataSource {
    * @return unknown
    */
   private function oracle_xml($sql, $block) {
-      $db = $this->db;
+    $db = $this->db;
 
-      //$rs->debugDumpParams();
-      $fsql = 'declare x XMLTYPE; begin x := f_forena_xml(:p1); :ret_val := x.getClobVal();  end; ';
-      $stmt = oci_parse($db, $fsql);
-      $ret = oci_new_descriptor($db, OCI_D_LOB);
-      oci_bind_by_name($stmt, ':ret_val', $ret, -1, OCI_B_CLOB);
-      oci_bind_by_name($stmt, ':p1', $sql);
-      $r = oci_execute($stmt, OCI_DEFAULT);
-      // Report errors
-      if (!$r) {
-        $e = oci_error($stmt);  // For oci_execute errors pass the statement handle
-        $msg .=  htmlentities($e['message']);
-        $msg .= "\n<pre>\n";
-        $msg .= htmlentities($e['sqltext']);
-        //printf("\n%".($e['offset']+1)."s", "^");
-        $msg .= "\n</pre>\n";
-        $this->error('Database error in ' . $this->block_name . ' see logs for info', $msg);
-        return NULL;
-      }
+    //$rs->debugDumpParams();
+    $fsql = 'declare x XMLTYPE; begin x := f_forena_xml(:p1); :ret_val := x.getClobVal();  end; ';
+    $stmt = oci_parse($db, $fsql);
+    $ret = oci_new_descriptor($db, OCI_D_LOB);
+    oci_bind_by_name($stmt, ':ret_val', $ret, -1, OCI_B_CLOB);
+    oci_bind_by_name($stmt, ':p1', $sql);
+    $r = oci_execute($stmt, OCI_DEFAULT);
+    // Report errors
+    if (!$r) {
+      $e = oci_error($stmt);  // For oci_execute errors pass the statement handle
+      $msg .=  htmlentities($e['message']);
+      $msg .= "\n<pre>\n";
+      $msg .= htmlentities($e['sqltext']);
+      //printf("\n%".($e['offset']+1)."s", "^");
+      $msg .= "\n</pre>\n";
+      $this->error('Database error in ' . $this->block_name . ' see logs for info', $msg);
+      return NULL;
+    }
 
-      $xml_text = $ret->load();
-      if ($xml_text) {
-        $xml = new SimpleXMLElement($xml_text);
-        if ($xml->getName() == 'error') {
-          $msg = (string)$xml . ' in ' . $this->block_name . '.sql. ';
-          $this->error($msg . 'See logs for more info', $msg . ' in <pre> ' . $sql . '</pre>');
-        }
+    $xml_text = $ret->load();
+    if ($xml_text) {
+      $xml = new SimpleXMLElement($xml_text);
+      if ($xml->getName() == 'error') {
+        $msg = (string)$xml . ' in ' . $this->block_name . '.sql. ';
+        $this->error($msg . 'See logs for more info', $msg . ' in <pre> ' . $sql . '</pre>');
       }
-      oci_free_statement($stmt);
-      return $xml;
+    }
+    oci_free_statement($stmt);
+    return $xml;
   }
 
   private function php_xml($sql) {
-      $db = $this->db;
-      $xml = new SimpleXMLElement('<table/>');
+    $db = $this->db;
+    $xml = new SimpleXMLElement('<table/>');
 
-      //$rs->debugDumpParams();
-      $stmt = oci_parse($db, $sql);
-      oci_execute($stmt);
+    //$rs->debugDumpParams();
+    $stmt = oci_parse($db, $sql);
+    oci_execute($stmt);
 
-      while ($row = oci_fetch_array($stmt, OCI_ASSOC+OCI_RETURN_NULLS)) {
-        $row_node = $xml->addChild('row');
-        foreach ($row as $key => $value) {
-          $row_node->addChild(strtolower($key), htmlspecialchars($value));
-        }
+    while ($row = oci_fetch_array($stmt, OCI_ASSOC+OCI_RETURN_NULLS)) {
+      $row_node = $xml->addChild('row');
+      foreach ($row as $key => $value) {
+        $row_node->addChild(strtolower($key), htmlspecialchars($value));
       }
-      oci_free_statement($stmt);
-      return $xml;
+    }
+    oci_free_statement($stmt);
+    return $xml;
   }
 
-    /**
+  /**
    * @param $sql string sql script containing function
    * @param $data array parameter array.
    * @param $types array containting types
@@ -171,76 +171,76 @@ class FrxOracle extends FrxDataSource {
         //list($params) = $match[1];
         $i=0;
         foreach ($match[0] as $match_num => $token) {
-           $name = trim($token, ':');
-           $value = $data[$name];
+          $name = trim($token, ':');
+          $value = $data[$name];
 
-           list($type, $subtype) = explode(' of ', $types[$name], 2);
-           // Default varchar
-           if (!$type )$type = 'varchar';
-           switch (strtolower($type)) {
-             // Handle arrays based on subtype.
-             case 'array':
-               $value = (array) $value;
-               $bind_type = $this->oci_bind_type($subtype);
-               $entries = count($value);
-               if (!count($value)) {
-                  $entries = 255;
-               }
-               oci_bind_array_by_name($stmt, $token, $value, $entries, -1, $bind_type);
-               break;
+          list($type, $subtype) = explode(' of ', $types[$name], 2);
+          // Default varchar
+          if (!$type )$type = 'varchar';
+          switch (strtolower($type)) {
+            // Handle arrays based on subtype.
+            case 'array':
+              $value = (array) $value;
+              $bind_type = $this->oci_bind_type($subtype);
+              $entries = count($value);
+              if (!count($value)) {
+                $entries = 255;
+              }
+              oci_bind_array_by_name($stmt, $token, $value, $entries, -1, $bind_type);
+              break;
 
-             case 'clob':
-               $c = oci_new_descriptor($db, OCI_D_LOB);
-               $lobs[$name] = $c;
-               oci_bind_by_name($stmt, $token, $lobs[$name], -1, OCI_B_CLOB);
-               if (is_object($c)) {
-                 $c->writeTemporary($value);
-               }
-               break;
-             case 'number':
-             case 'numeric':
-             case 'varchar':
-               oci_bind_by_name($stmt, $token, $data[$name], 32767);
-               break;
-             default:
+            case 'clob':
+              $c = oci_new_descriptor($db, OCI_D_LOB);
+              $lobs[$name] = $c;
+              oci_bind_by_name($stmt, $token, $lobs[$name], -1, OCI_B_CLOB);
+              if (is_object($c)) {
+                $c->writeTemporary($value);
+              }
+              break;
+            case 'number':
+            case 'numeric':
+            case 'varchar':
+              oci_bind_by_name($stmt, $token, $data[$name], 32767);
+              break;
+            default:
 
-               $o = oci_new_collection($db, strtoupper($type), $this->schema);
-               $value = (array)$value;
-               $collections[$name] = $o;
-               if ($value && $o) foreach ($value as $element) {
-                 $o->append($element);
-               }
-               oci_bind_by_name($stmt, $token, $o, -1, OCI_B_NTY);
-               break;
-           }
+              $o = oci_new_collection($db, strtoupper($type), $this->schema);
+              $value = (array)$value;
+              $collections[$name] = $o;
+              if ($value && $o) foreach ($value as $element) {
+                $o->append($element);
+              }
+              oci_bind_by_name($stmt, $token, $o, -1, OCI_B_NTY);
+              break;
+          }
         }
       }
 
       // putting the @ operator before the oci_execute call will suppress php warnings.
       try {
-       $r = @oci_execute($stmt, OCI_DEFAULT);
+        $r = @oci_execute($stmt, OCI_DEFAULT);
 
-       // Report errors
-       if (!$r) {
-        $e = oci_error($stmt);  // For oci_execute errors pass the statement handle
-        //drupal_set_message(e_display_array($e));
-        if ($e['code'] != '1403') {
-         $msg .=  htmlentities($e['message']);
-         $msg .= "\n<pre>\n";
-         $msg .= htmlentities($e['sqltext']);
-         $msg .= "\n</pre>\n";
-         ora_error('', $msg);
+        // Report errors
+        if (!$r) {
+          $e = oci_error($stmt);  // For oci_execute errors pass the statement handle
+          //drupal_set_message(e_display_array($e));
+          if ($e['code'] != '1403') {
+            $msg .=  htmlentities($e['message']);
+            $msg .= "\n<pre>\n";
+            $msg .= htmlentities($e['sqltext']);
+            $msg .= "\n</pre>\n";
+            ora_error('', $msg);
+          }
         }
-       }
       }
       catch (Exception $e) {
-         $msg .=  htmlentities($e['message']);
-         $msg .= "\n<pre>\n";
-         $msg .= htmlentities($e['sqltext']);
-         //printf("\n%".($e['offset']+1)."s", "^");
-         $msg .= "\n</pre>\n";
-         ora_error('Database error, see logs for info', $msg);
-       }
+        $msg .=  htmlentities($e['message']);
+        $msg .= "\n<pre>\n";
+        $msg .= htmlentities($e['sqltext']);
+        //printf("\n%".($e['offset']+1)."s", "^");
+        $msg .= "\n</pre>\n";
+        ora_error('Database error, see logs for info', $msg);
+      }
 
       // Retrieve any clob data.
       if ($lobs) foreach ($lobs as $name => $lob) {
@@ -279,7 +279,7 @@ class FrxOracle extends FrxDataSource {
    */
   public function format($value, $key, $data) {
     if ($value==='' || $value ===NULL || $value ===array())
-      $value = 'NULL';
+    $value = 'NULL';
     else {
       if (is_array($value)) {
         if ($value == array()) {
@@ -294,12 +294,12 @@ class FrxOracle extends FrxDataSource {
             if ($i==1) {
               $val .= '(';
             }
-             else {
+            else {
               $val .= ',';
-             }
-          $val .=  "'" . str_replace("'", "''", $v) . "'";
+            }
+            $val .=  "'" . str_replace("'", "''", $v) . "'";
           }
-        $value = $val . ')';
+          $value = $val . ')';
         }
       }
       else {
@@ -310,7 +310,7 @@ class FrxOracle extends FrxDataSource {
     return $value;
   }
 
-    /**
+  /**
    * Destructor - Closes database connections.
    *
    */

@@ -52,17 +52,17 @@ class FrxDataSource{
 
   protected function loadBlockFromDB($block_name) {
     $block = array();
-      // IF load from the database if forena_query is there.
+    // IF load from the database if forena_query is there.
     if (module_exists('forena_query')) {
 
       // See if we have one in the database first
       $sql = 'SELECT * FROM {forena_data_blocks} WHERE repository=:repos AND block_name = :block_name';
       $rs = db_query(
-        $sql,
-        array(
+      $sql,
+      array(
           ':repos' => $this->name,
           ':block_name' => $block_name,
-        )
+      )
       );
 
       if ($b = $rs->fetchObject()) {
@@ -267,7 +267,7 @@ class FrxDataSource{
               $access = trim($o);
               break;
             default:
-        }
+          }
 
         }
 
@@ -403,26 +403,26 @@ class FrxDataSource{
 
     $rs = db_query('SELECT * from {forena_data_blocks} WHERE repository=:repos AND
       block_name = :block_name',
-      array(
+    array(
         ':repos' => $this->name,
         ':block_name' => $block_name,
-        )
-      );
+    )
+    );
     if ($block = $rs->fetchObject()) {
       db_update('forena_data_blocks')
-        ->fields(array(
+      ->fields(array(
           'src' => $data['file'],
           'builder' => $builder,
           'access' => $data['access'],
           'modified' => $modified,
-        ))
-        ->condition('repository', $this->name)
-        ->condition('block_name', $block_name)
-        ->execute();
+      ))
+      ->condition('repository', $this->name)
+      ->condition('block_name', $block_name)
+      ->execute();
     }
     else {
       db_insert('forena_data_blocks')
-        ->fields( array(
+      ->fields( array(
           'repository' => $this->name,
           'block_name' => $block_name,
           'block_type' => $data['type'],
@@ -431,8 +431,8 @@ class FrxDataSource{
           'access' => $data['access'],
           'locked' => 0,
           'modified' => $modified,
-        ))
-        ->execute();
+      ))
+      ->execute();
     }
   }
 
@@ -443,9 +443,9 @@ class FrxDataSource{
    */
   public function deleteBlock($block_name) {
     db_delete('forena_data_blocks')
-      ->condition('repository', $this->name)
-      ->condition('block_name', $block_name)
-      ->execute();
+    ->condition('repository', $this->name)
+    ->condition('block_name', $block_name)
+    ->execute();
   }
 
   /**

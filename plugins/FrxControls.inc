@@ -21,71 +21,71 @@ class FrxControls {
                      'number' => 'Number',
                      'drupal_translation' => 'Translatable Text'
                      );
-    return $formats;
+                     return $formats;
   }
 
 
   private function is_number($value) {
-           $non_numeric_chars = trim($value, ' +-.,0123456789');
-          // Determine if it contains +- in the interior
-          // Zero is ok here bu
-          $inner_symbols = FALSE;
-          if (strpos($value, '+') || strpos($value, '-') || strpos($value, ' ')) $inner_symbols =  TRUE;
-          return (empty($non_numeric_chars) && trim($value)!=='' && !$inner_symbols) ? TRUE : FALSE;
+    $non_numeric_chars = trim($value, ' +-.,0123456789');
+    // Determine if it contains +- in the interior
+    // Zero is ok here bu
+    $inner_symbols = FALSE;
+    if (strpos($value, '+') || strpos($value, '-') || strpos($value, ' ')) $inner_symbols =  TRUE;
+    return (empty($non_numeric_chars) && trim($value)!=='' && !$inner_symbols) ? TRUE : FALSE;
   }
 
 
   // Custom formats based on translation string
   public function drupal_translation($value, $format_str, $teng) {
-     $field = '';
-     if ($format_str) $field = '{' . $format_str . '}';
-     $field = $teng->replace($field, NULL, TRUE);
-     $vars = array();
-     if ($field) {
-       $vars = (array) @unserialize($field);
-     }
-     return t($value, $vars);
+    $field = '';
+    if ($format_str) $field = '{' . $format_str . '}';
+    $field = $teng->replace($field, NULL, TRUE);
+    $vars = array();
+    if ($field) {
+      $vars = (array) @unserialize($field);
+    }
+    return t($value, $vars);
   }
 
-    // Custom formats based on translation string
+  // Custom formats based on translation string
   public function drupal_text_format($value, $format_str, $teng) {
-     $field = '';
-     if ($format_str) $field = $format_str;
-     $field = $teng->replace($field, NULL, TRUE);
-     if ($field) {
-       $format = $field;
-     }
-     else {
-       $format = filter_default_format();
-     }
-     return check_markup(html_entity_decode($value, ENT_QUOTES, 'UTF-8'), $format);
+    $field = '';
+    if ($format_str) $field = $format_str;
+    $field = $teng->replace($field, NULL, TRUE);
+    if ($field) {
+      $format = $field;
+    }
+    else {
+      $format = filter_default_format();
+    }
+    return check_markup(html_entity_decode($value, ENT_QUOTES, 'UTF-8'), $format);
   }
 
 
   //Date format methods
   public function drupal_date_format($value, $format_str, $teng) {
-     if (!$format_str) $format_str = 'small';
-     switch ($format_str) {
-       case 'medium':
-         $type = $format_str;
-         $format='';
-         break;
-        case 'small':
-         $type = $format_str;
-         $format='';
-         break;
-        case 'large':
-         $type = $format_str;
-         $format='';
-         break;
-       default:
-         $type = 'custom';
-         $format = $format_str;
-     }
-     if ($value) {
-         $value = function_exists('format_date') ? format_date($value, $type, $format) : date($format, $value);
-     }
-     return $value;
+    if (!$format_str) $format_str = 'small';
+    switch ($format_str) {
+      case 'medium':
+        $type = $format_str;
+        $format='';
+        break;
+      case 'small':
+        $type = $format_str;
+        $format='';
+        break;
+      case 'large':
+        $type = $format_str;
+        $format='';
+        break;
+      default:
+        $type = 'custom';
+        $format = $format_str;
+    }
+    if ($value) {
+      $value = function_exists('format_date') ? format_date($value, $type, $format) : date($format, $value);
+    }
+    return $value;
   }
 
   public function iso_date($value, $format_str, $teng) {
@@ -124,7 +124,7 @@ class FrxControls {
       }
       else {
         $dec = 0;
-       $dec_sep = '';
+        $dec_sep = '';
       }
     }
 

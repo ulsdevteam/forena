@@ -1,11 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--ACCESS=design any report -->
 <root>
-  <row><title>Create a simple report</title><name>help.CreateReportSimple</name></row>
-  <row><title>Data</title><name>help.data</name></row>
-  <row><title>Fields</title><name>help.fields</name></row>
-  <row><title>Layout</title><name>help.layout</name></row>
-  <row><title>Parameters</title><name>help.parameters</name></row>
-  <row><title>Format</title><name>help.format</name></row>
-  <row><title>Forena Report XML (frx) reference</title><name>help.design</name></row>
+	<row>
+		<title>Create a simple report</title>
+		<name>help.CreateReportSimple</name>
+	</row>
+	<row>
+		<title>Data</title>
+		<name>help.data</name>
+	</row>
+	<row>
+		<title>Fields</title>
+		<name>help.fields</name>
+	</row>
+	<row>
+		<title>Layout</title>
+		<name>help.layout</name>
+	</row>
+	<row>
+		<title>Parameters</title>
+		<name>help.parameters</name>
+	</row>
+	<row>
+		<title>Format</title>
+		<name>help.format</name>
+	</row>
+	<row>
+		<title>Forena Report XML (frx) reference</title>
+		<name>help.design</name>
+	</row>
 </root>

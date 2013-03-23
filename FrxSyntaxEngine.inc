@@ -13,10 +13,10 @@ class FrxSyntaxEngine {
   private $trim_chars;
   private $formatter; // Object used to format the data
   /**
-   * Class for doing syntax replacements;
-   * @param $regexp
-   * @return unknown_type
-   */
+  * Class for doing syntax replacements;
+  * @param $regexp
+  * @return unknown_type
+  */
   public function __construct($regexp, $trim, $formatter=NULL) {
     $this->tpattern = $regexp;
     $this->trim_chars = $trim;
@@ -49,12 +49,12 @@ class FrxSyntaxEngine {
 
 
   /**
-  * Get the value from the data.
-  * This is used by token_replace method to extract the data based on the path provided.
-  * @param $data
-  * @param $key
-  * @return unknown_type
-  */
+   * Get the value from the data.
+   * This is used by token_replace method to extract the data based on the path provided.
+   * @param $data
+   * @param $key
+   * @return unknown_type
+   */
   protected function get_value( $key, $raw=FALSE) {
     $retvar = '';
     // Default to theo current context
@@ -140,7 +140,7 @@ class FrxSyntaxEngine {
         $path = trim($token, $this->trim_chars);
         $value = $this->get_value($path, $raw);
         if ($single_value) {
-         return $value;
+          return $value;
         }
         else {
           $pos = strpos($text, $token);
@@ -160,16 +160,16 @@ class FrxSyntaxEngine {
    * @return array tokens contained in the text according to the regular expression.
    */
   public function tokens($text) {
-   $match=array();
-   $tokens = array();
+    $match=array();
+    $tokens = array();
 
     if (preg_match_all($this->tpattern, $text, $match)) {
       $i=0;
       foreach ($match[0] as $match_num => $token) {
-         $path = trim($token, $this->trim_chars);
-         if (array_search($path, $tokens)===FALSE) {
-           $tokens[] = $path;
-         }
+        $path = trim($token, $this->trim_chars);
+        if (array_search($path, $tokens)===FALSE) {
+          $tokens[] = $path;
+        }
       }
     }
     return $tokens;

@@ -23,7 +23,7 @@ class ForenaReportTestCase extends DrupalWebTestCase {
       'access demo reports',
       'administer forena reports',
       'list reports',
-      ));
+    ));
     $this->drupalLogin($this->privileged_user);
   }
 

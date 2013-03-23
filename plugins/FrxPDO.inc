@@ -32,7 +32,7 @@ class FrxPDO extends FrxDataSource {
       $options = array();
       if (@$conf['mysql_charset']) {
         $options = array(
-            PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . $conf['mysql_charset'],
+        PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . $conf['mysql_charset'],
         );
       }
 
@@ -117,10 +117,10 @@ class FrxPDO extends FrxDataSource {
   public function quote($value) {
     $new_value =  $this->db->quote($value);
     if (($value==='' || $value===NULL) && !$new_value) {
-     $value = "'" . str_replace("'", "''", $value) . "'";
+      $value = "'" . str_replace("'", "''", $value) . "'";
     }
     else {
-     $value = $new_value;
+      $value = $new_value;
     }
     return $value;
   }
@@ -152,10 +152,10 @@ class FrxPDO extends FrxDataSource {
             $i++;
             if ($i!=1) {
               $val .= ',';
-             }
-          $val .= $this->quote($v);
+            }
+            $val .= $this->quote($v);
           }
-        $value = $val;
+          $value = $val;
         }
       }
       else  $value =  $this->quote($value);

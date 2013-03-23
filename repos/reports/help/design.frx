@@ -35,14 +35,14 @@
 	</p>
 	<p>The following example illustrates a very simple report:</p>
 <html xmlns:frx:="urn:FrxReports" frx:renderer="FrxSource">
-	<head>
-	<title>A sample report</title>
-	</head>
-	<body>
-		<div frx:block="sampledb/states">
-			<p frx:foreach="*">{code} - {name}</p>
-		</div>
-	</body>
+  <head>
+  <title>A sample report</title>
+  </head>
+  <body>
+    <div frx:block="sampledb/states">
+      <p frx:foreach="*">{code} - {name}</p>
+    </div>
+  </body>
 </html>
 <p>There are basically three custom tags that appear in the simplest
 	version of the report:</p>

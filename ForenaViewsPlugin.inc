@@ -30,9 +30,9 @@ class ForenaViewsPlugin extends views_plugin_style {
   public function render() {
     // Group the rows according to the grouping instructions, if specified.
     $sets = $this->render_grouping(
-      $this->view->result,
-      $this->options['grouping'],
-      TRUE
+    $this->view->result,
+    $this->options['grouping'],
+    TRUE
     );
     $filename = $this->options['report_name'] . '.frx';
     if (Frx::File()->exists($filename)) {

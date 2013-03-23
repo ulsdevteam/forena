@@ -27,7 +27,7 @@ class FrxTemplate {
     }
     catch (Exception $e) {
       forena_error('Invalid or malformed template document', '<pre>' .
-        $e->getMessage() . $e->getTraceAsString() . '</pre>');
+      $e->getMessage() . $e->getTraceAsString() . '</pre>');
     }
     $this->body = $dom->getElementsByTagName('body')->item(0);
   }

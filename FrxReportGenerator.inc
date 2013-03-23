@@ -63,7 +63,7 @@ class FrxReportGenerator {
       $provider = isset($r['data']) ? $r['data'] : NULL;
       if ($provider && method_exists($provider, 'formats'))  {
         $f = $provider->formats();
-      if (isset($f[$fkey]) && method_exists($provider, $fkey)) {
+        if (isset($f[$fkey]) && method_exists($provider, $fkey)) {
           // We found an object with the advertised method return it
           return $provider;
         }
@@ -76,7 +76,7 @@ class FrxReportGenerator {
       $provider = $r;
       if ($provider && method_exists($provider, 'formats'))  {
         $f = $provider->formats();
-      if (isset($f[$fkey]) && method_exists($provider, $fkey)) {
+        if (isset($f[$fkey]) && method_exists($provider, $fkey)) {
           // We found an object with the advertised method return it
           return $provider;
         }
@@ -92,7 +92,7 @@ class FrxReportGenerator {
    *
    * @return FrxReport
    *
-  */
+   */
   function get_report($report_name, $data=array()) {
     $r=NULL;
     $this->alter_parameters($report_name, $data);
@@ -133,7 +133,7 @@ class FrxReportGenerator {
    *
    * Returns the string within the html tag name
    *
-  */
+   */
   function get_html($tag, $r_text) {
     $open = strpos($r_text, $tag);
     $close = strpos($r_text, '>', $open);
@@ -206,77 +206,77 @@ class FrxReportGenerator {
   }
 
 
- /**
- * Load and render a report based on a drupal path.
- * In this function the arglist is used to get the full path to the report.
- *
- * @return unknown
- */
-function report($name_in, $parms = array(), $print=TRUE) {
-  $output = '';
-  $desc = Frx::Menu()->parseURL($name_in);
-  $name = $desc['name'];
-  $format = isset($desc['format']) ? $desc['format'] : '';
-  $filename = $desc['filename'];
-  // Determine the data to get.
-  if (!$parms) {
-    $parms = array_merge($_GET, $_POST);
-    unset($parms['q']);
-  }
-  else $parms = (array)$parms;
-
-
-  if ($name) {
-    $r = @$this->get_report($name, $parms);
-    if (!$r || !$r->rpt_xml) {
-      $this->app->error('Could not load report. Check for invalid XML in ' . $name);
-      return '';
+  /**
+   * Load and render a report based on a drupal path.
+   * In this function the arglist is used to get the full path to the report.
+   *
+   * @return unknown
+   */
+  function report($name_in, $parms = array(), $print=TRUE) {
+    $output = '';
+    $desc = Frx::Menu()->parseURL($name_in);
+    $name = $desc['name'];
+    $format = isset($desc['format']) ? $desc['format'] : '';
+    $filename = $desc['filename'];
+    // Determine the data to get.
+    if (!$parms) {
+      $parms = array_merge($_GET, $_POST);
+      unset($parms['q']);
     }
+    else $parms = (array)$parms;
 
-    //check for default parameters
-    $r->processParameters();
-    Frx::Skin()->load($r->skin);
-    Frx::Skin()->loadSkinFiles($name);
-    $r->render($format);
-    $o =  Frx::Document($format);
-    if ($o) {
-      $output .= $o->render($r, $format,  array());
-      //$output = check_markup($output, variable_get('forena_input_format', 'full_html'));
-      if ($print) {
-        $printed = $o->output($output);
+
+    if ($name) {
+      $r = @$this->get_report($name, $parms);
+      if (!$r || !$r->rpt_xml) {
+        $this->app->error('Could not load report. Check for invalid XML in ' . $name);
+        return '';
       }
-      else {
-        $printed = FALSE;
-      }
-      if (!$printed) {
-        return  $output;
+
+      //check for default parameters
+      $r->processParameters();
+      Frx::Skin()->load($r->skin);
+      Frx::Skin()->loadSkinFiles($name);
+      $r->render($format);
+      $o =  Frx::Document($format);
+      if ($o) {
+        $output .= $o->render($r, $format,  array());
+        //$output = check_markup($output, variable_get('forena_input_format', 'full_html'));
+        if ($print) {
+          $printed = $o->output($output);
+        }
+        else {
+          $printed = FALSE;
+        }
+        if (!$printed) {
+          return  $output;
+        }
       }
     }
   }
-}
 
-public function debug($short_message='', $log='') {
-  $this->app->debug($short_message, $log);
-}
+  public function debug($short_message='', $log='') {
+    $this->app->debug($short_message, $log);
+  }
 
-public function error($short_message='', $log='') {
-  $this->app->error($short_message, $log);
-}
+  public function error($short_message='', $log='') {
+    $this->app->error($short_message, $log);
+  }
 
-public function configuration($name) {
-  return $this->app->configuration($name);
-}
+  public function configuration($name) {
+    return $this->app->configuration($name);
+  }
 
-public function report_path() {
-  return $this->app->configuration('report_repos');
-}
+  public function report_path() {
+    return $this->app->configuration('report_repos');
+  }
 
   public function link($title, $path, $options=array()) {
     return $this->app->link($title, $path, $options);
   }
 
-public function url($path, $options = array()) {
-  return $this->app->url($path, $options);
-}
+  public function url($path, $options = array()) {
+    return $this->app->url($path, $options);
+  }
 
 }

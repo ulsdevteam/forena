@@ -55,7 +55,7 @@ class FrxGraphTemplate extends FrxTemplate {
       '#default_value' => $config['gen_table'],
     );
 
-   $form_ctl['style'] = array(
+    $form_ctl['style'] = array(
       '#type' => 'select',
       '#title' => t('Style'),
       '#options' => $styles,
@@ -99,7 +99,7 @@ class FrxGraphTemplate extends FrxTemplate {
         '#title' => check_plain((string)($i + 1)),
         '#default_value' => $config['series'][$i],
         '#description' => t('Forena token expressioin for series %s. (e.g. {total} )', array('%s' => $i+1)),
-        );
+      );
 
     }
 
@@ -142,8 +142,8 @@ class FrxGraphTemplate extends FrxTemplate {
         $tbody = $this->addNode($table, 6, 'tbody');
         $tdrow = $this->addNode($tbody, 8, 'tr', NULL, NULL, array('foreach' => '*'));
         if ($columns) foreach ($columns as $col) {
-           $this->addNode($throw, 10, 'th', $col);
-           $this->addNode($tdrow, 10, 'td', '{' . $col . '}');
+          $this->addNode($throw, 10, 'th', $col);
+          $this->addNode($tdrow, 10, 'td', '{' . $col . '}');
         }
       }
 

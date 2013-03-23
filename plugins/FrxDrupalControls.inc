@@ -21,7 +21,7 @@ class FrxDrupalControls {
     $db = Database::getConnection('default');
     if ($db) {
       if ($value=='')
-        $value = 'NULL';
+      $value = 'NULL';
       else {
         if (is_array($value)) {
           if ($value == array()) {
@@ -35,8 +35,8 @@ class FrxDrupalControls {
               $i++;
               if ($i>1) {
                 $val .= ',';
-               }
-            $val .=   $db->quote($v);
+              }
+              $val .=   $db->quote($v);
             }
             $value = $val;
           }
@@ -59,7 +59,7 @@ class FrxDrupalControls {
     $formats = array(
                      'drupal_node_content' => 'Content from node id'
                      );
-    return $formats;
+                     return $formats;
   }
 
 

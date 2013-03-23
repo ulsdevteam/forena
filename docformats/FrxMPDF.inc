@@ -19,8 +19,8 @@ class FrxMPDF extends FrxDocument {
 
 
   public function render($r, $format, $options = array()) {
-// To Do
-// The option switch off links on PDF will bee good here too
+    // To Do
+    // The option switch off links on PDF will bee good here too
 
     $disable_links = variable_get('forena_pdf_disable_links', TRUE);
     $html = $this->check_markup($r->html);
@@ -31,37 +31,37 @@ class FrxMPDF extends FrxDocument {
     $mpdf = new mPDF('UTF-8');
     $mpdf->AddPageByArray(array(
       'orientation' => 'P'
-    ));
+      ));
 
-    $output = '';
-    $output = '<html><head>';
-    $output .= '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>';
-    if (@$options['css']) {
-     $output .= '<style type="text/css">';
-     $output .= $css;
-     $output .= '</style>';
-    }
-    $output .= '<title>' . $r->title . "</title></head><body class='forena-report $link_class'><h1>" . $r->title . '</h1>' . $html;
-    $output .= '</body></html>';
+      $output = '';
+      $output = '<html><head>';
+      $output .= '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>';
+      if (@$options['css']) {
+        $output .= '<style type="text/css">';
+        $output .= $css;
+        $output .= '</style>';
+      }
+      $output .= '<title>' . $r->title . "</title></head><body class='forena-report $link_class'><h1>" . $r->title . '</h1>' . $html;
+      $output .= '</body></html>';
 
-    foreach (Frx::Skin()->stylesheets as $type => $sheets) {
-      foreach ($sheets as $sheet) {
-        switch ($type) {
-           case 'all':
-           case 'print':
-           case 'screen':
-           case 'pdf':
-             $mpdf->WriteHTML(file_get_contents($sheet), 1);
-           //echo $sheet;
-           break;
+      foreach (Frx::Skin()->stylesheets as $type => $sheets) {
+        foreach ($sheets as $sheet) {
+          switch ($type) {
+            case 'all':
+            case 'print':
+            case 'screen':
+            case 'pdf':
+              $mpdf->WriteHTML(file_get_contents($sheet), 1);
+              //echo $sheet;
+              break;
+          }
         }
       }
-    }
 
-    $mpdf->WriteHTML($output);
-    // $pdf = $mpdf->Output('', 'S');
-    $pdf = $mpdf->Output();
-    return $pdf;
+      $mpdf->WriteHTML($output);
+      // $pdf = $mpdf->Output('', 'S');
+      $pdf = $mpdf->Output();
+      return $pdf;
   }
 
 
@@ -74,10 +74,10 @@ class FrxMPDF extends FrxDocument {
       'Cache-Control' => 'private',
       'Content-Transfer-Encoding' => 'binary',
       'Content-Type' => 'application/pdf',
-      // ! TODO !
-      // after testing beter to put disable this coments to offer save file or take a config variable that chose to save or open.
-      // 'Content-Length' => strlen($pdf),
-      // 'Content-Disposition' => 'attachment; filename="a_report_name.pdf"',
+    // ! TODO !
+    // after testing beter to put disable this coments to offer save file or take a config variable that chose to save or open.
+    // 'Content-Length' => strlen($pdf),
+    // 'Content-Disposition' => 'attachment; filename="a_report_name.pdf"',
     );
 
     foreach ($http_headers as $name => $value) {

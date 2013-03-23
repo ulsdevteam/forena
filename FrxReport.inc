@@ -55,8 +55,8 @@ class FrxReport {
         $nodes = $rpt_xml->xpath('//frx:docgen/frx:doc');
         $this->formats = array();
         if ($nodes) foreach ($nodes as $value) {
-            $arr = $value->attributes();
-            $this->formats[] = (string)$arr['type'];
+          $arr = $value->attributes();
+          $this->formats[] = (string)$arr['type'];
         }
 
 
@@ -152,11 +152,11 @@ class FrxReport {
 
     // Shortcut process a text node
     if ($node_type == XML_TEXT_NODE
-        || $node_type == XML_ENTITY_REF_NODE
-        || $node_type == XML_ENTITY_NODE
-        ) {     $text = $dom_node->textContent;
-      $o .= $this->teng->replace($text);
-      return $o;
+    || $node_type == XML_ENTITY_REF_NODE
+    || $node_type == XML_ENTITY_NODE
+    ) {     $text = $dom_node->textContent;
+    $o .= $this->teng->replace($text);
+    return $o;
     }
 
     //Ignore certain node types
@@ -207,7 +207,7 @@ class FrxReport {
 
       // Determine if we have a custom renderer
       $renderer = (string)$frx['renderer'];
-       // if we have a foreach in this node, we need to iterate the children
+      // if we have a foreach in this node, we need to iterate the children
       if ((string)$frx['foreach'] ) {
         // Save xml
         $path = $this->teng->replace((string)$frx['foreach'], TRUE);
@@ -238,7 +238,7 @@ class FrxReport {
           $r_attr_text = '';
 
           foreach ($tmp_attrs as $key => $value) {
-             $r_attr_text .=  ' ' . $key . '="' . (string)$value . '"';
+            $r_attr_text .=  ' ' . $key . '="' . (string)$value . '"';
           }
           $o .= $this->teng->replace('<' . $tag . $r_attr_text . '>');
           foreach ($dom_node->childNodes as $child) {
@@ -331,15 +331,15 @@ class FrxReport {
       if ($formatters) foreach ($formatters as $formatter) {
         if ((isset($formatter['block']) &&(string)$formatter['block'] == $this->block) || (!(string)$formatter['block'])) {
 
-           //@TODO: Replace the default extraction with something that will get sub elements of the string
-           $default = (string)$formatter;
-           $link = (string)$formatter['link'];
-           $add_query = (string)$formatter['add-query'];
-           $class = (string)$formatter['class'];
-           $rel = (string)$formatter['rel'];
-           $format = (string) $formatter['format'];
-           $format_str = (string) $formatter['format-string'];
-           $target = (string) $formatter['target'];
+          //@TODO: Replace the default extraction with something that will get sub elements of the string
+          $default = (string)$formatter;
+          $link = (string)$formatter['link'];
+          $add_query = (string)$formatter['add-query'];
+          $class = (string)$formatter['class'];
+          $rel = (string)$formatter['rel'];
+          $format = (string) $formatter['format'];
+          $format_str = (string) $formatter['format-string'];
+          $target = (string) $formatter['target'];
         }
       }
     }
@@ -385,8 +385,8 @@ class FrxReport {
         $data = array_merge($parms, $data);
       }
       if (trim($url)) $value = FrxReportGenerator::instance()->link(
-        htmlspecialchars_decode($value), $url,
-        array('fragment' => $fragment, 'query' => $data, 'attributes' => $attributes, 'absolute' => TRUE));
+      htmlspecialchars_decode($value), $url,
+      array('fragment' => $fragment, 'query' => $data, 'attributes' => $attributes, 'absolute' => TRUE));
     }
     return $value;
   }
@@ -412,58 +412,58 @@ class FrxReport {
    * @return unknown
    */
   public function asXML() {
-     if ($this->rpt_xml) {
-       return $this->rpt_xml->asXML();
-     }
-     else {
-       return '';
-     }
+    if ($this->rpt_xml) {
+      return $this->rpt_xml->asXML();
+    }
+    else {
+      return '';
+    }
   }
   /**
    * Make sure all xml elements have ids
    */
   private function parse_ids() {
-     $i=0;
-     if ($this->rpt_xml) {
-       $this->rpt_xml->registerXPathNamespace('frx', FRX_NS);
-       $frx_attributes = array();
-       $frx_nodes = $this->rpt_xml->xpath('body//*[@frx:*]');
+    $i=0;
+    if ($this->rpt_xml) {
+      $this->rpt_xml->registerXPathNamespace('frx', FRX_NS);
+      $frx_attributes = array();
+      $frx_nodes = $this->rpt_xml->xpath('body//*[@frx:*]');
 
-       if ($frx_nodes) foreach ($frx_nodes as $node) {
-          $attr_nodes = $node->attributes(FRX_NS);
-          if ($attr_nodes) {
-            // Make sure every element has an id
-            $i++;
-            $id = 'forena-' . $i;
+      if ($frx_nodes) foreach ($frx_nodes as $node) {
+        $attr_nodes = $node->attributes(FRX_NS);
+        if ($attr_nodes) {
+          // Make sure every element has an id
+          $i++;
+          $id = 'forena-' . $i;
 
-            if (!(string)$node['id']) {
-              $node->addAttribute('id', $id);
+          if (!(string)$node['id']) {
+            $node->addAttribute('id', $id);
 
+          }
+          else {
+            if (strpos((string)$node['id'], 'forena-')===0) {
+              // Reset the id to the numerically generated one
+              $node['id'] = $id;
             }
             else {
-              if (strpos((string)$node['id'], 'forena-')===0) {
-                // Reset the id to the numerically generated one
-                $node['id'] = $id;
-              }
-              else {
-                // Use the id of the element
-                $id = (string)$node['id'];
-              }
+              // Use the id of the element
+              $id = (string)$node['id'];
             }
-
-            // Save away the frx attributes in case we need them later.
-            $attr_nodes = $node->attributes(FRX_NS);
-            $attrs = array();
-            if ($attr_nodes) foreach ($attr_nodes as $key => $value) {
-              $attrs[$key] = (string)$value;
-            }
-            // Save away the attributes
-            $frx_attributes[$id] = $attrs;
           }
-       }
 
-       $this->frx_attributes = $frx_attributes;
-     }
+          // Save away the frx attributes in case we need them later.
+          $attr_nodes = $node->attributes(FRX_NS);
+          $attrs = array();
+          if ($attr_nodes) foreach ($attr_nodes as $key => $value) {
+            $attrs[$key] = (string)$value;
+          }
+          // Save away the attributes
+          $frx_attributes[$id] = $attrs;
+        }
+      }
+
+      $this->frx_attributes = $frx_attributes;
+    }
   }
 
   /**
@@ -557,15 +557,15 @@ class FrxReport {
     $missing_parms = FALSE;
     foreach ($this->parameters as $key => $parm) {
       if ((@$parms[$key]==='' || @$parms[$key]===array() || @$parms[$key]===NULL) && @$parm['value']) {
-       $value = (string)$parm['value'];
-       if (strpos($value, '|')!==FALSE) {
-         $value = explode('|', $value);
-       }
-       $parms[$key] = $value;
-       $reload_params = TRUE;
+        $value = (string)$parm['value'];
+        if (strpos($value, '|')!==FALSE) {
+          $value = explode('|', $value);
+        }
+        $parms[$key] = $value;
+        $reload_params = TRUE;
       }
-        //do not show report if a required parameter does not have a value
-        //force the user to input a parameter
+      //do not show report if a required parameter does not have a value
+      //force the user to input a parameter
       if ((@!$parms[$key]) && (@strcmp($parm['require'], "1") == 0) && (!$parm['value'])) {
         $missing_parms = TRUE;
       }

@@ -52,7 +52,7 @@ class FrxDocument {
                      'docname' => str_replace(' ', '_', $title),
                      'xml' => $r_text,
                      'title' => $title,
-               );
+    );
 
     $output = $this->generate_doc($format, $output, $options, $print);
     if ($format!='email') {

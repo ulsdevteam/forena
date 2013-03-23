@@ -84,41 +84,41 @@ class FrxPostgres extends FrxDataSource {
    * @return unknown
    */
   private function postgres_xml($sql, $block) {
-      $db = $this->db;
-      //$rs->debugDumpParams();
-      $fsql = 'select query_to_xml($1,true,false,$2);';
-      $rs = pg_query_params($db, $fsql, array($sql, ''));
-      $xml_text='';
-      if ($rs) {
-        $row = pg_fetch_row($rs);
-        $xml_text = $row[0];
+    $db = $this->db;
+    //$rs->debugDumpParams();
+    $fsql = 'select query_to_xml($1,true,false,$2);';
+    $rs = pg_query_params($db, $fsql, array($sql, ''));
+    $xml_text='';
+    if ($rs) {
+      $row = pg_fetch_row($rs);
+      $xml_text = $row[0];
+    }
+    $xml = NULL;
+    if ($xml_text) {
+      $xml = new SimpleXMLElement($xml_text);
+      if ($xml->getName() == 'error') {
+        $msg = (string)$xml . ' in ' . $block . '.sql. ';
+        $this->error($msg . 'See logs for more info', $msg . ' in <pre> ' . $sql . '</pre>');
       }
-      $xml = NULL;
-      if ($xml_text) {
-        $xml = new SimpleXMLElement($xml_text);
-        if ($xml->getName() == 'error') {
-          $msg = (string)$xml . ' in ' . $block . '.sql. ';
-          $this->error($msg . 'See logs for more info', $msg . ' in <pre> ' . $sql . '</pre>');
-        }
-        if (!$xml->children()) $xml ='';
-      }
-      if ($rs) pg_free_result($rs);
-      return $xml;
+      if (!$xml->children()) $xml ='';
+    }
+    if ($rs) pg_free_result($rs);
+    return $xml;
   }
 
   private function php_xml($sql) {
-      $db = $this->db;
-      $xml = new SimpleXMLElement('<table/>');
-      $rs = pg_query($sql);
+    $db = $this->db;
+    $xml = new SimpleXMLElement('<table/>');
+    $rs = pg_query($sql);
 
-      if ($rs) while ($row = pg_fetch_assoc($rs)) {
-        $row_node = $xml->addChild('row');
-        foreach ($row as $key => $value) {
-          $row_node->addChild(strtolower($key), htmlspecialchars($value));
-        }
+    if ($rs) while ($row = pg_fetch_assoc($rs)) {
+      $row_node = $xml->addChild('row');
+      foreach ($row as $key => $value) {
+        $row_node->addChild(strtolower($key), htmlspecialchars($value));
       }
-      if ($rs) pg_free_result($rs);
-      return $xml;
+    }
+    if ($rs) pg_free_result($rs);
+    return $xml;
   }
 
   /**
@@ -132,7 +132,7 @@ class FrxPostgres extends FrxDataSource {
    */
   public function format($value, $key, $data) {
     if ($value===''||$value===NULL)
-      $value = 'NULL';
+    $value = 'NULL';
     else {
       if (is_array($value)) {
         if ($value == array()) {
@@ -146,8 +146,8 @@ class FrxPostgres extends FrxDataSource {
             $i++;
             if ($i>1) {
               $val .= ',';
-             }
-          $val .=  "'" . pg_escape_string($v) . "'";
+            }
+            $val .=  "'" . pg_escape_string($v) . "'";
           }
           $value = $val;
         }

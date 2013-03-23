@@ -67,37 +67,37 @@ class FrxRepoMan {
     $repos['sampledb'] = array(
       'path' => $path . '/repos/sample',
       'title' => 'Sample DB Repository'
-    );
+      );
 
-    // Retrieve the repositories defined in the database;
-    $results = db_query('SELECT * FROM {forena_repositories}');
-    foreach ($results as $r) {
-      if ($r->config) {
-        $new_r = unserialize($r->config);
+      // Retrieve the repositories defined in the database;
+      $results = db_query('SELECT * FROM {forena_repositories}');
+      foreach ($results as $r) {
+        if ($r->config) {
+          $new_r = unserialize($r->config);
+        }
+        else {
+          $new_r = array();
+        }
+        $r_name = $r->repository;
+        if (is_array(@$repos[$r_name])) {
+          $new_r = array_merge($new_r, $repos[$r_name]);
+        }
+        else {
+          $new_r['source'] = 'user';
+        }
+        $new_r ['title'] = $r->title;
+        $new_r ['enabled'] = $r->enabled;
+
+        $repos[$r_name] = $new_r;
       }
-      else {
-        $new_r = array();
+
+      drupal_alter('forena_repos',  $repos);
+
+      if ($_forena_repositories) {
+        array_merge($repos, $_forena_repositories);
       }
-      $r_name = $r->repository;
-      if (is_array(@$repos[$r_name])) {
-        $new_r = array_merge($new_r, $repos[$r_name]);
-      }
-      else {
-        $new_r['source'] = 'user';
-      }
-      $new_r ['title'] = $r->title;
-      $new_r ['enabled'] = $r->enabled;
 
-      $repos[$r_name] = $new_r;
-    }
-
-    drupal_alter('forena_repos',  $repos);
-
-    if ($_forena_repositories) {
-      array_merge($repos, $_forena_repositories);
-    }
-
-    $this->repositories = $repos;
+      $this->repositories = $repos;
 
   }
 
@@ -165,13 +165,13 @@ class FrxRepoMan {
     list($provider, $block_name) = explode('/', $data_block, 2);
     $repos = @$this->repositories[$provider];
     if (isset($repos['enabled']) && !$repos['enabled']) {
-     return array();
+      return array();
     }
 
     $o = $this->repository($provider);
     if ($o) {
-     $access = TRUE;
-     $block = $o->loadBlock($block_name);
+      $access = TRUE;
+      $block = $o->loadBlock($block_name);
     }
 
     return $block;
@@ -218,47 +218,47 @@ class FrxRepoMan {
    * @return unknown
    */
   function data($data_block) {
-     list($provider, $block_name) = explode('/', $data_block, 2);
-     //Intstantiate the provider
-     $o = $this->repository($provider);
-     $repos = @$this->repositories[$provider];
-     if (isset($repos['enabled']) && !$repos['enabled']) {
-       return '';
-     }
-     //Populate user callback.
-     if (isset($repos['user callback'])) {
-       $user_fn = $repos['user callback'];
-       if (is_callable($user_fn)) {
-         $current_user =   $user_fn();
-         Frx::Data()->setValue('current_user', $current_user);
-       }
-     }
+    list($provider, $block_name) = explode('/', $data_block, 2);
+    //Intstantiate the provider
+    $o = $this->repository($provider);
+    $repos = @$this->repositories[$provider];
+    if (isset($repos['enabled']) && !$repos['enabled']) {
+      return '';
+    }
+    //Populate user callback.
+    if (isset($repos['user callback'])) {
+      $user_fn = $repos['user callback'];
+      if (is_callable($user_fn)) {
+        $current_user =   $user_fn();
+        Frx::Data()->setValue('current_user', $current_user);
+      }
+    }
 
 
-     $xml = '';
-     if ($o) {
-       $access = TRUE;
-       $block = $this->loadBlock($data_block);
-       $right = @$block['access'];
-       if ($block && $o->access($right)) {
-         switch ($block['type'])  {
-           case 'sql':
-             $xml = $o->sqlData($block['source']);
-             break;
-           case 'xml':
-             $xml = $o->xmlData($block['source']);
-             break;
-           case 'php':
-             $xml = $o->phpData($block['object'], $block['method']);
-             break;
-         }
+    $xml = '';
+    if ($o) {
+      $access = TRUE;
+      $block = $this->loadBlock($data_block);
+      $right = @$block['access'];
+      if ($block && $o->access($right)) {
+        switch ($block['type'])  {
+          case 'sql':
+            $xml = $o->sqlData($block['source']);
+            break;
+          case 'xml':
+            $xml = $o->xmlData($block['source']);
+            break;
+          case 'php':
+            $xml = $o->phpData($block['object'], $block['method']);
+            break;
+        }
 
-       }
-       return $xml;
-     }
-     else {
-       return '';
-     }
+      }
+      return $xml;
+    }
+    else {
+      return '';
+    }
   }
 
   /**
@@ -267,36 +267,36 @@ class FrxRepoMan {
    * @param $sql String sql command to execute
    */
   public function sqlData($provider, $sql, $parms = array()) {
-     $xml = '';
+    $xml = '';
 
-     //Intstantiate the provider
-     $o = $this->repository($provider);
+    //Intstantiate the provider
+    $o = $this->repository($provider);
 
-     $repos = @$this->repositories[$provider];
-     if (isset($repos['enabled']) && !$repos['enabled']) {
-       return '';
-     }
-     //Populate user callback.
-     if (isset($repos['user callback'])) {
-       $user_fn = $repos['user callback'];
-       if (is_callable($user_fn)) {
-          $current_user =   $user_fn();
-          $parms['current_user'] = $current_user;
-       }
-     }
+    $repos = @$this->repositories[$provider];
+    if (isset($repos['enabled']) && !$repos['enabled']) {
+      return '';
+    }
+    //Populate user callback.
+    if (isset($repos['user callback'])) {
+      $user_fn = $repos['user callback'];
+      if (is_callable($user_fn)) {
+        $current_user =   $user_fn();
+        $parms['current_user'] = $current_user;
+      }
+    }
 
 
-     if ($o && $sql) {
-       Frx::Data()->push($parms, 'parm');
+    if ($o && $sql) {
+      Frx::Data()->push($parms, 'parm');
 
-       // Parse the sql file
-       $data = $o->parseSQLFile($sql);
-       //now get the built SQL back
-       $sql = $data['source'];
-       $xml = $o->sqlData($sql);
-       Frx::Data()->pop();
-     }
-     return $xml;
+      // Parse the sql file
+      $data = $o->parseSQLFile($sql);
+      //now get the built SQL back
+      $sql = $data['source'];
+      $xml = $o->sqlData($sql);
+      Frx::Data()->pop();
+    }
+    return $xml;
   }
 
   /**
@@ -305,14 +305,14 @@ class FrxRepoMan {
    * @return array block definition.
    */
   public function sqlBlock($provider, $source) {      //Intstantiate the provider
-     $o = $this->repository($provider);
+    $o = $this->repository($provider);
 
-     $repos = @$this->repositories[$provider];
-     if (isset($repos['enabled']) && !$repos['enabled']) {
-       return '';
-     }
-     if ($o)
-     return $o->parseSQLFile($source);
+    $repos = @$this->repositories[$provider];
+    if (isset($repos['enabled']) && !$repos['enabled']) {
+      return '';
+    }
+    if ($o)
+    return $o->parseSQLFile($source);
   }
 
   /**
@@ -323,7 +323,7 @@ class FrxRepoMan {
   public function buildSQL($provider, $builder) {
     $repos = @$this->repositories[$provider];
     if (isset($repos['enabled']) && !$repos['enabled']) {
-       return '';
+      return '';
     }
     $o = $this->repository($provider);
     $sql = "SELECT * FROM (\n";
@@ -377,35 +377,35 @@ class FrxRepoMan {
   }
 
 
-/*
- * Recieves a datablock and returns an array of values from the data block.
- * @data_block: name of the data block to be invoked for values
- * @field: Specific field name within the data block. The values returned will only
- * come from this field.
- * @params: filtering for the data block
- * @where_clause: Where clause for data block to be filtered against.
- *
- */
-function dataBlockParams($data_block, $field, $label) {
-  $xml = Frx::RepoMan()->data($data_block);
+  /*
+   * Recieves a datablock and returns an array of values from the data block.
+   * @data_block: name of the data block to be invoked for values
+   * @field: Specific field name within the data block. The values returned will only
+   * come from this field.
+   * @params: filtering for the data block
+   * @where_clause: Where clause for data block to be filtered against.
+   *
+   */
+  function dataBlockParams($data_block, $field, $label) {
+    $xml = Frx::RepoMan()->data($data_block);
 
-  $list = array();
-  if ($xml) {
-    $path = ($field) ? $field : '*[1]';
-    $label_path = ($label) ? $label : '*[2]';
+    $list = array();
+    if ($xml) {
+      $path = ($field) ? $field : '*[1]';
+      $label_path = ($label) ? $label : '*[2]';
 
 
-    //walk through the $xml.
-    $rows = $xml->xpath('*');
-    if ($rows) foreach ($rows as $row) {
-      $value = $row->xpath($path);
-      $label_field = $row->xpath($label_path);
-      $label_value =  $label_field ? (string)$label_field[0] : (string)$value[0];
-      $list[(string)$value[0]] = (string)$label_value;
+      //walk through the $xml.
+      $rows = $xml->xpath('*');
+      if ($rows) foreach ($rows as $row) {
+        $value = $row->xpath($path);
+        $label_field = $row->xpath($label_path);
+        $label_value =  $label_field ? (string)$label_field[0] : (string)$value[0];
+        $list[(string)$value[0]] = (string)$label_value;
 
+      }
     }
+    return $list;
   }
-  return $list;
-}
 
 }

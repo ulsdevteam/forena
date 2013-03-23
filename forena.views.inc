@@ -18,7 +18,7 @@ function forena_views_plugins()  {
       'uses fields' => TRUE,
       'admin' => t('Forena Report'),
       'type' => 'normal',
-    ),
+  ),
   );
   return $plugins;
 }

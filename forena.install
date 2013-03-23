@@ -11,8 +11,8 @@
  */
 function forena_schema() {
   /*
-  * Table to store Reports
-  */
+   * Table to store Reports
+   */
   $schema['forena_reports'] = array(
     'fields' => array(
        'report_name' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE),
@@ -25,12 +25,12 @@ function forena_schema() {
        'modified' => array('type' => 'int'),
        'altered' => array('type' => 'int'),
        'path' => array('type' => 'varchar', 'length' => 255),
-    ),
+  ),
     'primary key' => array('report_name', 'language'),
     'indexes' => array(
       'category' => array('category'),
       'path' => array('path'),
-    ),
+  ),
   );
 
   $schema['forena_repositories'] = array(
@@ -39,7 +39,7 @@ function forena_schema() {
        'title' => array('type' => 'varchar', 'length' => '63'),
        'enabled' => array('type' => 'int', 'not null' => TRUE),
        'config' => array('type' => 'text'),
-    ),
+  ),
     'primary_key' => array('repository'),
   );
 
@@ -56,12 +56,12 @@ function forena_schema() {
        'src' => array('type' => 'text'),
        'builder' => array('type' => 'text'),
        'locked' => array('type' => 'int', 'not null' => TRUE),
-    ),
+  ),
     'primary key' => array('block_name'),
     'indexes' => array(
       'category' => array('category'),
       'repository' => array('repository'),
-    ),
+  ),
   );
   return $schema;
 }
@@ -77,7 +77,7 @@ function forena_update_7201() {
        'title' => array('type' => 'varchar', 'length' => 63),
        'enabled' => array('type' => 'int', 'not null' => TRUE),
        'config' => array('type' => 'text'),
-    ),
+  ),
     'primary_key' => array('repository'),
   );
 
@@ -91,12 +91,12 @@ function forena_update_7201() {
        'modified' => array('type' => 'int'),
        'src' => array('type' => 'text'),
        'locked' => array('type' => 'int', 'not null' => TRUE),
-    ),
+  ),
     'primary key' => array('block_name'),
     'indexes' => array(
       'category' => array('category'),
       'repository' => array('repository'),
-    ),
+  ),
   );
   db_add_field('forena_reports', 'descriptor', array('type' => 'text'));
   db_add_field('forena_reports', 'src', array('type' => 'text'));
@@ -108,53 +108,53 @@ function forena_update_7201() {
 /**
  * Add language column
  */
- function forena_update_7202() {
-   db_add_field('forena_reports', 'language', array('type' => 'varchar', 'length' => 30, 'not null' => TRUE, 'default' => 'en'));
-   db_query("update {forena_reports} set language='en'");
-   db_drop_primary_key('forena_reports');
-   db_add_primary_key('forena_reports', array('report_name', 'language'));
- }
+function forena_update_7202() {
+  db_add_field('forena_reports', 'language', array('type' => 'varchar', 'length' => 30, 'not null' => TRUE, 'default' => 'en'));
+  db_query("update {forena_reports} set language='en'");
+  db_drop_primary_key('forena_reports');
+  db_add_primary_key('forena_reports', array('report_name', 'language'));
+}
 
- function forena_update_7301() {
-   db_add_field('forena_reports', 'path', array('type' => 'varchar', 'length' => 255));
-   db_add_index('forena_reports', 'path', array('path'));
- }
+function forena_update_7301() {
+  db_add_field('forena_reports', 'path', array('type' => 'varchar', 'length' => 255));
+  db_add_index('forena_reports', 'path', array('path'));
+}
 
- function forena_update_7302() {
-   db_drop_field('forena_reports', 'src');
- }
+function forena_update_7302() {
+  db_drop_field('forena_reports', 'src');
+}
 
- function forena_update_7303() {
-   // Clear cache to load skins
-   require_once 'forena.admin.inc';
-   forena_sync_reports(FALSE);
+function forena_update_7303() {
+  // Clear cache to load skins
+  require_once 'forena.admin.inc';
+  forena_sync_reports(FALSE);
 
-   // New block access field.
-   db_add_field('forena_data_blocks', 'access', array('type' => 'varchar', 'length' => 255, 'not null' => TRUE));
-   db_add_field('forena_data_blocks', 'block_type', array('type' => 'varchar', 'length' => 30, 'not null' => TRUE));
- }
+  // New block access field.
+  db_add_field('forena_data_blocks', 'access', array('type' => 'varchar', 'length' => 255, 'not null' => TRUE));
+  db_add_field('forena_data_blocks', 'block_type', array('type' => 'varchar', 'length' => 30, 'not null' => TRUE));
+}
 
- function forena_update_7304() {
-   db_add_field('forena_data_blocks', 'builder', array('type' => 'text'));
- }
+function forena_update_7304() {
+  db_add_field('forena_data_blocks', 'builder', array('type' => 'text'));
+}
 
- function forena_install() {
-   require_once 'forena.admin.inc';
-   forena_sync_reports(TRUE);
- }
+function forena_install() {
+  require_once 'forena.admin.inc';
+  forena_sync_reports(TRUE);
+}
 
- /**
-  * Implementation of hook uninstall
-  */
- function forena_uninstall() {
-   // Delete all variables.
-   variable_del('forena_default_form');
-   variable_del('forena_doc_defaults');
-   variable_del('forena_doc_formats');
-   variable_del('forena_default_formats');
-   variable_del('forena_email_override');
-   variable_del('forena_input_format');
-   variable_del('forena_last_report_path');
-   variable_del('forena_report_repos');
-   variable_del('forena_skins');
- }
+/**
+ * Implementation of hook uninstall
+ */
+function forena_uninstall() {
+  // Delete all variables.
+  variable_del('forena_default_form');
+  variable_del('forena_doc_defaults');
+  variable_del('forena_doc_formats');
+  variable_del('forena_default_formats');
+  variable_del('forena_email_override');
+  variable_del('forena_input_format');
+  variable_del('forena_last_report_path');
+  variable_del('forena_report_repos');
+  variable_del('forena_skins');
+}

@@ -91,40 +91,40 @@ class FrxMSSQL extends FrxDataSource {
    * @return unknown
    */
   private function mssql_xml($sql, $block) {
-      $db = $this->db;
+    $db = $this->db;
 
-      //$rs->debugDumpParams();
-      $fsql = $sql . ' FOR XML AUTO';
-      $rs = mssql_query($db, $fsql, array($sql, ''));
-      if ($rs) {
-        $row = mssql_fetch_row($rs);
-        $xml_text = $row[0];
+    //$rs->debugDumpParams();
+    $fsql = $sql . ' FOR XML AUTO';
+    $rs = mssql_query($db, $fsql, array($sql, ''));
+    if ($rs) {
+      $row = mssql_fetch_row($rs);
+      $xml_text = $row[0];
+    }
+    if ($xml_text) {
+      $xml = new SimpleXMLElement($xml_text);
+      if ($xml->getName() == 'error') {
+        $msg = (string)$xml . ' in ' . $block . '.sql. ';
+        FrxReportGenerator::instance()->error($msg . 'See logs for more info', $msg . ' in <pre> ' . $sql . '</pre>');
       }
-      if ($xml_text) {
-        $xml = new SimpleXMLElement($xml_text);
-        if ($xml->getName() == 'error') {
-          $msg = (string)$xml . ' in ' . $block . '.sql. ';
-          FrxReportGenerator::instance()->error($msg . 'See logs for more info', $msg . ' in <pre> ' . $sql . '</pre>');
-        }
-      }
-      if ($rs) mssql_free_result($rs);
-      return $xml;
+    }
+    if ($rs) mssql_free_result($rs);
+    return $xml;
   }
 
   private function php_xml($sql) {
-      $db = $this->db;
-      $xml = new SimpleXMLElement('<table/>');
+    $db = $this->db;
+    $xml = new SimpleXMLElement('<table/>');
 
-      $rs = mssql_query($sql, $db);
+    $rs = mssql_query($sql, $db);
 
-      while ($row = mssql_fetch_assoc($rs)) {
-        $row_node = $xml->addChild('row');
-        foreach ($row as $key => $value) {
-          $row_node->addChild(strtolower($key), htmlspecialchars($value));
-        }
+    while ($row = mssql_fetch_assoc($rs)) {
+      $row_node = $xml->addChild('row');
+      foreach ($row as $key => $value) {
+        $row_node->addChild(strtolower($key), htmlspecialchars($value));
       }
-      if ($rs) mssql_free_result($rs);
-      return $xml;
+    }
+    if ($rs) mssql_free_result($rs);
+    return $xml;
 
   }
 
@@ -142,7 +142,7 @@ class FrxMSSQL extends FrxDataSource {
     return $value;
   }
 
-    /**
+  /**
    * Destructor - Closes database connections.
    *
    */
