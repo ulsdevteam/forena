@@ -19,7 +19,7 @@
 	<ul id="forena-1" frx:block="forena_help/design_topics">
 		<li id="forena-2" frx:foreach="*"><span>{title}</span></li>
 	</ul>
-	<h3>Report Definition - Overview</h3>
+	<h2 id="overview">Overview</h2>
 	<p>Forena reports are defined using the Forena Report Xml template
 		format (frx).&#xA0; The template format is largely an XHTML document
 		which is extended by some custom HTML tags and attributes.&#xA0; The
@@ -65,15 +65,23 @@
 	'*', which would imply creating a a repeating pattern for every row or
 	element returned by the query.
 </p>
-<h3>Report fields</h3>
-<p>each field in the report is referenced by an xpath expression
+<h2>Report fields</h2>
+<p>Each field in the report is referenced by an xpath expression
 	enclosed by curly braces. In its simplest form the xpath xpression can
 	be thought of as the name of the field in the database, but when using
 	more complex data sources, there is a lot that can be done using this
-	syntax. In some cases, the field name may be used using a '.' syntax to
-	reference fields in other blocks as report parameters.</p>
-<h3>Other Attributes</h3>
-<p id="parameters">
+	syntax. 
+  </p>
+<p>
+  The following shows a typical section of a report that illustrates
+  database fields in a report template from the 
+</p>
+<p>
+  In the head section of the .frx file, you will find a series of 
+  frx namespaced elements that define special formatting rules. 
+</p>
+<h2>Other frx Attributes</h2>
+<p id="parameters_attr">
 	<strong>frx:parameters</strong> when used in conjunction with the
 	frx:block attribute overrides the parameters provided to the block that
 	is run. When used these values are merged with the values of the
@@ -105,8 +113,8 @@
 </p>
 <p>Other attributes are interpreted directly from the custom
 	renderers section below.</p>
-<h3 id="renderers">Provided Renderers</h3>
-<h4 id="FrxInclude">FrxInclude</h4>
+<h2 id="renderers">Provided Renderers</h2>
+<h3 id="FrxInclude">FrxInclude</h3>
 <p>This renderer includes a another forena report as an asset with
 	the approprate tag. The primary use of this renderer is to create
 	references to external SVG assets. When rendered in a web page, these
@@ -120,7 +128,7 @@
 			to be rendered. (e.g. reports/sample.state_graph.svg?state=WA ).</td>
 	</tr>
 </table>
-<h4 id="FrxParameterForm">FrxParameterForm</h4>
+<h3 id="FrxParameterForm">FrxParameterForm</h3>
 <p>Place and customize the normal report parameters input form. Use
 	it on a div tag anywhere in your report to control exactly where the
 	parameter form renders. The renderer supports the following frx
@@ -140,7 +148,7 @@
 	</tr>
 	<tr>
 		<th>frx:collapsed</th>
-		<td>Indicate wether the feildset is collapsed by default.</td>
+		<td>Indicate wether the fieldset is collapsed by default.</td>
 	</tr>
 </table>
 <p>The children of the FrxParmameterForm div allow you to specify
@@ -148,11 +156,11 @@
 	replacement syntax. The default context is changed to be the rendered
 	form so that the parmeter ids will allow replacement of a form control.
 </p>
-<h4 id="FrxSource">FrxSource</h4>
+<h3 id="FrxSource">FrxSource</h3>
 <p>Display markup as a code snippet. No token replacement is done
 	for the children and all embedded code is escaped html. This is used in
 	the forena help files to display the source of reports.</p>
-<h4 id="FrxSVGGraph">FrxSVGGraph</h4>
+<h3 id="FrxSVGGraph">FrxSVGGraph</h3>
 <p>Render the node as an SVG graph. The PHP SVGGraph library must be
 	installed in order for this renderer to function. The following
 	attributes are supported:</p>
@@ -180,13 +188,13 @@
 		href="http://www.goat1000.com/svggraph.php"> PHP SVGGraph</a>
 	documentation for more info.
 </p>
-<h4 id="FrxTitle">FrxTitle</h4>
+<h3 id="FrxTitle">FrxTitle</h3>
 <p>
   Use the content of this tag as the Drupal Title.   This allows both 
   the page title and the tab title to be replaced by token replaced values 
   in the report.
 </p>
-<h4 id="FrxXMLSource">FrxXMLSource</h4>
+<h3 id="FrxXMLSource">FrxXMLSource</h3>
 <p>
 Displays the XML of the current data context and is particularly useful
 for debugging purposes. If you embed this in a report, it will show you
@@ -194,5 +202,73 @@ the XML data source that is used for token replacement, so it can give
 you a good idea as to what data is being returned and which tokens can
 be used.
 </p>
+<h2 id="parameters">Report Parameters</h2>
+<p>
+Forena is designed to pass url query parameters directly into the SQL queries that
+drive the report, however, there are many circumstances where you may want to 
+prompt users for specific data prior to generating a report. In such cases you 
+can define parameters in the head section of the .frx file as follows: 
+</p>
+<head frx:renderer="FrxSource">
+  <title>My Report Title</title>
+  <frx:parameters>
+  <frx:parm id="state" label="State" require="1"
+    desc="See the parameters tab to understand how this dropdown was created from a data block. "
+    data_source="sampledb/states" data_field="" type="select">WA</frx:parm>
+  </frx:parameters>
+</head>
+<p>
+  The id of each frx:parm element should match the parameters in the sql data block, 
+  and will further control how the user is prompted for each data element. The text contained
+  in the frx:parm element defines the "default" value for the parameter. The 
+  following attributes are supported in the frx:parm element. 
+</p>
+<table>
+  <tr>
+    <th>id</th><td>The id of the parameter, which must match what is expected in 
+    the data block.  This field is required. </td>
+  </tr>
+  <tr>
+    <th>label</th><td>The label or prompt that the user sees for this parameter</td>
+  </tr>
+  <tr>
+    <th>desc</th><td>The description provided for each label.</td>
+  </tr>
+  <tr>
+    <th>require</th><td>Set to 1 to require this before form submission</td>
+  </tr>
+  <tr>
+    <th>type</th><td><p>Type of control to use for prompting the user. Supports 
+    the following values:</p>
+    <p><strong>textfield</strong> normal text input box (default)
+    </p>
+    <p><strong>select</strong> - Normal select with a single value.</p>
+    <p><strong>multiselect</strong> - Select box with multiple values possbile. 
+      Only use this with sql parameters that can be used as arrays or 
+      "in"" clauses.
+    </p>
+    <p><strong>selectajax</strong> - Select with an ajax refresh on every
+    selection change.  This is good when you need to to have one select
+    statements values dependent on nother.  </p>
+    <p><strong>checkbox</strong> - Single checbox returning a value of 0 or 1.</p>
+    <p><strong>checkboxes</strong> - Multiple checkboxes that can be used to 
+    provide a list of options based on a dat_source. 
+    </p>
+    </td>
+  </tr>
+  <tr>
+    <th>data_source</th><td>The repository/block used to provide values for select,
+    radios or checkboxes. 
+    </td>
+  </tr>
+  <tr>
+    <th>data_field</th><td>The name of the column from the block that is used for 
+    the select value</td>
+  </tr>
+  <tr>
+    <th>label_field</th><td>The anme of the columne from the block that is used for
+    the select description.</td>
+  </tr>
+</table>
 </body>
 </html>

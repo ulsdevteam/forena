@@ -39,9 +39,9 @@
             since the dnix epoc date.&nbsp;</td>
           <td>Use small, medium or large to specify any of the site
             defined dates, or alternativley specify a custom date
-            format.&nbsp;See <a
+            format.See <a
             href="http://php.net/manual/en/function.date.php">http://php.net/manual/en/function.date.php</a>
-            for possibilities for custom formatting.&nbsp;</td>
+            for possibilities for custom formatting.</td>
         </tr>
         <tr>
           <td>drupal_node_content</td>
@@ -85,7 +85,6 @@
         </tr>
       </tbody>
     </table>
-    <p>&nbsp;</p>
     <h2>Linking Fields</h2>
     <p>
       <strong>Link</strong> - Specify a site relatie URL.&nbsp; When
