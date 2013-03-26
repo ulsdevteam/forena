@@ -115,8 +115,11 @@ class FrxSVGGraph extends FrxChart {
   }
 
   function renderGraph($type, $options, $data) {
-    if ($type == 'ScatterGraph' || $type=='MultiScatterGraph') {
+    if (!isset($options['scatter_2d']) && ($type == 'ScatterGraph' || $type=='MultiScatterGraph')) {
       $options['scatter_2d'] = TRUE;
+    }
+    else {
+      $options['scatter_2d'] = (bool) $options['scatter_2d'];
     }
     $links = $this->links;
     $width = (@$options['width']) ? @$options['width'] : 600;
