@@ -8,7 +8,14 @@
 class FrxSource extends FrxRenderer {
   public function render() {
     $node = $this->reportDocNode;
-    $output = "<pre>\n" . htmlspecialchars($node->asXML()) . "\n</pre>";
+    $dom_node = $this->reportDocDomNode;
+    //$dom_node->removeAttributeNS('urn:FrxReports', 'renderer');
+    dpm($node);
+    unset($node['frx:renderer']);
+    $html = $node->asXML();
+    $html = str_replace(' frx:renderer="FrxSource"', '', $html);
+    $html = str_replace('<html>', '<html xmlns:frx="urn:FrxReports">', $html);
+    $output = "<pre>\n" . htmlspecialchars($html) . "\n</pre>";
     return $output;
   }
 }
