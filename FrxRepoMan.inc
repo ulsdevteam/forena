@@ -249,7 +249,8 @@ class FrxRepoMan {
             $xml = $o->xmlData($block['source']);
             break;
           case 'php':
-            $xml = $o->phpData($block['object'], $block['method']);
+            $data = Frx::Data()->currentContextArray();
+            $xml = $o->phpData($block['object'], $block['method'], $data );
             break;
         }
 
