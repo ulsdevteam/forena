@@ -1039,7 +1039,7 @@ function forena_current_user_uid() {
  */
 function forena_current_user_name() {
   global $user;
-  return $user->name;
+  if (isset($user->name)) return $user->name;
 }
 
 /**
