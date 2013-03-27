@@ -35,16 +35,16 @@ class FrxSVGGraph extends FrxChart {
           $output = $this->groupedBarGraph($data, $options);
           break;
         case 'linegraph':
-          $output = $this->lineGraph($data[0], $options);
+          $output = $this->renderGraph('LineGraph', $options, $data[0]);
           break;
         case 'multilinegraph':
-          $output = $this->multiLineGraph($data, $options);
+          $output = $this->renderGraph('MultiLineGraph', $options, $data);
           break;
         case 'scatterplot':
-          $output = $this->scatterPlot($data, $options);
+          $output = $this->renderGraph('ScatterGraph', $options, $data);
           break;
         case 'multiscatterplot':
-          $output = $this->multiScatterPlot($data, $options);
+          $output = $this->renderGraph('MultiScatterGraph', $options, $data);
           break;
       }
     }
@@ -96,30 +96,12 @@ class FrxSVGGraph extends FrxChart {
     return $this->renderGraph($type, $options, $data);
   }
 
-  function lineGraph($data, $options) {
-    return $this->renderGraph('LineGraph', $options, $data);
-  }
-
-  function multiLineGraph($data, $options) {
-    return $this->renderGraph('MultiLineGraph', $options, $data);
-  }
-
-  // Scatter plot
-  function scatterPlot($data, $options) {
-    return $this->renderGraph('ScatterGraph', $options, $data);
-  }
-
-  // Multi scatter plot
-  function multiScatterPlot($data, $options) {
-    return $this->renderGraph('MultiScatterGraph', $options, $data);
-  }
-
   function renderGraph($type, $options, $data) {
-    if (!isset($options['scatter_2d']) && ($type == 'ScatterGraph' || $type=='MultiScatterGraph')) {
+    if (!isset($options['scatter_2d']) && ($type == 'ScatterGraph' || $type=='MultiScatterGraph') && $this->xy_data) {
       $options['scatter_2d'] = TRUE;
     }
     else {
-      $options['scatter_2d'] = (bool) $options['scatter_2d'];
+      $options['scatter_2d'] = (bool) @$options['scatter_2d'];
     }
     $links = $this->links;
     $width = (@$options['width']) ? @$options['width'] : 600;

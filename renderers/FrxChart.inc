@@ -6,6 +6,7 @@
  *
  */
 class FrxChart extends FrxRenderer {
+  public $xy_data = FALSE;
   public function render() {
 
     // Get data from source
@@ -50,6 +51,7 @@ class FrxChart extends FrxRenderer {
     if ($series) {
       foreach ((array)$series as $i => $d) {
         if ($seriesx) {
+          $this->xy_data = TRUE;
           $data[] = $this->xmlToValues($path, $d, $seriesx[$i], TRUE);
         }
         else {
