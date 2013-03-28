@@ -13,9 +13,11 @@ class FrxGraphTemplate extends FrxTemplate {
 
     $graph_types = array(
       'bargraph' => 'Bar Graph',
-      'piechart' => 'Pie Chart',
       'linegraph' => 'Line Graph',
-      'multilinegraph' => 'Multi Series Line Graph',
+      'multilinegraph' => 'Line Graph (Multi Series)',
+      'piechart' => 'Pie Chart',
+      'radargraph' => 'Radar Graph',
+      'multiradargraph' => 'Radar Graph (Multi Series)',
       'scatterplot' => 'Scatter Plot',
     );
 
@@ -24,10 +26,23 @@ class FrxGraphTemplate extends FrxTemplate {
       '3D' => '3D',
     );
 
-    if ($config['type']=='bargraph') $styles = $styles + array('grouped' => 'Grouped', 'stacked' => 'Stacked', 'horizontal' => 'Horizontal');
+    if ($config['type']=='bargraph') {
+      $styles = array(
+       'bargraph' => 'Normal',
+       'bar3dgraph' => '3D',
+       'groupedbargraph' => 'Grouped',
+       'horizontalbargraph' => 'Horizontal',
+       'cylindergraph' => 'Cylinder',
+       'stackedbargraph' => 'Stacked',
+       'stackedcylindergraph' => 'Cylinder (Stacked)',
+       'groupedcylindergraph' => 'Cylinder (Grouped)',
+      );
+
+    }
     switch (@$config['type']) {
       case 'piechart':
       case 'linegraph':
+      case 'radargraph':
         $num_series = 1;
         $xvalues = FALSE;
         break;
@@ -127,6 +142,9 @@ class FrxGraphTemplate extends FrxTemplate {
       $xpath = $this->extract('xpath', $config);
       $clause = $this->extract('clause', $config);
       $gen_table = $this->extract('gen_table', $config);
+      $style = $this->extract('style', $config);
+      if ($style) $type = $style;
+      dpm($type);
       $frxparms = array(
         'type' => $type,
         'renderer' => 'FrxSVGGraph',

@@ -23,8 +23,13 @@ class FrxSVGGraph extends FrxChart {
     if ($data) {
       switch ($type) {
         case 'bargraph':
-          $output = $this->barGraph($data[0], $options);
+          $output = $this->renderGraph('BarGraph', $options, $data[0]);
           break;
+        case 'bar3dgraph':
+          $output = $this->renderGraph('Bar3DGraph', $options, $data[0]);
+          break;
+        case 'horizontalbargraph':
+          $output = $this->renderGraph('HorizontalBarGraph', $options, $data[0]);
         case 'piechart':
           $output = $this->pieChart($data[0], $options);
           break;
@@ -46,6 +51,22 @@ class FrxSVGGraph extends FrxChart {
         case 'multiscatterplot':
           $output = $this->renderGraph('MultiScatterGraph', $options, $data);
           break;
+        case 'cylindergraph':
+          $output = $this->renderGraph('CylinderGraph', $options, $data[0]);
+          break;
+        case 'stackedcylindergraph':
+          $output = $this->renderGraph('StackedCylinderGraph', $options, $data);
+          break;
+        case 'groupedcylindergraph':
+          $output = $this->renderGraph('GroupedCylinderGraph', $options, $data);
+          break;
+        case 'radargraph':
+          $output = $this->renderGraph('RadarGraph', $options, $data[0]);
+          break;
+        case 'multiradargraph':
+          $output = $this->renderGraph('MultiRadarGraph', $options, $data);
+          break;
+
       }
     }
     return $output;
@@ -53,34 +74,48 @@ class FrxSVGGraph extends FrxChart {
 
   // Generate a bar graph.
   function barGraph($data, $options) {
-    if (@$options['style']=='3D') {
-      $type = 'Bar3DGraph';
-    }
-    elseif (@$options['style']=='horizontal') {
-      $type = 'HorizontalBarGraph';
-    }
-    else {
-      $type = 'BarGraph';
+    $type = $options['type'];
+    switch(@$options['type']) {
+      case '3D':
+        $type = 'Bar3DGraph';
+        break;
+      case 'horizontal':
+        $type = 'HorizontalBarGraph';
+        break;
+      case 'cylinder':
+        $type = 'Cylinder';
+
+      default:
+        $type = 'BarGraph';
     }
     return $this->renderGraph($type, $options, $data);
   }
 
   function stackedBarGraph($data, $options) {
-    if (@$options['style'] == 'horizontal') {
-      $type = 'HorizontalStackedBarGraph';
-    }
-    else {
-      $type = 'StackedBarGraph';
+    $type = $options[$type];
+    switch (@$options['style']) {
+      case 'horizontal':
+        $type = 'HorizontalStackedBarGraph';
+        break;
+      case 'cylinder':
+        $type = 'StackedCylinder';
+        break;
+      default:
+        $type='StackedBarGraph';
     }
     return $this->renderGraph($type, $options, $data);
   }
 
   function groupedBarGraph($data, $options) {
-    if (@$options['style'] == 'horizontal') {
-      $type = 'HorizontalGroupedBarGraph';
-    }
-    else {
-      $type = 'GroupedBarGraph';
+    switch (@$options['style']) {
+      case 'horizontal':
+        $type = 'HorizontalGroupedBarGraph';
+        break;
+      case 'groupedcylinder':
+        $type = 'GroupCylinderGraph';
+        break;
+      default:
+        $type = 'GroupedBarGraph';
     }
     return $this->renderGraph($type, $options, $data);
   }
