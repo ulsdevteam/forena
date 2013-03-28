@@ -34,7 +34,7 @@
 		<strong>A Simple Report:</strong>
 	</p>
 	<p>The following example illustrates a very simple report:</p>
-<html xmlns:frx:="urn:FrxReports" frx:renderer="FrxSource">
+<html frx:renderer="FrxSource">
   <head>
   <title>A sample report</title>
   </head>
