@@ -76,47 +76,16 @@ class FrxSVGGraph extends FrxChart {
     return $output;
   }
 
-  function stackedBarGraph($data, $options) {
-    $type = $options[$type];
-    switch (@$options['style']) {
-      case 'horizontal':
-        $type = 'HorizontalStackedBarGraph';
-        break;
-      case 'cylinder':
-        $type = 'StackedCylinder';
-        break;
-      default:
-        $type='StackedBarGraph';
-    }
-    return $this->renderGraph($type, $options, $data);
-  }
-
-  function groupedBarGraph($data, $options) {
-    switch (@$options['style']) {
-      case 'horizontal':
-        $type = 'HorizontalGroupedBarGraph';
-        break;
-      case 'groupedcylinder':
-        $type = 'GroupCylinderGraph';
-        break;
-      default:
-        $type = 'GroupedBarGraph';
-    }
-    return $this->renderGraph($type, $options, $data);
-  }
-
-  // Generate a pie chart
-  function pieChart($data, $options) {
-    if (@$options['style']=='3D') {
-      $type = 'Pie3DGraph';
-    }
-    else {
-      $type = 'PieGraph';
-    }
-    return $this->renderGraph($type, $options, $data);
-  }
 
   function renderGraph($type, $options, $data) {
+    // Default in Skin Options for Graph type
+    $skin = Frx::Data()->getContext('skin');
+    if (@is_array($skin['SVGGraph'][$type])) {
+      $skin_options = $skin['SVGGraph'][$type];
+      if (isset($skin['FrxSVGGraph'])) $skin_options = array_merge($skin['FrxSVGGraph'], $skin_options);
+      $options = array_merge($skin_option, $options);
+    }
+
     if (!isset($options['scatter_2d']) && ($type == 'ScatterGraph' || $type=='MultiScatterGraph') && $this->xy_data && !isset($options['scatter_2d'])) {
       $options['scatter_2d'] = TRUE;
     }
