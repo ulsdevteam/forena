@@ -16,79 +16,64 @@ class FrxSVGGraph extends FrxChart {
     require_once $library;
   }
 
+  static function graphTypes() {
+    return array(
+      'BarGraph' => array('type' => 'Bar Graph', 'style' => 'Simple', 'series' => 1),
+      'Bar3DGraph' => array('type' => 'Bar Graph', 'style' => '3D', 'series' => 1),
+      'StackedBarGraph' => array('type' => 'Bar Graph', 'style' => 'Stacked', 'series' => 4),
+      'GroupedBarGraph' => array('type' => 'Bar Graph', 'style' => 'Grouped', 'series' => 4),
+      'CylinderGraph' => array('type' => 'Bar Graph', 'style' => 'Cylinder', 'series' => 1),
+      'StackedCylinderGraph' => array('type' => 'Bar Graph', 'style' => 'Stacked Cylinder', 'series' => 4),
+      'GroupedCylinderGraph' =>  array('type' => 'Bar Graph', 'style' => 'Grouped Cylinder', 'series' => 1),
+      'PieGraph' => array('type' => 'Pie Chart', 'style' => 'Simple', 'series' => 1),
+      'Pie3DGraph' => array('type' => 'Pie Chart', 'style' => '3D', 'series' => 1),
+      'HorizontalBarGraph' => array('type' => 'Bar Graph', 'style' => 'Horizontal', 'series' => 1),
+      'LineGraph' =>array('type' => 'Line Graph', 'style' => 'Simple', 'series' => 1),
+      'MultiLineGraph' => array('type' => 'Line Graph', 'style' => 'Multi', 'series' => 4),
+      'ScatterGraph' => array('type' => 'Scatter Plot', 'style' => 'Simple', 'series' => 1, 'xaxis' => TRUE),
+      'MultiScatterGraph' => array('type' => 'Scatter Plot', 'style' => '3D', 'series' => 4, 'xaxis' => TRUE),
+      'RadarGraph' => array('type' => 'Radar Graph', 'style' => 'Simple', 'series' => 1),
+      'MultiRadarGraph' => array('type' => 'Radar Graph', 'style' => 'Multi', 'series' => 4),
+    );
+  }
+
+  static function graphOptions() {
+    $data = FrxSVGGraph::graphTypes();
+    foreach($data as $key => $value) {
+      $type[$value['type']] = $value['type'];
+      $style[$value['type']][$key] = $value['style'];
+    }
+    return array('types' => $type, 'styles' => $style);
+  }
+
   function renderChart($type, $data, $options, $links ) {
     $options['width'] = @$options['width'] ? $options['width'] : 600;
     $options['height'] = @$options['height'] ? $options['height'] : 400;
     $this->links = $links;
-    if ($data) {
-      switch ($type) {
-        case 'bargraph':
-          $output = $this->renderGraph('BarGraph', $options, $data[0]);
-          break;
-        case 'bar3dgraph':
-          $output = $this->renderGraph('Bar3DGraph', $options, $data[0]);
-          break;
-        case 'horizontalbargraph':
-          $output = $this->renderGraph('HorizontalBarGraph', $options, $data[0]);
-        case 'piechart':
-          $output = $this->pieChart($data[0], $options);
-          break;
-        case 'stackedbargraph':
-          $output = $this->stackedBarGraph($data, $options);
-          break;
-        case 'groupedbargraph':
-          $output = $this->groupedBarGraph($data, $options);
-          break;
-        case 'linegraph':
-          $output = $this->renderGraph('LineGraph', $options, $data[0]);
-          break;
-        case 'multilinegraph':
-          $output = $this->renderGraph('MultiLineGraph', $options, $data);
-          break;
-        case 'scatterplot':
-          $output = $this->renderGraph('ScatterGraph', $options, $data);
-          break;
-        case 'multiscatterplot':
-          $output = $this->renderGraph('MultiScatterGraph', $options, $data);
-          break;
-        case 'cylindergraph':
-          $output = $this->renderGraph('CylinderGraph', $options, $data[0]);
-          break;
-        case 'stackedcylindergraph':
-          $output = $this->renderGraph('StackedCylinderGraph', $options, $data);
-          break;
-        case 'groupedcylindergraph':
-          $output = $this->renderGraph('GroupedCylinderGraph', $options, $data);
-          break;
-        case 'radargraph':
-          $output = $this->renderGraph('RadarGraph', $options, $data[0]);
-          break;
-        case 'multiradargraph':
-          $output = $this->renderGraph('MultiRadarGraph', $options, $data);
-          break;
+    $type = strtolower($type);
+    // Legacy sustitions for backcward compatibility.
+    if ($type == 'piechart') $type = 'piegraph';
+    if ($type == 'scatterplot') $type = 'scattergraph';
+    if ($type == 'multiscatterplot') $type = 'multiscattergraph';
 
+    // Newly defined types
+    $graph_types = FrxSVGGraph::graphTypes();
+
+    // Build map for array types.
+    $lower_graphs_types = array_change_key_case($graph_types);
+    $graph_classes = array_combine(array_keys($lower_graphs_types), array_keys($graph_types));
+
+
+    if ($data && isset($graph_classes[$type])) {
+      $class = $graph_classes[$type];
+      if (@$graph_types[$class]['series'] >1) {
+        $output = $this->renderGraph($class, $options, $data[0]);
+      }
+      else {
+        $output = $this->renderGraph($class, $options, $data);
       }
     }
     return $output;
-  }
-
-  // Generate a bar graph.
-  function barGraph($data, $options) {
-    $type = $options['type'];
-    switch(@$options['type']) {
-      case '3D':
-        $type = 'Bar3DGraph';
-        break;
-      case 'horizontal':
-        $type = 'HorizontalBarGraph';
-        break;
-      case 'cylinder':
-        $type = 'Cylinder';
-
-      default:
-        $type = 'BarGraph';
-    }
-    return $this->renderGraph($type, $options, $data);
   }
 
   function stackedBarGraph($data, $options) {
