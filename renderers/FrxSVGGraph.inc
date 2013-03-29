@@ -66,7 +66,7 @@ class FrxSVGGraph extends FrxChart {
 
     if ($data && isset($graph_classes[$type])) {
       $class = $graph_classes[$type];
-      if (@$graph_types[$class]['series'] >1) {
+      if (@$graph_types[$class]['series'] == 1) {
         $output = $this->renderGraph($class, $options, $data[0]);
       }
       else {
