@@ -8,12 +8,19 @@ class FrxDrupalNode {
     $node = new SimpleXMLElement('<node/>');
     $nid = isset($parms['nid']) ? $parms['nid']: 1;
     $vid = isset($parms['vid']) ? $parms['vid']: NULL;
-    $lang = isset($parms['language'])  ? $parms['language'] : $language->language;
     $data = node_load($nid, $vid);
-    //dpm($data);
-    foreach($data as $key => $val) {
-      if(is_array($val) && array_key_exists('und', $val)) {
-        $node->addChild($key, $val[$lang][0]['value']);
+    $lang = isset($data->language) ? $data->language : $language->language;
+    
+    foreach ($data as $key => $val) {
+      if(is_array($val) && isset($val[$lang])) {
+        $tmp = $val[$lang][0];
+        $child = $node->addChild($key, $tmp['value']);
+        if (isset($tmp['format'])) {
+          $child->addAttribute('format', $tmp['format']);
+        }
+        if (isset($tmp['data_type'])) {
+          $child->addAttribute('data_type', $tmp['data_type']);
+        }
       } else if (is_string($val)) {
         $node->addChild($key, $val);
       }
