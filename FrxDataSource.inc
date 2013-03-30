@@ -121,7 +121,10 @@ class FrxDataSource{
         if (method_exists($o, 'tokens' )) {
           $block['tokens'] = $o->tokens();
         }
-        else {
+        elseif (isset($o->tokens)) {
+          $block['tokens'] = $o->tokens;
+        }
+        else{
           $block['tokens'] = array();
         }
       }
@@ -381,7 +384,7 @@ class FrxDataSource{
     return $xml;
   }
 
-  public function phpData($o, $method, $parameters = array()) {
+  public function phpData($o, $method, $parameters) {
     $data = NULL;
     if (is_object($o) && is_callable(array($o, $method))) {
       $data = $o->$method($parameters);

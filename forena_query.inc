@@ -143,7 +143,6 @@ function forena_query_builder_form($formid, &$form_state) {
 
 
     }
-
     if (@$block['tokens']) {
       $form['parameters'] = array(
         '#title' => 'Parameters',
@@ -257,6 +256,7 @@ function forena_query_preview($form, &$form_state) {
     $data = Frx::RepoMan()->sqlData($provider, $sql, $parms);
   }
   else {
+    Frx::Data()->push($parms, 'parm');
     $block_name = $form_state['storage']['block_name'];
     $data = Frx::RepoMan()->data($block_name);
   }
@@ -265,16 +265,27 @@ function forena_query_preview($form, &$form_state) {
   if ($data && $t) {
     $t->generate($data, $config);
     $fields = $t->columns;
-    $form_state['storage']['fields'] = array_combine($fields, $fields);
-
-    $report = $t->asXML();
-    $rpt = new FrxReport($report, $data);
-    $form_state['storage']['preview'] = $rpt->render('web');
+    if ($fields) $fields = array_combine($fields, $fields);
+    $form_state['storage']['fields'] = $fields;
+    if ($fields) {
+      $report = $t->asXML();
+      $rpt = new FrxReport($report, $data);
+      $preview = $rpt->render('web');
+    }
+    else {
+      if (is_object($data) && method_exists($data, 'asXML')) {
+        $preview = '<pre>' . htmlspecialchars($data->asXML()) . '</pre>';
+      }
+      else {
+        $preview = '<pre>' .htmlspecialchars(print_r($data,1)) .'</pre>';
+      }
+    }
+    $form_state['storage']['preview'] = $preview;
   }
   else {
     $form_state['storage']['preview'] = '';
   }
-  if (is_object($data)) $data = $data->asXML();
+
 
 }
 
@@ -418,13 +429,15 @@ function _forena_query_filter_ctl(&$data, &$ctl, $fields) {
  */
 function forena_query_update($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
-  switch ($form_state['storage']['step']) {
-    case 'sql':
-      forena_query_update_sql($form, $form_state);
-      break;
-    case 'builder':
-      forena_query_update_builder($form, $form_state);
-      break;
+  if ($form_state['storage']['block']['type']=='sql') {
+    switch ($form_state['storage']['step']) {
+      case 'sql':
+        forena_query_update_sql($form, $form_state);
+        break;
+      case 'builder':
+        forena_query_update_builder($form, $form_state);
+        break;
+    }
   }
 }
 

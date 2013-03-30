@@ -2,6 +2,7 @@
 
 class FrxDrupalNode {
   public $access = 'access content';
+  public $tokens = array('nid', 'vid');
 
   public function load($parms = array()) {
     GLOBAL $language;
@@ -10,8 +11,8 @@ class FrxDrupalNode {
     $vid = isset($parms['vid']) ? $parms['vid']: NULL;
     $data = node_load($nid, $vid);
     $lang = isset($data->language) ? $data->language : $language->language;
-    
-    foreach ($data as $key => $val) {
+
+    if ($data) foreach ($data as $key => $val) {
       if(is_array($val) && isset($val[$lang])) {
         $tmp = $val[$lang][0];
         $child = $node->addChild($key, $tmp['value']);

@@ -2074,7 +2074,7 @@ function forena_user_data_blocks($search) {
       }
     }
   }
-  asort($user_blocks);
+  if ($user_blocks) asort($user_blocks);
   return $user_blocks;
 }
 

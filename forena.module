@@ -329,7 +329,7 @@ function forena_block_view($delta = 0) {
 
 function forena_categories_autocomplete($string='') {
   require_once('forena.admin.inc');
-  $categories = forena_get_categories($string);
+  $categories = @forena_get_categories($string);
   print drupal_json_output($categories);
 }
 
@@ -380,7 +380,7 @@ function forena_reports_autocomplete($string='', $string2='') {
         if ($callback) foreach ($args as $arg) {
           $access = FALSE;
           if (function_exists($callback)) {
-            $a = $callback($arg);
+            $a = @$callback($arg);
           }
           if ($a) $access = TRUE;
         }
@@ -416,7 +416,7 @@ function forena_xml($block_name, $parms=array()) {
 function forena_fields_format_autocomplete($string='') {
   require_once('forena.common.inc');
   $matches = array();
-  $formats = FrxReportGenerator::instance()->supported_formats();
+  $formats = @FrxReportGenerator::instance()->supported_formats();
 
   if ($string == "*") {
     $matches = $formats;
