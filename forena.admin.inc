@@ -17,11 +17,17 @@ function forena_admin_reports() {
   $content = drupal_get_form('forena_sync_form');
   $output = drupal_render($content);
   $output .= theme('links',
-  array(
-                       'links' => $links,
-                       'attributes' => array('class' => 'action-links'),
-  )
+    array(
+      'links' => $links,
+      'attributes' => array('class' => 'action-links'),
+    )
   );
+  // Add Data tables if it exists.
+  drupal_add_css(drupal_get_path('module', 'forena') . '/forena.css');
+  if (file_exists('sites/all/libraries/dataTables/media/js/jquery.dataTables.min.js')) {
+    drupal_add_js(drupal_get_path('module', 'forena') . '/forena.admin.js');
+    drupal_add_js('sites/all/libraries/dataTables/media/js/jquery.dataTables.min.js');
+  }
   $headers = array(t('title'), t('name'), t('category'), t('operation'));
   $result = db_query('SELECT * FROM {forena_reports} where language=:language ORDER BY category,title', array(':language' => $language->language));
   foreach ($result as $row) {
@@ -32,7 +38,7 @@ function forena_admin_reports() {
     $title = l(t($row->title), 'reports/' . $rpt);
     $data[] = array($title, $row->report_name, $row->category, $edit . ' ' . $clone . ' ' . $delete);
   }
-  $output .= theme_table(array('header' => $headers, 'rows' => $data, 'attributes' => array(), 'caption' => '', 'sticky' => TRUE, 'colgroups' => array(), 'empty' => ''));
+  $output .= theme_table(array('header' => $headers, 'rows' => $data, 'attributes' => array('class' => array( 'dataTable-paged')), 'caption' => '', 'sticky' => TRUE, 'colgroups' => array(), 'empty' => ''));
   return $output;
 }
 
@@ -2122,6 +2128,26 @@ function forena_admin_params_form($formid, $form_state, $report_name) {
   $filename = $desc['filename'];
   $format = @$desc['format'];
   if ($desc['exists'] && $name) {
+    // Set up basic control types.
+    $control_types= array('textfield' => 'Text',
+      'hidden' => 'Hidden',
+      'radios' => 'Radios',
+      'checkbox' => 'Checkbox',
+      'checkboxes' => 'Checkboxes',
+      'select' => 'Select',
+      'selectajax' => 'Select with Refresh',
+      'multiselect' => 'Multi-Select',
+      'multiselectajax' => 'Multi-select With Refresh',
+    );
+    // Supported module specific control types.
+    if (module_exists('date_api')) {
+      $control_types['date_select'] =  'Date Select';
+    }
+    if (module_exists('date_popup')) {
+      $control_types['date_popup'] = 'Date Popup';
+    }
+
+    //Construct report editor
     $r = forena_get_report_editor($name);
     drupal_set_title($r->title);
     $form = array();
@@ -2136,11 +2162,11 @@ function forena_admin_params_form($formid, $form_state, $report_name) {
     $form['add_link'] = array(
       '#type' => 'markup',
       '#markup' => theme('links',
-    array(
-                       'links' => $links,
-                       'attributes' => array('class' => 'action-links'),
-    )
-    )
+        array(
+         'links' => $links,
+         'attributes' => array('class' => 'action-links'),
+        )
+      )
     );
 
     if ($r) $nodes = $r->simplexml->xpath('head/frx:parameters/frx:parm');
@@ -2208,12 +2234,20 @@ function forena_admin_params_form($formid, $form_state, $report_name) {
           '#description' => t('Enter a helpful description about this parameter. This will display on the form when the user is prompted to enter a parameter.'),
           );
 
+          $form['params'][$id]['type'] = array(
+          '#type' => 'select',
+          '#title' => t('Input Control Type'),
+          '#default_value' => $type,
+          '#options' => $control_types,
+          '#description' => t('Enter a helpful description about this parameter. This will display on the form when the user is prompted to enter a parameter.'),
+          );
+
           $form['params'][$id]['data_source'] = array(
           '#type' => 'textfield',
           '#title' => t('Data Source'),
           '#default_value' => $data_source,
           '#autocomplete_path' => 'forena/data_block/autocomplete',
-          '#description' => t('Data block to be used for list of values'),
+          '#description' => t('Data block to be used for select, multiselect, and checkboxes types'),
           );
 
           $form['params'][$id]['data_field'] = array(
@@ -2221,30 +2255,6 @@ function forena_admin_params_form($formid, $form_state, $report_name) {
           '#title' => t('Data Field'),
           '#default_value' => $data_field,
           '#description' => t('Column in data block to be used for ID'),
-          );
-          $control_types= array('textfield' => 'Text',
-          'hidden' => 'Hidden',
-          'radios' => 'Radios',
-          'checkbox' => 'Checkbox',
-          'checkboxes' => 'Checkboxes',
-          'select' => 'Select',
-          'selectajax' => 'Select with Refresh',
-          'multiselect' => 'Multi-Select',
-          'multiselectajax' => 'Multi-select With Refresh',
-          );
-
-          if (module_exists('date_api')) {
-            $control_types['date_select'] =  'Date Select';
-          }
-          if (module_exists('date_popup')) {
-            $control_types['date_popup'] = 'Date Popup';
-          }
-          $form['params'][$id]['type'] = array(
-          '#type' => 'select',
-          '#title' => t('Input Control Type'),
-          '#default_value' => $type,
-          '#options' => $control_types,
-          '#description' => t('Enter a helpful description about this parameter. This will display on the form when the user is prompted to enter a parameter.'),
           );
 
           $form['params'][$id]['options'] = array(
