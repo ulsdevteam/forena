@@ -29,7 +29,9 @@ function forena_query_menu() {
 function forena_query_permission() {
   $perms =  array(
     'build forena sql blocks' => array('title' => 'Build Forena Data Blocks using SQL',
-    	'description' => 'Direct access to SQL should not be given without understanding of security ramifications')
+    	'description' => 'Direct access to SQL should not be given without understanding of security ramifications'),
+      'forena data security' => array('title' => 'Manage forena data security',
+      'description' => 'Allows to create new data queries and alter security on saved queries.') ,
   );
   foreach (Frx::RepoMan()->repositories as $repos => $conf) {
     $name = $conf['title'] ? $conf['title'] : $repos;
@@ -44,6 +46,6 @@ function forena_query_permission() {
  * @param $repos string
  */
 function forena_query_access_repository($repos) {
-  list($repos, $block) = @explode('/', $repos, 2);
+  @list($repos, $block) = @explode('/', $repos, 2);
   return user_access('create ' . $repos . ' blocks');
 }

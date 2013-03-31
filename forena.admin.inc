@@ -2058,6 +2058,7 @@ function forena_clean_xhtml($xhtml) {
 function forena_user_data_blocks($search) {
   $repos = Frx::RepoMan()->repositories;
   $blocks= array();
+  $user_blocks = array();
 
   foreach ($repos as $name => $r) {
     // Make really sure the data provider objects have been instantiated
