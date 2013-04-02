@@ -11,9 +11,14 @@ class FrxHtmlDoc extends FrxDocument {
     $output = '<html><head>';
     $output .= '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>';
     $title = $r->title;
-    if ($css) {
+      // Add inline styles
+    if ($css || isset($r->rpt_xml->head->style)) {
       $output .= '<style type="text/css">';
       $output .= $css;
+      if (isset($r->rpt_xml->head->style)) {
+        $sheet = (string)$r->rpt_xml->head->style;
+        $output .= $sheet;
+      }
       $output .= '</style>';
     }
     $output .= '<title>' . $r->title . '</title></head><body class="forena-report"><h1>' . $r->title . '</h1>' . $this->check_markup($r->html) . '</body></html>';

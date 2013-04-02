@@ -30,9 +30,13 @@ class FrxPrincePDF extends FrxDocument {
     $link_class = $disable_links ? 'prince-disable-links': '';
     $output = '<html><head>';
     $output .= '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>';
-    if (@$options['css']) {
+    if (@$options['css'] || isset($r->rpt_xml->head->style)) {
       $output .= '<style type="text/css">';
       $output .= $css;
+      if (isset($r->rpt_xml->head->style) || isset($r->rpt_xml->head->style)) {
+        $sheet = (string)$r->rpt_xml->head->style;
+        $output .= $sheet;
+      }
       $output .= '</style>';
     }
 

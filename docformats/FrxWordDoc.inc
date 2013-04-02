@@ -14,9 +14,13 @@ class FrxWordDoc extends FrxDocument {
     $css = $this->loadCSSFiles($format);
     $output = '<html><head>';
     $output .= '<meta http-equiv="Content-Type" content="text/html"/>';
-    if ($options['css']) {
+    if ($options['css'] || isset($r->rpt_xml->head->style)) {
       $output .= '<style type="text/css">';
       $output .= $css;
+      if (isset($r->rpt_xml->head->style)) {
+        $sheet = (string)$r->rpt_xml->head->style;
+        $output .= $sheet;
+      }
       $output .= '</style>';
     }
     $output .= '<title>' . $r->title . '</title></head><body class="forena-report">' . $this->check_markup($r->html) . '</body></html>';

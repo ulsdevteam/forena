@@ -266,7 +266,7 @@ can define parameters in the head section of the .frx file as follows:
     the select value</td>
   </tr>
   <tr>
-    <th>label_field</th><td>The anme of the columne from the block that is used for
+    <th>label_field</th><td>The name of the columne from the block that is used for
     the select description.</td>
   </tr>
 </table>

@@ -28,6 +28,12 @@ class FrxWebDoc extends FrxDocument {
       }
     }
 
+    // Add inline styles
+    if (isset($r->rpt_xml->head->style)) {
+      $sheet = (string)$r->rpt_xml->head->style;
+      drupal_add_css($sheet, array('type' => 'inline'));
+    }
+
     // Add javascript files
     foreach (Frx::Skin()->scripts as $script) {
       drupal_add_js($script);
