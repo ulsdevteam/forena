@@ -332,7 +332,7 @@ class FrxDataSource{
               $inc_block = $this->getSQLInclude(trim($o));
               if ($inc_block) {
                 $data .= $inc_block['source'];
-                array_merge($tokens, $inc_block['tokens']);
+                $tokens = array_merge($tokens, $inc_block['tokens']);
               }
               break;
           }
