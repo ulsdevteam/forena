@@ -383,6 +383,7 @@ function forena_layout_form($form, $form_state, $report_name) {
       $category = $r->getCategory();
       $menu = $r->getMenu();
       $body = $r->simplexml->body->asXML();
+      $css = @(string)$r->simplexml->head->style;
 
       $form = array();
 
@@ -414,7 +415,6 @@ function forena_layout_form($form, $form_state, $report_name) {
         '#type' => 'text_format',
         '#title' => t('Body'),
         '#default_value' => $body,
-
         '#rows' => 25,
       '#format' => variable_get('forena_input_format', filter_default_format())
       );
@@ -470,6 +470,21 @@ function forena_layout_form($form, $form_state, $report_name) {
         '#type' => 'select',
         '#title' => 'Type of menu to create',
         '#options' => $menu_options,
+      );
+
+      $form['style'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('CSS Styles'),
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+      );
+
+      $form['style']['css'] = array(
+        '#type' => 'textarea',
+        '#default_value' => $css,
+        '#description' => t('Specify small css snipets that can be used in the reports.'),
+        '#rows' => 10,
+        '#cols' => 80,
       );
 
       $form['buttons']['save'] = array(
@@ -545,6 +560,8 @@ function forena_layout_form_submit($form, &$form_state) {
 
   // Body
   $r->setBody($values['body']['value']);
+  // CSS
+  $r->setStyle($values['css']);
   // If there are no frx attributes in the body then replace them with the old values.
   $frx_nodes = $r->simplexml->xpath('body//*[@frx:*]');
   if (!$frx_nodes) {

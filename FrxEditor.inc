@@ -398,6 +398,26 @@ class FrxEditor {
     }
   }
 
+  /*
+   * Set CSS Style Data
+   * @param $menu_data array of key values for menu options.
+   */
+  public function setStyle($css) {
+    $dom = $this->dom;
+    //$this->verifyHeaderElements(array('menu'));
+    $head = $dom->getElementsByTagName('head')->item(0);
+    $nodes = $dom->getElementsByTagName('style');
+    $style = $dom->createElement('style');
+    $style->appendChild(new DOMText($css));
+    if ($nodes->length==0) {
+      $head->appendChild($style);
+    }
+    else {
+      $head->replaceChild($style, $nodes->item(0));
+    }
+
+  }
+
   public function removeParm($id) {
     $dom = $this->dom;
     $xpq = $this->xpq;
