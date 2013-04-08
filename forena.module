@@ -869,8 +869,14 @@ function forena_report_title_callback($report_name, $use_menu_title=TRUE) {
   $title = '';
   $lang = $language->language;
   $result = db_query('SELECT * FROM {forena_reports} where report_name = :name and language=:language',
-    array(':name' => $report_name, 'language' => $lang));
+  array(':name' => $report_name, 'language' => $lang));
   foreach ($result as $row) {
+    $cache = $row->cache;
+    if ($cache) {
+      $cache = unserialize($cache);
+      // Load menu item defaults
+      $menu = $cache['menu'];
+    }
     $title = $use_menu_title && @$menu['title'] ? $menu['title']:  $row->title;
   }
   return $title;

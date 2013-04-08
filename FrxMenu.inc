@@ -219,7 +219,7 @@ class FrxMenu {
         );
         if (module_exists('locale')) {
           $items[$new_path]['title callback'] = 'forena_report_title_callback';
-          $items[$new_path]['title arguments'] = array($row->report_name, FALSE);
+          $items[$new_path]['title arguments'] = array($row->report_name, TRUE);
         }
         if ($access_callback === 'forena_check_all_access') $items[$new_path]['access arguments'][] = $cache['access'];
       }
