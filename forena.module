@@ -859,6 +859,11 @@ function forena_check_all_access($checks) {
   return $access;
 }
 
+/**
+ * Callback for setting international titles
+ * @param $report_name string name of report
+ * @param $use_menu_title boolean indicate wether to use menu title attribute.
+ */
 function forena_report_title_callback($report_name, $use_menu_title=TRUE) {
   GLOBAL $language;
   $title = '';
@@ -868,7 +873,6 @@ function forena_report_title_callback($report_name, $use_menu_title=TRUE) {
   foreach ($result as $row) {
     $title = $use_menu_title && @$menu['title'] ? $menu['title']:  $row->title;
   }
-  if (!$title) $title = t('Title not found');
   return $title;
 }
 
