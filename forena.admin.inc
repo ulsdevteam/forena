@@ -457,6 +457,7 @@ function forena_layout_form($form, $form_state, $report_name) {
         '#type' => 'textfield',
         '#title' => t('Menu Title'),
         '#description' => t('Title of menu item.  Leave blank to use the report title as the menu title.'),
+        '#default_value' => @$menu['title'],
       );
 
       $menu_options = array(
@@ -470,6 +471,7 @@ function forena_layout_form($form, $form_state, $report_name) {
         '#type' => 'select',
         '#title' => 'Type of menu to create',
         '#options' => $menu_options,
+        '#default_value' => @$menu['type'],
       );
 
       $form['style'] = array(
