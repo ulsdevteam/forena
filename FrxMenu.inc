@@ -151,6 +151,9 @@ class FrxMenu {
         $path = $menu['path'];
         $type = @$menu['type'];
         $title = @$menu['title'] ? $menu['title']:  $row->title;
+        if (module_exists('locale')) {
+
+        }
 
         //Default type
         switch ($type) {
@@ -198,6 +201,10 @@ class FrxMenu {
              'page callback' => 'forena_report_menu_callback',
              'page arguments' => $page_args,
             );
+            if (module_exists('locale')) {
+              $items[$parent_path]['title callback'] = 'forena_report_title_callback';
+              $items[$parent_path]['title arguments'] = array($row->report_name, FALSE);
+            }
             if ($access_callback === 'forena_check_all_access') $items[$parent_path]['access arguments'][] = $cache['access'];
           }
         }
@@ -210,10 +217,14 @@ class FrxMenu {
           'page callback' => 'forena_report_menu_callback',
           'page arguments' => $page_args,
         );
-
+        if (module_exists('locale')) {
+          $items[$new_path]['title callback'] = 'forena_report_title_callback';
+          $items[$new_path]['title arguments'] = array($row->report_name, FALSE);
+        }
         if ($access_callback === 'forena_check_all_access') $items[$new_path]['access arguments'][] = $cache['access'];
       }
     }
+
   }
 
 

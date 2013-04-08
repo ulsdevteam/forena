@@ -859,6 +859,19 @@ function forena_check_all_access($checks) {
   return $access;
 }
 
+function forena_report_title_callback($report_name, $use_menu_title=TRUE) {
+  GLOBAL $language;
+  $title = '';
+  $lang = $language->language;
+  $result = db_query('SELECT * FROM {forena_reports} where report_name = :name and language=:language',
+    array(':name' => $report_name, 'language' => $lang));
+  foreach ($result as $row) {
+    $title = $use_menu_title && @$menu['title'] ? $menu['title']:  $row->title;
+  }
+  if (!$title) $title = t('Title not found');
+  return $title;
+}
+
 
 
 /**
