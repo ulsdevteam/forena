@@ -29,4 +29,8 @@
 		<title>Forena Report XML (frx) reference</title>
 		<name>help.design</name>
 	</row>
+	<row>
+	  <title>Reort Skins</title>
+	  <name>help.skins</name>
+	</row>
 </root>
