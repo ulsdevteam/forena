@@ -3,29 +3,30 @@
 class FrxDrupalNode {
   public $access = 'access content';
   public $tokens = array('nid', 'vid');
-
+  
   public function load($parms = array()) {
-    GLOBAL $language;
-    $node = new SimpleXMLElement('<node/>');
-    $nid = isset($parms['nid']) ? $parms['nid']: 1;
-    $vid = isset($parms['vid']) ? $parms['vid']: NULL;
-    $data = node_load($nid, $vid);
-    $lang = isset($data->language) ? $data->language : $language->language;
-
-    if ($data) foreach ($data as $key => $val) {
-      if(is_array($val) && isset($val[$lang])) {
+    $nid = isset($parms['nid']) ? $parms['nid'] : 1;
+    $vid = isset($parms['vid']) ? $parms['vid'] : NULL;
+    $node = node_load($nid, $vid);
+    $return = new SimpleXMLElement('<node/>');
+    $lang = isset($node->language) ? $node->language : 'unk';
+    
+    if ($node) foreach ($node as $key => $val) {
+      if (strpos($key, 'field_') === 0) {
+        $fields = field_get_items('node', $node, $key);
+        $output = @field_view_value('node', $node, $key, $fields[0]);
+        $return->addChild($key, drupal_render($output));
+      } else if (is_array($val) && isset($val[$lang])) {
         $tmp = $val[$lang][0];
-        $child = $node->addChild($key, $tmp['value']);
-        if (isset($tmp['format'])) {
-          $child->addAttribute('format', $tmp['format']);
+        if (isset($tmp['safe_value'])) {
+          $return->addChild($key, $tmp['safe_value']);
+        } else if (isset($tmp['value'])) {
+          $return->addChild($key, $tmp['value']);
         }
-        if (isset($tmp['data_type'])) {
-          $child->addAttribute('data_type', $tmp['data_type']);
-        }
-      } else if (is_string($val)) {
-        $node->addChild($key, $val);
+      } else if (is_scalar($val)) {
+        $return->addChild($key, $val);
       }
     }
-    return $node;
+    return $return;
   }
 }
