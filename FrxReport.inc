@@ -371,7 +371,7 @@ class FrxReport {
         if ($target) $attributes['target'] = $target;
       }
       if ($rel) $attributes['rel'] = $this->teng->replace($rel, TRUE);
-      if ($class) $attributes['class'] = $this->teng->replace($class, TRUE);
+      if ($class) $attributes['class'] = explode(' ', trim($this->teng->replace($class, TRUE)));
       $link = $this->teng->replace($link, TRUE);
       @list($url, $query) = explode('?', $link);
       @list($query, $queryFrag) = explode('#', $query);
