@@ -109,7 +109,7 @@
 	object. How the tag is rendered is defined by implementation of the
 	renderer. See the <a href="#renderers">Provided Renderers</a> section
 	for additional information. Typcial syntax looks something like
-	frx:renderer="FrxXMLSource".
+	frx:renderer="FrxXML".
 </p>
 <p>Other attributes are interpreted directly from the custom
 	renderers section below.</p>
@@ -194,7 +194,7 @@
   the page title and the tab title to be replaced by token replaced values 
   in the report.
 </p>
-<h3 id="FrxXMLSource">FrxXMLSource</h3>
+<h3 id="FrxXML">FrxXML</h3>
 <p>
 Displays the XML of the current data context and is particularly useful
 for debugging purposes. If you embed this in a report, it will show you

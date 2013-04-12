@@ -1,16 +1,19 @@
 <?php
-
+/**
+ * Implementation of a drupal node load function
+ * @author baileys
+ */
 class FrxDrupalNode {
   public $access = 'access content';
   public $tokens = array('nid', 'vid');
-  
+
   public function load($parms = array()) {
     $nid = isset($parms['nid']) ? $parms['nid'] : 1;
     $vid = isset($parms['vid']) ? $parms['vid'] : NULL;
     $node = node_load($nid, $vid);
     $return = new SimpleXMLElement('<node/>');
     $lang = isset($node->language) ? $node->language : 'unk';
-    
+
     if ($node) foreach ($node as $key => $val) {
       if (strpos($key, 'field_') === 0) {
         $fields = field_get_items('node', $node, $key);
