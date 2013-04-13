@@ -1327,6 +1327,10 @@ function forena_theme() {
       'render element' => 'element',
       'file' => 'forena.common.inc',
   ),
+    'forena_inline_field' => array(
+      'render element' => 'field',
+      'file' => 'forena.common.inc',
+  ),
     'forena_fieldset_template' => array(
       'render element' => 'fieldset',
       'file' => 'forena.common.inc',
