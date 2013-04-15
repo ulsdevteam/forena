@@ -64,7 +64,6 @@ class FrxMSSQL extends FrxDataSource {
   public function sqlData($sql, $params=array(), $tag='table') {
     // Load the block from the file
     $db = $this->db;
-    $block = $this->loadBlock($block_name);
     $xml ='';
     if ($sql && $db) {
       $sql = $this->te->replace($sql);
