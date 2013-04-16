@@ -48,7 +48,6 @@ class FrxXLSDoc extends FrxDocument {
         foreach ($row as $column) {
           $value = $column->asXML();
           $value = strip_tags($value);
-          $value = decode_entities($value);
           $tval = trim($value);
           // Find if it contains invalid number characters
           $non_numeric_chars = trim($value, ' +-.,0123456789');
