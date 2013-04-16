@@ -47,6 +47,7 @@ class FrxCSVDoc extends FrxDocument {
         }
         $value = $column->asXML();
         $value = strip_tags($value);
+        $value = decode_entities($value);
         $value = str_replace('"', '""', $value);
         $value = str_replace(array("\n"), '', $value);
         $value =  '"' . $value . '",';
