@@ -27,6 +27,7 @@ class FrxReport {
   private $ids;
   public $teng;
   public $parms;
+  public $missing_parms = FALSE;
   private $dom;
   private $format;
 
@@ -294,7 +295,8 @@ class FrxReport {
     $dom = $this->dom;
     $o='';
     $body = $dom->getElementsByTagName('body')->item(0);
-    foreach ($body->childNodes as $node) {
+
+    if (!$this->missing_parms) foreach ($body->childNodes as $node) {
       $o .= $this->render_section($node);
     }
     // Default in dynamic title from head.
@@ -555,6 +557,7 @@ class FrxReport {
   public function processParameters() {
     $parms = $this->parms;
     $missing_parms = FALSE;
+
     foreach ($this->parameters as $key => $parm) {
       if ((@$parms[$key]==='' || @$parms[$key]===array() || @$parms[$key]===NULL) && @$parm['value']) {
         $value = (string)$parm['value'];
@@ -571,6 +574,7 @@ class FrxReport {
       }
     }
     $this->parms = $parms;
+    $this->missing_parms = $missing_parms;
     return $missing_parms;
   }
 
