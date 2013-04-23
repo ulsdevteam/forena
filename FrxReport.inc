@@ -296,7 +296,7 @@ class FrxReport {
     $o='';
     $body = $dom->getElementsByTagName('body')->item(0);
 
-    if (!$this->missing_parms) foreach ($body->childNodes as $node) {
+    if (!$this->missing_parms || $this->rpt_xml->xpath('//*[@frx:renderer="FrxParameterForm"]')) foreach ($body->childNodes as $node) {
       $o .= $this->render_section($node);
     }
     // Default in dynamic title from head.
