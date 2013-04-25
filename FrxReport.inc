@@ -559,17 +559,38 @@ class FrxReport {
     $missing_parms = FALSE;
 
     foreach ($this->parameters as $key => $parm) {
+
       if ((@$parms[$key]==='' || @$parms[$key]===array() || @$parms[$key]===NULL) && @$parm['value']) {
-        $value = (string)$parm['value'];
-        if (strpos($value, '|')!==FALSE) {
-          $value = explode('|', $value);
+        $value = $parm['value'];
+        $options = array();
+        if (@$parm['options']) {
+          parse_str($parm['options'],$options);
+        }
+        switch ((string)@$parm['type']) {
+          case 'date_text':
+          case 'date_popup':
+          case 'date_select':
+             if ($value){
+
+                $datetime = @strtotime($value);
+                if ($datetime) {
+                  $value = date($options['date_format'], $datetime);
+                }
+
+              }
+            break;
+          default:
+            if (strpos($value, '|')!==FALSE) {
+              $value = explode('|', $value);
+            }
         }
         $parms[$key] = $value;
         $reload_params = TRUE;
       }
       //do not show report if a required parameter does not have a value
       //force the user to input a parameter
-      if ((@!$parms[$key]) && (@strcmp($parm['require'], "1") == 0) && (!$parm['value'])) {
+
+      if ((@!$parms[$key]) && (@strcmp($parm['require'], "1") == 0)) {
         $missing_parms = TRUE;
       }
     }

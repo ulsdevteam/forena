@@ -557,6 +557,14 @@ function forena_parameter_form($formid, &$form_state, $parameters, $attributes= 
           case 'date_popup':
             if (@$options['date_format']) {
               $ctl_attrs['#date_format'] = $options['date_format'];
+              if ($value){
+                $datetime = @strtotime($value);
+                if ($datetime) {
+                  $value = date($options['date_format'], $datetime);
+                }
+
+              }
+
             }
             if (@$options['date_year_range']) {
               $ctl_attrs['#date_year_range'] = $options['date_year_range'];
@@ -564,6 +572,7 @@ function forena_parameter_form($formid, &$form_state, $parameters, $attributes= 
             if (@$options['date_label_position']) {
               $ctl_attrs['#date_label_position'] = $options['date_label_position'];
             }
+
             $list='';
             break;
           case 'checkbox':
