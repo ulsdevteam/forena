@@ -9,7 +9,6 @@ class FrxXMLDoc extends FrxDocument {
 
   public function __construct() {
     $this->content_type = 'application/xml';
-    dpm($this->content_type);
   }
 
   public function render($r, $format, $options = array()) {
