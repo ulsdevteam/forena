@@ -523,10 +523,15 @@ function forena_parameter_form($formid, &$form_state, $parameters, $attributes= 
         @(strcmp((string)$node['require'], "1") == 0) ? $required = TRUE : $required = FALSE;
         $ctl_attrs = array();
 
+        //returned values filtered against data_field attr.
+        if ($data_source) {
+          $list = Frx::RepoMan()->dataBlockParams($data_source, $data_field, $label_field);
+          if (!$required && $add_null) $list = array('' => '') + $list;
+        }
+
         //Determine the form element type to be displayed
         //If select or radios is chosen then begin a $list array for display values.
         $multiselect = FALSE;
-        $list = array();
         $ajax = FALSE;
         $add_null = FALSE;
         switch ($type) {
@@ -590,11 +595,6 @@ function forena_parameter_form($formid, &$form_state, $parameters, $attributes= 
             $list = '';
         }
 
-        //returned values filtered against data_field attr.
-        if ($data_source) {
-          $list = Frx::RepoMan()->dataBlockParams($data_source, $data_field, $label_field);
-          if (!$required && $add_null) $list = array('' => '') + $list;
-        }
         if (isset($menu_parms[$id]) && $type=='textfield') {
           $disabled = TRUE;
         }
@@ -627,8 +627,6 @@ function forena_parameter_form($formid, &$form_state, $parameters, $attributes= 
               'class' => @explode(' ', $class),
           );
         }
-
-
 
         //if $list is not empty then push options
         //onto the array. options will cause an error for
