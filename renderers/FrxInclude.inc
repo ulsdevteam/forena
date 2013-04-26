@@ -13,8 +13,10 @@ class FrxInclude extends FrxRenderer {
 
     // Determine data type
     $include = @$attributes['src'];
-    $include = $this->teng->replace($include);
+
+    // Reformat URL
     @list($url, $query_str)=@explode('?', $include);
+    $url = $this->teng->replace($url, TRUE);
     $report_url = $url;
     $parts = @explode('/', $url);
     $file = @$parts[count($parts) - 1];
@@ -22,7 +24,14 @@ class FrxInclude extends FrxRenderer {
     // Determine file extention
     $ext = count($parts) > 1 ? $parts[count($parts) - 1] : '';
     $query = array();
-    parse_str($query_str, $query );
+    if ($query_str) {
+      parse_str($query_str, $query );
+      foreach ($query as $key=>$value) {
+        $query[$key] = $this->teng->replace($value, TRUE);
+      }
+    }
+
+    // Build URL
     $options = array('query' => $query);
     $url = url($url, $options);
     if ($this->format=='web') {
