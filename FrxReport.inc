@@ -571,10 +571,10 @@ class FrxReport {
           case 'date_popup':
           case 'date_select':
              if ($value){
-
+                $date_format = @$options['date_format'] ? $options['date_format'] : 'Y-m-d';
                 $datetime = @strtotime($value);
                 if ($datetime) {
-                  $value = date($options['date_format'], $datetime);
+                  $value = date($date_format, $datetime);
                 }
 
               }

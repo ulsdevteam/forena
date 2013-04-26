@@ -555,17 +555,16 @@ function forena_parameter_form($formid, &$form_state, $parameters, $attributes= 
           case 'date_text':
           case 'date_select':
           case 'date_popup':
-            if (@$options['date_format']) {
-              $ctl_attrs['#date_format'] = $options['date_format'];
-              if ($value){
-                $datetime = @strtotime($value);
-                if ($datetime) {
-                  $value = date($options['date_format'], $datetime);
-                }
-
+            $options['date_format'] = @$options['date_format'] ? $options['date_format'] : 'Y-m-d';
+            $ctl_attrs['#date_format'] = $options['date_format'];
+            if ($value){
+              $datetime = @strtotime($value);
+              if ($datetime) {
+                $value = date($options['date_format'], $datetime);
               }
 
             }
+
             if (@$options['date_year_range']) {
               $ctl_attrs['#date_year_range'] = $options['date_year_range'];
             }
