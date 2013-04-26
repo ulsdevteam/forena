@@ -123,7 +123,7 @@ class FrxReport {
     if ($data_uri) {
       parse_str($data_uri, $data);
       if (is_array($data)) foreach ($data as $key => $value) {
-        $data[$key] = $this->teng->replace($value);
+        $data[$key] = $this->teng->replace($value, TRUE);
       }
 
       // Merge in current_context
@@ -374,13 +374,16 @@ class FrxReport {
       }
       if ($rel) $attributes['rel'] = $this->teng->replace($rel, TRUE);
       if ($class) $attributes['class'] = explode(' ', trim($this->teng->replace($class, TRUE)));
-      $link = $this->teng->replace($link, TRUE);
       @list($url, $query) = explode('?', $link);
+      $url = $this->teng->replace($url, TRUE);
       @list($query, $queryFrag) = explode('#', $query);
       @list($url, $fragment) = explode('#', $url);
       $fragment = $fragment . $queryFrag;
       $data = array();
       parse_str($query, $data);
+      if ($data) foreach ($data as $k => $v) {
+        $data[$k] = $this->teng->replace($v, TRUE);
+      }
       if ($add_query) {
         $parms = $_GET;
         unset($parms['q']);
