@@ -673,9 +673,10 @@ function forena_parameter_form_submit($form, &$form_state) {
   unset($values['params']['submit']);
   if (isset($values['params'])) foreach ($values['params'] as $key => $value) {
     if (is_array($value)) {
+      $values['params'][$key] = array();
       foreach ($value as $k => $val) {
-        if (!$val) {
-          unset($values['params'][$key][$k]);
+        if ($val) {
+          $values['params'][$key][] = $val;
         }
       }
     }
