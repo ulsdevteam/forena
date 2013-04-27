@@ -884,6 +884,7 @@ function forena_data_settings() {
 }
 
 function forena_data_settings_edit($form, &$form_state, $source=-1) {
+  global $databases;
   $adding = ($source === -1);
   if (!@$form_state['storage']) {
     if ($adding) {
@@ -894,6 +895,7 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
         'config' => array(
           'source' => 'user',
           'data provider' => 'FrxDrupal',
+          'database' => 'default',
           'access callback' => 'user_access',
           'user callback' => 'forena_current_user_id'
           ),
@@ -1080,10 +1082,13 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
 
   switch ($data_provider) {
     case 'FrxDrupal':
-      $form['connection']['uri'] = array(
-        '#type' => 'item',
-        '#title' => t('URI'),
+      $db_list = array_combine(array_keys($databases), array_keys($databases));
+      $form['connection']['database'] = array(
+        '#type' => 'select',
+        '#title' => t('Database'),
         '#disabled' => $locked,
+        '#default_value' => @$config['database'],
+        '#options' => $db_list,
         '#markup' => 'Determined by Drupal settings.php file',
       );
       break;

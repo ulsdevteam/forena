@@ -10,7 +10,7 @@ class FrxDrupal extends FrxDataSource {
    * Implements hooks into the drupal applications
    */
 
-  private $db;
+  private $database = 'default';
 
   /**
    * Object constructor
@@ -20,7 +20,9 @@ class FrxDrupal extends FrxDataSource {
    */
   public function __construct($conf, $repos_path, $name) {
     parent::__construct($conf, $repos_path, $name);
-
+    if (@$conf['database'] != 'default')  {
+      $this->database = $conf['database'];
+    }
     // Set up the stuff required to translate.
     $this->te = new FrxSyntaxEngine(FRX_SQL_TOKEN, ':', $this);
   }
@@ -32,6 +34,9 @@ class FrxDrupal extends FrxDataSource {
    * @param Query $subQuery
    */
   public function sqlData($sql) {
+    if ($this->database != 'default') {
+      db_set_active($this->database);
+    }
     // Load the block from the file
     $xml ='';
     $sql = $this->te->replace($sql);
@@ -45,6 +50,9 @@ class FrxDrupal extends FrxDataSource {
         $row_node->addChild($key, htmlspecialchars($value));
         //$row_node->$key = $value;
       }
+    }
+    if ($this->database != 'default') {
+      db_set_active();
     }
     return $xml;
   }
