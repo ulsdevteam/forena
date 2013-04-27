@@ -20,7 +20,7 @@ class FrxDrupal extends FrxDataSource {
    */
   public function __construct($conf, $repos_path, $name) {
     parent::__construct($conf, $repos_path, $name);
-    if (@$conf['database'] != 'default')  {
+    if (@$conf['database'] && @$conf['database'] != 'default')  {
       $this->database = $conf['database'];
     }
     // Set up the stuff required to translate.
