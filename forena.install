@@ -98,30 +98,33 @@ function forena_update_7201() {
       'repository' => array('repository'),
   ),
   );
-  db_add_field('forena_reports', 'descriptor', array('type' => 'text'));
-  db_add_field('forena_reports', 'src', array('type' => 'text'));
-  db_add_field('forena_reports', 'altered', array('type' => 'int'));
-  db_create_table('forena_repositories', $schema['forena_repositories']);
-  db_create_table('forena_data_blocks', $schema['forena_data_blocks']);
+  if (!db_field_exists('forena_reports', 'descriptor')) db_add_field('forena_reports', 'descriptor', array('type' => 'text'));
+  if (!db_field_exists('forena_reports', 'altered')) db_add_field('forena_reports', 'altered', array('type' => 'int'));
+  if (!db_table_exists('forena_reports')) db_create_table('forena_repositories', $schema['forena_repositories']);
+  if (!db_table_exists('forena_data_blocks')) db_create_table('forena_data_blocks', $schema['forena_data_blocks']);
 }
 
 /**
  * Add language column
  */
 function forena_update_7202() {
-  db_add_field('forena_reports', 'language', array('type' => 'varchar', 'length' => 30, 'not null' => TRUE, 'default' => 'en'));
-  db_query("update {forena_reports} set language='en'");
-  db_drop_primary_key('forena_reports');
-  db_add_primary_key('forena_reports', array('report_name', 'language'));
+  if (!db_field_exists('forena_reports', 'language')) {
+    db_add_field('forena_reports', 'language', array('type' => 'varchar', 'length' => 30, 'not null' => TRUE, 'default' => 'en'));
+    db_query("update {forena_reports} set language='en'");
+    db_drop_primary_key('forena_reports');
+    db_add_primary_key('forena_reports', array('report_name', 'language'));
+  }
 }
 
 function forena_update_7301() {
-  db_add_field('forena_reports', 'path', array('type' => 'varchar', 'length' => 255));
-  db_add_index('forena_reports', 'path', array('path'));
+  if (!db_field_exists('forena_reports', 'path')) {
+    db_add_field('forena_reports', 'path', array('type' => 'varchar', 'length' => 255));
+    db_add_index('forena_reports', 'path', array('path'));
+  }
 }
 
 function forena_update_7302() {
-  db_drop_field('forena_reports', 'src');
+  if (db_field_exists('forena_reports', 'src')) db_drop_field('forena_reports', 'src');
 }
 
 function forena_update_7303() {
@@ -130,12 +133,12 @@ function forena_update_7303() {
   forena_sync_reports(FALSE);
 
   // New block access field.
-  db_add_field('forena_data_blocks', 'access', array('type' => 'varchar', 'length' => 255, 'not null' => TRUE));
-  db_add_field('forena_data_blocks', 'block_type', array('type' => 'varchar', 'length' => 30, 'not null' => TRUE));
+  if (!db_field_exists('forena_data_blocks', 'access')) db_add_field('forena_data_blocks', 'access', array('type' => 'varchar', 'length' => 255, 'not null' => TRUE));
+  if (!db_field_exists('forena_data_blocks', 'block_type')) db_add_field('forena_data_blocks', 'block_type', array('type' => 'varchar', 'length' => 30, 'not null' => TRUE));
 }
 
 function forena_update_7304() {
-  db_add_field('forena_data_blocks', 'builder', array('type' => 'text'));
+  if (!db_field_exists('forena_data_blocks', 'builder')) db_add_field('forena_data_blocks', 'builder', array('type' => 'text'));
 }
 
 function forena_install() {
