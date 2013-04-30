@@ -23,6 +23,7 @@ function forena_admin_reports() {
     )
   );
   // Add Data tables if it exists.
+
   drupal_add_css(drupal_get_path('module', 'forena') . '/forena.css');
   if (file_exists('sites/all/libraries/dataTables/media/js/jquery.dataTables.min.js')) {
     drupal_add_js(drupal_get_path('module', 'forena') . '/forena.admin.js');
@@ -38,7 +39,9 @@ function forena_admin_reports() {
     $title = l(t($row->title), 'reports/' . $rpt);
     $data[] = array($title, $row->report_name, $row->category, $edit . ' ' . $clone . ' ' . $delete);
   }
+  $output .= '<div id="forena-reports-list">';
   $output .= theme_table(array('header' => $headers, 'rows' => $data, 'attributes' => array('class' => array( 'dataTable-paged')), 'caption' => '', 'sticky' => TRUE, 'colgroups' => array(), 'empty' => ''));
+  $output .= '</div>';
   return $output;
 }
 
