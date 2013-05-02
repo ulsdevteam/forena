@@ -569,6 +569,7 @@ function forena_parameter_form($formid, &$form_state, $parameters, $attributes= 
               }
 
             }
+            $ctl_attrs['#forena_date_format'] = @$options['date_parm_format'] ? $options['date_parm_format'] : 'Y-m-d';
 
             if (@$options['date_year_range']) {
               $ctl_attrs['#date_year_range'] = $options['date_year_range'];
@@ -679,7 +680,7 @@ function forena_parameter_form_submit($form, &$form_state) {
       case 'date_text':
         $datetime = @strtotime($value);
         if ($datetime) {
-          $value = $values['params'][$key] = date($ctl['#date_format'], $datetime);
+          $value = $values['params'][$key] = date($ctl['#forena_date_format'], $datetime);
         }
         break;
 
