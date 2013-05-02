@@ -565,7 +565,7 @@ function forena_parameter_form($formid, &$form_state, $parameters, $attributes= 
             if ($value){
               $datetime = @strtotime($value);
               if ($datetime) {
-                $value = date($options['date_format'], $datetime);
+                $value = date('Y-m-d h:i', $datetime);
               }
 
             }
@@ -600,7 +600,6 @@ function forena_parameter_form($formid, &$form_state, $parameters, $attributes= 
         }
 
         //If a data_source attr was found then create an array of
-
         $form['params'][$id] = array(
             '#type' => $type,
             '#title' => ($label) ? t($label) : t($id),
@@ -671,7 +670,21 @@ function forena_parameter_form($formid, &$form_state, $parameters, $attributes= 
 function forena_parameter_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   unset($values['params']['submit']);
+
   if (isset($values['params'])) foreach ($values['params'] as $key => $value) {
+    $ctl = $form['params'][$key];
+    switch($ctl['#type']) {
+      case 'date_popup':
+      case 'date_select':
+      case 'date_text':
+        $datetime = @strtotime($value);
+        if ($datetime) {
+          $value = $values['params'][$key] = date($ctl['#date_format'], $datetime);
+        }
+        break;
+
+    }
+
     if (is_array($value)) {
       $values['params'][$key] = array();
       foreach ($value as $k => $val) {
