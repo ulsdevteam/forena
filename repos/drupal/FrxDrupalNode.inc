@@ -10,6 +10,9 @@ class FrxDrupalNode {
   public function load($parms = array()) {
     $nid = isset($parms['nid']) ? $parms['nid'] : 1;
     $vid = isset($parms['vid']) ? $parms['vid'] : NULL;
+
+    // No node ID means don't try and laod a node.
+    if (!$nid && !$vid) return '';
     $node = node_load($nid, $vid);
     $return = new SimpleXMLElement('<node/>');
     $lang = isset($node->language) ? $node->language : 'unk';
