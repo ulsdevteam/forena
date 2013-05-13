@@ -213,7 +213,7 @@ class FrxMenu {
           'type' => $menu_type,
           'title' => $title,
           'access callback' => $access_callback,
-          'access arguments' => array($cache['access']),
+          'access arguments' => array(@$cache['access']),
           'page callback' => 'forena_report_menu_callback',
           'page arguments' => $page_args,
         );
