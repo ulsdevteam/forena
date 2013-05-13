@@ -116,7 +116,7 @@ class FrxPDO extends FrxDataSource {
    */
   public function quote($value) {
     $new_value =  $this->db->quote($value);
-    if (($value==='' || $value===NULL) && !$new_value) {
+    if (($value!=='' || $value!==NULL) && !$new_value) {
       $value = "'" . str_replace("'", "''", $value) . "'";
     }
     else {
