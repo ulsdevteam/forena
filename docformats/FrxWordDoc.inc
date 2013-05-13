@@ -14,7 +14,7 @@ class FrxWordDoc extends FrxDocument {
     $css = $this->loadCSSFiles($format);
     $output = '<html><head>';
     $output .= '<meta http-equiv="Content-Type" content="text/html"/>';
-    if ($options['css'] || isset($r->rpt_xml->head->style)) {
+    if (isset($r->rpt_xml->head->style)) {
       $output .= '<style type="text/css">';
       $output .= $css;
       if (isset($r->rpt_xml->head->style)) {
