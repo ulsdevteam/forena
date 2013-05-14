@@ -494,7 +494,8 @@ function forena_parameter_form($formid, &$form_state, $parameters, $attributes= 
       );
 
       foreach ($parameters as $node) {
-        $list='';
+        $add_null = FALSE;
+        $list=array();
         $disabled = FALSE;
         $label = @(string)$node['label'];
         $id = @(string)$node['id'];
@@ -578,18 +579,18 @@ function forena_parameter_form($formid, &$form_state, $parameters, $attributes= 
               $ctl_attrs['#date_label_position'] = $options['date_label_position'];
             }
 
-            $list='';
+            $list=array();
             break;
           case 'checkbox':
             if (@$option_str['return_value']) {
               $ctl_attrs['#return_value'] = $options['return_value'];
             }
-            $list='';
+            $list=array();
             break;
           case 'radios':
             break;
           case 'hidden':
-            $list='';
+            $list=array();
             break;
           default:
             $type = 'textfield';
@@ -631,7 +632,7 @@ function forena_parameter_form($formid, &$form_state, $parameters, $attributes= 
         //if $list is not empty then push options
         //onto the array. options will cause an error for
         //textfield elements.
-        if ($list) {
+        if ($list || $type = 'select' || $type='radios') {
           $form['params'][$id]['#options'] = $list;
           $form['params'][$id]['#multiple'] = $multiselect;
         }
