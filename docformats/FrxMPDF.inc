@@ -78,11 +78,7 @@ class FrxMPDF extends FrxDocument {
       'Cache-Control' => 'private',
       'Content-Transfer-Encoding' => 'binary',
       'Content-Type' => 'application/pdf',
-    // ! TODO !
-    // after testing beter to put disable this coments to offer save file or take a config variable that chose to save or open.
-    // 'Content-Length' => strlen($pdf),
-    // 'Content-Disposition' => 'attachment; filename="a_report_name.pdf"',
-    );
+     );
 
     foreach ($http_headers as $name => $value) {
       $value = preg_replace('/\r?\n(?!\t| )/', '', $value);
