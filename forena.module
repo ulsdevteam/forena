@@ -791,6 +791,8 @@ function forena_report($name_in, $parms = array(), $print = TRUE) {
     drupal_not_found();
     exit;
   }
+
+  FrxData::instance()->setContext('cookie', $_COOKIE);
   $report_name = $desc['name'];
   // Load dataTable plugin if possible.
   //forena_include_data_tables();
