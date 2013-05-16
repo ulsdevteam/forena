@@ -317,7 +317,6 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
   $data['name'] = $report_name;
   $data['altered'] = $altered;
   $r_xml = $report->asXML();
-  //@TODO: Clean up filename to make sure
   $name = $data['name'];
   $filepath = $report_path . '/' . $report_name . '.frx';
   // If we need to save this to the file system

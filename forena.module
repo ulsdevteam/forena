@@ -732,7 +732,6 @@ function forena_permission() {
     'delete report' => array('title' => t('Delete reports')),
     'perform email merge' => array('title' => t('Peform email merge')),
   );
-  //@TODO: Add the ability to create subrepositories with different permissions.
   return $perms;
 }
 
