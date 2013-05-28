@@ -452,8 +452,15 @@ function forena_layout_form($form, $form_state, $report_name) {
       $form['menu']['path'] = array(
         '#type' => 'textfield',
         '#title' => t('Menu Path'),
-        '#description' => t('Indicate site reletive path to menu.  Paramters may be embedded in the url using a :parm syntax (e.g. states/:state)'),
+        '#description' => t('Indicate site reletive path to menu.  Parameters may be embedded in the url using a :parm syntax (e.g. states/:state)'),
         '#default_value' => @$menu['path'],
+      );
+
+      $form['menu']['args'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Additional Arguments'),
+        '#description' => t('Indicate additonal parameters that should be extracted after the menu path using a :parm syntax (e.g. :parma/:parmb)'),
+        '#default_value' => @$menu['args'],
       );
 
       $form['menu']['title'] = array(
