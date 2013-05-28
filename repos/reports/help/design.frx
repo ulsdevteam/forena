@@ -65,6 +65,12 @@
 	'*', which would imply creating a a repeating pattern for every row or
 	element returned by the query.
 </p>
+<p id="skip_root">
+  <strong>frx:skip_root attribute</strong>- This will cause the current node 
+  of the report to not be rendered, but children will be rendered as normal. 
+  This is most commonly used when you want the frx:foreach to not render the node
+  containing the frx:foreach attribute. 
+</p>
 <h2>Report fields</h2>
 <p>Each field in the report is referenced by an xpath expression
 	enclosed by curly braces. In its simplest form the xpath xpression can

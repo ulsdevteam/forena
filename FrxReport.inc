@@ -173,6 +173,7 @@ class FrxReport {
 
 
     $frx = $node->attributes(FRX_NS);
+    $include_root = !isset($frx['skip_root']) || !$frx['skip_root'];
     $elements = $dom_node->childNodes->length;
     // Test to see if we have any nodes that contain data url
     if ($node->xpath('*//@frx:*') || $frx) {
@@ -241,11 +242,11 @@ class FrxReport {
           foreach ($tmp_attrs as $key => $value) {
             $r_attr_text .=  ' ' . $key . '="' . (string)$value . '"';
           }
-          $o .= $this->teng->replace('<' . $tag . $r_attr_text . '>');
+          if ($include_root) $o .= $this->teng->replace('<' . $tag . $r_attr_text . '>');
           foreach ($dom_node->childNodes as $child) {
             $o .= $this->render_section($child);
           }
-          $o .= '</' . $tag . '>';
+          if ($include_root) $o .= '</' . $tag . '>';
           Frx::Data()->pop();
         }
       }
@@ -260,13 +261,13 @@ class FrxReport {
           }
         }
         else {
-          $o .= $this->teng->replace('<' . $tag . $attr_text . '>');
+          if ($include_root) $o .= $this->teng->replace('<' . $tag . $attr_text . '>');
 
           // None found, so render children
           foreach ($dom_node->childNodes as $child) {
             $o .= $this->render_section($child);
           }
-          $o .= '</' . $tag . '>';
+          if ($include_root) $o .= '</' . $tag . '>';
         }
       }
       if ($is_data_block && $continue) {
