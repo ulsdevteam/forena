@@ -594,7 +594,7 @@ function forena_parameter_form($formid, &$form_state, $parameters, $attributes= 
             break;
           default:
             $type = 'textfield';
-            $list = '';
+            $list = array();
         }
 
         if (isset($menu_parms[$id]) && $type=='textfield') {
@@ -632,7 +632,7 @@ function forena_parameter_form($formid, &$form_state, $parameters, $attributes= 
         //if $list is not empty then push options
         //onto the array. options will cause an error for
         //textfield elements.
-        if ($list || $type = 'select' || $type='radios') {
+        if ($list || $type == 'select' || $type =='radios') {
           $form['params'][$id]['#options'] = $list;
           $form['params'][$id]['#multiple'] = $multiselect;
         }
