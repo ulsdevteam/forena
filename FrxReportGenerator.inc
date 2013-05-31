@@ -271,10 +271,6 @@ class FrxReportGenerator {
     return $this->app->configuration('report_repos');
   }
 
-  public function link($title, $path, $options=array()) {
-    return $this->app->link($title, $path, $options);
-  }
-
   public function url($path, $options = array()) {
     return $this->app->url($path, $options);
   }

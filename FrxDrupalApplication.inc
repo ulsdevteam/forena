@@ -29,14 +29,6 @@ class FrxDrupalApplication {
   }
 
 
-  /**
-   * Convert a relative link to appropriately rendered html
-   * return html A properly formatted anchor tag
-   */
-  public function link($title, $path, $options=array()) {
-    return l($title, $path, $options);
-  }
-
   public function url($path, $options = array()) {
     return url($path, $options);
   }

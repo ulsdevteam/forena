@@ -30,6 +30,7 @@ class FrxReport {
   public $missing_parms = FALSE;
   private $dom;
   private $format;
+  private $link_mode = 'remove';
 
 
   public function __construct($xhtml, $data=array()) {
@@ -174,6 +175,13 @@ class FrxReport {
 
     $frx = $node->attributes(FRX_NS);
     $elements = $dom_node->childNodes->length;
+
+    // Check for invalid link processing.
+    if (@(string)$frx['invalid_link']) {
+      $old_link_mode = $this->link_mode;
+      $this->link_mode = (string)$frx['invalid_link'];
+    }
+
     // Test to see if we have any nodes that contain data url
     if ($node->xpath('*//@frx:*') || $frx) {
       $attrs = $node->attributes();
@@ -280,6 +288,11 @@ class FrxReport {
       $o .= $this->teng->replace($text);
     }
 
+    // Restore link processing.
+    if (@(string)$frx['invalid_link']) {
+      $this->link_mode = $old_link_mode;
+    }
+
     return $o;
   }
 
@@ -313,6 +326,35 @@ class FrxReport {
     Frx::Data()->pop();
     return $o ;
   }
+
+
+  /**
+   * Convert a relative link to appropriately rendered html
+   * return html A properly formatted anchor tag
+   */
+  public function link($title, $path, $options=array()) {
+    // check if we have
+    $l = '';
+    if (strpos($path, ':')===FALSE) {
+      $valid = drupal_valid_path($path,FALSE);
+      switch ($this->link_mode) {
+        case 'remove':
+          $l = '';
+          break;
+        case 'no-link':
+          $l = $valid ? l($title, $path, $options) : $title;
+          break;
+        case 'disable':
+          dpm($options);
+        default:
+          $l = l($title, $path, $options);
+      }
+    }
+    else {
+    }
+
+  }
+
   /*
    * Formatter used by the syntax engine to alter data that gets extracted.
    * This invokes the field translation
@@ -390,8 +432,10 @@ class FrxReport {
         $data = array_merge($parms, $data);
       }
       if (trim($url)) $value = FrxReportGenerator::instance()->link(
-      htmlspecialchars_decode($value), $url,
-      array('fragment' => $fragment, 'query' => $data, 'attributes' => $attributes, 'absolute' => TRUE));
+        htmlspecialchars_decode($value),
+        $url,
+        array('fragment' => $fragment, 'query' => $data, 'attributes' => $attributes, 'absolute' => TRUE)
+      );
     }
     return $value;
   }
