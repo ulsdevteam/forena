@@ -71,6 +71,24 @@
   This is most commonly used when you want the frx:foreach to not render the node
   containing the frx:foreach attribute. 
 </p>
+<p id="invalid-link"><strong>frx:invalid_link attribute</strong>- To cause forena to validate
+links prior to presenting them.  Supports the following values:  </p>
+<table >
+	<tbody>
+		<tr>
+			<th>remove</th><td>Remove the feild (do not render it)</td>
+		</tr>
+		<tr>
+			<th>text</th><td>Render the text without the link</td>
+		</tr>
+		<tr>
+			<th>disable</th><td>Disable the link by removeing its href attribute.  
+			This will also add a class="disabled" on the link for css styling.</td>
+		</tr>
+		
+	</tbody>
+	
+</table>
 <h2>Report fields</h2>
 <p>Each field in the report is referenced by an xpath expression
 	enclosed by curly braces. In its simplest form the xpath xpression can

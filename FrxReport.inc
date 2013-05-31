@@ -30,7 +30,7 @@ class FrxReport {
   public $missing_parms = FALSE;
   private $dom;
   private $format;
-  private $link_mode = 'remove';
+  private $link_mode = '';
 
 
   public function __construct($xhtml, $data=array()) {
@@ -343,17 +343,21 @@ class FrxReport {
           $l = '';
           break;
         case 'no-link':
+        case 'text':
           $l = $valid ? l($title, $path, $options) : $title;
           break;
         case 'disable':
-          dpm($options);
+          $options['attributes']['class'][] = 'disabled';
+          $l = '<a '. drupal_attributes($options['attributes']) . '>' . check_plain($title) . '</a>';
+          break;
         default:
           $l = l($title, $path, $options);
       }
     }
     else {
+      $l = l($title, $path, $options);
     }
-
+    return $l;
   }
 
   /*
@@ -432,7 +436,7 @@ class FrxReport {
         unset($parms['q']);
         $data = array_merge($parms, $data);
       }
-      if (trim($url)) $value = FrxReportGenerator::instance()->link(
+      if (trim($url)) $value = $this->link(
         htmlspecialchars_decode($value),
         $url,
         array('fragment' => $fragment, 'query' => $data, 'attributes' => $attributes, 'absolute' => TRUE)

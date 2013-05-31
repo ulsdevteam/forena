@@ -186,7 +186,7 @@ class FrxEditor {
     $tnode = $dom->createTextNode("\n");
     $pnode->appendChild($tnode);
     foreach ($element_array as $element_data) {
-      $id = $element_data[$id_field];
+      $id = @$element_data[$id_field];
       $path = '//frx:' . $parent . '/frx:' . $element . '[@' . $id_field . '="' . $id . '"]';
       $nodes = $xpq->query($path);
       $value = NULL;
