@@ -21,23 +21,23 @@
       available. &nbsp;Explanation of the opions on this form are as
       follows:</p>
     <p>
-      <strong>Body -&nbsp;</strong>&nbsp;The html body of the
+      <strong>Body -;</strong>&nbsp;The html body of the
       report.&nbsp;
     </p>
     <p>
       <strong>Category</strong> - This controls under which group the
       report appears under the My Reports link.
     </p>
-    <p>Form - The form determines the look and feel of the report.
+    <p>
+      <strong>Menu</strong> - Specify configuration options for a drupal menu 
+      here.  
+    </p> 
+    <p><strong>Skin</strong> - The skin determines the look and feel of the report.
       &nbsp;In conventional report writers this can be thought of as
       what kinid of paper form the report printed on. &nbsp;In the
       modern days of the web most layout is controlled by Cascacding
-      Style Sheets (CSS). &nbsp;Specify the form of the report and any
-      css or js files of the same name in your reports directory will
-      automatically get added to the report. &nbsp;In this way you can
-      establish common styles that get used by reports that have the
-      same form name. &nbsp;If you leave this blank, the default form,
-      specified in the Forena configuration menu is used.&nbsp;</p>
+      Style Sheets (CSS) and Javascript Libraries.   See the section on 
+      Report Skins for additional information on creating report skins.</p>
     <p>
       <strong>Hidden</strong> - Checking this box will cause the report
       not to be listed in the My Reports list regardless of the Category

@@ -147,8 +147,9 @@ class FrxMenu {
 
         $cache = unserialize($cache);
         // Load menu item defaults
-        $menu = $cache['menu'];
+        $menu = @$cache['menu'];
         $path = $menu['path'];
+        $path_args = @$menu['args'];
         $type = @$menu['type'];
         $title = @$menu['title'] ? $menu['title']:  $row->title;
         if (module_exists('locale')) {
@@ -180,7 +181,8 @@ class FrxMenu {
         // Now generate the callback arguments
         $parts = explode( '/', $new_path);
         $page_args = array_keys($parts, '%');
-        $page_args = array_merge(array($path, $row->report_name), $page_args);
+        $path_args = $path_args ? rtrim($path,'/') . '/' . ltrim($path_args, '/') : $path;
+        $page_args = array_merge(array($path_args, $row->report_name), $page_args);
 
         // Set the access callback
         $access_callback = isset($cache['access']) ? 'forena_check_all_access' : TRUE;
