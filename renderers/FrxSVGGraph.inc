@@ -78,6 +78,7 @@ class FrxSVGGraph extends FrxChart {
 
 
   function renderGraph($type, $options, $data) {
+    static $jsinc = FALSE;
     // Default in Skin Options for Graph type
     $skin = Frx::Data()->getContext('skin');
     if (@is_array($skin['SVGGraph'][$type])) {
@@ -85,6 +86,7 @@ class FrxSVGGraph extends FrxChart {
       if (isset($skin['FrxSVGGraph'])) $skin_options = array_merge($skin['FrxSVGGraph'], $skin_options);
       $options = array_merge($skin_option, $options);
     }
+
 
     if (!isset($options['scatter_2d']) && ($type == 'ScatterGraph' || $type=='MultiScatterGraph') && $this->xy_data && !isset($options['scatter_2d'])) {
       $options['scatter_2d'] = TRUE;
@@ -110,9 +112,13 @@ class FrxSVGGraph extends FrxChart {
     $output = str_replace('<svg width', "<svg viewBox='0 0 $width $height' width", $output);
     $javascript = '/<script[^>]*?>.*?<\/script>/si';
     $noscript = '';
-    if ($this->format != 'web') {
+    if (!$jsinc && $this->format == 'web') {
+      $output .= $graph->FetchJavascript();
+    }
+    else {
       $output = preg_replace($javascript, $noscript, $output);
     }
+
     return $output;
   }
 
