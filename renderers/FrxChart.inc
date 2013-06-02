@@ -85,7 +85,7 @@ class FrxChart extends FrxRenderer {
 
         $val = $this->teng->replace($data_path, TRUE);
         if ($label_path) {
-          $key = $this->teng->replace($label_path, TRUE);
+          $key = strip_tags($this->teng->replace($label_path, FALSE));
         }
         else {
           $key = $i;
