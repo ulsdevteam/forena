@@ -633,6 +633,11 @@ function forena_parameter_form($formid, &$form_state, $parameters, $attributes= 
         //onto the array. options will cause an error for
         //textfield elements.
         if ($list || $type == 'select' || $type =='radios') {
+          if ($add_null) {
+            $prompt = @$options['prompt'];
+            if (!$prompt) $prompt = $required ? '-select-' : '-none-';
+            $form['params'][$id]['#empty_option'] = $prompt ;
+          }
           $form['params'][$id]['#options'] = $list;
           $form['params'][$id]['#multiple'] = $multiselect;
         }
