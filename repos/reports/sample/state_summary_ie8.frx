@@ -4,7 +4,7 @@
 ]>
 <html xmlns:frx="urn:FrxReports">
 <head>
-<title>3. Master Summary with drill down</title>
+<title>6. External SVG Graph Example</title>
 <frx:category>Sample</frx:category>
 <frx:options />
 <frx:parameters>
@@ -21,16 +21,18 @@
 </head>
 <body>
   <div>
-    <p>This report links back to the sample report 2. You can begin
-      to see the possibilities for inter-connecting reports</p>
+    <p>This example demonstrates graphing with SVG in a way that supports
+    older browsers that do not support inline SVG.  If using Internet Explorer prior to version
+    9 you would need an additional plugin to enable SVG support.</p>
   </div>
   <div frx:block="sampledb/users_by_state" id="forena-1">
-    <svg id="state-chart" frx:block="sampledb/users_by_state"
-      frx:renderer="FrxSVGGraph" frx:type="bargraph"
-      frx:xpath="*[total&gt;10000]"
-      frx:link="sample.user_distribution_simple?state={state}"
-      frx:series_1="{total}" frx:label="{state}">
-    </svg>
+    <div
+      frx:src="reports/sample.state_graph.svg?height=400&amp;width=600"
+      frx:renderer="FrxInclude" frx:height="480" frx:width="640">
+      <p>To see a sample graph embedded in this report. Install
+        SVGGraph into your sites/all/libraries folder and enable the SVG
+        document type in the forena document types configuration.</p>
+    </div>
     <table>
       <thead>
         <tr>
