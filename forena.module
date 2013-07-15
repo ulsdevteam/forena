@@ -1271,7 +1271,7 @@ function forena_db_sync($subdir='') {
     $src_file = trim($d->path, '/') . '/' . trim($rpt_file, '/');
     $dest_file = $path . '/' . trim($rpt_file, '/');
     if (is_file($src_file)) {
-      list($base_file, $ext) = explode('.', $rpt_file, 2);
+      @list($base_file, $ext) = explode('.', $rpt_file, 2);
       switch($ext) {
         // Load Forena Reports
         case 'frx':

@@ -46,7 +46,7 @@ function forena_load_cache($r_xhtml) {
       $attrs = $block_node->attributes('urn:FrxReports');
       foreach ($attrs as $key => $value) {
         if ($key == 'block') {
-          list($provider, $block) = explode('/', $value, 2);
+          @list($provider, $block) = explode('/', $value, 2);
           $repos[$provider][] = $block;
         }
       }
