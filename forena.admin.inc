@@ -2103,7 +2103,7 @@ function forena_user_data_blocks($search) {
       foreach ($blocks as $block) {
         $block_info = $o->loadBlock($block);
         if (method_exists($o, 'access')) {
-          $allow = $o->access($block_info['access']);
+          $allow = $o->access(@$block_info['access']);
           if ($allow) $user_blocks[] = $name . '/' . $block;
         }
       }
