@@ -165,6 +165,8 @@ class FrxOracle extends FrxDataSource {
     $db = $this->db;
     $begin_end_block = stripos($sql, 'begin')===FALSE ? FALSE : TRUE;
     $match=array();
+    $collections = array();
+    $return = array();
     if ($db) $stmt = oci_parse($db, $sql);
     if ($stmt) {
       if (preg_match_all(FRX_SQL_TOKEN, $sql, $match)) {
@@ -172,9 +174,9 @@ class FrxOracle extends FrxDataSource {
         $i=0;
         foreach ($match[0] as $match_num => $token) {
           $name = trim($token, ':');
-          $value = $data[$name];
+          $value = @$data[$name];
 
-          list($type, $subtype) = explode(' of ', $types[$name], 2);
+          @list($type, $subtype) = explode(' of ', $types[$name], 2);
           // Default varchar
           if (!$type )$type = 'varchar';
           switch (strtolower($type)) {
