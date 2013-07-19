@@ -141,10 +141,10 @@ class FrxOracle extends FrxDataSource {
     $stmt = oci_parse($db, $sql);
     oci_execute($stmt);
 
-    while ($row = oci_fetch_array($stmt, OCI_ASSOC+OCI_RETURN_NULLS)) {
+    while ($row = oci_fetch_array($stmt, OCI_ASSOC + OCI_RETURN_NULLS + OCI_RETURN_LOBS)) {
       $row_node = $xml->addChild('row');
       foreach ($row as $key => $value) {
-        $row_node->addChild(strtolower($key), htmlspecialchars($value));
+        $row_node->addChild(strtolower($key), @htmlspecialchars($value));
       }
     }
     oci_free_statement($stmt);
