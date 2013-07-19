@@ -314,7 +314,7 @@ function forena_query_preview($form, &$form_state) {
     if ($fields) {
       $report = $t->asXML();
       $rpt = new FrxReport($report, $data);
-      $preview = $rpt->render('web');
+      $preview = $rpt->render('web', FALSE);
     }
     else {
       if (is_object($data) && method_exists($data, 'asXML')) {

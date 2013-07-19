@@ -237,7 +237,7 @@ class FrxReportGenerator {
       $r->processParameters();
       Frx::Skin()->load($r->skin);
       Frx::Skin()->loadSkinFiles($name);
-      $r->render($format);
+      $r->render($format, $print);
       $o =  Frx::Document($format);
       if ($o) {
         $output .= $o->render($r, $format,  array());

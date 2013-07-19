@@ -833,7 +833,7 @@ function forena_report_include($report_name, $parms=array()) {
   //check for default parameters
   $r->processParameters();
   $format = $desc['format'];
-  $r->render($format);
+  $r->render($format, FALSE);
 
   $o =  Frx::Document($format);
   if ($o) {
