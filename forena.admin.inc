@@ -1569,7 +1569,7 @@ function forena_add_data_block_form($formid, &$form_state, $report_name) {
         $body = $template_obj->template();
         $rpt_xml = $template_obj->asXML();
         $parms = $form_state['storage']['parms'];
-        $output = forena_render_report($rpt_xml, NULL, $parms);
+        $output = forena_render_report($rpt_xml, NULL, $parms, NULL, FALSE);
         //render the xml
         $form_state['storage']['output'] = $output;
         $form_state['storage']['template_body'] = $body;
@@ -1681,7 +1681,6 @@ function forena_data_block_add($form, &$form_state) {
   $added_report = forena_clean_xhtml($added_report);
 
   $r->setBody($main_report . "\n" . $added_report);
-
   if (forena_save_report($report_name, $r->asXML(), TRUE) == 1) {
     drupal_set_message(t('Your report has been saved'));
     $form_state['redirect'] = $values['return'];

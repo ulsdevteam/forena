@@ -301,7 +301,7 @@ class FrxReport {
    * Render the report
    * @return unknown_type
    */
-  public function render($format) {
+  public function render($format, $render_form=TRUE) {
     if (!$format) $format = 'web';
     Frx::Data()->push($this->parms, 'parm');
 
@@ -318,7 +318,8 @@ class FrxReport {
       $title = check_plain($this->teng->replace($this->frx_title));
       if ($title) $title = $this->title = $title;
     }
-    if (!$this->rpt_xml->xpath('//*[@frx:renderer="FrxParameterForm"]') && $format=='web') {
+
+    if ($render_form && !$this->rpt_xml->xpath('//*[@frx:renderer="FrxParameterForm"]') && $format=='web') {
       $variables = array('collapse' => $this->blocks_loaded);
       $form = $this->parametersForm($variables);
       $o = drupal_render($form) . $o;

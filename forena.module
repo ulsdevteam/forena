@@ -923,7 +923,7 @@ function forena_report_title_callback($report_name, $use_menu_title=TRUE) {
 function forena_render_report($report, $format='', $data='', $options= array(), $print = TRUE) {
   require_once('forena.common.inc');
   $o = forena_report_object($report, $data);
-  $output = $o->render($format);
+  $output = $o->render($format, $print);
 
   //If a format was requested render a custom non-drupal document
   if ($format && $format != 'web') {
