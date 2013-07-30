@@ -635,7 +635,7 @@ function forena_parameter_form($formid, &$form_state, $parameters, $attributes= 
         if ($list || $type == 'select' || $type =='radios') {
           if ($add_null) {
             $prompt = @$options['prompt'];
-            if (!$prompt) $prompt = $required ? '-select-' : '-none-';
+            if (!$prompt) $prompt = $required ? '-' . t('select') .  '-' : '-none-';
             $form['params'][$id]['#empty_option'] = $prompt ;
           }
           $form['params'][$id]['#options'] = $list;
