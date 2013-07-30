@@ -277,7 +277,7 @@ class FrxEditor {
 
     $this->setFrxHeader('parameters', 'parm',
     $parmElements,
-    array('id', 'label', 'require', 'desc', 'data_source', 'data_field', 'type', 'class', 'options'),
+    array('id', 'label', 'require', 'desc', 'data_source', 'data_field', 'label_field', 'type', 'class', 'options'),
       'value');
   }
 

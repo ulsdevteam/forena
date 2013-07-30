@@ -59,11 +59,16 @@
         </tr>
         <tr>
           <th scope="row" align="left">data field</th>
+          <td><p>Thefield that indicates which lookup values will be used to
+                populate the parameter when a data source is specified.
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <th scope="row" align="left">label field</th>
           <td><p>
-              <span
-                style="color: #3b3b3b; font-family: Georgia, 'Times New Roman', Times, serif; font-size: 14px; line-height: 21px;">The
-                filed that indicates which lookup values will be used to
-                populate the parameter when a data source is specified.</span>
+              The field that indicates which lookup values will be used to
+              populate the parameter when a data source is specified.
             </p>
           </td>
         </tr>

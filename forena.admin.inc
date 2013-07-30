@@ -2288,7 +2288,14 @@ function forena_admin_params_form($formid, $form_state, $report_name) {
           '#type' => 'textfield',
           '#title' => t('Data Field'),
           '#default_value' => $data_field,
-          '#description' => t('Column in data block to be used for ID'),
+          '#description' => t('Column in data block to be used data of select boxes and radio buttons. '),
+          );
+
+          $form['params'][$id]['label_field'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Label Field'),
+            '#default_value' => $label_field,
+            '#description' => t('Column in data block to be used for the label for selet boxes and radio buttons.')
           );
 
           $form['params'][$id]['options'] = array(
