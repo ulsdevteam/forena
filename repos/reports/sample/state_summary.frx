@@ -28,6 +28,7 @@
     <svg id="state-chart" frx:block="sampledb/users_by_state"
       frx:renderer="FrxSVGGraph" frx:type="bargraph"
       frx:xpath="*[total&gt;10000]"
+      frx:color="{color}"
       frx:link="sample.user_distribution_simple?state={state}"
       frx:series_1="{total}" frx:label="{state}">
     </svg>

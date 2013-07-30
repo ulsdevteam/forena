@@ -63,6 +63,12 @@ class FrxChart extends FrxRenderer {
     if ($link) {
       $links = $this->xmlToValues($path, $link, $label);
     }
+
+    // Deal with rare case where attributes are supposed to come from data
+    if (@$attributes['color'] && !is_array($attributes['color']) && strpos($attributes['color'], '{') !==FALSE) {
+      $options['colors'] = $this->xmlToValues($path, $attributes['color']);
+    }
+
     if ($data) {
 
       if (method_exists($this, 'renderChart')) {
