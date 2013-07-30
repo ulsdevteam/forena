@@ -60,15 +60,15 @@
         <tr>
           <th scope="row" align="left">data field</th>
           <td><p>Thefield that indicates which lookup values will be used to
-                populate the parameter when a data source is specified.
+                populate the return values of the select or radio buttons when a data source is specified.
             </p>
           </td>
         </tr>
         <tr>
           <th scope="row" align="left">label field</th>
           <td><p>
-              The field that indicates which lookup values will be used to
-              populate the parameter when a data source is specified.
+              The field that indicates which lookup labels will be used to
+              populate the labels of select or radio buttons when a data source is specified.
             </p>
           </td>
         </tr>
