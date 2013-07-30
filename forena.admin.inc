@@ -2212,16 +2212,17 @@ function forena_admin_params_form($formid, $form_state, $report_name) {
 
         foreach ($nodes as $node) {
           $attrs = $node->attributes();
-          $id = (string)$attrs['id'];
-          $label = (string)$attrs['label'];
-          $value = (string)$attrs['value'] ? (string)$attrs['value'] : (string)$node;
-          $require = (string)$attrs['require'];
-          $data_source = (string)$attrs['data_source'];
-          $data_field = (string)$attrs['data_field'];
-          $class = (string)$attrs['class'];
-          $desc = (string)$attrs['desc'];
-          $type = (string)$attrs['type'];
-          $options = (string)$attrs['options'];
+          $id = @(string)$attrs['id'];
+          $label = @(string)$attrs['label'];
+          $value = @(string)$attrs['value'] ? (string)$attrs['value'] : (string)$node;
+          $require = @(string)$attrs['require'];
+          $data_source = @(string)$attrs['data_source'];
+          $data_field = @(string)$attrs['data_field'];
+          $label_field = @(string)$attrs['label_field'];
+          $class = @(string)$attrs['class'];
+          $desc = @(string)$attrs['desc'];
+          $type = @(string)$attrs['type'];
+          $options = @(string)$attrs['options'];
 
           //make a subtree for each param
           $form['params'][$id] = array(
