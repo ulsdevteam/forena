@@ -1084,7 +1084,7 @@ function forena_report_path() {
  *
  * @return unknown
  */
-function forena_current_user_uid() {
+function forena_current_user_id() {
   global $user;
   return $user->uid;
 }

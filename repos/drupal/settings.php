@@ -14,7 +14,7 @@ $conf['access callback'] = 'user_access';
  *   forena_current_user_uid
  *   forena_current_user_name
  */
-$conf['user callback'] = 'forena_current_user_uid';
+$conf['user callback'] = 'forena_current_user_id';
 /*
  * Data provider:
  * Specify the class name that will be used to interpret data block files.
