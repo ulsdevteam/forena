@@ -4,7 +4,7 @@
  * General Forena Reporting Class
  */
 define('FRX_TOKEN_EXP', '/\{[^\n^\r^}]+}/');
-define('FRX_SQL_TOKEN', '/(?<!:):[a-zA-Z]([a-zA-Z]|[0-9]|[_\.])+/');
+define('FRX_SQL_TOKEN', '/(?<!(:|[a-zA-Z]|[0-9]|[_\.])):[a-zA-Z]([a-zA-Z]|[0-9]|[_\.])+/');
 
 class Frx {
 

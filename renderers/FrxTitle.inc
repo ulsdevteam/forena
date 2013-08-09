@@ -13,4 +13,3 @@ class FrxTitle extends FrxRenderer {
     return '';
 
   }
-}
