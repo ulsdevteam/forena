@@ -35,6 +35,7 @@ class FrxTemplate {
 
   public function columns($xml, $path='/*/*') {
     //create an array of columns
+    if (!is_object($xml)) return array();
     $rows = $xml->xpath($path);
     $column_array = array();
     $this->columns = array();

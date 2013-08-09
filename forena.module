@@ -1080,6 +1080,13 @@ function forena_report_path() {
 }
 
 /**
+ * Rename function for backwards compatibility
+ */
+function forena_current_user_uid() {
+  return forena_current_user_id();
+}
+
+/**
  * Helper function for current user for the drupal instance
  *
  * @return unknown

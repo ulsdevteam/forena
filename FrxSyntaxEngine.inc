@@ -79,7 +79,11 @@ class FrxSyntaxEngine {
         $retvar = $this->simplexml_evaluate($data, ltrim($key, '='));
       }
       else {
-        $rows = $data->xpath($key);
+
+        $rows = @$data->xpath($key);
+        if ($rows === FALSE) {
+          drupal_set_message(t('Invalid field: "%s"', array('%s' => $key)), 'error', FALSE);
+        }
         $x ='';
         if ($rows) $x = $rows[0];
 

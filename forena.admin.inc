@@ -1551,7 +1551,12 @@ function forena_add_data_block_form($formid, &$form_state, $report_name) {
     $xml = $form_state['storage']['xml'];
     if ($xml) {
 
-      $xml = new SimpleXMLElement($xml);
+      try {
+        $xml = @new SimpleXMLElement($xml);
+      }
+      catch (Exception $e ) {
+        drupal_set_message(t('Could not create xml from %s.  Verify that all columns names are valid XML tag names and have no spaces or other special characters.', array('%s' => $form_state['storage']['data_block'])), 'error', FALSE);
+      }
       //create xml from template object
       $template_obj = FrxReportGenerator::instance()->get_templates($template);
       if ($template_obj) {
