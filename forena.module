@@ -455,10 +455,14 @@ function forena_parameters_report() {
 
 function forena_parameter_form($formid, &$form_state, $parameters, $attributes= array()) {
   $parms = $_GET;
+  // Set menu parms
   $menu_parms = Frx::Data()->getContext('menu-parms');
-  if ($menu_parms) {
-    $form_state['storage']['menu-parms'] = $menu_parms;
-  }
+  if ($menu_parms) $form_state['storage']['menu-parms'] = $menu_parms;
+  // Set Descriptors
+  $desc = FrxData::instance()->getContext('forenaReport');
+  if ($desc) $form_state['storage']['desc'] = $desc;
+  $desc = $form_state['storage']['desc'];
+
   if (isset($form_state['values'])) {
     $collapse=FALSE;
     $parms = array_merge($parms, $form_state['values']['params']);
@@ -479,7 +483,8 @@ function forena_parameter_form($formid, &$form_state, $parameters, $attributes= 
   $form = array();
 
   if ($parameters) {
-    $report_name = '';
+
+    $report_name = @$desc['name'];
     drupal_alter('forena_parameters', $report_name,  $parms);
     if ($parameters) {
 
@@ -796,7 +801,10 @@ function forena_report($name_in, $parms = array(), $print = TRUE) {
     exit;
   }
 
+
+
   FrxData::instance()->setContext('cookie', $_COOKIE);
+  FrxData::instance()->setContext('forenaReport', $desc);
   $report_name = $desc['name'];
   // Load dataTable plugin if possible.
   //forena_include_data_tables();

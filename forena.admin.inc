@@ -2233,7 +2233,7 @@ function forena_admin_params_form($formid, $form_state, $report_name) {
           $form['params'][$id] = array(
           '#tree' => TRUE,
           '#type' => 'fieldset',
-          '#title' => ($label) ? $label : $id,
+          '#title' => ($label) ? $label . ' (' . $id . ')' : $id,
           '#collapsible' => TRUE,
           '#collapsed' => TRUE,
           '#group' => 'additional_settings',
