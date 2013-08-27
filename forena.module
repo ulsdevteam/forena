@@ -462,6 +462,7 @@ function forena_parameter_form($formid, &$form_state, $parameters, $attributes= 
   $desc = FrxData::instance()->getContext('forenaReport');
   if ($desc) $form_state['storage']['desc'] = $desc;
   $desc = $form_state['storage']['desc'];
+  $report_name = @$desc['name'];
 
   if (isset($form_state['values'])) {
     $collapse=FALSE;
@@ -472,6 +473,7 @@ function forena_parameter_form($formid, &$form_state, $parameters, $attributes= 
       $parms = array_merge($menu_parms,$parms);
 
     }
+    drupal_alter('forena_parameters', $report_name,  $parms);
     Frx::Data()->push($parms, 'parm');
   }
   $collapse = isset($attributes['collapse']) ? $attributes['collapse'] : FALSE;
@@ -479,13 +481,14 @@ function forena_parameter_form($formid, &$form_state, $parameters, $attributes= 
   $collapsible = isset($attributes['collapsible']) ? $attributes['collapsible'] : TRUE;
   $title = isset($attributes['title']) ? $attributes['title'] : t('Parameters');
   $submit_value = isset($attributes['submit']) ? $attributes['submit'] : t('Submit');
+
   unset($parms['q']);
   $form = array();
 
+
   if ($parameters) {
 
-    $report_name = @$desc['name'];
-    drupal_alter('forena_parameters', $report_name,  $parms);
+    //drupal_alter('forena_parameters', $report_name,  $parms);
     if ($parameters) {
 
       $form['params'] = array(
