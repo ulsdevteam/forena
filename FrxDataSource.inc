@@ -250,7 +250,7 @@ class FrxDataSource{
 
   public function parseXMLFile($contents) {
     $comment = $this->comment_prefix;
-    $trim = $this->comment_suffix;
+    $trim = '->';
     $lines = explode("\n", $contents);
     $cnt = count($lines);
     $access = '';
