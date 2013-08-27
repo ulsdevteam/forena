@@ -54,6 +54,10 @@ class FrxDrupal extends FrxDataSource {
     if ($this->database != 'default') {
       db_set_active();
     }
+    if ($this->debug) {
+      $d = ($xml) ? htmlspecialchars($xml->asXML()) : '';
+      $this->debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "\n</pre>");
+    }
     return $xml;
   }
 
