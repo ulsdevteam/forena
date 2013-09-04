@@ -15,7 +15,7 @@ class FrxDrupalNode {
     if (!$nid && !$vid) return '';
     $node = node_load($nid, $vid);
     $return = new SimpleXMLElement('<node/>');
-    $lang = isset($node->language) ? $node->language : 'unk';
+    $lang = isset($node->language) ? $node->language : 'und';
     $display = isset($parms['display']) ? $parms['display'] : 'default';
     if ($node) foreach ($node as $key => $val) if ($val) {
       if (strpos($key, 'field_') === 0) {

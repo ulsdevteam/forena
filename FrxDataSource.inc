@@ -17,6 +17,7 @@ class FrxDataSource{
   public $types;
   public $block_name;
   protected $te;
+  public $debug = FALSE;
   public function __construct($conf, $repos_path, $name) {
     $this->conf = $conf;
     $this->comment_prefix = '--';
@@ -306,6 +307,7 @@ class FrxDataSource{
     $file = '';
     $skip = FALSE;
     $tokens = array();
+    $options = array();
     while ($i<$cnt) {
       $l = trim($lines[$i], "\r");
       @list($d, $c) = explode($comment, $l, 2);
@@ -335,6 +337,8 @@ class FrxDataSource{
                 $tokens = array_merge($tokens, $inc_block['tokens']);
               }
               break;
+            default:
+              $options[$a] = $o;
           }
 
         }
@@ -355,16 +359,17 @@ class FrxDataSource{
     }
     $tokens = array_merge($tokens, $this->tokens($contents));
     $block = array( 'source' => $data, 'file' => trim($file, " \n"),
-      'tokens' => $tokens);
+      'tokens' => $tokens, 'options' => $options);
     if ($access) $block['access'] = $access;
     return $block;
   }
 
   /**
    * Dummy method for returning sql data
-   * @param unknown_type $parameters
+   * @param $parameters array Block parameters
+   * @param $block array extra block options for data provider.
    */
-  public function sqlData($parameters) {
+  public function sqlData($parameters, $options= array()) {
     return '';
   }
 

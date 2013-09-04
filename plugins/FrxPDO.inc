@@ -74,7 +74,7 @@ class FrxPDO extends FrxDataSource {
    * @param Array $parm_data
    * @param Query $subQuery
    */
-  public function sqlData($sql) {
+  public function sqlData($sql, $options = array()) {
     // Load the block from the file
     $db = $this->db;
     $xml ='';

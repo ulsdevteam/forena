@@ -33,7 +33,7 @@ class FrxDrupal extends FrxDataSource {
    * @param Array $parm_data
    * @param Query $subQuery
    */
-  public function sqlData($sql) {
+  public function sqlData($sql, $options = array()) {
     if ($this->database != 'default') {
       db_set_active($this->database);
     }
@@ -42,15 +42,52 @@ class FrxDrupal extends FrxDataSource {
     $sql = $this->te->replace($sql);
     $rs = db_query($sql);
 
+
     $xml = new SimpleXMLElement('<table/>');
     foreach ($rs as $data) {
       $row_node = $xml->addChild('row');
+      /* If we have asked for one, lets load the entities based on
+         the entity type and entity id that is specified in the block
+         comments. */
+      if (@$options['ENTITY_TYPE']  && @$options['ENTITY_ID'] ) {
+        $id_key = $options['ENTITY_ID'];
+        $id = $data->$id_key;
+        if ($id) {
+          $type = $options['ENTITY_TYPE'];
+          $e = entity_load($type, (array) $id);
+          $lang = isset($e->language) ? $e->language : 'und';
+          if ($e) foreach ($e[$id] as $key => $val) if ($val) {
+            if (strpos($key, 'field_') === 0) {
+              //$fields = field_get_items('node', $node, $key);
+              $field = field_view_field($type, $e, $key);
+              $field['#theme'] = array('forena_inline_field');
+              $value  = drupal_render($field);
+              $f = $row_node->addChild($key, $value);
+              if (isset($field['#field_type'])) $f['type'] = $field['#field_type'];
+              if (isset($field['#field_name'])) $f['name'] = $field['#field_name'];
+            } else if (is_array($val) && isset($val[$lang])) {
+              dpm('in here');
+              $tmp = $val[$lang][0];
+              if (isset($tmp['safe_value'])) {
+                $row_node->addChild($key, $tmp['safe_value']);
+              } else if (isset($tmp['value'])) {
+                $row_node->addChild($key, $tmp['value']);
+              }
+            } else if (is_scalar($val)) {
+              $row_node->addChild($key, $val);
+            }
+          }
 
-      foreach ($data as $key => $value) {
-        $row_node->addChild($key, htmlspecialchars($value));
-        //$row_node->$key = $value;
+        }
+      } else {
+        foreach ($data as $key => $value) {
+          $row_node->addChild($key, htmlspecialchars($value));
+          //$row_node->$key = $value;
+        }
       }
     }
+
+
     if ($this->database != 'default') {
       db_set_active();
     }

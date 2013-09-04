@@ -243,7 +243,7 @@ class FrxRepoMan {
       if ($block && $o->access($right)) {
         switch ($block['type'])  {
           case 'sql':
-            $xml = $o->sqlData($block['source']);
+            $xml = $o->sqlData($block['source'], @$block['options']);
             break;
           case 'xml':
             $xml = $o->xmlData($block['source']);
