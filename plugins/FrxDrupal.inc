@@ -41,22 +41,65 @@ class FrxDrupal extends FrxDataSource {
     $xml ='';
     $sql = $this->te->replace($sql);
     $rs = db_query($sql);
+    $entity_map = array();
 
 
     $xml = new SimpleXMLElement('<table/>');
     foreach ($rs as $data) {
       $row_node = $xml->addChild('row');
-      /* If we have asked for one, lets load the entities based on
-         the entity type and entity id that is specified in the block
-         comments. */
+      /* If we are querying entities, we will store away IDs
+       * for later querying and XML processing in the
+       * loadEntitys method
+       */
       if (@$options['ENTITY_TYPE']  && @$options['ENTITY_ID'] ) {
+
         $id_key = $options['ENTITY_ID'];
+        $type = $options['ENTITY_TYPE'];
         $id = $data->$id_key;
         if ($id) {
-          $type = $options['ENTITY_TYPE'];
-          $e = entity_load($type, (array) $id);
-          $lang = isset($e->language) ? $e->language : 'und';
-          if ($e) foreach ($e[$id] as $key => $val) if ($val) {
+          $entity_map[$id] = $row_node;
+        }
+      } else {
+        foreach ($data as $key => $value) {
+          $row_node->addChild($key, htmlspecialchars($value));
+          //$row_node->$key = $value;
+        }
+      }
+
+    }
+
+
+    if ($this->database != 'default') {
+      db_set_active();
+    }
+    if ($entity_map) {
+      $this->loadEntities($type, $entity_map);
+    }
+    if ($this->debug) {
+      $d = ($xml) ? htmlspecialchars($xml->asXML()) : '';
+      $this->debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "\n</pre>");
+    }
+    return $xml;
+  }
+
+  /**
+   * Perform a bulk load of entities 100 at a time and then join data back onto the simplexml already created.
+   * @param $type Type of entity being loaded.
+   * @param $entity_map Map of entity ids to nodes.
+   */
+  private function loadEntities($type, $entity_map) {
+    // Do these 100 at a time for performance reasons
+    $chunks = array_chunk($entity_map, 100, TRUE);
+    foreach ($chunks as $chunk) {
+      $ids = array_keys($chunk);
+
+      $data = entity_load($type, $ids);
+
+      if ($data) foreach ($data as $id => $e) {
+        $lang = isset($e->language) ? $e->language : 'und';
+        if (isset($entity_map[$id])) {
+          $row_node = $entity_map[$id];
+          foreach ($e as $key => $val) if ($val) {
             if (strpos($key, 'field_') === 0) {
               //$fields = field_get_items('node', $node, $key);
               $field = field_view_field($type, $e, $key);
@@ -66,7 +109,6 @@ class FrxDrupal extends FrxDataSource {
               if (isset($field['#field_type'])) $f['type'] = $field['#field_type'];
               if (isset($field['#field_name'])) $f['name'] = $field['#field_name'];
             } else if (is_array($val) && isset($val[$lang])) {
-              dpm('in here');
               $tmp = $val[$lang][0];
               if (isset($tmp['safe_value'])) {
                 $row_node->addChild($key, $tmp['safe_value']);
@@ -77,25 +119,10 @@ class FrxDrupal extends FrxDataSource {
               $row_node->addChild($key, $val);
             }
           }
-
-        }
-      } else {
-        foreach ($data as $key => $value) {
-          $row_node->addChild($key, htmlspecialchars($value));
-          //$row_node->$key = $value;
         }
       }
     }
 
-
-    if ($this->database != 'default') {
-      db_set_active();
-    }
-    if ($this->debug) {
-      $d = ($xml) ? htmlspecialchars($xml->asXML()) : '';
-      $this->debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "\n</pre>");
-    }
-    return $xml;
   }
 
   /**
