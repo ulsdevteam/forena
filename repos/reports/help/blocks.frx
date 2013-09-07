@@ -67,17 +67,17 @@
   </p>
   <pre>
   --ACCESS=access content
-	SELECT nid FROM node 
-	  WHERE promote=1
-	    AND status=1
-	  ORDER BY sticky DESC, created 
-	--IF=:limit
-	LIMIT :limit 
-	--ELSE 
-	LIMIT 10
-	--END
-	--INFO
-	type[limit]=int
+  SELECT nid FROM node 
+    WHERE promote=1
+      AND status=1
+    ORDER BY sticky DESC, created 
+  --IF=:limit
+  LIMIT :limit 
+  --ELSE 
+  LIMIT 10
+  --END
+  --INFO
+  type[limit]=int
   </pre>
   <p>In the above example, the :limit parameter is specified to be of type int.  The following type conversions are 
   currently supported:</p>
@@ -103,7 +103,7 @@
   WHERE code='AL'
   --END
   ORDER BY NAME
-	</pre>
+  </pre>
   <p>In the above example the Where clause is only added when there
     is a value specified for :state. If no value for :state is provided
     the WHERE clause limits the selection to code of 'AL'. The order by
@@ -112,12 +112,12 @@
   <p>Blocks can be build from other data blocks. To accomplish this
     use the --INCLUDE directive as follows:</p>
   <pre>
-	--ACCESS=access content
-	SELECT * FROM (
-	--INCLUDE=users_by_state
-	) t
-	WHERE state=:state
-	</pre>
+  --ACCESS=access content
+  SELECT * FROM (
+  --INCLUDE=users_by_state
+  ) t
+  WHERE state=:state
+  </pre>
   <p>Note that when icluding other data blocks you can only include
     blocks within the same repository, and that the security of the new
     datablock is the security that is used for that data. The --ACCESS
@@ -128,14 +128,14 @@
    in the --INFO section of your data block as is shown in the following example: 
   </p>
   <pre>
-	--ACCESS=access content
-	SELECT nid, type, title, uid, sticky, promote from node WHERE type=:content_type
-	  and status=1 
-	  ORDER BY title
-	--INFO
-	; This demonstrates loading node entities.
-	entity_type = node
-	entity_id = nid
+  --ACCESS=access content
+  SELECT nid, type, title, uid, sticky, promote from node WHERE type=:content_type
+    and status=1 
+    ORDER BY title
+  --INFO
+  ; This demonstrates loading node entities.
+  entity_type = node
+  entity_id = nid
   </pre>
   <p>The example illustrates loading a node, but any entity may be loaded. 
   </p>
