@@ -99,9 +99,9 @@ class FrxDrupal extends FrxDataSource {
       $data = entity_load($type, $ids);
 
       if ($data) foreach ($data as $id => $e) {
-        $lang = isset($e->language) ? $e->language : 'und';
         if (isset($entity_map[$id])) {
           $row_node = $entity_map[$id];
+          $lang = isset($e->language) ? $e->language : 'und';
           foreach ($e as $key => $val) if ($val) {
             if (strpos($key, 'field_') === 0) {
               //$fields = field_get_items('node', $node, $key);
@@ -118,7 +118,14 @@ class FrxDrupal extends FrxDataSource {
               } else if (isset($tmp['value'])) {
                 $row_node->addChild($key, $tmp['value']);
               }
-            } else if (is_scalar($val)) {
+            } else if (is_array($val) && isset($val['und'])) {
+              $tmp = $val['und'][0];
+              if (isset($tmp['safe_value'])) {
+                $row_node->addChild($key, $tmp['safe_value']);
+              } else if (isset($tmp['value'])) {
+                $row_node->addChild($key, $tmp['value']);
+              }
+            }else if (is_scalar($val)) {
               $row_node->addChild($key, $val);
             }
           }
