@@ -6,14 +6,14 @@
 function forena_drush_command() {
   $items = array();
 
-  $items['clear-forena-cache'] = array(
-    'description' => 'Clear forenas report cache',
+  $items['forena-clear-cache'] = array(
+    'description' => 'Forena clear report cache',
     'examples' => array('drush frxcc'),
     'aliases' => array('frxcc')
   );
 
-  $items['deliver-forena-reports'] = array(
-    'description' => 'Copy/Deliver module provided forena reports',
+  $items['forena-deliver-reports'] = array(
+    'description' => 'Forena Copy/Deliver module provided forena reports',
     'examples' => array('drush frxcp'),
     'aliases' => array('frxcp'),
   );
@@ -23,7 +23,7 @@ function forena_drush_command() {
 /**
  * Execute a clear forena's cache from drush
  */
-function drush_forena_clear_forena_cache() {
+function drush_forena_clear_cache() {
   require_once 'forena.common.inc';
   require_once 'forena.admin.inc';
   forena_sync_reports(FALSE);
@@ -32,7 +32,7 @@ function drush_forena_clear_forena_cache() {
 /**
  * Execute copy of the reports from drush.
  */
-function drush_forena_deliver_forena_reports() {
+function drush_forena_deliver_reports() {
   require_once 'forena.common.inc';
   require_once 'forena.admin.inc';
   forena_sync_reports(TRUE);
