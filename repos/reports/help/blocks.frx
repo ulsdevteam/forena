@@ -26,9 +26,9 @@
     WHERE p.rid = :role
 </pre>
   <p>The content of a data block is a SQL statement.&nbsp;</p>
-  <h3>Security and data blocks&nbsp;</h3>
+  <h3>Security and data blocks</h3>
   <p>
-    The line beginning with<strong>&nbsp;--ACCESS=<em>some_permission</em>
+    The line beginning with<strong>--ACCESS=<em>some_permission</em>
     </strong> is a required comment that indicates the permission required to
     access the data retrived by this block. The security for data block
     repository is configurable and pluggable, meaning that developers
@@ -55,10 +55,43 @@
     binding for any database you are accessing with Forena. Tokens may
     be reference multiple times within the same SQL query.
   </p>
+  <h3>Parameter Data Types</h3>
+  <p>All data coming in from parameter forms and from the url is considered string 
+  data.  In some cases you may need to make sure that a data block casts the incoming parameters
+  in a particular type.  Numeric values should be included in the SQL without surrounding quotes, but
+  in a way that is safe from SQL injection attacks.   
+  </p>
+  <p>
+  You can use the --INFO section of your data block to specify data types for parameters in the data block as is 
+  seen in the following example: 
+  </p>
+  <pre>
+  --ACCESS=access content
+	SELECT nid FROM node 
+	  WHERE promote=1
+	    AND status=1
+	  ORDER BY sticky DESC, created 
+	--IF=:limit
+	LIMIT :limit 
+	--ELSE 
+	LIMIT 10
+	--END
+	--INFO
+	type[limit]=int
+  </pre>
+  <p>In the above example, the :limit parameter is specified to be of type int.  The following type conversions are 
+  currently supported:</p>
+  <p><strong>int</strong> - Convert to an integer. This is useful for limit queries as in the above example. </p>
+  <p><strong>numeric</strong> - Convert to a floating point number (e.g. 6.2)</p>
+  <p><strong>array</strong> - Convert to an array.  This is useful for in clauses</p>
+  <p><strong>date</strong> - Convert to an ISO representation of a date string in YYYY-MM-DD HH:MI:SS format.  PHP date
+  creation syntax is supported, so you can use values like now + 1 year</p>
+  <p><strong>unixtime</strong> - Convert to a unix timestamp version of time and treat this as an integer.   This is particularly 
+  useful for working with drupal dates.  PHP date creation syntax is supported, so you can use values lke now + 1 year. </p>
   <h3>Conditional SQL</h3>
   <p>When building data blocks you can specifcy sections of sql that
     are only included if a particular parameter is present. This lets
-    you creqte SQL that has optional filters that can be of signifciant
+    you create SQL that has optional filters that can be of signifciant
     complexity and don't get included unless needed. The following
     example illustrates this technique</p>
   <pre>
@@ -89,10 +122,26 @@
     blocks within the same repository, and that the security of the new
     datablock is the security that is used for that data. The --ACCESS
     line of the included block is ignored.</p>
+  <h3>Drupal Entities</h3>
+  <p>When using the Drupal data driver you can create data blocks that 
+   load drupal entities instead of selecting columns from the database. To do this specify an entity_type and entity_id column 
+   in the --INFO section of your data block as is shown in the following example: 
+  </p>
+  <pre>
+	--ACCESS=access content
+	SELECT nid, type, title, uid, sticky, promote from node WHERE type=:content_type
+	  and status=1 
+	  ORDER BY title
+	--INFO
+	; This demonstrates loading node entities.
+	entity_type = node
+	entity_id = nid
+  </pre>
+  <p>The example illustrates loading a node, but any entity may be loaded. 
+  </p>
 
   <ul id="forena-1" frx:block="forena_help/admin_topics">
     <li id="forena-2" frx:foreach="*"><span>{title}</span></li>
   </ul>
-  <p>&nbsp;</p>
 </body>
 </html>
