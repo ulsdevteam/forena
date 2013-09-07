@@ -496,6 +496,12 @@ class FrxDataSource{
     return $clause;
   }
 
+  /**
+   * Perform generic type conversion based on attributes.
+   * @param  $key The token key for parameter replacement.
+   * @param  $value The value of the parameter
+   * @return Ambigous <NULL, array>
+   */
   public function parmConvert($key, $value) {
     if (isset($this->types[$key]) && $this->types[$key]) {
       if ($value === NULL || $value ==='') {
@@ -503,6 +509,24 @@ class FrxDataSource{
       }
       else {
         switch (strtolower($this->types[$key])) {
+          case 'date':
+            $time = @new DateTime($value);
+            if ($time) {
+              $value   = date_format($time, 'Y-m-d H:i:s');
+            }
+            else {
+              $value = NULL;
+            }
+            break;
+          case 'unixtime':
+            $time = @new DateTime($value);
+            if ($time) {
+              $value   = $time->getTimeStamp();
+            }
+            else {
+              $value = NULL;
+            }
+            break;
           case 'numeric':
           case 'flaot':
             $value = (float)$value;
