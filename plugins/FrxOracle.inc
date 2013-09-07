@@ -280,6 +280,7 @@ class FrxOracle extends FrxDataSource {
    * @param unknown_type $data
    */
   public function format($value, $key, $data) {
+    $value = $this->parmConvert($key, $value);
     if ($value==='' || $value ===NULL || $value ===array())
     $value = 'NULL';
     else {
@@ -304,11 +305,20 @@ class FrxOracle extends FrxDataSource {
           $value = $val . ')';
         }
       }
+      elseif (is_int($value)) {
+        $value = (int)$value;
+        $value = (string)$value;
+      }
+      elseif (is_float($value)) {
+        $value = (float)$value;
+        $value = (string)$value;
+      }
       else {
         $value = trim($value);
         $value =  "'" . str_replace("'", "''", $value) . "'";
       }
     }
+
     return $value;
   }
 

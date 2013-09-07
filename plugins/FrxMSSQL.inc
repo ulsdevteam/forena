@@ -65,6 +65,8 @@ class FrxMSSQL extends FrxDataSource {
     // Load the block from the file
     $db = $this->db;
     $xml ='';
+    // Load the types array based on data
+    $this->types = isset($options['type']) ? $options['type'] : array();
     if ($sql && $db) {
       $sql = $this->te->replace($sql);
 
@@ -137,7 +139,19 @@ class FrxMSSQL extends FrxDataSource {
    * @param unknown_type $data
    */
   public function format($value, $key, $data) {
-    if ($value===''||$value===NULL) $value = 'NULL'; else $value = "'" . str_replace("'", "''", $value) . "'";
+    $value = $this->parmConvert($key, $value);
+    if ($value===''||$value===NULL) {
+      $value = 'NULL';
+    }
+    elseif (is_int($value)) {
+      $value = (int)$value;
+      $value = (string)$value;
+    }
+    elseif (is_float($value)) {
+      $value = (float)$value;
+      $value = (string)$value;
+    }
+    else $value = "'" . str_replace("'", "''", $value) . "'";
     return $value;
   }
 

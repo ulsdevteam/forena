@@ -136,9 +136,18 @@ class FrxPDO extends FrxDataSource {
    */
   public function format($value, $key, $data) {
     $db = $this->db;
+    $value = $this->parmConvert($key, $value);
     if ($db) {
       if ($value==='' || $value ===NULL || $value === array()) {
         $value = 'NULL';
+      }
+      elseif (is_int($value)) {
+        $value = (int)$value;
+        $value = (string)$value;
+      }
+      elseif (is_float($value)) {
+        $value = (float)$value;
+        $value = (string)$value;
       }
       elseif (is_array($value)) {
         if ($value == array()) {

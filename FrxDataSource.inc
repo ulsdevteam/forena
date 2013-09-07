@@ -495,6 +495,30 @@ class FrxDataSource{
     }
     return $clause;
   }
+
+  public function parmConvert($key, $value) {
+    if (isset($this->types[$key]) && $this->types[$key]) {
+      if ($value === NULL || $value ==='') {
+        $value = NULL;
+      }
+      else {
+        switch (strtolower($this->types[$key])) {
+          case 'numeric':
+          case 'flaot':
+            $value = (float)$value;
+            break;
+          case 'int':
+          case 'integer':
+            $value = (int)$value;
+            break;
+          case 'array':
+            $value = (array)$value;
+            break;
+        }
+      }
+    }
+    return $value;
+  }
 }
 
 

@@ -37,6 +37,9 @@ class FrxDrupal extends FrxDataSource {
     if ($this->database != 'default') {
       db_set_active($this->database);
     }
+    // Load the types array based on data
+    $this->types = isset($options['type']) ? $options['type'] : array();
+
     // Load the block from the file
     $xml ='';
     $sql = $this->te->replace($sql);
@@ -136,6 +139,7 @@ class FrxDrupal extends FrxDataSource {
    */
   public function format($value, $key, $data) {
     $db = Database::getConnection('default');
+    $value = $this->parmConvert($key, $value);
     if ($db) {
       if ($value==='' || $value===NULL)
       $value = 'NULL';
@@ -157,6 +161,14 @@ class FrxDrupal extends FrxDataSource {
             }
             $value = $val;
           }
+        }
+        elseif (is_int($value)) {
+          $value = (int)$value;
+          $value = (string)$value;
+        }
+        elseif (is_float($value)) {
+          $value = (float)$value;
+          $value = (string)$value;
         }
         else {
           $value = trim($value);
