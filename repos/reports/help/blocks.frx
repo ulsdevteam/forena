@@ -20,11 +20,11 @@
     database repository. Below is the contents of the
     drupal/role_permissions data block that demonstrates role
     permissions.</p>
-  <pre frx:renderer="FrxSource">
+  <pre>
   --ACCESS=administer permissions
-  SELECT * FROM {role_permission} p&nbsp;
+  SELECT * FROM {role_permission} p
     WHERE p.rid = :role
-</pre>
+  </pre>
   <p>The content of a data block is a SQL statement.&nbsp;</p>
   <h3>Security and data blocks</h3>
   <p>
