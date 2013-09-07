@@ -306,6 +306,8 @@ class FrxDataSource{
     $source = '';
     $file = '';
     $skip = FALSE;
+    $in_info = FALSE;
+    $info_text = '';
     $tokens = array();
     $options = array();
     while ($i<$cnt) {
@@ -316,7 +318,10 @@ class FrxDataSource{
         $c = trim($c);
         @list($a, $o) = explode('=', $c, 2);
         $a = trim($a);
-        if (($a && $o) || $c == 'END' || $c == 'ELSE' ) {
+        if (($a && $o) || $c == 'END' || $c == 'ELSE' || $c == 'INFO') {
+          if ($c != 'INFO' ) {
+            $in_info = false;
+          }
           switch ($a) {
             case 'ACCESS':
               $access = trim($o);
@@ -330,6 +335,9 @@ class FrxDataSource{
             case 'ELSE':
               $skip = !$skip;
               break;
+            case 'INFO':
+              $in_info = TRUE;
+              break;
             case 'INCLUDE':
               $inc_block = $this->getSQLInclude(trim($o));
               if ($inc_block) {
@@ -337,8 +345,6 @@ class FrxDataSource{
                 $tokens = array_merge($tokens, $inc_block['tokens']);
               }
               break;
-            default:
-              $options[$a] = $o;
           }
 
         }
@@ -349,7 +355,9 @@ class FrxDataSource{
 
         $file .= "$l\n";
       }
-      if (!$skip) {
+      if ($in_info) {
+        if (strpos($l, $comment)!==0 && $l) $info_text .= "$l\n";
+      } elseif (!$skip) {
         if (strpos($l, $comment)!==0 && $l) {
           $data .= "$l\n";
         }
@@ -358,6 +366,8 @@ class FrxDataSource{
       $i++;
     }
     $tokens = array_merge($tokens, $this->tokens($contents));
+    $options = drupal_parse_info_format($info_text);
+
     $block = array( 'source' => $data, 'file' => trim($file, " \n"),
       'tokens' => $tokens, 'options' => $options);
     if ($access) $block['access'] = $access;

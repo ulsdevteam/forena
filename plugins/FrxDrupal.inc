@@ -51,10 +51,10 @@ class FrxDrupal extends FrxDataSource {
        * for later querying and XML processing in the
        * loadEntitys method
        */
-      if (@$options['ENTITY_TYPE']  && @$options['ENTITY_ID'] ) {
+      if (@$options['entity_type']  && @$options['entity_id'] ) {
 
-        $id_key = $options['ENTITY_ID'];
-        $type = $options['ENTITY_TYPE'];
+        $id_key = $options['entity_id'];
+        $type = $options['entity_type'];
         $id = $data->$id_key;
         if ($id) {
           $entity_map[$id] = $row_node;
