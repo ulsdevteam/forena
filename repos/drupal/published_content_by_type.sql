@@ -6,4 +6,3 @@ SELECT nid, type, title, uid, sticky, promote from node WHERE type=:content_type
 ; This demonstrates loading node entities.
 entity_type = node
 entity_id = nid
-type[limit] = int

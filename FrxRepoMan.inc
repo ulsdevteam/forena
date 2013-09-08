@@ -294,7 +294,8 @@ class FrxRepoMan {
       $data = $o->parseSQLFile($sql);
       //now get the built SQL back
       $sql = $data['source'];
-      $xml = $o->sqlData($sql);
+      dpm($data);
+      $xml = $o->sqlData($sql, @$data['options']);
       Frx::Data()->pop();
     }
     return $xml;
