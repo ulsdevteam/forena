@@ -420,7 +420,6 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
  */
 function theme_forena_inline_field(&$variables) {
   $element = $variables['field'];
- // dpm($variables);
   // This is also used in the installer, pre-database setup.
   drupal_render_children($variables['field']);
 }
