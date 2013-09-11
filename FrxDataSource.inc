@@ -246,7 +246,12 @@ class FrxDataSource{
   }
 
   public function error($msg='', $log='') {
-    FrxReportGenerator::instance()->app->error($msg, $log);
+    if ($msg) {
+      drupal_set_message(check_markup($msg), 'error');
+    }
+    if ($log) {
+      watchdog('forena', $log, NULL, WATCHDOG_ERROR);
+    }
   }
 
   public function parseXMLFile($contents) {

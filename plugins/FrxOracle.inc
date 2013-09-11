@@ -227,11 +227,11 @@ class FrxOracle extends FrxDataSource {
           $e = oci_error($stmt);  // For oci_execute errors pass the statement handle
           //drupal_set_message(e_display_array($e));
           if ($e['code'] != '1403') {
-            $msg .=  htmlentities($e['message']);
+            $msg =  htmlentities($e['message']);
             $msg .= "\n<pre>\n";
             $msg .= htmlentities($e['sqltext']);
             $msg .= "\n</pre>\n";
-            ora_error('', $msg);
+            $this->error('', $msg);
           }
         }
       }
@@ -241,7 +241,7 @@ class FrxOracle extends FrxDataSource {
         $msg .= htmlentities($e['sqltext']);
         //printf("\n%".($e['offset']+1)."s", "^");
         $msg .= "\n</pre>\n";
-        ora_error('Database error, see logs for info', $msg);
+        $this->error('Database error, see logs for info', $msg);
       }
 
       // Retrieve any clob data.
