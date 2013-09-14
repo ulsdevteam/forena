@@ -36,7 +36,7 @@ class FeedsForenaBlockFetcher extends FeedsFetcher {
     // Just return a Block result if this is a Block.
     $r = Frx::RepoMan();
     $block = $source_config['source'];
-    $data = @$source_config['data'];
+    $data = @drupal_parse_info_format($source_config['data']);
     if ($r->loadBlock($block)) {
       return new FeedsForenaBlockFetcherResult($block, $data);
     }
@@ -53,13 +53,16 @@ class FeedsForenaBlockFetcher extends FeedsFetcher {
       '#title' => 'Data Block',
       '#required' => TRUE,
       '#description' => t('Select an exising block.'),
+      '#default_value' => isset($source_config['source']) ? $source_config['source'] : '',
     );
 
     $form['data'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Data block parameters as defined in the block. '),
-      '#description' => t('URL Parameters'),
+      '#type' => 'textarea',
+      '#title' => t('Parameters  '),
+      '#description' => t('Specify one per line the key value pairs that will be used when fetching the data.   The format
+          used is the same as in .info files.'),
       '#default_value' => isset($source_config['data']) ? $source_config['data'] : '',
+      '#rows' => 20,
       '#maxlength' => NULL,
       '#required' => FALSE,
     );

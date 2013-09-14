@@ -7,7 +7,7 @@ function _forena_feeds_plugins() {
 
   $info['FeedsForenaBlockFetcher'] = array(
     'name' => 'Forena Block Fetcher',
-    'description' => 'Fetch any forena data as XML.  Use with an XML Feed parser',
+    'description' => 'Fetch any forena data as XML.  Use with an XML Feed parser such as the Forena XML Parser',
     'handler' => array(
       'parent' => 'FeedsFetcher',
       'class' => 'FeedsForenaBlockFetcher',

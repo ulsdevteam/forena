@@ -72,7 +72,7 @@ class FeedsForenaXMLParser extends FeedsParser {
     $form['xpath'] = array(
       '#type' => 'textfield',
       '#title' => t('XPath Expression'),
-      '#description' => t('The character that delimits fields in the CSV file.'),
+      '#description' => t('Specify an xpath expression that will be used to break up the data into feed items.  When in doubt use * '),
       '#default_value' => isset($source_config['xpath']) ? $source_config['xpath'] : '*',
     );
     return $form;
@@ -96,7 +96,7 @@ class FeedsForenaXMLParser extends FeedsParser {
     $form['xpath'] = array(
       '#type' => 'textfield',
       '#title' => t('XPath Expression'),
-      '#description' => t('Xpath to used to parse rows'),
+      '#description' => t('Specify an xpath expression that will be used to break up the data into feed items.  When in doubt use * '),
       '#default_value' => $this->config['xpath'],
     );
     return $form;
