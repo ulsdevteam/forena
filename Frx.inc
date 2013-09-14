@@ -59,6 +59,17 @@ class Frx {
     }
     return $o;
   }
+
+  /**
+   *
+   * @param  $config array of field configuration;
+   * @return FrxFields
+   */
+  public static function Fields($config = array()) {
+    require_once('FrxFields.inc');
+    $o = new FrxFields($config);
+    return $o;
+  }
   /**
    *
    * Enter description here ...

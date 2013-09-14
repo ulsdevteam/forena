@@ -1401,6 +1401,11 @@ function theme_forena_web_report ($variables) {
   return $output;
 }
 
+
+/**
+ * Iemplents hook_views_api
+ * @return multitype:number The Ambigous <The, string>
+ */
 function forena_views_api() {
   return array(
     'api' => 3,
@@ -1408,6 +1413,15 @@ function forena_views_api() {
     'template path' => drupal_get_path('module', 'forena') ,
   );
 }
+
+/**
+ * Implements hook_feeds_plugins().
+ */
+function forena_feeds_plugins() {
+  module_load_include('inc', 'forena', 'feeds/forena_feeds');
+  return _forena_feeds_plugins();
+}
+
 
 /**
  * Implements hook_bean_types_api_info().
