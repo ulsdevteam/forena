@@ -56,61 +56,10 @@ class FrxSyntaxEngine {
    * @return unknown_type
    */
   protected function get_value( $key, $raw=FALSE) {
-    $retvar = '';
-    // Default to theo current context
-    $data = Frx::Data()->currentContext();
+    $f=NULL;
+    if (!$raw) $f = $this->formatter;
+    $retvar = Frx::Data()->getValue($key, $f );
 
-    // Determine if we have a . syntax for the id.
-    $raw_key=$key;
-    if ($key && strpos($key, '.')) {
-      @list($id, $path) = explode('.', $key, 2);
-      if (Frx::Data()->contextExists($id)) {
-        $data = Frx::Data()->getContext($id);
-        $key = $path;
-      }
-    }
-
-    if (is_array($data)) {
-      $retvar = @$data[$key];
-    }
-    elseif (is_object($data)) {
-
-      if (strpos($key, '=')===0) {
-        $retvar = $this->simplexml_evaluate($data, ltrim($key, '='));
-      }
-      else {
-
-        $rows = @$data->xpath($key);
-        if ($rows === FALSE) {
-          drupal_set_message(t('Invalid field: "%s"', array('%s' => $key)), 'error', FALSE);
-        }
-        $x ='';
-        if ($rows) $x = $rows[0];
-
-        if ($x) $retvar = $x->asXML();
-        // Check to see if there are child nodes
-        // If so use asXML otherwise string cast.
-        if ($retvar && strpos($retvar, '<')!==FALSE) {
-          // Find the end of the first tag.
-          $p = strpos($retvar, '>');
-          $retvar = substr_replace($retvar, '', 0, $p+1);
-          $p = strrpos($retvar, '<', -1);
-          $retvar = substr_replace($retvar, '', $p, strlen($retvar) - $p);
-
-        }
-        else {
-          $retvar = (string)$x;
-        }
-      }
-
-    }
-    // Call the formatter object if neccessary
-    $f = $this->formatter;
-    if (!$raw && is_object($f) && method_exists($f, 'format')) {
-      $retvar = $f->format($retvar, $raw_key, $data);
-    }
-
-    if (!is_array($retvar)) $retvar = trim((string)$retvar);
     return $retvar;
   }
 

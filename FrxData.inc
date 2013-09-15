@@ -56,6 +56,71 @@ class FrxData {
   }
 
   /**
+   * Get the value from the data.
+   * This is used by token_replace method to extract the data based on the path provided.
+   * @param $data
+   * @param $key
+   * @return unknown_type
+   */
+  public function getValue($key, $formatter = NULL) {
+    $retvar = '';
+    // Default to theo current context
+    $data = $this->currentContext();
+
+    // Determine if we have a . syntax for the id.
+    $raw_key=$key;
+    if ($key && strpos($key, '.')) {
+      @list($id, $path) = explode('.', $key, 2);
+      if ($this->contextExists($id)) {
+        $data = $this->getContext($id);
+        $key = $path;
+      }
+    }
+
+    if (is_array($data)) {
+      $retvar = @$data[$key];
+    }
+    elseif (is_object($data)) {
+
+      if (strpos($key, '=')===0) {
+        $retvar = $this->simplexml_evaluate($data, ltrim($key, '='));
+      }
+      else {
+
+        $rows = @$data->xpath($key);
+        if ($rows === FALSE) {
+          drupal_set_message(t('Invalid field: "%s"', array('%s' => $key)), 'error', FALSE);
+        }
+        $x ='';
+        if ($rows) $x = $rows[0];
+
+        if ($x) $retvar = $x->asXML();
+        // Check to see if there are child nodes
+        // If so use asXML otherwise string cast.
+        if ($retvar && strpos($retvar, '<')!==FALSE) {
+          // Find the end of the first tag.
+          $p = strpos($retvar, '>');
+          $retvar = substr_replace($retvar, '', 0, $p+1);
+          $p = strrpos($retvar, '<', -1);
+          $retvar = substr_replace($retvar, '', $p, strlen($retvar) - $p);
+
+        }
+        else {
+          $retvar = (string)$x;
+        }
+      }
+    }
+
+    if (is_object($formatter) && method_exists($formatter, 'format')) {
+      $retvar = $formatter->format($retvar, $key, $data);
+    }
+
+
+    if (!is_array($retvar)) $retvar = trim((string)$retvar);
+    return $retvar;
+  }
+
+  /**
    * Allows override of a value for the current context.
    * @param String $key
    * @param String $value
@@ -138,5 +203,8 @@ class FrxData {
   public function dumpContext() {
     drupal_set_message(filter_xss('cur_context ' . $this->id . '<br/>Stack<br/><pre>' . print_r($this->cur_context, 1) . '</pre>'));
   }
+
+
+
 
 }
