@@ -144,7 +144,7 @@ class FrxDrupal extends FrxDataSource {
    * @param unknown_type $key
    * @param unknown_type $data
    */
-  public function format($value, $key, $data) {
+  public function format($value, $key) {
     $db = Database::getConnection('default');
     $value = $this->parmConvert($key, $value);
     if ($db) {

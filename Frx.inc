@@ -210,7 +210,7 @@ class Frx {
   }
 
   /**
-   * Facotry for SQL Query builder object
+   * Factory for SQL Query builder object
    * @param $new Boolean value that forces a new object
    * @return FrxSQLQueryBuilder
    */
@@ -219,6 +219,17 @@ class Frx {
     require_once 'FrxSQLQueryBuilder.inc';
     if (!$o || $new) {
       $o = new FrxSQLQueryBuilder();
+    }
+    return $o;
+  }
+
+  public static function Context($context) {
+    $o = NULL;
+    if ($context) {
+
+    }
+    if (!$o) {
+      $o = Frx::Data();
     }
     return $o;
   }

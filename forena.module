@@ -948,24 +948,43 @@ function forena_render_report($report, $format='', $data='', $options= array(), 
  *
  */
 function forena_forena_plugins() {
+  $path = drupal_get_path('module', 'forena');
+
   $plugins[] = array('file' => 'plugins/FrxPDO.inc',
+                     'parent' => 'FrxDataSource',
                      'class' => 'FrxPDO',
+                     'path' => $path,
   );
+
   $plugins[] = array('file' => 'plugins/FrxOracle.inc',
+                     'parent' => 'FrxDataSource',
                      'class' => 'FrxOracle',
+                     'path' => $path,
   );
-  $plugins[] = array('file' => 'plugins/FrxDrupal.inc',
+
+  $plugins[] = array(
+                     'file' => 'plugins/FrxDrupal.inc',
+                     'parent' => 'FrxDataSource',
                      'class' => 'FrxDrupal',
+                     'path' => $path,
   );
+
   $plugins[] = array('file' => 'plugins/FrxFiles.inc',
+                     'parent' => 'FrxDataSource',
                      'class' => 'FrxFiles',
   );
+
   $plugins[] = array('file' => 'plugins/FrxPostgres.inc',
                      'class' => 'FrxPostgres',
+                     'parent' => 'FrxDataSource'
   );
+
   $plugins[] = array('file' => 'plugins/FrxMSSQL.inc',
+                     'parent' => 'FrxDataSource',
                      'class' => 'FrxMSSQL',
+                     'path' => $path,
   );
+
   return $plugins;
 }
 

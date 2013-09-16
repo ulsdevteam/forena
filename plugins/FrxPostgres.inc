@@ -130,7 +130,7 @@ class FrxPostgres extends FrxDataSource {
    * @param unknown_type $key
    * @param unknown_type $data
    */
-  public function format($value, $key, $data) {
+  public function format($value, $key) {
     $value = $this->parmConvert($key, $value);
     if ($value===''||$value===NULL)
     $value = 'NULL';

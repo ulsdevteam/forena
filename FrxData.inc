@@ -9,7 +9,8 @@
  * The static instance function of this object acts as a factory method that allows other code in forena to always be able to operate on the current context of the class.
  * @var unknown_type
  */
-class FrxData {
+require_once('FrxContext.inc');
+class FrxData extends FrxContext {
 
   public $id;
   private $cur_context;  // The data of the xml;
@@ -62,21 +63,14 @@ class FrxData {
    * @param $key
    * @return unknown_type
    */
-  public function getValue($key, $formatter = NULL) {
+  public function getValue($key, $context = '') {
     $retvar = '';
     // Default to theo current context
     $data = $this->currentContext();
 
-    // Determine if we have a . syntax for the id.
-    $raw_key=$key;
-    if ($key && strpos($key, '.')) {
-      @list($id, $path) = explode('.', $key, 2);
-      if ($this->contextExists($id)) {
-        $data = $this->getContext($id);
-        $key = $path;
-      }
+    if ($context && $this->contextExists($context)) {
+      $data = $this->getContext($context);
     }
-
     if (is_array($data)) {
       $retvar = @$data[$key];
     }
@@ -111,11 +105,6 @@ class FrxData {
       }
     }
 
-    if (is_object($formatter) && method_exists($formatter, 'format')) {
-      $retvar = $formatter->format($retvar, $key, $data);
-    }
-
-
     if (!is_array($retvar)) $retvar = trim((string)$retvar);
     return $retvar;
   }
@@ -125,7 +114,7 @@ class FrxData {
    * @param String $key
    * @param String $value
    */
-  public function setValue($key, $value) {
+  public function setValue($key, $value, $context='') {
     if (is_array($this->cur_context)) {
       $this->cur_context[$key] = $value;
     }

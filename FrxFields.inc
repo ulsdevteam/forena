@@ -20,7 +20,7 @@ class FrxFields {
    * Formatter used by the syntax engine to alter data that gets extracted.
   * This invokes the field translation
   */
-  public function format($value, $key, $data) {
+  public function format($value, $key) {
     // Determine if there is a field overide entry
     $default='';
     $link ='';

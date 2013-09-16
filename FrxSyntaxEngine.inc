@@ -56,11 +56,18 @@ class FrxSyntaxEngine {
    * @return unknown_type
    */
   protected function get_value( $key, $raw=FALSE) {
-    $f=NULL;
-    if (!$raw) $f = $this->formatter;
-    $retvar = Frx::Data()->getValue($key, $f );
-
-    return $retvar;
+    $context = '';
+    if ($key && strpos($key, '.')) {
+      @list($key, $path) = explode('.', $key, 2);
+      $o = Frx::Context($context);
+    }
+    else {
+      $o = Frx::Data();
+    }
+    $value = $o->getValue($key, $context);
+    if (!$raw && $this->formatter)
+      $value = trim($this->formatter->format($value, $key));
+    return $value;
   }
 
 
