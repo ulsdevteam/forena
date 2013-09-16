@@ -107,6 +107,7 @@ function forena_query_builder_form($formid, &$form_state) {
         '#description' => t('Value depends on the security for the data block,
           but for drupal data, this is a right as defined by the module provided.  '),
         '#type' => 'textfield',
+        '#required' => TRUE,
         '#disabled' => !user_access('forena data security') || @$block['locked'],
         '#default_value' => $block['access'],
       );
