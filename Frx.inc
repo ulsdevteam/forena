@@ -210,7 +210,7 @@ class Frx {
   }
 
   /**
-   * Factory for SQL Query builder object
+   * Facotry for SQL Query builder object
    * @param $new Boolean value that forces a new object
    * @return FrxSQLQueryBuilder
    */
@@ -223,15 +223,100 @@ class Frx {
     return $o;
   }
 
+  /**
+   * Factory method to return instance object
+   * @param unknown_type $parent
+   * @param unknown_type $key
+   * @return object
+   */
+  public static function PluginInstance($parent, $key) {
+    static $objects='';
+    $o = NULL;
+    if (!$objects) {
+      $objects = array();
+    }
+    $plugins = Frx::plugins($parent);
+    if (isset($plugins[$key])) {
+      $class = @$plugins[$key]['class'];
+      if (!isset($objects[$class])) {
+        if (class_exists($class)) $objects[$class] = new $class();
+      }
+      $o = $objects[$class];
+    }
+
+    return $o;
+  }
+
+  /**
+   * Factory object to get the context based on a name.  IF the context doesn't
+   * exist we assume the default data context (FrxData).
+   * @param $context string
+   * @return FrxContext
+   */
   public static function Context($context) {
     $o = NULL;
-    if ($context) {
 
+    // Instantiate the class if it exists
+    if ($context) {
+      $o = Frx::PluginInstance('FrxContext', $context);
     }
+
+    // Otherwise instantiate the data class.
     if (!$o) {
-      $o = Frx::Data();
+      Frx::Data();
     }
+
     return $o;
+  }
+
+  /**
+   * Loads all of the include files that
+   */
+  public static function plugins( $parent = '') {
+    static $plugins = '';
+
+    if (!$plugins) {
+      $plugins = array();
+      foreach (module_list() as $module) {
+        $function = $module . '_forena_plugins';
+        if (function_exists($function)) {
+          $returned_plugins = $function();
+          if ($returned_plugins) foreach ((array)$returned_plugins as $key=>$p) {
+            $p['module'] = $module;
+            if (@$p['path']) {
+              $p['file'] = rtrim($p['path'],'/') . '/' . $p['file'];
+            }
+            else {
+              $p['file'] = drupal_get_path('module' , $p['module']) . '/' . $p['file'];
+            }
+            if (is_int($key)) {
+              $plugins[]=$p;
+            }
+            else {
+              $plugins[$key] = $p;
+            }
+          }
+        }
+      }
+      foreach ($plugins as $p) {
+        if ($p['file'] ) {
+          include_once( trim($p['file'], '/'));
+        }
+      }
+    }
+
+    // Return the plugins if a parent was requested.
+    $ret_plugins = array();
+    if ($parent) {
+      foreach($plugins as $key => $p) {
+        if (@$p[parent] == $parent) {
+          $ret_plugins[$key] = $p;
+        }
+      }
+    }
+
+    return $ret_plugins;
+
   }
 
 }

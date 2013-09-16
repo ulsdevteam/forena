@@ -11,35 +11,6 @@ class FrxRepoMan {
   private $repository;
 
 
-  /**
-   * Loads all of the include files that
-   */
-  private function define_plugins( $class='') {
-    static $plugins = '';
-    if (!$plugins) {
-      $plugins = array();
-      foreach (module_list() as $module) {
-        $function = $module . '_forena_plugins';
-        if (function_exists($function)) {
-          $returned_plugins = $function();
-          if ($returned_plugins) foreach ((array)$returned_plugins as $p) {
-            $p['module'] = $module;
-            $p['file'] = drupal_get_path('module' , $p['module']) . '/' . $p['file'];
-            $plugins[]=$p;
-          }
-        }
-      }
-    }
-
-    foreach ($plugins as $p) {
-      if (($class=='' || $class==$p['class'])) {
-        if ($p['file'] ) {
-          include_once( trim($p['file'], '/'));
-        }
-      }
-    }
-  }
-
   //Determine data sources.
   public function __construct() {
     global $_forena_repositories;
@@ -143,7 +114,7 @@ class FrxRepoMan {
    */
   public function load_provider($conf, $repo_path, $repos_name) {
     @$name = isset($conf['data provider'])? $conf['data provider'] : $conf['data_engine'];
-    $this->define_plugins();
+    Frx::plugins('FrxDataSource');
     // Instantiate the path
     if (class_exists($name)) {
       $o = new $name($conf, $repo_path, $repos_name);

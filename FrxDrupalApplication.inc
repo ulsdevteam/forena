@@ -182,34 +182,6 @@ class FrxDrupalApplication {
   }
 
   /**
-   * Invokes the hooks required for forena plugin registration.
-   * Each module returns an array structure that defines multiple plugins
-   *
-   * class - Indicates the name of the class that will be used to define the plugins behaviors.
-   *
-   */
-  function plugins() {
-    static $plugins = '';
-    if (!$plugins) {
-      $plugins = array();
-      foreach (module_list() as $module) {
-        $function = $module . '_forena_plugins';
-        if (function_exists($function)) {
-          $returned_plugins = $function();
-          if ($returned_plugins) foreach ((array)$returned_plugins as $p) {
-            $p['module'] = $module;
-            $p['file'] = drupal_get_path('module' , $p['module']) . '/' . $p['file'];
-            $plugins[]=$p;
-          }
-        }
-      }
-    }
-    return $plugins;
-  }
-
-
-
-  /**
    * Builds a global array of available controls
    * and returns the array.
    */

@@ -58,7 +58,7 @@ class FrxSyntaxEngine {
   protected function get_value( $key, $raw=FALSE) {
     $context = '';
     if ($key && strpos($key, '.')) {
-      @list($key, $path) = explode('.', $key, 2);
+      @list($context, $key) = explode('.', $key, 2);
       $o = Frx::Context($context);
     }
     else {

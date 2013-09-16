@@ -800,8 +800,8 @@ function forena_report($name_in, $parms = array(), $print = TRUE) {
   require_once('forena.common.inc');
   $desc = Frx::Menu()->parseURL($name_in);
   if (!$desc['exists']) {
-    drupal_not_found();
-    exit;
+    drupal_set_message(t('Report %s not found', array('%s' => $name_in)), 'error', FALSE);
+    return '';
   }
 
 
@@ -950,39 +950,46 @@ function forena_render_report($report, $format='', $data='', $options= array(), 
 function forena_forena_plugins() {
   $path = drupal_get_path('module', 'forena');
 
-  $plugins[] = array('file' => 'plugins/FrxPDO.inc',
+  $plugins['FrxPDO'] = array('file' => 'plugins/FrxPDO.inc',
                      'parent' => 'FrxDataSource',
                      'class' => 'FrxPDO',
                      'path' => $path,
   );
 
-  $plugins[] = array('file' => 'plugins/FrxOracle.inc',
+  $plugins['FrxOracle'] = array('file' => 'plugins/FrxOracle.inc',
                      'parent' => 'FrxDataSource',
                      'class' => 'FrxOracle',
                      'path' => $path,
   );
 
-  $plugins[] = array(
+  $plugins['FrxDrupal'] = array(
                      'file' => 'plugins/FrxDrupal.inc',
                      'parent' => 'FrxDataSource',
                      'class' => 'FrxDrupal',
                      'path' => $path,
   );
 
-  $plugins[] = array('file' => 'plugins/FrxFiles.inc',
+  $plugins['FrxFiles'] = array('file' => 'plugins/FrxFiles.inc',
                      'parent' => 'FrxDataSource',
                      'class' => 'FrxFiles',
   );
 
-  $plugins[] = array('file' => 'plugins/FrxPostgres.inc',
+  $plugins['FrxPostgres'] = array('file' => 'plugins/FrxPostgres.inc',
                      'class' => 'FrxPostgres',
                      'parent' => 'FrxDataSource'
   );
 
-  $plugins[] = array('file' => 'plugins/FrxMSSQL.inc',
+  $plugins['FrxMSSQL'] = array('file' => 'plugins/FrxMSSQL.inc',
                      'parent' => 'FrxDataSource',
                      'class' => 'FrxMSSQL',
                      'path' => $path,
+  );
+  // Normally you wouldn't do this but I wanted to make the FrxReport sytax work.
+  $plugins['FrxReport'] = array(
+    'file' => 'plugins/FrxReportContext.inc',
+    'parent' => 'FrxContext',
+    'class' => 'FrxReportContext',
+    'path' => $path,
   );
 
   return $plugins;
