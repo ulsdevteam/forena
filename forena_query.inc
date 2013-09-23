@@ -199,7 +199,7 @@ function forena_query_builder_form($formid, &$form_state) {
       if (!$data['new']) $form['delete'] = array('#type' => 'submit', '#value' => t('Delete'), '#submit' => array( 'forena_query_try_delete'));
     }
     $form['submit'] = array('#type' => 'submit', '#value' => 'Preview', '#submit' => array('forena_query_update', 'forena_query_preview'));
-    $form['cancel'] = array('#type' => 'submit', '#value' => 'Close', '#submit' => array('forena_query_close'));
+    $form['cancel'] = array('#type' => 'submit', '#value' => 'Close', '#submit' => array('forena_query_close'), '#limit_validation_errors' => array());
     $form['preview'] = array('#markup' => @$form_state['storage']['preview']);
   }
 
@@ -238,6 +238,15 @@ function forena_query_validate_block($form, &$form_state) {
      }
 
    }
+
+   if (isset($form_state['values']['access'])) {
+     $r = Frx::RepoMan()->repository($provider);
+     $access = $r->access($form_state['values']['access']);
+     if (!$access) {
+       form_set_error('access', 'You must have access to use this right.');
+     }
+   }
+
 
 }
 
@@ -340,10 +349,18 @@ function forena_query_validate_new_block($form, &$form_state) {
   if (isset($form_state['values']['save_as_name'])) {
     $block_name = $form_state['storage']['provider'] . '/' . $form_state['values']['save_as_name'];
 
+
     $block = Frx::RepoMan()->loadBlock($block_name);
     if ($block) {
       form_set_error('save_as_name', t('Block already exists'));
-      return;
+    }
+
+  }
+  if (isset($form_state['values']['access'])) {
+    $r = Frx::RepoMan()->repository($form_state['storage']['provider']);
+    $access = $r->access($form_state['values']['access']);
+    if (!$access) {
+      form_set_error('access', 'You must have access to use this right.');
     }
   }
 }
