@@ -45,6 +45,7 @@ class FrxDrupal extends FrxDataSource {
     $sql = $this->te->replace($sql);
     $rs = db_query($sql);
     $entity_map = array();
+    $select_fields = array();
 
 
     $xml = new SimpleXMLElement('<table/>');
@@ -60,7 +61,9 @@ class FrxDrupal extends FrxDataSource {
         $id = $data->$id_key;
         if ($id) {
           $entity_map[$id] = $row_node;
+          $select_fields[$id] = $data;
         }
+
       } else {
         foreach ($data as $key => $value) {
           $row_node->addChild($key, htmlspecialchars($value));
@@ -75,7 +78,7 @@ class FrxDrupal extends FrxDataSource {
       db_set_active();
     }
     if ($entity_map) {
-      $this->loadEntities($type, $entity_map);
+      $this->loadEntities($type, $entity_map, $select_fields);
     }
     if ($this->debug) {
       $d = ($xml) ? htmlspecialchars($xml->asXML()) : '';
@@ -89,7 +92,7 @@ class FrxDrupal extends FrxDataSource {
    * @param $type Type of entity being loaded.
    * @param $entity_map Map of entity ids to nodes.
    */
-  private function loadEntities($type, $entity_map) {
+  private function loadEntities($type, $entity_map, $select_fields) {
     // Do these 100 at a time for performance reasons
     $chunks = array_chunk($entity_map, 100, TRUE);
     foreach ($chunks as $chunk) {
@@ -125,6 +128,12 @@ class FrxDrupal extends FrxDataSource {
                 $row_node->addChild($key, $tmp['value']);
               }
             }else if (is_scalar($val)) {
+              $row_node->addChild($key, $val);
+            }
+          }
+          // Now add on select fields
+          if ($select_fields[$id]) foreach ($select_fields[$id] as $key=>$val) {
+            if (!isset($row_node->$key)) {
               $row_node->addChild($key, $val);
             }
           }
