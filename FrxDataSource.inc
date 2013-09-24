@@ -26,6 +26,7 @@ class FrxDataSource{
     $this->app = FrxReportGenerator::instance()->app;
     $this->block_extensions = array('inc', 'sql', 'xml');
     $this->name = $name;
+    $this->debug = @$conf['debug'];
   }
 
   /**
