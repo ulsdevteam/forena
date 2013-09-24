@@ -376,7 +376,6 @@ class FrxReport {
     $class = '';
     $rel = '';
     if ($this->fields) {
-
       $path = 'frx:field[@id="' . $key . '"]';
       $formatters = $this->fields->xpath($path);
       if ($formatters) foreach ($formatters as $formatter) {

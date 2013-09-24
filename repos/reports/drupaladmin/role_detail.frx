@@ -3,7 +3,7 @@
 <head>
 <title>Roles</title>
 <frx:category>Drupal Administration</frx:category>
-<frx:options hidden="0" form="" />
+<frx:options hidden="0"/>
 <frx:parameters>
   <frx:parm id="role" label="" require="0" value="" desc=""
     data_source="drupal/roles" data_field="" type="select" />
@@ -11,12 +11,11 @@
 <frx:docgen>
 </frx:docgen>
 <frx:fields>
-  <frx:field id="name" link="user/{uid}/edit" />
+  <frx:field id="user.name" link="user/{uid}/edit" />
 </frx:fields>
 </head>
 <body>
-  <div frx:block="drupal/roles" id="forena-1"
-    frx:clause="where rid=:role">
+  <div frx:block="drupal/roles" id="forena-1">
     <table frx:foreach="*" id="forena-2">
       <tbody>
         <tr>
@@ -38,8 +37,8 @@
         </tr>
       </thead>
       <tbody>
-        <tr id="forena-4" frx:foreach="*">
-          <td>{name}</td>
+        <tr id="user" frx:foreach="*">
+          <td>{user.name}</td>
         </tr>
       </tbody>
     </table>

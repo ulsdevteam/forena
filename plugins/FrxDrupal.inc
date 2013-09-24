@@ -55,7 +55,6 @@ class FrxDrupal extends FrxDataSource {
        * loadEntitys method
        */
       if (@$options['entity_type']  && @$options['entity_id'] ) {
-
         $id_key = $options['entity_id'];
         $type = $options['entity_type'];
         $id = $data->$id_key;

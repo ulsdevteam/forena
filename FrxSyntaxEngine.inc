@@ -57,6 +57,7 @@ class FrxSyntaxEngine {
    */
   protected function get_value( $key, $raw=FALSE) {
     $context = '';
+    $raw_key = $key;
     if ($key && strpos($key, '.')) {
       @list($context, $key) = explode('.', $key, 2);
       $o = Frx::Context($context);
@@ -65,8 +66,9 @@ class FrxSyntaxEngine {
       $o = Frx::Data();
     }
     $value = $o->getValue($key, $context);
-    if (!$raw && $this->formatter)
-      $value = trim($this->formatter->format($value, $key));
+    if (!$raw && $this->formatter) {
+      $value = trim($this->formatter->format($value, $raw_key));
+    }
     return $value;
   }
 
