@@ -263,7 +263,7 @@ class Frx {
 
     // Otherwise instantiate the data class.
     if (!$o) {
-      Frx::Data();
+      $o = Frx::Data();
     }
 
     return $o;

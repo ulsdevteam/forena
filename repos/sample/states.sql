@@ -1,5 +1,5 @@
 --ACCESS=access demo reports
-select * from states
+select *, code as state from states
 ORDER BY name
 
 

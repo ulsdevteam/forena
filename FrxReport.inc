@@ -303,7 +303,8 @@ class FrxReport {
    */
   public function render($format, $render_form=TRUE) {
     if (!$format) $format = 'web';
-    Frx::Data()->push($this->parms, 'parm');
+    // Only push the parameter context
+    if (!Frx::Data()->contextExists('parm')) Frx::Data()->push($this->parms, 'parm');
 
     $this->format = $format;
     $dom = $this->dom;
