@@ -25,6 +25,7 @@ class FrxReport {
   public $html;
   public $skin;
   private $ids;
+  private $data_passed = FALSE;
   public $teng;
   public $parms;
   public $missing_parms = FALSE;
@@ -38,6 +39,7 @@ class FrxReport {
     $this->parameters = array();
     $this->options = array();
     $this->parms = $data;
+    if ($data) $this->data_passed = TRUE;
     $this->teng = new FrxSyntaxEngine(FRX_TOKEN_EXP, '{}', $this);
     if ($xhtml) {
       $dom = $this->dom = new DOMDocument('1.0', 'UTF-8');
@@ -303,8 +305,8 @@ class FrxReport {
    */
   public function render($format, $render_form=TRUE) {
     if (!$format) $format = 'web';
-    // Only push the parameter context
-    if (!Frx::Data()->contextExists('parm')) Frx::Data()->push($this->parms, 'parm');
+    // Only push the parameter conte
+    Frx::Data()->push($this->parms, 'parm');
 
     $this->format = $format;
     $dom = $this->dom;

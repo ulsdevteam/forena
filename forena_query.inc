@@ -322,6 +322,7 @@ function forena_query_preview($form, &$form_state) {
     if ($fields) $fields = array_combine($fields, $fields);
     $form_state['storage']['fields'] = $fields;
     if ($fields) {
+
       $report = $t->asXML();
       $rpt = new FrxReport($report, $data);
       $preview = $rpt->render('web', FALSE);

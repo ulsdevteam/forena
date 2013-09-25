@@ -97,7 +97,6 @@ class FrxPDO extends FrxDataSource {
             $row_node->addChild($key, htmlspecialchars($value));
           }
         }
-
       }
 
       if ($this->debug) {
