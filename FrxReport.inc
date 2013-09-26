@@ -341,18 +341,24 @@ class FrxReport {
     // check if we have
     $l = '';
     if (strpos($path, ':')===FALSE) {
-      $valid = drupal_valid_path($path,FALSE);
       switch ($this->link_mode) {
         case 'remove':
           $l = '';
           break;
         case 'no-link':
         case 'text':
+          $valid = drupal_valid_path($path,FALSE);
           $l = $valid ? l($title, $path, $options) : $title;
           break;
         case 'disable':
-          $options['attributes']['class'][] = 'disabled';
-          $l = '<a '. drupal_attributes($options['attributes']) . '>' . check_plain($title) . '</a>';
+          $valid = drupal_valid_path($path,FALSE);
+          if (!$valid) {
+            $options['attributes']['class'][] = 'disabled';
+            $l = '<a '. drupal_attributes($options['attributes']) . '>' . check_plain($title) . '</a>';
+          }
+          else {
+            $l = l($title, $path, $options);
+          }
           break;
         default:
           $l = l($title, $path, $options);
