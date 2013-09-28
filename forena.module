@@ -248,7 +248,7 @@ function forena_menu() {
   $items['forena/xml/%'] = array(
    	'page callback' => 'forena_block_xml',
     'page arguments' => array(2),
-   	'access callback' => TRUE,
+   	'access arguments' => array('access forena block xml'),
     'file' => 'forena.common.inc',
    	'type' => MENU_CALLBACK,
   );
@@ -744,6 +744,7 @@ function forena_permission() {
     'design any report' => array('title' => t('Design reports')),
     'delete report' => array('title' => t('Delete reports')),
     'perform email merge' => array('title' => t('Peform email merge')),
+    'access forena block xml' => array('title' => t('Access xml from data blocks directly'), 'description' => t('Useful for ajax calls to data blocks')),
   );
   return $perms;
 }
