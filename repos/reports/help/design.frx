@@ -89,22 +89,38 @@ links prior to presenting them.  Supports the following values:  </p>
 	</tbody>
 	
 </table>
-<h2>Report fields</h2>
+<h2>Report fields (token replacement)</h2>
 <p>Each field in the report is referenced by an xpath expression
-	enclosed by curly braces. In its simplest form the xpath xpression can
+	enclosed by curly braces (e.g. {code}). In its simplest form the xpath xpression can
 	be thought of as the name of the field in the database, but when using
 	more complex data sources, there is a lot that can be done using this
 	syntax. 
   </p>
 <p>
-  The following shows a typical section of a report that illustrates
-  database fields in a report template from the 
-</p>
-<p>
   In the head section of the .frx file, you will find a series of 
-  frx namespaced elements that define special formatting rules. 
+  frx:field  elements that define special formatting rules for each of the 
+  report fields referenced in the .frx file. 
 </p>
-<h2>Other frx Attributes</h2>
+<h3>Data Contexts</h3>
+<p>
+  Reports from other section of a report may be used by referencing other data contexts by their 
+  id. For example, if you place an id attribuute on the tag that you place an frx:foreach attribute on 
+  (e.g id='state' frx:foreach='*') then you can reference any data element in that data context using the 
+  a context by that id (e.g. {state.name}).     
+</p>
+<h3>Custom Contexts</h3>
+<p>
+  Modules may provide their own custom data contexts either by adding them in a hook_forena_parmaters_alter
+  implementation or by implementing a custom context class of their own. 
+</p>
+<h3>FrxReport Contexts</h3>
+<p>
+  Forena provides a custom FrxReport context that allows you to embed reports easily.  For example, the 
+  sample report (Simple Table of States) may be embedded in another report simply by including 
+  {FrxReport.sample.states} anywhere in a report.  It is important to understand that the data from 
+  the current context will be used as parameters to the report when this context is used. 
+</p>
+<h2>Frx Attributes</h2>
 <p id="parameters_attr">
 	<strong>frx:parameters</strong> when used in conjunction with the
 	frx:block attribute overrides the parameters provided to the block that
