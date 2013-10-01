@@ -11,17 +11,26 @@
 class FrxSyntaxEngine {
   private $tpattern;
   private $trim_chars;
+  private $data; // Data object for current context.
   private $formatter; // Object used to format the data
   /**
   * Class for doing syntax replacements;
   * @param $regexp
+  * @param $trim Trim characgers
+  * @param $data Data object to be used for resolving contexts.
   * @return unknown_type
   */
-  public function __construct($regexp, $trim, $formatter=NULL) {
+  public function __construct($regexp, $trim, $formatter=NULL, $data=NULL) {
     $this->tpattern = $regexp;
     $this->trim_chars = $trim;
     if (is_object($formatter)) {
       $this->formatter=$formatter;
+    }
+    if ($data) {
+      $this->data = $data;
+    }
+    else {
+      $this->data = Frx::Data();
     }
   }
 
@@ -63,7 +72,7 @@ class FrxSyntaxEngine {
       $o = Frx::Context($context);
     }
     else {
-      $o = Frx::Data();
+      $o = $this->data;
     }
     $value = $o->getValue($key, $context);
     if (!$raw && $this->formatter) {
