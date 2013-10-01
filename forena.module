@@ -1186,7 +1186,7 @@ function _forena_filter_process($text='') {
 
       $parms = array_merge($parms, $in_parms);
       // Render it
-      $output = forena_report_include($report_name, $parms);
+      $output = forena_report($report_name, $parms, FALSE);
 
       // Finally replace the parameters
       $find[]=$match[0][$idx];
