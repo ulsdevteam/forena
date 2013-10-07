@@ -534,7 +534,7 @@ class FrxDataSource{
             }
             break;
           case 'numeric':
-          case 'flaot':
+          case 'float':
             $value = (float)$value;
             break;
           case 'int':
