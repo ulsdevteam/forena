@@ -16,7 +16,7 @@
   <p>Modules may define custom data provider plugins, and register
     them using hook_forena_plugins.&#xA0; The following methods must be
     implemented when defining custom data providers:</p>
-  <table border="0" cellpadding="5">
+  <table border="0">
     <tbody>
       <tr>
         <th style="width: 30%;" align="left" valign="top">list_blocks($search)</th>
