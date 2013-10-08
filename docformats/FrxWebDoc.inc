@@ -6,11 +6,12 @@
  *
  */
 class FrxWebDoc extends FrxDocument {
-
+  private $title;
   public function render($r, $format, $options=array()) {
     // Set title based on report.
     if ($r->title) {
-      drupal_set_title(filter_xss($r->title));
+      $this->title = $r->title;
+      //drupal_set_title(filter_xss($r->title));
     }
 
     // Add Style attribute from header
@@ -75,6 +76,13 @@ class FrxWebDoc extends FrxDocument {
     $output = theme('forena_web_report', $variables);
 
     return $output;
+  }
+
+  public function output($output) {
+    if ($this->title) {
+      drupal_set_title(filter_xss($this->title));
+    }
+    return FALSE;
   }
 
 
