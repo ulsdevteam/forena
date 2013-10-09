@@ -253,7 +253,7 @@ function forena_confirm_email_submit($form, &$form_state) {
   $max = (integer)$form_state['values']['max'];
   $i = 0;
   if (isset($form_state['values']['body']['value'])) {
-    $body =  check_markup($form_state['values']['body']['value'], variable_get('forena_input_format', filter_default_format()));
+    $body =  check_markup($form_state['values']['body']['value'],$form_state['values']['body']['format']);
   }
   foreach ($form_state['storage']['docs'] as $doc) {
     $to = $test_send ? $user->mail : $doc['to'];
