@@ -2,6 +2,7 @@
 /*
 * Implement a field parser that handles token replacements
 */
+require_once 'FrxSyntaxEngine.inc';
 class FrxFields {
   public function __construct($fields = array()) {
     $this->teng = new FrxSyntaxEngine(FRX_TOKEN_EXP, '{}', $this);
