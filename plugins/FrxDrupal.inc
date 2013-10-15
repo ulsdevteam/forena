@@ -46,11 +46,15 @@ class FrxDrupal extends FrxDataSource {
     $rs = db_query($sql);
     $entity_map = array();
     $select_fields = array();
+    $rownum = 0;
+
 
 
     $xml = new SimpleXMLElement('<table/>');
     foreach ($rs as $data) {
+      $rownum++;
       $row_node = $xml->addChild('row');
+        $row_node['num'] = $rownum;
       /* If we are querying entities, we will store away IDs
        * for later querying and XML processing in the
        * loadEntitys method

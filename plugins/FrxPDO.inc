@@ -91,8 +91,11 @@ class FrxPDO extends FrxDataSource {
 
         //$rs->debugDumpParams();
         $data = $rs->fetchAll(PDO::FETCH_ASSOC);
+        $rownum = 0;
         foreach ($data as $row) {
+          $rownum++;
           $row_node = $xml->addChild('row');
+          $row_node['num'] = $rownum;
           foreach ($row as $key => $value) {
             $row_node->addChild($key, htmlspecialchars($value));
           }

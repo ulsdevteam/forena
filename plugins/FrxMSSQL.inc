@@ -117,9 +117,11 @@ class FrxMSSQL extends FrxDataSource {
     $xml = new SimpleXMLElement('<table/>');
 
     $rs = mssql_query($sql, $db);
-
+    $rownum = 0;
     while ($row = mssql_fetch_assoc($rs)) {
+      $rownum++;
       $row_node = $xml->addChild('row');
+      $row_node['num'] = $rownum;
       foreach ($row as $key => $value) {
         $row_node->addChild(strtolower($key), htmlspecialchars($value));
       }

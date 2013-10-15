@@ -110,9 +110,11 @@ class FrxPostgres extends FrxDataSource {
     $db = $this->db;
     $xml = new SimpleXMLElement('<table/>');
     $rs = pg_query($sql);
-
+    $rownum = 0;
     if ($rs) while ($row = pg_fetch_assoc($rs)) {
+      $rownum++;
       $row_node = $xml->addChild('row');
+      $row_node['num'] = $rownum;
       foreach ($row as $key => $value) {
         $row_node->addChild(strtolower($key), htmlspecialchars($value));
       }

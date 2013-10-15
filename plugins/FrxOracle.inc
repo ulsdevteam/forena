@@ -140,9 +140,12 @@ class FrxOracle extends FrxDataSource {
     //$rs->debugDumpParams();
     $stmt = oci_parse($db, $sql);
     oci_execute($stmt);
+    $rownum=0;
 
     while ($row = oci_fetch_array($stmt, OCI_ASSOC + OCI_RETURN_NULLS + OCI_RETURN_LOBS)) {
+      $rownum++;
       $row_node = $xml->addChild('row');
+      $row_node['num'] = $rownum;
       foreach ($row as $key => $value) {
         $row_node->addChild(strtolower($key), @htmlspecialchars($value));
       }
