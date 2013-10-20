@@ -35,26 +35,7 @@ class FrxSyntaxEngine {
   }
 
 
-  /**
-   * Provides an api to the {=xpath} syntax that can be used
-   * to evaluat expressions such as sum and count in a report.  We
-   * need to use the DOM object here, because this method isn't exposed
-   * with simplexml.
-   *
-   * @param $xml
-   * @param $path
-   * @return unknown_type
-   */
-  protected function simplexml_evaluate($xml, $path) {
-    $dom_node = dom_import_simplexml($xml);
-    $dom_doc = new DOMDocument('');
-    $dom_node = $dom_doc->importNode($dom_node, TRUE);
-    $dom_doc->appendChild($dom_node);
-    // Do we also need to call AppendChild?
-    $xpath = new DOMXpath($dom_doc);
-    $ret = $xpath->evaluate($path, $dom_node);
-    return $ret;
-  }
+
 
 
   /**
