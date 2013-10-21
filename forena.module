@@ -814,7 +814,6 @@ function forena_report($name_in, $parms = array(), $print = TRUE) {
   //forena_include_data_tables();
   $output = FrxReportGenerator::instance()->report($name_in, $parms, $print);
   $m_path = drupal_get_path('module', 'forena');
-
   if ($output) {
     // This has been deprecated, but we'll eave it in for now.
     if ($print) drupal_add_js($m_path . '/forena.js');

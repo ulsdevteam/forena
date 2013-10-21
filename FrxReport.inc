@@ -23,6 +23,7 @@ class FrxReport {
   public $frx_title;
   public $body;
   public $html;
+  public $parameters_form;
   public $skin;
   private $ids;
   private $data_passed = FALSE;
@@ -310,12 +311,13 @@ class FrxReport {
 
     $this->format = $format;
     $dom = $this->dom;
-    $o='';
     $body = $dom->getElementsByTagName('body')->item(0);
 
+    $o='';
     if (!$this->missing_parms || $this->rpt_xml->xpath('//*[@frx:renderer="FrxParameterForm"]')) foreach ($body->childNodes as $node) {
       $o .= $this->render_section($node);
     }
+    $this->html = $o;
     // Default in dynamic title from head.
     if ($this->frx_title) {
       $title = check_plain($this->teng->replace($this->frx_title));
@@ -324,12 +326,11 @@ class FrxReport {
 
     if ($render_form && !$this->rpt_xml->xpath('//*[@frx:renderer="FrxParameterForm"]') && $format=='web') {
       $variables = array('collapse' => $this->blocks_loaded);
-      $form = $this->parametersForm($variables);
-      $o = drupal_render($form) . $o;
+      $this->parameters_form = $form = $this->parametersForm($variables);
+      //$o = drupal_render($form) . $o;
     }
-    $this->html = $o;
     Frx::Data()->pop();
-    return $o ;
+    return $this->html;
   }
 
 

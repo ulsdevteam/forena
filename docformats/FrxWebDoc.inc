@@ -13,7 +13,6 @@ class FrxWebDoc extends FrxDocument {
       $this->title = $r->title;
       //drupal_set_title(filter_xss($r->title));
     }
-
     // Add Style attribute from header
 
     // Add css files
@@ -69,13 +68,13 @@ class FrxWebDoc extends FrxDocument {
 
     // Use a theme function to make sure the report gets themed.
     $variables = array(
-      'doc_links' => $formats,
-      'content' => $this->check_markup($r->html),
+      'parameters' => $r->parameters_form,
+      'doc_links' => array('#markup' => $formats),
+      'content' => array('#markup' => $this->check_markup($r->html)),
     );
 
-    $output = theme('forena_web_report', $variables);
-
-    return $output;
+    //$output = theme('forena_web_report', $variables);
+    return $variables;
   }
 
   public function output($output) {
