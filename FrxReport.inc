@@ -13,6 +13,7 @@ class FrxReport {
   public $rpt_xml;
   public $fields;
   public $category;
+  public $cache;
   public $descriptor;
   public $form;
   public $access;
@@ -73,7 +74,6 @@ class FrxReport {
             case 'category':
               $this->category = (string)$node;
               break;
-
             case 'descriptor':
               $this->descriptor = (string)$node;
               break;
@@ -82,6 +82,10 @@ class FrxReport {
                 $this->options[$key] = (string)$value;
               }
               break;
+            case 'cache':
+              foreach ($node->attributes() as $key => $value) {
+                $this->cache[$key] = (string)$value;
+              }
             case 'title':
               $this->frx_title = (string)$node;
               break;
@@ -304,7 +308,7 @@ class FrxReport {
    * Render the report
    * @return unknown_type
    */
-  public function render($format, $render_form=TRUE) {
+  public function render($format, $render_form=TRUE, $cache_data=array()) {
     if (!$format) $format = 'web';
     // Only push the parameter conte
     Frx::Data()->push($this->parms, 'parm');
@@ -314,9 +318,17 @@ class FrxReport {
     $body = $dom->getElementsByTagName('body')->item(0);
 
     $o='';
-    if (!$this->missing_parms || $this->rpt_xml->xpath('//*[@frx:renderer="FrxParameterForm"]')) foreach ($body->childNodes as $node) {
-      $o .= $this->render_section($node);
+    if (!$this->missing_parms || $this->rpt_xml->xpath('//*[@frx:renderer="FrxParameterForm"]'))  {
+      if ($cache_data && $cache_data['content']) {
+        $o .= $cache_data['content'];
+      }
+      else {
+        foreach ($body->childNodes as $node) {
+          $o .= $this->render_section($node);
+        }
+      }
     }
+
     $this->html = $o;
     // Default in dynamic title from head.
     if ($this->frx_title) {
@@ -327,9 +339,11 @@ class FrxReport {
     if ($render_form && !$this->rpt_xml->xpath('//*[@frx:renderer="FrxParameterForm"]') && $format=='web') {
       $variables = array('collapse' => $this->blocks_loaded);
       $this->parameters_form = $form = $this->parametersForm($variables);
-      //$o = drupal_render($form) . $o;
     }
     Frx::Data()->pop();
+    if ($this->cache) {
+      $this->cache['content'] = $this->html;
+    }
     return $this->html;
   }
 
@@ -687,6 +701,7 @@ class FrxReport {
 
     return drupal_get_form('forena_parameter_form', $parms, $variables);
   }
+
 
 }
 

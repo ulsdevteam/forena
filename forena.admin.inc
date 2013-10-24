@@ -385,6 +385,7 @@ function forena_layout_form($form, $form_state, $report_name) {
       $attributes = $r->get_attributes_by_id();
       $category = $r->getCategory();
       $menu = $r->getMenu();
+      $cache = $r->getCache();
       $body = $r->simplexml->body->asXML();
       $css = @(string)$r->simplexml->head->style;
 
@@ -499,6 +500,21 @@ function forena_layout_form($form, $form_state, $report_name) {
         '#cols' => 80,
       );
 
+      $form['cache'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Cache'),
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+        '#tree' => TRUE,
+      );
+
+      $form['cache']['duration'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Duration'),
+        '#description' => t('Specify a php strtotime relative date duration, (e.g. +1 hour, +2 days)'),
+        '#default_value' => @$cache['duration'],
+      );
+
       $form['buttons']['save'] = array(
         '#type' => 'submit',
         '#value' => 'Save',
@@ -544,6 +560,14 @@ function forena_layout_form_validate($form, &$form_state) {
       form_set_error('menu][path', t('Invalid Path'));
     }
   }
+  if ($values['cache']['duration']) {
+    try {
+      $time = @new DateTime($values['cache']['duration']);
+    }
+    catch (Exception $e) {
+    }
+    if (!$time) form_set_error('cache][duration' , t('Invalid Cache Duration'));
+  }
 }
 
 /**
@@ -568,6 +592,11 @@ function forena_layout_form_submit($form, &$form_state) {
   if ($values['menu']!= $menu) {
     $r->setMenu($values['menu']);
     $rebuild_menu = TRUE;
+  }
+
+  $cache = $r->cache;
+  if ($values['cache']!=$cache) {
+    $r->setCache($values['cache']);
   }
 
   // Body

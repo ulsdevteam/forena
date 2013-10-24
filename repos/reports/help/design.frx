@@ -310,5 +310,17 @@ can define parameters in the head section of the .frx file as follows:
     the select description.</td>
   </tr>
 </table>
+<h2 id="cache">Cache</h2>
+<p>The frx:cache element specifies the caching properties of each report.  The following poperties
+  may be defined</p>
+  <table>
+    <tbody>
+      <tr>
+        <th>duration</th><td>The duration that the cache is supposed to be kept. 
+        Use <a href="http://php.net/manual/en/datetime.formats.relative.php">
+        relative formats</a> according to the php documentation.</td>
+      </tr>
+    </tbody>
+  </table>
 </body>
 </html>

@@ -379,6 +379,23 @@ class FrxEditor {
   }
 
   /*
+   * Retrieve menu data for the report
+  */
+  public function getCache() {
+    $dom = $this->dom;
+    $this->verifyHeaderElements(array('cache'));
+    $opts = $dom->getElementsByTagNameNS($this->xmlns, 'cache')->item(0);
+    $ret = array();
+    // Simplexml is easier to work with
+    $options = simplexml_import_dom($opts);
+    foreach ($options->attributes() as $key => $value) {
+      $ret[(string)$key] = (string)$value;
+    }
+    return $ret;
+
+  }
+
+  /*
    * Set menu data for the report
    * @param $menu_data array of key values for menu options.
    */
@@ -397,6 +414,27 @@ class FrxEditor {
       }
     }
   }
+
+  /*
+   * Set Cache data for the report
+  * @param $cache_data array of key values for menu options.
+  */
+  public function setCache($data) {
+    $dom = $this->dom;
+    $this->verifyHeaderElements(array('cache'));
+    $options = $dom->getElementsByTagNameNS($this->xmlns, 'cache')->item(0);
+    foreach ($data as $key => $value) {
+      if ($value) {
+        $options->setAttribute($key, $value);
+      }
+      else {
+        if ($options->hasAttribute($key)) {
+          $options->removeAttribute($key);
+        }
+      }
+    }
+  }
+
 
   /*
    * Set CSS Style Data

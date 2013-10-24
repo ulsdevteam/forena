@@ -237,8 +237,37 @@ class FrxReportGenerator {
       $r->processParameters();
       Frx::Skin()->load($r->skin);
       Frx::Skin()->loadSkinFiles($name);
+      $cached_data = FALSE;
+      $cache = array();
 
-      $r->render($format, $print);
+      // Check for cache data
+      if ($r->cache) {
+        $cid = 'forena:report:' . $name . ':' . drupal_http_build_query($parms);
+        $cache = cache_get($cid, 'cache');
+        if (!$cache || (isset($r->cache['duration']) && $cache->expire < time())) {
+          $r->render($format, $print);
+          $time = null;
+          if (isset($r->cache['duration'])) {
+            try {
+              $time = @new DateTime($r->cache['duration']);
+            }
+            catch (Exception $e) {
+              drupal_set_message('Invalid Cache Duration', 'error', TRUE);
+            }
+            if ($time) $time = $time->getTimeStamp();
+          }
+          if (!$time) {
+            $time = CACHE_PERMANENT;
+          }
+          cache_set($cid, $r->cache, 'cache', $time);
+        }
+        $r->render($format, $print, $cache->data);
+      }
+      else {
+        $r->render($format, $print);
+      }
+
+
       $o =  Frx::Document($format);
       if ($o) {
         $output = $o->render($r, $format,  array());
