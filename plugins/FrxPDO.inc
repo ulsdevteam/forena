@@ -87,7 +87,7 @@ class FrxPDO extends FrxDataSource {
         $i = $db->errorInfo();
         FrxReportGenerator::instance()->error($i[2] . ':' . $sql, $i[2]);
       }
-      else if ($rs) {
+      else if ($rs && $rs->columnCount()) {
 
         $data = $rs->fetchAll(PDO::FETCH_ASSOC);
         $rownum = 0;
