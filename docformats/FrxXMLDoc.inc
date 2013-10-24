@@ -13,8 +13,7 @@ class FrxXMLDoc extends FrxDocument {
 
   public function render($r, $format, $options = array()) {
     $body = $this->check_markup($r->html);
-    $output = '<?xml version="1.0"?>' . "\n";
-    $output .= '<div>' . $body . "</div>\n";
+    $output = '<div>' . $body . "</div>\n";
     return $output;
   }
 
@@ -23,6 +22,7 @@ class FrxXMLDoc extends FrxDocument {
       header('Cache-Control:');
       header('Pragma:');
       header('Cache-Control: must-revalidate');
+      $output = '<?xml version="1.0"?>' . "\n" . $output;
       print  $output;
       return TRUE;
       }
