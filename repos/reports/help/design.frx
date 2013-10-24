@@ -320,6 +320,11 @@ can define parameters in the head section of the .frx file as follows:
         Use <a href="http://php.net/manual/en/datetime.formats.relative.php">
         relative formats</a> according to the php documentation.</td>
       </tr>
+      <tr>
+        <th>per_user</th><td>1 indicates that caches will be maintained for each drupal uid</td>
+        <th>per_doctype</th><td>1 indicates that caches will be maintained for each document type.  CSV files 
+          will be rendered differently than other files. </td>
+      </tr>
     </tbody>
   </table>
 </body>

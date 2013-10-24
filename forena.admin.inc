@@ -515,6 +515,18 @@ function forena_layout_form($form, $form_state, $report_name) {
         '#default_value' => @$cache['duration'],
       );
 
+      $form['cache']['per_user'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Per User'),
+        '#default_value' => @$cache['per_user'],
+      );
+
+      $form['cache']['per_doctype'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Per Document Type'),
+        '#default_value' => @$cache['per_doctype'],
+      );
+
       $form['buttons']['save'] = array(
         '#type' => 'submit',
         '#value' => 'Save',

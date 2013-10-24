@@ -213,6 +213,7 @@ class FrxReportGenerator {
    * @return unknown
    */
   function report($name_in, $parms = array(), $print=TRUE) {
+    global $user;
     $output = '';
     $desc = Frx::Menu()->parseURL($name_in);
     $name = $desc['name'];
@@ -243,6 +244,8 @@ class FrxReportGenerator {
       // Check for cache data
       if ($r->cache) {
         $cid = 'forena:report:' . $name . ':' . drupal_http_build_query($parms);
+        if ($r->cache['per_user'] && $user) $cid .= ':' . $user->uid;
+        if ($r->cache['per_doctype']) @$cid .= ':' . $format;
         $cache = cache_get($cid, 'cache');
         if (!$cache || (isset($r->cache['duration']) && $cache->expire < time())) {
           $r->render($format, $print);
