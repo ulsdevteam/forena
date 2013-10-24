@@ -18,6 +18,7 @@ class FeedsForenaBlockFetcherResult extends FeedsFetcherResult {
     $xml = forena_xml($this->block, $this->data);
     $raw = '';
     if (is_object($xml) && method_exists($xml, 'asXML')) {
+
       $raw = $xml->asXML();
     }
     return $this->sanitizeRaw($raw);

@@ -19,8 +19,7 @@
 </frx:fields>
 </head>
 <body>
-<body>
-<body>
+
 
   <div frx:block="sampledb/state" id="state">
     <h3>{row/name}</h3>
@@ -46,7 +45,5 @@
       </tbody>
     </table>
   </div>
-</body>
-</body>
 </body>
 </html>
