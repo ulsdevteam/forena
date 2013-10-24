@@ -51,7 +51,7 @@ class FrxDrupal extends FrxDataSource {
 
 
     $xml = new SimpleXMLElement('<table/>');
-    foreach ($rs as $data) {
+    if ($rs) foreach ($rs as $data) {
       $rownum++;
       $row_node = $xml->addChild('row');
         $row_node['num'] = $rownum;

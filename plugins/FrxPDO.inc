@@ -87,12 +87,11 @@ class FrxPDO extends FrxDataSource {
         $i = $db->errorInfo();
         FrxReportGenerator::instance()->error($i[2] . ':' . $sql, $i[2]);
       }
-      else {
+      else if ($rs) {
 
-        //$rs->debugDumpParams();
         $data = $rs->fetchAll(PDO::FETCH_ASSOC);
         $rownum = 0;
-        foreach ($data as $row) {
+        if ($data) foreach ($data as $row) {
           $rownum++;
           $row_node = $xml->addChild('row');
           $row_node['num'] = $rownum;
