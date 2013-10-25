@@ -100,7 +100,7 @@ class FrxMenu {
 
     $desc['name'] = $this->name = $name;
     $desc['directory'] = Frx::File()->directory($filename);
-    $desc['filename'] = Frx::File()->path($filename);
+    $desc['filename'] = $filename;
     $desc['base_name'] = $this->base_name = $base_name;
     $desc['exists'] = Frx::File()->exists($filename);
     $desc['link'] = $this->link = 'reports/' . str_replace('/' , '.', $name);

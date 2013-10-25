@@ -318,18 +318,11 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
   $data['altered'] = $altered;
   $r_xml = $report->asXML();
   $name = $data['name'];
-  $filepath = $report_path . '/' . $report_name . '.frx';
+  $filepath = $report_name . '.frx';
   // If we need to save this to the file system
 
   if ($save_file) {
-    if (!file_exists($filepath) || is_writeable($filepath)) {
-      // Serialize the report for saving
-      file_put_contents($filepath, $r_xml);
-
-    }
-    else {
-      Frx::error(t('Insufficient privileges to write file.'));
-    }
+    Frx::File()->save($filepath, $r_xml);
   }
 
   // Get the security caches from the reports
@@ -360,8 +353,8 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
 
 
   // Save to the Database
-  if (file_exists($filepath)) {
-    $modified = filemtime($filepath);
+  if (Frx::File()->exists($filepath, FALSE)) {
+    $modified = filemtime(Frx::File()->path($filepath));
     $result = db_query("SELECT report_name FROM {forena_reports} WHERE report_name=:report_name AND language=:language", array(':report_name' => $name, 'language' => $lang) );
     $path = isset($cache['menu']) ? @$cache['menu']['path'] : '';
     if ($rpt = $result->fetchObject() ) {

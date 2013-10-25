@@ -1300,7 +1300,6 @@ function _forena_copy_reports($src_dir, $overwrite=FALSE, $subdir=FALSE) {
   return $i;
 }
 
-
 /**
  * Load cache files from the database
  */
@@ -1310,7 +1309,8 @@ function forena_db_sync($subdir='') {
   if (!$subdir) {
     $prefix = '';
     db_delete('forena_reports')
-    ->execute();
+      ->execute();
+
   }
 
   $save_count=0;

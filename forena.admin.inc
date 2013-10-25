@@ -55,12 +55,8 @@ function forena_delete_report($report_name, $delete_file = TRUE) {
 
 
   $filepath = $report_path . '/' . $report_name . '.frx';
-  $info = pathinfo($filepath);
-  $do = TRUE;
-  if (file_exists($filepath)) {
-    chdir($info['dirname']);
-    if ($delete_file) $do = unlink($info['basename']);
-  }
+  $info = Frx::File()->pathinfo($filepath);
+  $do = Frx::File()->delete($filepath);
   if (module_exists('locale')) {
     @list($tlang, $tname) = explode('/', $report_name, 2);
     if (array_key_exists($tlang, language_list())) {
@@ -134,10 +130,8 @@ function forena_get_report_editor($report_name) {
   if ($report_name) {
     $r_text='';
     $report_path = forena_report_path();
-    $filename = $report_path . '/' . $report_name . '.frx';
-    if (file_exists($filename)) {
-      $r_text = file_get_contents($filename);
-    }
+    $filename = $report_name . '.frx';
+    $r_text = Frx::File()->contents($filename);
     $r = new FrxEditor($r_text);
     return $r;
   }
@@ -621,10 +615,6 @@ function forena_layout_form_submit($form, &$form_state) {
     $r->save_attributes_by_id($values['attributes']);
   }
 
-  //determine redirection.
-  $report_path = forena_report_path();
-  $filename = $report_path . '/' . $report_name . '.frx';
-
   if (forena_save_report($report_name, $r->asXML(), TRUE) == 1) {
     drupal_set_message(t('Your report, %s has been saved.', array('%s' => $report_name)));
   }
@@ -743,14 +733,12 @@ function forena_add_report_form_validate($form, &$form_state) {
   $values = $form_state['values'];
   $regexp = "/^[A-Za-z0-9\/\_\-]*$/";
   $save_report_name = $values['save_report_name'];
-  $desc = Frx::Menu()->parseURL($save_report_name);
 
   //comparing the report names to see if they have changed.
   //If they have, making sure the new name does not already exist.
-  $report_path = forena_report_path();
-  $filename = $report_path . '/' . $save_report_name . '.frx';
-  if (@$desc['exists']) {
-    form_set_error('save_report_name', t('The file ' . $save_report_name . ' already exists. Please enter another name.'));
+  $filename = $save_report_name . '.frx';
+  if (Frx::File()->exists($filename, FALSE)) {
+    form_set_error('save_report_name', t('The report ' . $save_report_name . ' already exists. Please enter another name.'));
   }
 }
 
@@ -863,7 +851,7 @@ function forena_create_trans_form_submit($form, &$form_state) {
 
   //determine redirection.
 
-  if (file_exists($filename)) {
+  if (Frx::File()->exists($filename, FALSE)) {
     drupal_set_message(t('Report %s already exists', array('%s' => $new_name)), 'error');
     return;
   }
@@ -1317,7 +1305,7 @@ function forena_fields_form($formid, $form_state, $report_name) {
   $filename = $desc['filename'];
   @$format = $desc['format'];
   if ($name) {
-    if (file_exists($filename)) {
+    if (Frx::File()->exists($filename)) {
       $r = forena_get_report_editor($name);
       drupal_set_title($r->title);
       $regexp = FRX_TOKEN_EXP;
@@ -1981,18 +1969,17 @@ function forena_report_translations($name_in='') {
   if (array_key_exists($lang, $languages)) {
     $name = $base_name;
   }
-  elseif ($cur_lang &&  file_exists(FrxReportGenerator::instance()->report_path() . '/' . $cur_lang . '/' . str_replace('.', '/', $name_in) . '.frx')) {
+  elseif ($cur_lang &&  Frx::File()->exists( $cur_lang . '/' . str_replace('.', '/', $name_in) . '.frx')) {
     $name_in = $cur_lang . '.' . $name_in;
   }
   $data = array();
   $headers = array(t('Language'), t('Title'), t('Last Modified'), t('Operation'));
   // Generate list of all existing tranlsations and their status.
-  $report_path = FrxReportGenerator::instance()->report_path();
   foreach ($languages as $key => $language) {
     $i_name = ($key=='en') ? $name : $key . '/' . $name;
     $i_link = $key . '.' . $name;
-    if (file_exists($report_path . '/' . $i_name . '.frx')) {
-      $modified = format_date(filemtime($report_path . '/' . $i_name . '.frx'));
+    if (Frx::File()->exists($report_path . '/' . $i_name . '.frx')) {
+      $modified = format_date(filemtime(Frx::File()->path($i_name . '.frx')));
       $r = forena_get_report_editor($i_name);
       $title = $r->title;
       $edit = l(t('Edit'), 'reports/' . str_replace('/', '.', $i_link) . '/edit', array('query' => array('language' => $key)));
