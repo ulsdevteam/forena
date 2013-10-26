@@ -48,11 +48,7 @@ class FrxFile {
    * @param unknown_type $filename
    */
   public function directory($filename) {
-    @list ($dir, $name_part) = explode('/', $filename, -2);
-    if (!$name_part) {
-      $name_part = $dir;
-      $dir = '';
-    }
+    @list ($dir, $name_part) = explode('/', $filename, -1);
     return $this->dir . '/' . $dir;
   }
 
@@ -70,12 +66,43 @@ class FrxFile {
    */
   public function contents($filename) {
     $path = $this->path($filename);
+
     if (file_exists($path)) {
       return file_get_contents($path);
     }
     else {
       return '';
     }
+  }
+
+  function verifyDirectory($fullpath, $recursive=FALSE) {
+    static $path='';
+    $success = TRUE;
+    if (!$recursive) {
+      $path = $this->dir;
+      if (!is_writable($path)) {
+        drupal_set_message(t('Report directory %s is not modifiable', array('%s' => $path)), 'error');
+        return FALSE;
+      }
+    }
+    @list($dir, $file) = explode('/', $fullpath, 2);
+    $path .= '/' . $dir;
+
+
+    // Path
+    if (!file_exists($path) && $file) {
+      @mkdir($path);
+      if (!@is_writable($path)) {
+        drupal_set_message(t('Error creating directory %path', array('%path' => $path)), 'error');
+        return FALSE;
+      }
+
+    }
+    // Recurse to next file.
+    if ($file && strpos($file, '/')) {
+      $this->verifyDirectory($file, TRUE);
+    }
+    return TRUE;
   }
 
   /**
@@ -85,7 +112,9 @@ class FrxFile {
    */
   public function save($filename, $data) {
     $path = $this->dir . '/' . $filename;
-    if (is_writable($path)) {
+    $this->verifyDirectory($filename);
+
+    if (is_writable($path) || (!file_exists($path) && is_writable(dirname($path)))) {
       file_put_contents($path, $data);
     }
     else {
