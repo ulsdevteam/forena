@@ -46,7 +46,7 @@ class FrxPDO extends FrxDataSource {
       }
       try {
         if (isset($conf['user'])) {
-          $db = new PDO($uri, $conf['user'], $conf['password'], $options);
+          $db = new PDO($uri, $conf['user'], @$conf['password'], $options);
         }
         else {
           $db = new PDO($uri, NULL, NULL, $options);
