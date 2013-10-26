@@ -1322,6 +1322,12 @@ function forena_db_sync_all() {
 
 }
 
+/**
+ *
+ * @param $base_path Directory
+ * @param $subdir Relative directory.
+ * @return array skins that were detected.
+ */
 function _forena_db_sync($base_path, $subdir='') {
   $path = rtrim($base_path . '/' . $subdir, '/');
   //Iterate through each file
