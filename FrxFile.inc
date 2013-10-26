@@ -10,6 +10,45 @@ class FrxFile {
   public $includes = array(); //Other places to look for a directory.
 
   /**
+   * Revert an individual report
+   * @param $file
+   */
+  public function revert($file) {
+    $i = 0;
+    if ($this->includeExists($file)) {
+      $file_to_delete = $this->dir . '/' . $file;
+      if (file_exists($file_to_delete)) {
+        if (is_writeable(dirname($file_to_delete))) {
+          drupal_set_message(t('Removing customised report %s', array('%s' => $file_to_delete)));
+          unlink($file_to_delete);
+          $i++;
+        }
+        else {
+          drupal_set_message(t('Unable to revert %s', array('%s' => $file_to_delete)), 'error');
+        }
+      }
+    }
+    return $i;
+  }
+
+  /**
+   * Determine if the file exists in the include path.
+   * @param $file
+   */
+  public function includeExists($file) {
+    $found = false;
+    $i = 0;
+    while(isset($this->includes[$i]) && !$found ) {
+      $filename = $this->includes[$i] . '/' . $file;
+      if (file_exists($this->includes[$i] . '/' . $file)) {
+        $found = TRUE;
+      }
+      $i++;
+    }
+    return $found;
+  }
+
+  /**
    * Constructor
    *   Sets the initial reort directory
    */

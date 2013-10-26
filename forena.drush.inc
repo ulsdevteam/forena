@@ -13,9 +13,9 @@ function forena_drush_command() {
   );
 
   $items['forena-deliver-reports'] = array(
-    'description' => 'Forena Copy/Deliver module provided forena reports',
-    'examples' => array('drush frxcp'),
-    'aliases' => array('frxcp'),
+    'description' => 'Forena Revert Delivered module provided forena reports',
+    'examples' => array('drush frxrevert'),
+    'aliases' => array('frxcp', 'frxrevert'),
   );
   return $items;
 }

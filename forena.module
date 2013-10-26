@@ -1259,44 +1259,30 @@ function _forena_verify_directory($fullpath, $recursive=FALSE) {
  * Recursively ,  all report files from the source directory to the destination directory
  * @param $src_dir  Source directory to copy files from
  */
-function _forena_copy_reports($src_dir, $overwrite=FALSE, $subdir=FALSE) {
-  static $dest_dir = '';
-  static $i = 0;
-  if (!$subdir) {
-    $dest_dir = forena_report_path();
-  }
-
-  if (!file_exists($dest_dir)) {
-    mkdir($dest_dir);
-  }
-
+function _forena_revert_reports($subdir = '') {
+  static $cnt = 0;
+  $cnt++;
+  if ($cnt > 100) return 0;
+  $i = 0;
+  $src_dir = rtrim(Frx::File()->dir, '/');
+  if ($subdir) $src_dir .= '/' . $subdir;
   $d = dir($src_dir);
-  while (false !== ($rpt_file = $d->read())) {
+  while ($d && false !== ($rpt_file = $d->read())) {
     $src_file = $d->path . '/' . $rpt_file;
-    $dest_file = $dest_dir . '/' . $rpt_file;
-
-    if (is_file($src_file)) {
-      if ((is_writable($dest_file) && $overwrite) || !file_exists($dest_file)) {
-        file_put_contents($dest_file, file_get_contents($src_file));
-        $i++;
-      } else {
-        drupal_set_message($dest_file . ' not writeable', 'error');
-      }
+    if (strpos($rpt_file, '.')!==0 && is_file($src_file)) {
+      $filename = $subdir ? "$subdir/$rpt_file" : $rpt_file;
+      $i += Frx::File()->revert($filename);
     }
     else {
       if (strpos($rpt_file, '.')!==0) {
         // Recurse into sub directory
-        $src_save = $src_dir;
-        $dest_save = $dest_dir;
-        $dest_dir .= '/' . $rpt_file;
-        $src_dir .= '/' . $rpt_file;
-        _forena_copy_reports($src_dir, $overwrite, TRUE);
-        $src_dir = $src_save;
-        $dest_dir = $dest_save;
+
+        $dir = $subdir ? $subdir . '/' . $rpt_file : $rpt_file;
+        $i += _forena_revert_reports($dir);
       }
     }
   }
-  $d->close();
+  if ($d) $d->close();
   return $i;
 }
 
@@ -1310,11 +1296,11 @@ function forena_db_sync_all() {
 
   foreach(Frx::File()->includes as $path) {
     $data = _forena_db_sync($path);
-    $skins = array_merge($skins, $data);
+    if ($data) $skins = array_merge($skins, $data);
   }
 
   $data = _forena_db_sync(Frx::File()->dir);
-  $skins = array_merge($skins, $data);
+  if ($data) $skins = array_merge($skins, $data);
   asort($skins);
   variable_set('forena_skins', $skins);
   // Rebuild menus.
@@ -1386,14 +1372,8 @@ function _forena_db_sync($base_path, $subdir='') {
  */
 function forena_sync_reports($copy_reports=FALSE) {
   if ($copy_reports) {
-    $directories = module_invoke_all('forena_report_directory');
-    $i=0;
-    if ($directories) {
-      foreach ($directories as $src_dir) {
-        $i += _forena_copy_reports($src_dir, TRUE);
-      }
-      if ($i > 0) drupal_set_message($i . ' reports copied');
-    }
+    $i = _forena_revert_reports();
+    if ($i > 0) drupal_set_message($i . ' reports reverted');
   }
   forena_db_sync_all();
 }
