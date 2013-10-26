@@ -1301,6 +1301,79 @@ function _forena_copy_reports($src_dir, $overwrite=FALSE, $subdir=FALSE) {
 }
 
 /**
+ * Load cache for all databases.
+ */
+function forena_db_sync_all() {
+  $skins = array();
+  db_delete('forena_reports')
+    ->execute();
+
+  foreach(Frx::File()->includes as $path) {
+    $data = _forena_db_sync($path);
+    $skins = array_merge($skins, $data);
+  }
+
+  $data = _forena_db_sync(Frx::File()->dir);
+  $skins = array_merge($skins, $data);
+  asort($skins);
+  variable_set('forena_skins', $skins);
+  // Rebuild menus.
+  menu_rebuild();
+
+}
+
+function _forena_db_sync($base_path, $subdir='') {
+  $path = rtrim($base_path . '/' . $subdir, '/');
+  //Iterate through each file
+  $d = dir($path);
+  if ($d) while (false !== ($rpt_file = $d->read())) {
+    $src_file = trim($d->path, '/') . '/' . trim($rpt_file, '/');
+      $dest_file = $path . '/' . trim($rpt_file, '/');
+    if (is_file($src_file)) {
+      @list($base_file, $ext) = explode('.', $rpt_file, 2);
+      switch($ext) {
+        // Load Forena Reports
+        case 'frx':
+          $base_file = trim($subdir . '/' . $base_file, '/');
+
+          try {
+            $r_xml =file_get_contents($src_file);
+          } catch (Exception $e) {
+            $s = t('unable to load Report %s', $r_xml);
+            forena_error($s, $s . $e->getMessage());
+
+          }
+
+          // Load the report
+
+          $r = new FrxReport($r_xml);
+          $save_count = forena_save_report($base_file, $r_xml, FALSE);
+          $r->__destruct();
+          unset($r);
+          break;
+
+          //load into list of skins
+        case 'skinfo':
+          $data = file_get_contents($src_file);
+          $skin = drupal_parse_info_format($data);
+          $skin_name = @$skin['name'] ? $skin['name'] : $base_file;
+          $skins[$base_file] = $skin_name;
+          break;
+
+      }
+    }
+    elseif (is_dir($src_file)) {
+      if (strpos($rpt_file, '.')!==0) {
+        _forena_db_sync($base_path, rtrim($subdir, '/') . '/' . $rpt_file);
+      }
+    }
+  }
+  if ($d) $d->close();
+  return $skins;
+}
+
+
+/**
  * Load cache files from the database
  */
 function forena_db_sync($subdir='') {
@@ -1391,8 +1464,7 @@ function forena_sync_reports($copy_reports=FALSE) {
       if ($i > 0) drupal_set_message($i . ' reports copied');
     }
   }
-  forena_db_sync();
-  menu_rebuild();
+  forena_db_sync_all();
 }
 
 function forena_theme() {

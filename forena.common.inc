@@ -353,7 +353,7 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
 
 
   // Save to the Database
-  if (Frx::File()->exists($filepath, FALSE)) {
+  if (Frx::File()->exists($filepath)) {
     $modified = filemtime(Frx::File()->path($filepath));
     $result = db_query("SELECT report_name FROM {forena_reports} WHERE report_name=:report_name AND language=:language", array(':report_name' => $name, 'language' => $lang) );
     $path = isset($cache['menu']) ? @$cache['menu']['path'] : '';
