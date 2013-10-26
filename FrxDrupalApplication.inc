@@ -111,13 +111,13 @@ class FrxDrupalApplication {
     $r_text = '';
     if ($report_name) {
       $i_report_name = $report_name;
-      $report_path =  Frx::File()->path('');
       $int_filename = $language->language . '/' . $report_name . '.frx';
       $filename = $report_name . '.frx';
       if (Frx::File()->exists($int_filename) && @$_GET['language']!= 'en') {
         $i_report_name = $language->language . '/' . $report_name;
-        $r_text = file_get_contents($int_filename);
-        $modified = filemtime($int_filename);
+        $r_text = Frx::File()->contents($int_filename);
+        $full_path = Frx::File()->path($int_filename);
+        $modified = filemtime($full_path);
         $filename = $int_filename;
       }
       elseif (Frx::File()->exists($filename)) {
