@@ -14,6 +14,7 @@ class FrxTemplate {
   public $doc_prefix = '<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE root [ <!ENTITY nbsp "&#160;"> ]>';
   public $xmlns = 'urn:FrxReports';
   public $columns;
+  public $numeric_columns;
 
   public function __construct($xml_string = '') {
     $this->dom = new DOMDocument('1.0', 'UTF-8');
@@ -38,11 +39,17 @@ class FrxTemplate {
     if (!is_object($xml)) return array();
     $rows = $xml->xpath($path);
     $column_array = array();
-    $this->columns = array();
+    $numeric_columns = array();
     foreach ($rows as $columns) {
       foreach ($columns as $name => $value) {
-        $column_array[$name] = $name;
-        $this->columns[] = $name;
+        $label = str_replace('_', ' ', $name);
+        $column_array[$name] = $label;
+        if (is_numeric((string)$value)) {
+          $numeric_columns[$name] = $label;
+        }
+        else {
+          if (isset($numeric_columns[$name])) unset($numeric_columns[$name]);
+        }
       }
       if (is_object($xml) && method_exists($xml, 'attributes')) {
         foreach ($xml->attributes() as $name => $value) {
@@ -50,6 +57,8 @@ class FrxTemplate {
         }
       }
     }
+    $this->columns = $column_array;
+    $this->numeric_columns = $numeric_columns;
     return $column_array;
   }
 
@@ -57,7 +66,7 @@ class FrxTemplate {
    * Returns the section
    * Enter description here ...
    */
-  public function config_form($config, $xml='') {
+  public function configForm($config, $xml='') {
     $form_ctl = array();
 
     $form_ctl['heading'] = array(
