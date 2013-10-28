@@ -1596,7 +1596,7 @@ function forena_add_data_block_form($formid, &$form_state, $report_name) {
               '#title' => t('Template Settings'),
               '#tree' => TRUE,
           );
-          $form['template']['template_data']['config'] = $template_obj->config_form($config, $xml);
+          $form['template']['template_data']['config'] = $template_obj->configForm($config, $xml);
         };
 
         $template_obj->generate($xml, $config);
