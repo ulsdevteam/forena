@@ -1973,11 +1973,10 @@ function forena_data_block_delete($form, &$form_state) {
   $values = $form_state['values'];
 
   $report_name = $values['report_name'];
-  $r = FrxReportGenerator::instance()->get_report($report_name);
+  $r = Frx::Editor($report_name);
 
   //find the datablocks in the existing report
   if ($r) $r->get_attributes_by_id();
-  $body = $r->body;
 
   foreach ($values['blocks'] as $block) {
     if ($block['delete']) {
@@ -1985,9 +1984,8 @@ function forena_data_block_delete($form, &$form_state) {
     }
   }
 
-  if (forena_save_report($report_name, $r->rpt_xml, TRUE) == 1) {
-    drupal_set_message(t('Your report has been saved.'));
-  }
+  $r->update();
+
 }
 
 /**

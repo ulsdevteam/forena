@@ -13,6 +13,7 @@ class FrxEditor {
   public $simplexml;
   public $title;
   public $report_name;
+  public $frx_attributes;
   public $doc_prefix = '<?xml version="1.0" encoding="UTF-8"?>
     <!DOCTYPE root [
     <!ENTITY nbsp "&#160;">
@@ -32,25 +33,10 @@ class FrxEditor {
 
     $this->dom = new DOMDocument('1.0', 'UTF-8');
     $dom = $this->dom;
-
-    $rpt_text = $this->load($report_name);
-    libxml_use_internal_errors();
-    try {
-      $dom->loadXML($rpt_text);
-    }
-    catch (Exception $e) {
-      forena_error('Invalid or malformed report document', '<pre>' .
-      $e->getMessage() . $e->getTraceAsString() . '</pre>');
-    }
-
-    $this->verifyHeaderElements();
-    $tnodes = $dom->getElementsByTagName('title');
-    if ($tnodes->length) $this->title = $tnodes->item(0)->textContent;
-    $this->document_root = $dom->documentElement;
-    $this->simplexml = simplexml_import_dom($dom);
-    $dom->formatOutput = TRUE;
+    $this->load($report_name);
     $this->xpq = new DOMXPath($dom);
     $this->xpq->registerNamespace('frx', $this->xmlns);
+
   }
 
   /**
@@ -67,7 +53,6 @@ class FrxEditor {
    * Save data away in the session state.
    */
   public function update() {
-    dpm($this->report_name,'update');
     $_SESSION['forena_report_editor'][$this->report_name] = $this->asXML();
   }
 
@@ -83,10 +68,10 @@ class FrxEditor {
    */
   public function load($report_name) {
     $r_text='';
+    $dom = $this->dom;
     $this->report_name = $report_name;
     // Load the latest copy of the report editor
     if ($report_name) {
-        dpm($_SESSION['forena_report_editor'], $report_name);
       if (isset($_SESSION['forena_report_editor'][$report_name])) {
         $r_text = $_SESSION['forena_report_editor'][$report_name];
         drupal_set_message(t('All changes are stored temporarily.  Click Save to make your changes permanent.  Click Cancel to discard your changes.'), 'warning', FALSE);
@@ -100,6 +85,22 @@ class FrxEditor {
       $m_path = drupal_get_path('module', 'forena');
       $r_text = file_get_contents($m_path . '/default.frx');
     }
+
+    libxml_use_internal_errors();
+    try {
+      $dom->loadXML($r_text);
+    }
+    catch (Exception $e) {
+      forena_error('Invalid or malformed report document', '<pre>' .
+        $e->getMessage() . $e->getTraceAsString() . '</pre>');
+    }
+
+    $this->verifyHeaderElements();
+    $tnodes = $dom->getElementsByTagName('title');
+    if ($tnodes->length) $this->title = $tnodes->item(0)->textContent;
+    $this->document_root = $dom->documentElement;
+    $this->simplexml = simplexml_import_dom($dom);
+    $dom->formatOutput = TRUE;
     return $r_text;
   }
 
@@ -605,7 +606,21 @@ class FrxEditor {
     }
   }
 
+  /**
+   * Delete a node based on id
+   * @param unknown_type $id
+   * @return unknown_type
+   */
+  public function deleteNode($id) {
+    $path = '//*[@id="' . $id . '"]';
+    $dom = $this->dom;
+    $nodes = $this->simplexml->xpath($path);
+    if ($nodes) {
+      $node = $nodes[0];
+      $dom=dom_import_simplexml($node);
+      $dom->parentNode->removeChild($dom);
+    }
 
-
+  }
 
 }
