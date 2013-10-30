@@ -316,9 +316,21 @@ class Frx {
         }
       }
     }
-
     return $ret_plugins;
-
   }
+
+
+  static public function Editor($report_name = '') {
+    static $o='';
+    require_once('FrxEditor.inc');
+    if (!$o) {
+      $o = new FrxEditor($report_name);
+    }
+    else {
+      if ($report_name) $o->load($report_name) ;
+    }
+    return $o;
+  }
+
 
 }
