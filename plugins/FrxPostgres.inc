@@ -58,6 +58,9 @@ class FrxPostgres extends FrxDataSource {
     // Load the block from the file
     $db = $this->db;
     $xml ='';
+    // Load the types array based on data
+    $this->types = isset($options['type']) ? $options['type'] : array();
+
     if ($sql && $db) {
       $sql = $this->te->replace($sql);
 

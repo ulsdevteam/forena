@@ -63,7 +63,12 @@ class FrxMSSQL extends FrxDataSource {
    */
   public function sqlData($sql, $options = array()) {
     // Load the block from the file
+
     $db = $this->db;
+
+    // Load the types array based on data
+    $this->types = isset($options['type']) ? $options['type'] : array();
+
     $xml ='';
     // Load the types array based on data
     $this->types = isset($options['type']) ? $options['type'] : array();

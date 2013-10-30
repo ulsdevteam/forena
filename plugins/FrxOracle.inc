@@ -66,6 +66,9 @@ class FrxOracle extends FrxDataSource {
     // Load the block from the file
     $db = $this->db;
     $xml ='';
+    // Load the types array based on data
+    $this->types = isset($options['type']) ? $options['type'] : array();
+
     if ($sql && $db) {
       // See if this block matches a declare begin end; syntax.
       if (stripos($sql, 'end;')>= stripos($sql, 'begin') && stripos($sql, 'begin')!==FALSE) {
