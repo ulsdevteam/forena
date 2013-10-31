@@ -119,26 +119,6 @@ function forena_filter_element($fmt, $name) {
 }
 
 
-/**
- * Accepts the name of a file
- *
- * Returns an editor object of the file.
- *
- */
-function forena_get_report_editor($report_name) {
-  require_once('FrxEditor.inc');
-  if ($report_name) {
-    $r_text='';
-    $report_path = forena_report_path();
-    $filename = $report_name . '.frx';
-    $r_text = Frx::File()->contents($filename);
-    $r = new FrxEditor($r_text);
-    return $r;
-  }
-  else {
-    return new FrxEditor();
-  }
-}
 
 /**
  * Report syncronization form
@@ -239,17 +219,13 @@ function forena_settings_sync_submit($form, &$form_state) {
 function forena_format_form($formid, $form_state, $report_name) {
   $desc = Frx::Menu()->parseURL($report_name);
   $name = $desc['name'];
-  if (!$desc['exists']) {
-    drupal_not_found();
-    exit;
-  }
+
   $filename = $desc['filename'];
   $format = isset($desc['format']) ? $desc['format'] : '';
   if ($desc['exists']) {
-    $r = forena_get_report_editor($name);
+    $r = Frx::Editor($name);
     drupal_set_title($r->title);
     $form = array();
-    $r = forena_get_report_editor($name);
     $frx_options = $r->getOptions();
     $report_form = @$frx_options['form'];
 
@@ -299,10 +275,22 @@ function forena_format_form($formid, $form_state, $report_name) {
         '#default_value' => $default
       );
 
+      $form['update'] = array(
+        '#type' => 'submit',
+        '#value' => 'Update',
+      );
+
       $form['submit'] = array(
         '#type' => 'submit',
         '#value' => 'Save',
+        '#submit' => array('forena_format_form_submit', 'forena_save_submit'),
       );
+
+      $form['cancel'] = array(
+        '#type' => 'submit',
+        '#value' => 'Cancel',
+        '#submit' => array('forena_save_cancel'),
+      );  return $form;
     }
   }
   return $form;
@@ -312,7 +300,7 @@ function forena_format_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   $name = $values['report_name'];
 
-  $r = forena_get_report_editor($name);
+  $r = Frx::Editor();
   $options = array(
     'form' => $values['form']);
   $r->setOptions($options);
@@ -329,12 +317,7 @@ function forena_format_form_submit($form, &$form_state) {
     $r->setDocgen($docgen);
   }
 
-  if (forena_save_report($name, $r->asXML(), TRUE) == 1) {
-    drupal_set_message(t('Your report, %s has been saved.', array('%s' => $name)));
-  }
-  else {
-    drupal_set_message(t('There was an error saving your report, %s to the database.', array('%s' => $name)));
-  }
+  $r->update();
 
 }
 
@@ -352,199 +335,199 @@ function forena_layout_form($form, $form_state, $report_name) {
 
   $filename = $desc['filename'];
   $format = @$desc['format'];
-  if ($name) {
+    $save_name = $name;
+    //set the name to empty string for new reports
+    $r = Frx::Editor($name);
 
-    if ((isset($desc['exists']) && $desc['exists'])) {
-      $save_name = $name;
-      //set the name to empty string for new reports
-      $r = forena_get_report_editor($name);
-
-      $title = (string)$r->title;
-      if (module_exists('locale')) {
-        @list($tlang,  $tsave_name) = explode('/', $name, 2);
-        // FInd out if the starting name of the report is an installed language.
-        if (array_key_exists($tlang, language_list() )) {
-          $lang = $tlang;
-          $save_name = $tsave_name;
-        }
-        else {
-          $lang = 'en';
-        }
+    $title = (string)$r->title;
+    if (module_exists('locale')) {
+      @list($tlang,  $tsave_name) = explode('/', $name, 2);
+      // FInd out if the starting name of the report is an installed language.
+      if (array_key_exists($tlang, language_list() )) {
+        $lang = $tlang;
+        $save_name = $tsave_name;
       }
-      drupal_set_title(filter_xss($r->title));
-      // Need to get all option attributes
-      $frx_options = $r->getOptions();
-      $hidden = @$frx_options['hidden']=='1' ? 1 : 0;
-      $report_form = @$frx_options['form'];
-      $attributes = $r->get_attributes_by_id();
-      $category = $r->getCategory();
-      $menu = $r->getMenu();
-      $cache = $r->getCache();
-      $body = $r->simplexml->body->asXML();
-      $css = @(string)$r->simplexml->head->style;
+      else {
+        $lang = 'en';
+      }
+    }
+    drupal_set_title(filter_xss($r->title));
+    // Need to get all option attributes
+    $frx_options = $r->getOptions();
+    $hidden = @$frx_options['hidden']=='1' ? 1 : 0;
+    $report_form = @$frx_options['form'];
+    $attributes = $r->get_attributes_by_id();
+    $category = $r->getCategory();
+    $menu = $r->getMenu();
+    $cache = $r->getCache();
+    $body = $r->simplexml->body->asXML();
+    $css = @(string)$r->simplexml->head->style;
 
-      $form = array();
+    $form = array();
 
-      //array of xml attributes that are required to have a value
-      $required = array('id' => TRUE, 'label' => TRUE);
+    //array of xml attributes that are required to have a value
+    $required = array('id' => TRUE, 'label' => TRUE);
 
-      $form['report_name'] = array(
-        '#type' => 'value',
-        '#value' => $name,
-      );
+    $form['report_name'] = array(
+      '#type' => 'value',
+      '#value' => $name,
+    );
 
-      $form['name_in'] = array(
-        '#type' => 'value',
-        '#value' => $name_in,
-      );
+    $form['name_in'] = array(
+      '#type' => 'value',
+      '#value' => $name_in,
+    );
 
-      $form['attributes'] = array(
-        '#type' => 'value',
-        '#value' => $attributes,
-      );
+    $form['attributes'] = array(
+      '#type' => 'value',
+      '#value' => $attributes,
+    );
 
-      $form['title'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Title'),
-        '#default_value' => $title,
-      );
+    $form['title'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Title'),
+      '#default_value' => $title,
+    );
 
-      $form['body'] = array(
-        '#type' => 'text_format',
-        '#title' => t('Body'),
-        '#default_value' => $body,
-        '#rows' => 25,
-      '#format' => variable_get('forena_input_format', filter_default_format())
-      );
-      $form['visibility'] = array(
-        '#type' => 'fieldset',
-        '#title' => t('Visibility'),
-      );
+    $form['body'] = array(
+      '#type' => 'text_format',
+      '#title' => t('Body'),
+      '#default_value' => $body,
+      '#rows' => 25,
+    '#format' => variable_get('forena_input_format', filter_default_format())
+    );
+    $form['visibility'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Visibility'),
+    );
 
-      $form['visibility']['category'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Category'),
-        '#default_value' => $category,
-        '#autocomplete_path' => 'forena/categories/autocomplete',
-        '#description' => t('The heading your report will be grouped under on the report list.'),
-      );
+    $form['visibility']['category'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Category'),
+      '#default_value' => $category,
+      '#autocomplete_path' => 'forena/categories/autocomplete',
+      '#description' => t('The heading your report will be grouped under on the report list.'),
+    );
 
-      $form['visibility']['hidden'] = array(
-        '#type' => 'checkbox',
-        '#title' => t('Hidden'),
-        '#default_value' => $hidden,
-        '#description' => t('Hide your report from showing up on the report list.'),
-      );
+    $form['visibility']['hidden'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Hidden'),
+      '#default_value' => $hidden,
+      '#description' => t('Hide your report from showing up on the report list.'),
+    );
 
-      $form['menu'] = array(
-        '#type' => 'fieldset',
-        '#title' => t('Menu'),
-        '#tree' => TRUE,
-        '#collapsible' => TRUE,
-        '#collapsed' => empty($menu),
-      );
+    $form['menu'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Menu'),
+      '#tree' => TRUE,
+      '#collapsible' => TRUE,
+      '#collapsed' => empty($menu),
+    );
 
-      $form['menu']['path'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Menu Path'),
-        '#description' => t('Indicate site reletive path to menu.  Parameters may be embedded in the url using a :parm syntax (e.g. states/:state)'),
-        '#default_value' => @$menu['path'],
-      );
+    $form['menu']['path'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Menu Path'),
+      '#description' => t('Indicate site reletive path to menu.  Parameters may be embedded in the url using a :parm syntax (e.g. states/:state)'),
+      '#default_value' => @$menu['path'],
+    );
 
-      $form['menu']['args'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Additional Arguments'),
-        '#description' => t('Indicate additonal parameters that should be extracted after the menu path using a :parm syntax (e.g. :parma/:parmb)'),
-        '#default_value' => @$menu['args'],
-      );
+    $form['menu']['args'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Additional Arguments'),
+      '#description' => t('Indicate additonal parameters that should be extracted after the menu path using a :parm syntax (e.g. :parma/:parmb)'),
+      '#default_value' => @$menu['args'],
+    );
 
-      $form['menu']['title'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Menu Title'),
-        '#description' => t('Title of menu item.  Leave blank to use the report title as the menu title.'),
-        '#default_value' => @$menu['title'],
-      );
+    $form['menu']['title'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Menu Title'),
+      '#description' => t('Title of menu item.  Leave blank to use the report title as the menu title.'),
+      '#default_value' => @$menu['title'],
+    );
 
-      $menu_options = array(
-        'normal-item' => t('Normal'),
-        'local-task' => t('Tab'),
-        'default-local-taks' => t('Default Tab'),
-        'callback' => t('Callback'),
-      );
+    $menu_options = array(
+      'normal-item' => t('Normal'),
+      'local-task' => t('Tab'),
+      'default-local-taks' => t('Default Tab'),
+      'callback' => t('Callback'),
+    );
 
-      $form['menu']['type'] = array(
-        '#type' => 'select',
-        '#title' => 'Type of menu to create',
-        '#options' => $menu_options,
-        '#default_value' => @$menu['type'],
-      );
+    $form['menu']['type'] = array(
+      '#type' => 'select',
+      '#title' => 'Type of menu to create',
+      '#options' => $menu_options,
+      '#default_value' => @$menu['type'],
+    );
 
-      $form['style'] = array(
-        '#type' => 'fieldset',
-        '#title' => t('CSS Styles'),
-        '#collapsible' => TRUE,
-        '#collapsed' => TRUE,
-      );
+    $form['style'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('CSS Styles'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
 
-      $form['style']['css'] = array(
-        '#type' => 'textarea',
-        '#default_value' => $css,
-        '#description' => t('Specify small css snipets that can be used in the reports.'),
-        '#rows' => 10,
-        '#cols' => 80,
-      );
+    $form['style']['css'] = array(
+      '#type' => 'textarea',
+      '#default_value' => $css,
+      '#description' => t('Specify small css snipets that can be used in the reports.'),
+      '#rows' => 10,
+      '#cols' => 80,
+    );
 
-      $form['cache'] = array(
-        '#type' => 'fieldset',
-        '#title' => t('Cache'),
-        '#collapsible' => TRUE,
-        '#collapsed' => TRUE,
-        '#tree' => TRUE,
-      );
+    $form['cache'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Cache'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#tree' => TRUE,
+    );
 
-      $form['cache']['duration'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Duration'),
-        '#description' => t('Specify a php strtotime relative date duration, (e.g. +1 hour, +2 days)'),
-        '#default_value' => @$cache['duration'],
-      );
+    $form['cache']['duration'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Duration'),
+      '#description' => t('Specify a php strtotime relative date duration, (e.g. +1 hour, +2 days)'),
+      '#default_value' => @$cache['duration'],
+    );
 
-      $form['cache']['per_user'] = array(
-        '#type' => 'checkbox',
-        '#title' => t('Per User'),
-        '#default_value' => @$cache['per_user'],
-      );
+    $form['cache']['per_user'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Per User'),
+      '#default_value' => @$cache['per_user'],
+    );
 
-      $form['cache']['per_doctype'] = array(
-        '#type' => 'checkbox',
-        '#title' => t('Per Document Type'),
-        '#default_value' => @$cache['per_doctype'],
-      );
+    $form['cache']['per_doctype'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Per Document Type'),
+      '#default_value' => @$cache['per_doctype'],
+    );
 
-      $form['buttons']['save'] = array(
+    $form['buttons']['update'] = array(
+      '#type' => 'submit',
+      '#value' => 'Update',
+      '#submit' => array('forena_layout_form_submit'),
+    );
+
+    $form['buttons']['save'] = array(
+      '#type' => 'submit',
+      '#value' => 'Save',
+      '#submit' => array('forena_layout_form_submit', 'forena_save_submit'),
+    );
+
+    $form['buttons']['cancel'] = array(
+      '#type' => 'submit',
+      '#value' => 'Cancel',
+      '#submit' => array('forena_save_cancel'),
+    );  return $form;
+
+    if (user_access('delete report')) {
+      $form['buttons']['delete'] = array(
         '#type' => 'submit',
-        '#value' => 'Save',
-        '#submit' => array('forena_layout_form_submit'),
+        '#value' => 'Delete',
+        '#submit' => array('forena_edit_delete_submit'),
       );
+    }
+    return $form;
 
-      if (user_access('delete report')) {
-        $form['buttons']['delete'] = array(
-          '#type' => 'submit',
-          '#value' => 'Delete',
-          '#submit' => array('forena_edit_delete_submit'),
-        );
-      }
-      return $form;
-    }
-    else {
-      drupal_not_found();
-      exit;
-    }
-  }
-  else {
-    drupal_not_found();
-    exit;
-  }
 }
 
 function forena_layout_form_validate($form, &$form_state) {
@@ -585,7 +568,7 @@ function forena_layout_form_submit($form, &$form_state) {
   $rebuild_menu = FALSE;
   $values = $form_state['values'];
   $report_name = $values['report_name'];
-  $r = forena_get_report_editor($report_name);
+  $r = Frx::Editor();
   // Title and category
   $r->setTitle($values['title']);
   $r->setCategory($values['category']);
@@ -615,13 +598,9 @@ function forena_layout_form_submit($form, &$form_state) {
     $r->save_attributes_by_id($values['attributes']);
   }
 
-  if (forena_save_report($report_name, $r->asXML(), TRUE) == 1) {
-    drupal_set_message(t('Your report, %s has been saved.', array('%s' => $report_name)));
-  }
+  $r->update();
   // If we changed the menu we need to rebuild it.
-  if ($rebuild_menu) {
-    menu_rebuild();
-  }
+
 }
 
 
@@ -654,7 +633,7 @@ function forena_add_report_form($formid, $form_state, $report_name='') {
   global $language;
   //determine if this is an add new report request
 
-  $r = forena_get_report_editor($name);
+  $r = Frx::Editor($name);
   $title = (string)$r->title;
   if (module_exists('locale')) {
     @list($tlang,  $tsave_name) = explode('/', $name, 2);
@@ -748,7 +727,13 @@ function forena_add_report_form_submit($form, &$form_state) {
   $desc = Frx::Menu()->parseURL($report_name);
   $report_name = $desc['name'];
 
-  $r = forena_get_report_editor($values['report_name']);
+  if ($values['report_name']) {
+    $r = Frx::Editor($values['report_name']);
+    $r->report_name = $values['save_report_name'];
+  }
+  else {
+    $r = Frx::Editor($values['save_report_name']);
+  }
   // Title and category
   $r->setTitle($values['title']);
   $r->setCategory($values['category']);
@@ -761,18 +746,16 @@ function forena_add_report_form_submit($form, &$form_state) {
   //determine redirection.
   $filename = $desc['filename'];
 
-  if (forena_save_report($report_name, $r->asXML(), TRUE) == 1) {
-    drupal_set_message(t('Your report, %s has been saved.', array('%s' => $report_name)));
-    //if this is a new report then redirect to data blocks
-    if ($values['report_name']) {
-      $edit = '/edit';
-    }
-    else {
-      $edit = '/edit/data/add';
-    }
-    $form_state['redirect']= $desc['i_link'] . $edit;
-
+  $r->update();
+  //if this is a new report then redirect to data blocks
+  if ($values['report_name']) {
+    $edit = '/edit';
   }
+  else {
+    $edit = '/edit/data/add';
+  }
+  $form_state['redirect']= $desc['i_link'] . $edit;
+
 }
 function forena_create_trans_form($formid, $form_state, $report_name) {
   $name = '';
@@ -788,7 +771,7 @@ function forena_create_trans_form($formid, $form_state, $report_name) {
   $languages = language_list();
   //determine if this is an add new report request
 
-  $r = forena_get_report_editor($name);
+  $r = Frx::Editor($name);
   $title = (string)$r->title;
   $lang = @$_GET['language'];
   if ($lang) {
@@ -844,7 +827,7 @@ function forena_create_trans_form_submit($form, &$form_state) {
   $filename = $desc['filename'];
   $report_name = $desc['name'];
 
-  $r = forena_get_report_editor($values['report_name']);
+  $r = Frx::Editor($values['report_name']);
 
   // Title and category
   $r->setTitle($values['title']);
@@ -856,11 +839,10 @@ function forena_create_trans_form_submit($form, &$form_state) {
     return;
   }
 
-  if (forena_save_report($report_name, $r->asXML(), TRUE) == 1) {
-    drupal_set_message(t('Translation,  %s has been created. Switch languages to translate.', array('%s' => $values['title'])));
-    //if this is a new report then redirect to data blocks
-    $form_state['redirect']= array( $desc['i_link'] . '/edit/layout');
-  }
+  $r->update();
+  drupal_set_message(t('Translation,  %s has been created. Switch languages to translate.', array('%s' => $values['title'])));
+  //if this is a new report then redirect to data blocks
+  $form_state['redirect']= array( $desc['i_link'] . '/edit/layout');
 }
 
 
@@ -1193,7 +1175,6 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
   $form['save'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
-    '#submit' => array('forena_data_settings_save'),
   );
 
 
@@ -1289,6 +1270,13 @@ function forena_access_info_callback($form, $form_state) {
   return $form['access_details'];
 }
 
+function forena_save_submit($form, &$form_state) {
+  Frx::Editor()->save();
+}
+
+function forena_save_cancel($form, &$form_state) {
+  Frx::Editor()->cancel();
+}
 
 /**
  *
@@ -1297,152 +1285,150 @@ function forena_access_info_callback($form, $form_state) {
  */
 function forena_fields_form($formid, $form_state, $report_name) {
   $desc = Frx::Menu()->parseURL($report_name);
-  if (!$desc['exists']) {
-    drupal_not_found();
-    exit;
-  }
   $name = $desc['name'];
   $filename = $desc['filename'];
   @$format = $desc['format'];
-  if ($name) {
-    if (Frx::File()->exists($filename)) {
-      $r = forena_get_report_editor($name);
-      drupal_set_title($r->title);
-      $regexp = FRX_TOKEN_EXP;
-      $match = array("{", "}");
 
-      /*search the body, looking for {}*/
-      $body = $r->simplexml->body->asXML();
-      $head = $r->simplexml->head;
+  $r = Frx::Editor($name);
+  drupal_set_title($r->title);
+  $regexp = FRX_TOKEN_EXP;
+  $match = array("{", "}");
 
-      $fields = array();
-      preg_match_all($regexp, $body, $out);
-      foreach ($out as $key => $value) {
-        foreach ($value as $el) {
-          $clean_element = str_replace($match, "", $el);
-          $fields[$clean_element] = $clean_element;
-        }
-      }
+  /*search the body, looking for {}*/
+  $body = $r->simplexml->body->asXML();
+  $head = $r->simplexml->head;
 
-      $form = array();
-
-      $form['report_name'] = array(
-        '#type' => 'value',
-        '#value' => $name,
-      );
-
-      $form['fields'] = array(
-        '#tree' => TRUE,
-        '#type' => 'vertical_tabs',
-      );
-      /*Now check the fields in the body against the xml*/
-      $i=0;
-      foreach ($fields as $field) {
-        $i++;
-        $field_ids[$i] = $field;
-        $form['fields'][$i] = array(
-          '#tree' => TRUE,
-          '#type' => 'fieldset',
-          '#title' => $field,
-          '#collapsible' => TRUE,
-          '#collapsed' => TRUE,
-          '#group' => 'additional_settings',
-        );
-
-        $path = 'frx:fields/frx:field[@id="' . $field . '"]';
-        $node =  $head->xpath($path);
-        $attr= array();
-        $default = '';
-        if ($node) {
-          $attr = $node[0];
-          $default = (string) $node[0];
-        }
-
-        $form['fields'][$i]['id'] = array(
-          '#type' => 'value',
-          '#value' => $field,
-        );
-
-        $form['fields'][$i]['format'] = array(
-          '#type' => 'textfield',
-          '#title' => t('format'),
-          '#default_value' => @$attr['format'],
-          '#size' => 30,
-          '#autocomplete_path' => 'forena/fields/format/autocomplete',
-          '#description' => t('Format a date and time field by entering the name of a supported format function. Enter a "*" to see all available formats.')
-        );
-
-        $form['fields'][$i]['format-string'] = array(
-          '#type' => 'textfield',
-          '#title' => t('format-string'),
-          '#default_value' => @$attr['format-string'],
-          '#size' => 30,
-          '#description' => t('The display type of your format.')
-        );
-
-        $form['fields'][$i]['link'] = array(
-          '#type' => 'textfield',
-          '#title' => t('link'),
-          '#default_value' => @$attr['link'],
-          '#size' => 100,
-          '#maxlength' => 256,
-          '#description' => t('Create a link that incorporates this field, e.g "profile/{field_name}" will create a link to this field_name\'s profile. *Note the field must be wrapped in {}.')
-        );
-
-        $form['fields'][$i]['add-query'] = array(
-          '#type' => 'checkbox',
-          '#title' => t('Pass through url parameters'),
-          '#default_value' => @$attr['add-query'],
-          '#description' => t('Automatically pass through url parameters on this link'),
-        );
-
-        $form['fields'][$i]['rel'] = array(
-          '#type' => 'textfield',
-          '#title' => t('rel') ,
-          '#description' => t('Relationship attribute to apply to the link.'),
-          '#size' => 100,
-          '#maxlength' => 256,
-          '#default_value' => @$attr['rel'],
-        );
-
-        $form['fields'][$i]['class'] = array(
-          '#type' => 'textfield',
-          '#title' => t('class') ,
-          '#description' => t('Class applied to be applied to the link.'),
-          '#size' => 100,
-          '#maxlength' => 256,
-          '#default_value' => @$attr['class'],
-        );
-
-        $form['fields'][$i]['target'] = array(
-          '#type' => 'textfield',
-          '#title' => t('target'),
-          '#default_value' => @$attr['target'],
-          '#size' => 30,
-          '#description' => t('Link target eg. _BLANK,  Targets that begin with "popup" will be opened in a new window using javascript.')
-        );
-
-        $form['fields'][$i]['default'] = array(
-          '#type' => 'textfield',
-          '#title' => t('default value'),
-          '#default_value' => $default,
-          '#size' => 30,
-          '#description' => t('The value to be displayed in the report when no value exists.')
-        );
-      }
-      $form['submit'] = array(
-        '#type' => 'submit',
-        '#value' => 'Save',
-      );
-      return $form;
-    }
-    else {
-      drupal_not_found();
+  $fields = array();
+  preg_match_all($regexp, $body, $out);
+  foreach ($out as $key => $value) {
+    foreach ($value as $el) {
+      $clean_element = str_replace($match, "", $el);
+      $fields[$clean_element] = $clean_element;
     }
   }
-  else {
-    drupal_not_found();
+
+  $form = array();
+
+  $form['report_name'] = array(
+    '#type' => 'value',
+    '#value' => $name,
+  );
+
+  $form['fields'] = array(
+    '#tree' => TRUE,
+    '#type' => 'vertical_tabs',
+  );
+  /*Now check the fields in the body against the xml*/
+  $i=0;
+  foreach ($fields as $field) {
+    $i++;
+    $field_ids[$i] = $field;
+    $form['fields'][$i] = array(
+      '#tree' => TRUE,
+      '#type' => 'fieldset',
+      '#title' => $field,
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#group' => 'additional_settings',
+    );
+
+    $path = 'frx:fields/frx:field[@id="' . $field . '"]';
+    $node =  $head->xpath($path);
+    $attr= array();
+    $default = '';
+    if ($node) {
+      $attr = $node[0];
+      $default = (string) $node[0];
+    }
+
+    $form['fields'][$i]['id'] = array(
+      '#type' => 'value',
+      '#value' => $field,
+    );
+
+    $form['fields'][$i]['format'] = array(
+      '#type' => 'textfield',
+      '#title' => t('format'),
+      '#default_value' => @$attr['format'],
+      '#size' => 30,
+      '#autocomplete_path' => 'forena/fields/format/autocomplete',
+      '#description' => t('Format a date and time field by entering the name of a supported format function. Enter a "*" to see all available formats.')
+    );
+
+    $form['fields'][$i]['format-string'] = array(
+      '#type' => 'textfield',
+      '#title' => t('format-string'),
+      '#default_value' => @$attr['format-string'],
+      '#size' => 30,
+      '#description' => t('The display type of your format.')
+    );
+
+    $form['fields'][$i]['link'] = array(
+      '#type' => 'textfield',
+      '#title' => t('link'),
+      '#default_value' => @$attr['link'],
+      '#size' => 100,
+      '#maxlength' => 256,
+      '#description' => t('Create a link that incorporates this field, e.g "profile/{field_name}" will create a link to this field_name\'s profile. *Note the field must be wrapped in {}.')
+    );
+
+    $form['fields'][$i]['add-query'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Pass through url parameters'),
+      '#default_value' => @$attr['add-query'],
+      '#description' => t('Automatically pass through url parameters on this link'),
+    );
+
+    $form['fields'][$i]['rel'] = array(
+      '#type' => 'textfield',
+      '#title' => t('rel') ,
+      '#description' => t('Relationship attribute to apply to the link.'),
+      '#size' => 100,
+      '#maxlength' => 256,
+      '#default_value' => @$attr['rel'],
+    );
+
+    $form['fields'][$i]['class'] = array(
+      '#type' => 'textfield',
+      '#title' => t('class') ,
+      '#description' => t('Class applied to be applied to the link.'),
+      '#size' => 100,
+      '#maxlength' => 256,
+      '#default_value' => @$attr['class'],
+    );
+
+    $form['fields'][$i]['target'] = array(
+      '#type' => 'textfield',
+      '#title' => t('target'),
+      '#default_value' => @$attr['target'],
+      '#size' => 30,
+      '#description' => t('Link target eg. _BLANK,  Targets that begin with "popup" will be opened in a new window using javascript.')
+    );
+
+    $form['fields'][$i]['default'] = array(
+      '#type' => 'textfield',
+      '#title' => t('default value'),
+      '#default_value' => $default,
+      '#size' => 30,
+      '#description' => t('The value to be displayed in the report when no value exists.')
+    );
   }
+  $form['update'] = array(
+    '#type' => 'submit',
+    '#value' => 'Update',
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Save',
+    '#submit' => array('forena_fields_form_submit', 'forena_save_submit'),
+  );
+
+  $form['cancel'] = array(
+    '#type' => 'submit',
+    '#value' => 'Cancel',
+    '#submit' => array('forena_save_cancel'),
+  );  return $form;
 }
 
 
@@ -1450,17 +1436,11 @@ function forena_fields_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   $name = $values['report_name'];
 
-  $r = forena_get_report_editor($name);
+  $r = Frx::Editor($name);
   /*now build the fields*/
   $fields = $values['fields'];
   $r->setFields($fields);
-
-  if (forena_save_report($name, $r->asXML(), TRUE) == 1) {
-    drupal_set_message(t('Your report, %s has been saved.', array('%s' => $name)));
-  }
-  else {
-    drupal_set_message(t('There was an error saving your report, %s to the database.', array('%s' => $name)));
-  }
+  $r->update();
 
 }
 
@@ -1472,12 +1452,8 @@ function forena_add_data_block_form($formid, &$form_state, $report_name) {
     $desc = $form_state['storage']['desc'] = Frx::Menu()->parseURL($report_name);
     $filename = $form_state['storage']['filename'] = $desc['filename'];
     $format = isset($desc['format']) ? $desc['format'] : '';
-    $r = forena_get_report_editor($desc['name']);
+    $r = Frx::Editor($report_name);
     $form_state['storage']['title'] = $r->title;
-    if (!@$desc['exists']) {
-      drupal_not_found();
-      return;
-    }
     $step = $form_state['storage']['step'] = 'select_block';
   }
   else {
@@ -1596,7 +1572,7 @@ function forena_add_data_block_form($formid, &$form_state, $report_name) {
               '#title' => t('Template Settings'),
               '#tree' => TRUE,
           );
-          $form['template']['template_data']['config'] = $template_obj->config_form($config, $xml);
+          $form['template']['template_data']['config'] = $template_obj->configForm($config, $xml);
         };
 
         $template_obj->generate($xml, $config);
@@ -1675,7 +1651,7 @@ function forena_data_block_add($form, &$form_state) {
   $values = $form_state['values'];
   $report_name = $values['report_name'];
   $data_block = $form_state['storage']['data_block'];
-  $r = forena_get_report_editor($report_name);
+  $r = Frx::Editor($report_name);
   $head = $r->simplexml->head;
 
   //Get the xml body of the added data block
@@ -1715,10 +1691,8 @@ function forena_data_block_add($form, &$form_state) {
   $added_report = forena_clean_xhtml($added_report);
 
   $r->setBody($main_report . "\n" . $added_report);
-  if (forena_save_report($report_name, $r->asXML(), TRUE) == 1) {
-    drupal_set_message(t('Your report has been saved'));
-    $form_state['redirect'] = $values['return'];
-  }
+  $r->update();
+  $form_state['redirect'] = $values['return'];
 }
 
 /**
@@ -1798,14 +1772,10 @@ function forena_add_data_block_form_submit($form, &$form_state) {
  */
 function forena_data_block_form($formid, &$form_state, $report_name) {
   $desc = Frx::Menu()->parseURL($report_name);
-  if (!$desc['exists']) {
-    drupal_not_found();
-    exit;
-  }
   $name = $desc['name'];
   $filename = $desc['filename'];
   $format = isset($desc['format']) ? $desc['format'] : '';
-  $r = forena_get_report_editor($name);
+  $r = Frx::Editor($name);
   drupal_set_title($r->title);
   $form = array();
   $title = (string)$r->title;
@@ -1912,9 +1882,21 @@ function forena_data_block_form($formid, &$form_state, $report_name) {
         $form['blocks'][] = $ctl;
   }
 
+  $form['update'] = array(
+    '#type' => 'update',
+    '#value' => 'Update',
+  );
+
   $form['save'] = array(
       '#type' => 'submit',
       '#value' => 'Save',
+      '#submit' => array('forena_data_block_form_submit', 'forena_save_submit'),
+  );
+
+  $form['cancel'] = array(
+    '#type' => 'submit',
+    '#value' => 'Cancel',
+    '#submit' => array('forena_save_cancel'),
   );
   return $form;
 }
@@ -1935,7 +1917,7 @@ function forena_data_block_form_submit($form, &$form_state) {
   $block_info='';
   $values = $form_state['values'];
   $name = $values['report_name'];
-  $r = forena_get_report_editor($name);
+  $r = Frx::Editor();
 
   if ($values['blocks']) {
     $r->get_attributes_by_id();
@@ -1952,9 +1934,7 @@ function forena_data_block_form_submit($form, &$form_state) {
     }
     if ($r) $r->save_attributes_by_id($data);
   }
-  if (forena_save_report($name, $r->asXML(), TRUE) == 1) {
-    drupal_set_message(t('Your report %s been saved', array('%s' => $name)));
-  }
+  $r->update();
 }
 
 
@@ -1980,7 +1960,7 @@ function forena_report_translations($name_in='') {
     $i_link = $key . '.' . $name;
     if (Frx::File()->exists($report_path . '/' . $i_name . '.frx')) {
       $modified = format_date(filemtime(Frx::File()->path($i_name . '.frx')));
-      $r = forena_get_report_editor($i_name);
+      $r = Frx::Editor($i_name);
       $title = $r->title;
       $edit = l(t('Edit'), 'reports/' . str_replace('/', '.', $i_link) . '/edit', array('query' => array('language' => $key)));
     }
@@ -2006,11 +1986,10 @@ function forena_data_block_delete($form, &$form_state) {
   $values = $form_state['values'];
 
   $report_name = $values['report_name'];
-  $r = FrxReportGenerator::instance()->get_report($report_name);
+  $r = Frx::Editor($report_name);
 
   //find the datablocks in the existing report
   if ($r) $r->get_attributes_by_id();
-  $body = $r->body;
 
   foreach ($values['blocks'] as $block) {
     if ($block['delete']) {
@@ -2018,9 +1997,8 @@ function forena_data_block_delete($form, &$form_state) {
     }
   }
 
-  if (forena_save_report($report_name, $r->rpt_xml, TRUE) == 1) {
-    drupal_set_message(t('Your report has been saved.'));
-  }
+  $r->update();
+
 }
 
 /**
@@ -2187,182 +2165,187 @@ function forena_xmlpp($xml, $html_output=FALSE) {
 function forena_admin_params_form($formid, $form_state, $report_name) {
 
   $desc = Frx::Menu()->parseURL($report_name);
-  if (!$desc['exists']) {
-    drupal_not_found();
-    exit;
-  }
   $name = $desc['name'];
   $filename = $desc['filename'];
   $format = @$desc['format'];
-  if ($desc['exists'] && $name) {
-    // Set up basic control types.
-    $control_types= array('textfield' => 'Text',
-      'hidden' => 'Hidden',
-      'radios' => 'Radios',
-      'checkbox' => 'Checkbox',
-      'checkboxes' => 'Checkboxes',
-      'select' => 'Select',
-      'selectajax' => 'Select with Refresh',
-      'multiselect' => 'Multi-Select',
-      'multiselectajax' => 'Multi-select With Refresh',
-    );
-    // Supported module specific control types.
-    if (module_exists('date_api')) {
-      $control_types['date_select'] =  'Date Select';
-    }
-    if (module_exists('date_popup')) {
-      $control_types['date_popup'] = 'Date Popup';
-    }
 
-    //Construct report editor
-    $r = forena_get_report_editor($name);
-    drupal_set_title($r->title);
-    $form = array();
+  // Set up basic control types.
+  $control_types= array('textfield' => 'Text',
+    'hidden' => 'Hidden',
+    'radios' => 'Radios',
+    'checkbox' => 'Checkbox',
+    'checkboxes' => 'Checkboxes',
+    'select' => 'Select',
+    'selectajax' => 'Select with Refresh',
+    'multiselect' => 'Multi-Select',
+    'multiselectajax' => 'Multi-select With Refresh',
+  );
+  // Supported module specific control types.
+  if (module_exists('date_api')) {
+    $control_types['date_select'] =  'Date Select';
+  }
+  if (module_exists('date_popup')) {
+    $control_types['date_popup'] = 'Date Popup';
+  }
 
-    $form['rpt_name'] = array(
-      '#type' => 'value',
-      '#value' => $name,
-    );
+  //Construct report editor
+  $r = Frx::Editor($name);
+  drupal_set_title($r->title);
+  $form = array();
 
-    $links = array();
-    $links[] = array('href' => $desc['link'] . '/edit/params/add', 'title' => 'Add Parameter' );
-    $form['add_link'] = array(
-      '#type' => 'markup',
-      '#markup' => theme('links',
-        array(
-         'links' => $links,
-         'attributes' => array('class' => 'action-links'),
-        )
+  $form['rpt_name'] = array(
+    '#type' => 'value',
+    '#value' => $name,
+  );
+
+  $links = array();
+  $links[] = array('href' => $desc['link'] . '/edit/params/add', 'title' => 'Add Parameter' );
+  $form['add_link'] = array(
+    '#type' => 'markup',
+    '#markup' => theme('links',
+      array(
+       'links' => $links,
+       'attributes' => array('class' => 'action-links'),
       )
-    );
+    )
+  );
 
-    if ($r) $nodes = $r->simplexml->xpath('head/frx:parameters/frx:parm');
-    if ($nodes) {
-      $form['params'] = array(
+  if ($r) $nodes = $r->simplexml->xpath('head/frx:parameters/frx:parm');
+  if ($nodes) {
+    $form['params'] = array(
+      '#tree' => TRUE,
+      '#type' => 'vertical_tabs'
+      );
+
+      foreach ($nodes as $node) {
+        $attrs = $node->attributes();
+        $id = @(string)$attrs['id'];
+        $label = @(string)$attrs['label'];
+        $value = @(string)$attrs['value'] ? (string)$attrs['value'] : (string)$node;
+        $require = @(string)$attrs['require'];
+        $data_source = @(string)$attrs['data_source'];
+        $data_field = @(string)$attrs['data_field'];
+        $label_field = @(string)$attrs['label_field'];
+        $class = @(string)$attrs['class'];
+        $desc = @(string)$attrs['desc'];
+        $type = @(string)$attrs['type'];
+        $options = @(string)$attrs['options'];
+
+        //make a subtree for each param
+        $form['params'][$id] = array(
         '#tree' => TRUE,
-        '#type' => 'vertical_tabs'
+        '#type' => 'fieldset',
+        '#title' => ($label) ? $label . ' (' . $id . ')' : $id,
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+        '#group' => 'additional_settings',
         );
 
-        foreach ($nodes as $node) {
-          $attrs = $node->attributes();
-          $id = @(string)$attrs['id'];
-          $label = @(string)$attrs['label'];
-          $value = @(string)$attrs['value'] ? (string)$attrs['value'] : (string)$node;
-          $require = @(string)$attrs['require'];
-          $data_source = @(string)$attrs['data_source'];
-          $data_field = @(string)$attrs['data_field'];
-          $label_field = @(string)$attrs['label_field'];
-          $class = @(string)$attrs['class'];
-          $desc = @(string)$attrs['desc'];
-          $type = @(string)$attrs['type'];
-          $options = @(string)$attrs['options'];
-
-          //make a subtree for each param
-          $form['params'][$id] = array(
-          '#tree' => TRUE,
-          '#type' => 'fieldset',
-          '#title' => ($label) ? $label . ' (' . $id . ')' : $id,
-          '#collapsible' => TRUE,
-          '#collapsed' => TRUE,
-          '#group' => 'additional_settings',
-          );
-
-          $form['params'][$id]['id'] = array(
-          '#type' => 'value',
-          '#value' => $id,
-          );
-
-          $form['params'][$id]['label'] = array(
-          '#type' => 'textfield',
-          '#title' => t('label'),
-          '#default_value' => $label,
-          '#required' => FALSE,
-          '#description' => t('A descriptive name of the parameter to be displayed on a form.')
-          );
-
-          $form['params'][$id]['require'] = array(
-          '#type' => 'radios',
-          '#title' => t('require'),
-          '#default_value' => ($require) ? $require : "0",
-          '#options' => array("1" => t('Yes'), "0" => t('No')),
-          '#description' => t('Requires a value for this parameter to display the report. If there is not a default value, the user will be prompted to enter a value.')
-          );
-
-          $form['params'][$id]['value'] = array(
-          '#type' => 'textfield',
-          '#title' => 'default value',
-          '#default_value' => $value,
-          '#description' => t('The value of the parameter for the initial view of the report.')
-          );
-
-          $form['params'][$id]['desc'] = array(
-          '#type' => 'textfield',
-          '#title' => t('description'),
-          '#default_value' => $desc,
-          '#description' => t('Enter a helpful description about this parameter. This will display on the form when the user is prompted to enter a parameter.'),
-          );
-
-          $form['params'][$id]['type'] = array(
-          '#type' => 'select',
-          '#title' => t('Input Control Type'),
-          '#default_value' => $type,
-          '#options' => $control_types,
-          '#description' => t('Enter a helpful description about this parameter. This will display on the form when the user is prompted to enter a parameter.'),
-          );
-
-          $form['params'][$id]['data_source'] = array(
-          '#type' => 'textfield',
-          '#title' => t('Data Source'),
-          '#default_value' => $data_source,
-          '#autocomplete_path' => 'forena/data_block/autocomplete',
-          '#description' => t('Data block to be used for select, multiselect, and checkboxes types'),
-          );
-
-          $form['params'][$id]['data_field'] = array(
-          '#type' => 'textfield',
-          '#title' => t('Data Field'),
-          '#default_value' => $data_field,
-          '#description' => t('Column in data block to be used data of select boxes and radio buttons. '),
-          );
-
-          $form['params'][$id]['label_field'] = array(
-            '#type' => 'textfield',
-            '#title' => t('Label Field'),
-            '#default_value' => $label_field,
-            '#description' => t('Column in data block to be used for the label for selet boxes and radio buttons.')
-          );
-
-          $form['params'][$id]['options'] = array(
-          '#type' => 'textfield',
-          '#title' => t('Options'),
-          '#default_value' => $options,
-          '#description' => t('Used to configure the control type above options depend on the control type above.')
-          );
-
-          $form['params'][$id]['class'] = array(
-          '#type' => 'textfield',
-          '#title' => t('Class'),
-          '#description' => t('Specify the html class you wish to apply to this parameter'),
-          '#default_value' => $class,
-          );
-
-          $form['params'][$id]['delete_ind'] = array(
-          '#type' => 'checkbox',
-          '#title' => 'Remove this parameter',
-          '#description' => t('Check to remove this parameter, then save'),
-          );
-        }
-
-        $form['submit'] = array(
-       '#type' => 'submit',
-       '#value' => 'Save',
+        $form['params'][$id]['id'] = array(
+        '#type' => 'value',
+        '#value' => $id,
         );
-    }
-    return $form;
+
+        $form['params'][$id]['label'] = array(
+        '#type' => 'textfield',
+        '#title' => t('label'),
+        '#default_value' => $label,
+        '#required' => FALSE,
+        '#description' => t('A descriptive name of the parameter to be displayed on a form.')
+        );
+
+        $form['params'][$id]['require'] = array(
+        '#type' => 'radios',
+        '#title' => t('require'),
+        '#default_value' => ($require) ? $require : "0",
+        '#options' => array("1" => t('Yes'), "0" => t('No')),
+        '#description' => t('Requires a value for this parameter to display the report. If there is not a default value, the user will be prompted to enter a value.')
+        );
+
+        $form['params'][$id]['value'] = array(
+        '#type' => 'textfield',
+        '#title' => 'default value',
+        '#default_value' => $value,
+        '#description' => t('The value of the parameter for the initial view of the report.')
+        );
+
+        $form['params'][$id]['desc'] = array(
+        '#type' => 'textfield',
+        '#title' => t('description'),
+        '#default_value' => $desc,
+        '#description' => t('Enter a helpful description about this parameter. This will display on the form when the user is prompted to enter a parameter.'),
+        );
+
+        $form['params'][$id]['type'] = array(
+        '#type' => 'select',
+        '#title' => t('Input Control Type'),
+        '#default_value' => $type,
+        '#options' => $control_types,
+        '#description' => t('Enter a helpful description about this parameter. This will display on the form when the user is prompted to enter a parameter.'),
+        );
+
+        $form['params'][$id]['data_source'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Data Source'),
+        '#default_value' => $data_source,
+        '#autocomplete_path' => 'forena/data_block/autocomplete',
+        '#description' => t('Data block to be used for select, multiselect, and checkboxes types'),
+        );
+
+        $form['params'][$id]['data_field'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Data Field'),
+        '#default_value' => $data_field,
+        '#description' => t('Column in data block to be used data of select boxes and radio buttons. '),
+        );
+
+        $form['params'][$id]['label_field'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Label Field'),
+          '#default_value' => $label_field,
+          '#description' => t('Column in data block to be used for the label for selet boxes and radio buttons.')
+        );
+
+        $form['params'][$id]['options'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Options'),
+        '#default_value' => $options,
+        '#description' => t('Used to configure the control type above options depend on the control type above.')
+        );
+
+        $form['params'][$id]['class'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Class'),
+        '#description' => t('Specify the html class you wish to apply to this parameter'),
+        '#default_value' => $class,
+        );
+
+        $form['params'][$id]['delete_ind'] = array(
+        '#type' => 'checkbox',
+        '#title' => 'Remove this parameter',
+        '#description' => t('Check to remove this parameter, then save'),
+        );
+      }
+
+      $form['update'] = array(
+        '#type' => 'submit',
+        '#value' => 'Update',
+      );
+
+      $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => 'Save',
+        '#submit' => array('forena_admin_params_form_submit', 'forena_save_submit'),
+      );
+
+      $form['cancel'] = array(
+        '#type' => 'submit',
+        '#value' => 'Cancel',
+        '#submit' => array('forena_save_cancel'),
+      );
   }
-  else {
-    drupal_not_found();
-  }
+  return $form;
+
 }
 
 function forena_add_param_form($form, &$form_state, $report_name) {
@@ -2370,8 +2353,8 @@ function forena_add_param_form($form, &$form_state, $report_name) {
   $name = $desc['name'];
   $filename = $desc['filename'];
   $format = @$desc['format'];
-  if ($desc['exists'] && $name) {
-    $r = forena_get_report_editor($name);
+  if ($report_name) {
+    $r = Frx::Editor($report_name);
     drupal_set_title($r->title);
     $form = array();
 
@@ -2420,11 +2403,13 @@ function forena_add_param_form($form, &$form_state, $report_name) {
       '#description' => t('Enter a helpful description about this parameter. This will display on the form when the user is prompted to enter a parameter.'),
     );
 
-    $form['save'] = array(
+    $form['add'] = array(
       '#type' => 'submit',
       '#value' => 'Add',
       '#submit' => array('forena_add_param_form_submit'),
     );
+
+
 
     $form['cancel'] = array(
       '#type' => 'submit',
@@ -2439,16 +2424,12 @@ function forena_add_param_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   $name = $values['rpt_name'];
   $param = $values['params'];
-  $r = forena_get_report_editor($name);
+  $r = Frx::Editor($name);
   //add the new parms
   $r->addParameter($param);
-
-  $new_report = $r->asXML();
-
-  if (forena_save_report($name, $new_report, TRUE) == 1) {
-    drupal_set_message(t('Parameter added'));
-    $form_state['redirect'] = $values['return'];
-  }
+  $r->update();
+  drupal_set_message(t('Parameter added'));
+  $form_state['redirect'] = $values['return'];
 }
 
 function forena_admin_params_form_submit($form, &$form_state) {
@@ -2457,7 +2438,7 @@ function forena_admin_params_form_submit($form, &$form_state) {
   $params = $values['params'];
   // Hack because in rare cases the forms api adds this parmeter.
   unset($params['params__active_tab']);
-  $r = forena_get_report_editor($name);
+  $r = Frx::Editor($name);
   //add the new parms
   $r->setParameters($params);
   //Remove paramters to delete
@@ -2467,11 +2448,7 @@ function forena_admin_params_form_submit($form, &$form_state) {
     }
   }
 
-  $new_report = $r->asXML();
-
-  if (forena_save_report($name, $new_report, TRUE) == 1) {
-    drupal_set_message(t('Your report has been saved'));
-  }
+  $r->update();
 }
 
 /**

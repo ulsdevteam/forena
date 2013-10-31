@@ -9,7 +9,7 @@
 require_once (drupal_get_path('module','forena') . '/renderers/FrxSVGGraph.inc');
 class FrxGraphTemplate extends FrxTemplate {
 
-  public function config_form($config, $xml='') {
+  public function configForm($config, $xml='') {
     $form_ctl = array();
 
     $graph_types = array(

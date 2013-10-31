@@ -12,6 +12,8 @@ class FrxEditor {
   public $document_root;
   public $simplexml;
   public $title;
+  public $report_name;
+  public $frx_attributes;
   public $doc_prefix = '<?xml version="1.0" encoding="UTF-8"?>
     <!DOCTYPE root [
     <!ENTITY nbsp "&#160;">
@@ -19,45 +21,21 @@ class FrxEditor {
   public $xmlns = 'urn:FrxReports';
   private $xpq;
 
+
+
   /**
    * Create initial FRX report
    * Enter description here ...
    * @param unknown_type $xml_string
    */
-  public function __construct($xml_string = '') {
+  public function __construct($report_name) {
+
+
     $this->dom = new DOMDocument('1.0', 'UTF-8');
     $dom = $this->dom;
+    $this->load($report_name);
 
-    // Load a new one or build the empty XML Document
-    if ($xml_string) {
-      // Eliminate the xml headers that don't have encoding info
-      $xml_string = str_ireplace('<?xml version="1.0"?>', '', $xml_string);
-      // If the <?xml code is missing assume UTF-8
-      if (strpos($xml_string, '<?xml')===FALSE) {
-        $xml_string = $this->doc_prefix . "\n" . $xml_string;
-      }
-    }
-    else {
-      $xml_string = $this->doc_prefix .
-        '<html xmlns:frx="urn:FrxReports"><head/><body/></html>';
-    }
-    libxml_use_internal_errors();
-    try {
-      $dom->loadXML($xml_string);
-    }
-    catch (Exception $e) {
-      forena_error('Invalid or malformed report document', '<pre>' .
-      $e->getMessage() . $e->getTraceAsString() . '</pre>');
-    }
 
-    $this->verifyHeaderElements();
-    $tnodes = $dom->getElementsByTagName('title');
-    if ($tnodes->length) $this->title = $tnodes->item(0)->textContent;
-    $this->document_root = $dom->documentElement;
-    $this->simplexml = simplexml_import_dom($dom);
-    $dom->formatOutput = TRUE;
-    $this->xpq = new DOMXPath($dom);
-    $this->xpq->registerNamespace('frx', $this->xmlns);
   }
 
   /**
@@ -68,6 +46,74 @@ class FrxEditor {
     $dom =  $this->dom;
     $dom->formatOutput = TRUE;
     return $dom->saveXML();
+  }
+
+  /**
+   * Save data away in the session state.
+   */
+  public function update() {
+    $_SESSION['forena_report_editor'][$this->report_name] = $this->asXML();
+  }
+
+  public function cancel() {
+    unset($_SESSION['forena_report_editor'][$this->report_name]);
+    drupal_get_messages('warning');
+  }
+
+  /**
+   * Load report from file system
+   * @param unknown_type $report_name
+   * @return string
+   */
+  public function load($report_name) {
+    $r_text='';
+    $dom = $this->dom;
+    $this->report_name = $report_name;
+    // Load the latest copy of the report editor
+    if ($report_name) {
+      if (isset($_SESSION['forena_report_editor'][$report_name])) {
+        $r_text = $_SESSION['forena_report_editor'][$report_name];
+        drupal_set_message(t('All changes are stored temporarily.  Click Save to make your changes permanent.  Click Cancel to discard your changes.'), 'warning', FALSE);
+      }
+      else {
+        $filename = $report_name . '.frx';
+        $r_text = Frx::File()->contents($filename);
+      }
+    }
+    if (!$r_text) {
+      $m_path = drupal_get_path('module', 'forena');
+      $r_text = file_get_contents($m_path . '/default.frx');
+    }
+
+    libxml_use_internal_errors();
+    try {
+      @$dom->loadXML($r_text);
+    }
+    catch (Exception $e) {
+      forena_error('Invalid or malformed report document', '<pre>' .
+        $e->getMessage() . $e->getTraceAsString() . '</pre>');
+    }
+
+    $this->verifyHeaderElements();
+    $tnodes = $dom->getElementsByTagName('title');
+    if ($tnodes->length) $this->title = $tnodes->item(0)->textContent;
+    $this->document_root = $dom->documentElement;
+    $this->simplexml = simplexml_import_dom($dom);
+    $dom->formatOutput = TRUE;
+    $this->xpq = new DOMXPath($dom);
+    $this->xpq->registerNamespace('frx', $this->xmlns);
+    return $r_text;
+  }
+
+  /**
+   * Save report
+   */
+  public function save() {
+    unset($_SESSION['forena_report_editor'][$this->report_name]);
+    forena_save_report($this->report_name, $this->asXML(), TRUE);
+    drupal_set_message(t('Your report, %s has been saved.', array('%s' => $this->report_name)));
+    drupal_get_messages('warning');
+    menu_rebuild();
   }
 
   /**
@@ -260,6 +306,7 @@ class FrxEditor {
     NULL,
       'type'
       );
+    print_r($this->simplexml);
   }
 
   /**
@@ -562,7 +609,21 @@ class FrxEditor {
     }
   }
 
+  /**
+   * Delete a node based on id
+   * @param unknown_type $id
+   * @return unknown_type
+   */
+  public function deleteNode($id) {
+    $path = '//*[@id="' . $id . '"]';
+    $dom = $this->dom;
+    $nodes = $this->simplexml->xpath($path);
+    if ($nodes) {
+      $node = $nodes[0];
+      $dom=dom_import_simplexml($node);
+      $dom->parentNode->removeChild($dom);
+    }
 
-
+  }
 
 }

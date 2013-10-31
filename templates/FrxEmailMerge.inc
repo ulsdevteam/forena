@@ -6,7 +6,7 @@
 require_once('FrxTemplate.inc');
 class FrxEmailMerge extends FrxTemplate {
 
-  public function config_form($config, $xml='') {
+  public function configForm($config, $xml='') {
     $form_ctl['from'] = array(
       '#type' => 'textfield',
       '#title' => t('From'),

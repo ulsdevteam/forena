@@ -18,7 +18,7 @@ class FrxFieldTable extends FrxTemplate {
       $tr = $this->addNode($tbody, 8, 'tr');
       $th = $this->addNode($tr, 10, 'th', $col);
       if ($r==1) {
-        $th->setAttribute('width', '300');
+        $th->setAttribute('style', 'width: 25em;');
       }
       $td = $this->addNode($tr, 10, 'td', '{' . $col . '}');
     }
