@@ -34,8 +34,7 @@ class FrxEditor {
     $this->dom = new DOMDocument('1.0', 'UTF-8');
     $dom = $this->dom;
     $this->load($report_name);
-    $this->xpq = new DOMXPath($dom);
-    $this->xpq->registerNamespace('frx', $this->xmlns);
+
 
   }
 
@@ -88,7 +87,7 @@ class FrxEditor {
 
     libxml_use_internal_errors();
     try {
-      $dom->loadXML($r_text);
+      @$dom->loadXML($r_text);
     }
     catch (Exception $e) {
       forena_error('Invalid or malformed report document', '<pre>' .
@@ -101,6 +100,8 @@ class FrxEditor {
     $this->document_root = $dom->documentElement;
     $this->simplexml = simplexml_import_dom($dom);
     $dom->formatOutput = TRUE;
+    $this->xpq = new DOMXPath($dom);
+    $this->xpq->registerNamespace('frx', $this->xmlns);
     return $r_text;
   }
 
@@ -109,9 +110,10 @@ class FrxEditor {
    */
   public function save() {
     unset($_SESSION['forena_report_editor'][$this->report_name]);
-    forena_save_report($this->report_name, $this->asXML());
+    forena_save_report($this->report_name, $this->asXML(), TRUE);
     drupal_set_message(t('Your report, %s has been saved.', array('%s' => $this->report_name)));
     drupal_get_messages('warning');
+    menu_rebuild();
   }
 
   /**
@@ -304,6 +306,7 @@ class FrxEditor {
     NULL,
       'type'
       );
+    print_r($this->simplexml);
   }
 
   /**

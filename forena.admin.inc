@@ -283,8 +283,14 @@ function forena_format_form($formid, $form_state, $report_name) {
       $form['submit'] = array(
         '#type' => 'submit',
         '#value' => 'Save',
-        '#submit' => array('forena_save_submit'),
+        '#submit' => array('forena_format_form_submit', 'forena_save_submit'),
       );
+
+      $form['cancel'] = array(
+        '#type' => 'submit',
+        '#value' => 'Cancel',
+        '#submit' => array('forena_save_cancel'),
+      );  return $form;
     }
   }
   return $form;
@@ -311,7 +317,7 @@ function forena_format_form_submit($form, &$form_state) {
     $r->setDocgen($docgen);
   }
 
-  $r->save();
+  $r->update();
 
 }
 
@@ -504,8 +510,14 @@ function forena_layout_form($form, $form_state, $report_name) {
     $form['buttons']['save'] = array(
       '#type' => 'submit',
       '#value' => 'Save',
-      '#submit' => array('forena_save_submit'),
+      '#submit' => array('forena_layout_form_submit', 'forena_save_submit'),
     );
+
+    $form['buttons']['cancel'] = array(
+      '#type' => 'submit',
+      '#value' => 'Cancel',
+      '#submit' => array('forena_save_cancel'),
+    );  return $form;
 
     if (user_access('delete report')) {
       $form['buttons']['delete'] = array(
@@ -586,13 +598,9 @@ function forena_layout_form_submit($form, &$form_state) {
     $r->save_attributes_by_id($values['attributes']);
   }
 
-  if (forena_save_report($report_name, $r->asXML(), TRUE) == 1) {
-    drupal_set_message(t('Your report, %s has been saved.', array('%s' => $report_name)));
-  }
+  $r->update();
   // If we changed the menu we need to rebuild it.
-  if ($rebuild_menu) {
-    menu_rebuild();
-  }
+
 }
 
 
@@ -1413,9 +1421,14 @@ function forena_fields_form($formid, $form_state, $report_name) {
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => 'Save',
-    '#submit' => array('forena_save_submit'),
+    '#submit' => array('forena_fields_form_submit', 'forena_save_submit'),
   );
-  return $form;
+
+  $form['cancel'] = array(
+    '#type' => 'submit',
+    '#value' => 'Cancel',
+    '#submit' => array('forena_save_cancel'),
+  );  return $form;
 }
 
 
@@ -1427,13 +1440,7 @@ function forena_fields_form_submit($form, &$form_state) {
   /*now build the fields*/
   $fields = $values['fields'];
   $r->setFields($fields);
-
-  if (forena_save_report($name, $r->asXML(), TRUE) == 1) {
-    drupal_set_message(t('Your report, %s has been saved.', array('%s' => $name)));
-  }
-  else {
-    drupal_set_message(t('There was an error saving your report, %s to the database.', array('%s' => $name)));
-  }
+  $r->update();
 
 }
 
@@ -1883,7 +1890,13 @@ function forena_data_block_form($formid, &$form_state, $report_name) {
   $form['save'] = array(
       '#type' => 'submit',
       '#value' => 'Save',
-      '#submit' => array('forena_save_submit'),
+      '#submit' => array('forena_data_block_form_submit', 'forena_save_submit'),
+  );
+
+  $form['cancel'] = array(
+    '#type' => 'submit',
+    '#value' => 'Cancel',
+    '#submit' => array('forena_save_cancel'),
   );
   return $form;
 }
@@ -2322,7 +2335,13 @@ function forena_admin_params_form($formid, $form_state, $report_name) {
       $form['submit'] = array(
         '#type' => 'submit',
         '#value' => 'Save',
-        '#submit' => array('forena_save_submit'),
+        '#submit' => array('forena_admin_params_form_submit', 'forena_save_submit'),
+      );
+
+      $form['cancel'] = array(
+        '#type' => 'submit',
+        '#value' => 'Cancel',
+        '#submit' => array('forena_save_cancel'),
       );
   }
   return $form;
@@ -2334,8 +2353,8 @@ function forena_add_param_form($form, &$form_state, $report_name) {
   $name = $desc['name'];
   $filename = $desc['filename'];
   $format = @$desc['format'];
-  if ($desc['exists'] && $name) {
-    $r = Frx::Editor($name);
+  if ($report_name) {
+    $r = Frx::Editor($report_name);
     drupal_set_title($r->title);
     $form = array();
 
@@ -2405,12 +2424,12 @@ function forena_add_param_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   $name = $values['rpt_name'];
   $param = $values['params'];
-  $r = Frx::Editor();
+  $r = Frx::Editor($name);
   //add the new parms
   $r->addParameter($param);
-
-  $new_report = $r->asXML();
   $r->update();
+  drupal_set_message(t('Parameter added'));
+  $form_state['redirect'] = $values['return'];
 }
 
 function forena_admin_params_form_submit($form, &$form_state) {
@@ -2419,7 +2438,7 @@ function forena_admin_params_form_submit($form, &$form_state) {
   $params = $values['params'];
   // Hack because in rare cases the forms api adds this parmeter.
   unset($params['params__active_tab']);
-  $r = Frx::Editor();
+  $r = Frx::Editor($name);
   //add the new parms
   $r->setParameters($params);
   //Remove paramters to delete
