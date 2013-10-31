@@ -47,7 +47,9 @@ class FrxOracle extends FrxDataSource {
     }
     // Set the date format that drupal expects using the date api.
     if ($this->db) {
-      $stmt = oci_parse($this->db, "alter session set NLS_DATE_FORMAT='yyyy-mm-dd hh24:mi:ss'");
+      $stmt = oci_parse($this->db, "ALTER SESSION SET NLS_DATE_FORMAT='yyyy-mm-dd hh24:mi:ss'");
+      oci_execute($stmt);
+      $stmt = oci_parse($this->db, 'ALTER SESSION SET NLS_NUMERIC_CHARACTERS = ".,"');
       oci_execute($stmt);
     }
 
