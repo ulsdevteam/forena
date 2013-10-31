@@ -6,6 +6,10 @@
 		<name>help.admin</name>
 	</row>
 	<row>
+	  <title>Installation and Configuration</title>
+	  <name>help.install</name>
+	</row>
+	<row>
 		<title>Connecting to external databases</title>
 		<name>help.repositories</name>
 	</row>
