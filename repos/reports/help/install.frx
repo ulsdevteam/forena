@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE root [
+<!ENTITY nbsp "&#160;">
+]>
+<html xmlns:frx="urn:FrxReports">
+<head>
+<title>Drupal administration tasks</title>
+<frx:category/>
+<frx:options hidden="1" form=""/>
+<frx:parameters>
+</frx:parameters>
+<frx:docgen>
+</frx:docgen>
+<frx:fields>
+  <frx:field id="title" link="reports/{name}"/>
+</frx:fields>
+<frx:menu type="normal-item"/><style/></head>
+<body>
+  <h2>Introduction</h2>
+  <p>
+  The information below details various drupal administration tasks related to forena, which are typically located within
+  <a href="../admin/structure/forena" target="_self">forena structure</a> and
+  <a href="../admin/config/content/forena" target="_self">forena configuration</a> (containing various tabs).
+  </p>
+  <p>
+  If you are aware of additional related items that you'd recommend to also include here,
+  or you noticed anything already here that's incomplete or contains errors, please report about
+  it in the <a href="https://drupal.org/node/2120833" target="_blank">forena issue queue</a>.
+  Better still: contribute an updated version of this help document by attaching it to the issue.
+  </p>
+  <h2>Forena module upgrades</h2>
+  <h3>About upgrading the forena module</h3>
+  <p>
+  The process to upgrade module forena is similar to upgrading any other Drupal module. However, after the standard upgrade
+  activities are completed (e.g. including the database updates, if needed), there might be some additional drupal administration
+  tasks required related to forena. Failing (forgetting) to do so may lead to situations where special warnings, errors, etc start
+  to happen.
+  </p>
+  <h3>Post-upgrade situations that do require some additional drupal administration</h3>
+  <p>
+  Here is a (partial) list of scenarios that do require some extra drupal administration related to forena:
+  </p>
+  <table border="1">
+    <tbody>
+      <tr>
+        <th style="width: 40%;" align="left" valign="top"><strong>Scenario</strong></th>
+        <td style="width: 60%;" scope="col" align="left" valign="top"><strong>Situation and required drupal admin action</strong></td>
+      </tr>
+      <tr>
+        <th style="width: 40%;" align="left" valign="top">
+        Upgrading to forena version 7.x-3.x (from a pre-7.x-3.x version, such as 7.x-2.x).
+		</th>
+        <td style="width: 60%;" scope="col" align="left" valign="top">
+		When you try to edit the format of any report, e.g. a <a href="./sample.states/edit/format" target="_self">sample report</a>),
+		you get a warning message like:<br/><br/>
+		<i><u>Warning: array_merge() [function.array-merge]: Argument #1 is not an array in forena_format_form()
+		(line 264 of .../modules/forena/forena.admin.inc).</u></i><br/><br/>
+		This warning appears because the value for <b>skin</b> (in the same edit format window) is empty (blank).
+		What is worse: you can't select any skin from the drop-down list because it is entirely empty.
+		Continue reading the next item in this list to address this issue, after that issue is resolved come back to this item,
+		pretty sure the drop-down list for the report you selected won't be empty anymore (and the warning won't show up
+		anymore either).
+		</td>
+      </tr>
+      <tr>
+        <th style="width: 40%;" align="left" valign="top">
+        Upgrading to forena version 7.x-3.x (from a pre-7.x-3.x version, such as 7.x-2.x).
+		</th>
+        <td style="width: 60%;" scope="col" align="left" valign="top">
+		Using Drupal's administration option <a href="../admin/config" target="_self">Configuration</a>
+		produces a warning message like:<br/><br/>
+		<i><u>Warning: Invalid argument supplied for foreach() in form_select_options()
+			(line 2675 of .../includes/form.inc).</u></i><br/><br/>
+		This warning appears because the value for <b>Default report skin </b> on the
+		<a href="../admin/config/content/forena" target="_self">forena configuration screen</a> (on the <b>general</b> tab)
+		is empty (blank). What is worse: you can't select any Default report skin from the drop-down list there because it
+		is entirely empty (also ...).<br/><br/>
+		To resolve this (so that the drop-down list is no longer empty), 2 actions are needed (in the order specified):
+		<ol>
+		<li>
+		Create a skin file (use any filename ending with .skinfo) in the root of the directory in the
+		<a href="../admin/config/content/forena" target="_self">Report Repository</a>, e.g. by cloning it from the
+		default_skin.skinfo located in the repos/reports subfolder of the forena module directory (using the same filename is fine).
+		If you prefer to not do so manually, and it's OK for you to Revert all delivered reports to original (which will cause all
+		customizations to module delivered reports to get lost, if they were customized in the prior forena release), then 
+		simply check the checkmark in front of "Revert all delivered reports to orignial"
+		on the <a href="../admin/structure/forena" target="_self">forena structure screen</a>. This will also copy the
+		default_skin.skinfo to the root of the directory in the
+		<a href="../admin/config/content/forena" target="_self">Report Repository</a>.
+		</li>
+		<li>
+		hit the <b>clear cache</b> button on the <a href="../admin/structure/forena" target="_self">forena structure screen</a>.
+		</li>
+		</ol>
+		</td>
+      </tr>
+    </tbody>
+  </table>  
+  <h2>To clear or not to clear (the forena cache)</h2>
+  <h3>About the forena cache</h3>
+  <p>
+  Forena takes advantage of caching techniques, similar to caching that's available also for things like themes, menus, etc.
+  This implies that there are some situations where you'll have to clear the forena cache also, using the <b>clear cache</b>
+  button on the <a href="../admin/structure/forena" target="_self">forena structure screen</a>. Failing (forgetting) to do
+  so will typically lead to situations where you changed 'something', but it doesn't seem to work (potentially because it isn't 
+  activated yet). Also, in case something doesn't seem to work (yet) after you changed something, it doesn't hurt to clear
+  the forena cache (it may start working after you did just that ...).
+  </p>
+  <h3>Situations that do require forena cache to be cleared</h3>
+  <p>
+  Here is a (partial) list of scenarios that do require to <a href="../admin/structure/forena" target="_self">clear the forena cache</a>:
+  </p>
+  <table border="1">
+    <tbody>
+      <tr>
+        <th style="width: 50%;" align="left" valign="top"><strong>Scenario</strong></th>
+        <td style="width: 50%;" scope="col" align="left" valign="top"><strong>Situation while the forena cache is not cleared</strong></td>
+      </tr>
+      <tr>
+        <th style="width: 50%;" align="left" valign="top">
+        Copying new reports into a newly created subfolder of the
+		<a href="../admin/config/content/forena" target="_self">Report Repository</a>
+		</th>
+        <td style="width: 50%;" scope="col" align="left" valign="top">
+		Those new reports will not yet show up within <a href="../forena" target="_self">My Reports</a>
+		</td>
+      </tr>
+      <tr>
+        <th style="width: 50%;" align="left" valign="top">
+		Adding a new skin (.skinfo file) in the <a href="../admin/config/content/forena" target="_self">Report Repository</a>
+		(e.g. by cloning it from the default_skin.skinfo)
+		</th>
+        <td style="width: 50%;" scope="col" align="left" valign="top">
+		Such new skin will not yet show up in the pull-down list for setting it as the <b>Default report skin</b> on the
+		<a href="../admin/config/content/forena" target="_self">forena configuration screen</a> (on the <b>general</b> tab)
+		</td>
+      </tr>
+      <tr>
+        <th style="width: 50%;" align="left" valign="top">
+		Changing the name of a skin (within the .skinfo file), e.g. because you forgot to do so after creating the .skinfo file
+		by cloning it from an existing .skinfo file.
+		</th>
+        <td style="width: 50%;" scope="col" align="left" valign="top">
+		The new name of the skin will not yet show up in the pull-down list for setting it as the <b>Default report skin</b> on the
+		<a href="../admin/config/content/forena" target="_self">forena configuration screen</a> (on the <b>general</b> tab),
+		instead the old skin name (before changing the name in the .skinfo file) will still show up (e.g. with the same name
+		as in the .skinfo file where you cloned it from)
+		</td>
+      </tr>
+    </tbody>
+  </table>
+  <h2>Text formats configuration</h2>
+  <h3>Select a text formats configuration</h3>
+  <p>
+  Make sure the <b>text format</b> within <b>input formats</b> is set to <b>full HTML</b> within the
+  <a href="../admin/config/content/forena" target="_self">forena configuration screen</a> (on the <b>general</b> tab).
+  Especially if you're planning to use SVG graphs it is important to avoid that tags are being stripped out, as this could cause
+  such graphs to not be shown at all (or with some error messages).
+  </p>
+  <p>
+ As a variation, first
+  <a href="../admin/config/content/formats/add" target="_self">define some new text format</a> (e.g.: Reporting HTML) and then
+  set the text format to this new text format. The advantage of using some new text format is that the impact of tuning
+  the selected filter (as detailed below) will be limited to forena reports only.
+  </p>
+  <h3>Tune the selected text format</h3>
+  <p>
+  Navigate to the <a href="../admin/config/content/formats" target="_self">configuration page related to text formats</a>
+  (within content authoring) and select the text format you specified on the <a href="../admin/config/content/forena" target="_self">forena configuration screen</a>.
+  Make sure these entries are turned of for the selected text format (within enabled filters):
+  <ul>
+  <li>Limit allowed HTML tags</li>
+  <li>Display any HTML as plain text</li>
+  <li>Convert line breaks into HTML</li>
+  <li>Correct faulty and chopped off HTML</li>
+  </ul>
+  </p>
+  <h3>Validate your text formats configuration</h3>
+  <p>
+  Assuming you completed the setup of your SVG graph library, you should now be in good shape to start using forena's amazing 
+  charting features. To perform an easy validation about this, just checkout one of the SVG samples delivered with forena. 
+  Use the <a href="./sample.state_summary_ie8" target="_self">external SVG graph sample</a> in case you're using an older browser
+  that does not support inline SVG. Alternatively, if you're using a more recent browser, try using the
+  <a href="./sample.state_summary" target="_blank">Master Summary with drill down</a>.
+  </p>
+  <p>
+  If you don't see a nicely formatted graph,
+  but only some square with a grey background (about the size of the SVG graph you should see if it would have worked),
+  or you're getting some error messages, you may want to checkout the issue queue on Drupal.org (search for <b>html filter</b>),
+  such as in issue <a href="https://drupal.org/node/828458" target="_self">https://drupal.org/node/828458</a>.
+  </p>
+  <h3>Recommended video tutorials</h3>
+  <p>
+  For more info about this topic, checkout 
+  <a href="http://www.youtube.com/watch?v=shAVqLPEPYI" target="_blank">Basic Reporting on External Data -
+  Quick introduction to reporting using the Northwind sample database.</a> (i.e. what is explained from about 00:30 to 02:10).
+  </p>
+  <h2>Related topics:</h2>
+  <p>
+  <ul id="help-toc-1" frx:block="forena_help/admin_topics">
+    <li id="help-toc-2" frx:foreach="*"><span>{title}</span></li>
+  </ul>
+  </p>
+</body>
+</html>
