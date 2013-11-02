@@ -26,8 +26,8 @@ class FrxTable extends FrxTemplate {
     $throw = $this->addNode($thead, 8, 'tr');
     $tbody = $this->addNode($table, 6, 'tbody');
     $tdrow = $this->addNode($tbody, 8, 'tr', NULL, array('id' => $id),$attrs);
-    if ($columns) foreach ($columns as $col) {
-      $this->addNode($throw, 10, 'th', $col);
+    if ($columns) foreach ($columns as $col => $label) {
+      $this->addNode($throw, 10, 'th', $label);
       $this->addNode($tdrow, 10, 'td', '{' . $col . '}');
     }
   }

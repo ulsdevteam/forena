@@ -216,7 +216,7 @@ class FrxTemplate {
 
     $columns = $this->columns($xml);
     $text = '';
-    if ($columns) foreach ($columns as $col) {
+    if ($columns) foreach ($columns as $col => $label) {
       $text .= ' {' . $col . '}';
     }
     $this->blockDiv($config, $text);

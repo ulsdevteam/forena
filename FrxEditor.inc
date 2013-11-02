@@ -14,6 +14,7 @@ class FrxEditor {
   public $title;
   public $report_name;
   public $frx_attributes;
+  public $cache;
   public $doc_prefix = '<?xml version="1.0" encoding="UTF-8"?>
     <!DOCTYPE root [
     <!ENTITY nbsp "&#160;">
