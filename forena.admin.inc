@@ -290,7 +290,8 @@ function forena_format_form($formid, $form_state, $report_name) {
         '#type' => 'submit',
         '#value' => 'Cancel',
         '#submit' => array('forena_save_cancel'),
-      );  return $form;
+      );
+
     }
   }
   return $form;
@@ -321,229 +322,145 @@ function forena_format_form_submit($form, &$form_state) {
 
 }
 
-/**
- * Form function for the edit report form
- * @param $form_state
- * @return the form
- */
-function forena_layout_form($form, $form_state, $report_name) {
+function forena_general_form($form, &$form_state, $report_name) {
   $name_in = $report_name;
   $desc = Frx::Menu()->parseURL($report_name);
   $name = $desc['name'];
-  global $language;
-  //determine if this is an add new report request
-
   $filename = $desc['filename'];
   $format = @$desc['format'];
-    $save_name = $name;
-    //set the name to empty string for new reports
-    $r = Frx::Editor($name);
+  $save_name = $name;
+  //set the name to empty string for new reports
+  $r = Frx::Editor($name);
+  $title = (string)$r->title;
+  drupal_set_title(filter_xss($r->title));
+  $frx_options = $r->getOptions();
+  $hidden = @$frx_options['hidden']=='1' ? 1 : 0;
+  $report_form = @$frx_options['form'];
+  $category = $r->getCategory();
+  $menu = $r->getMenu();
+  $cache = $r->getCache();
+  $form['report_name'] = array(
+    '#type' => 'value',
+    '#value' => $name,
+  );
 
-    $title = (string)$r->title;
-    if (module_exists('locale')) {
-      @list($tlang,  $tsave_name) = explode('/', $name, 2);
-      // FInd out if the starting name of the report is an installed language.
-      if (array_key_exists($tlang, language_list() )) {
-        $lang = $tlang;
-        $save_name = $tsave_name;
-      }
-      else {
-        $lang = 'en';
-      }
-    }
-    drupal_set_title(filter_xss($r->title));
-    // Need to get all option attributes
-    $frx_options = $r->getOptions();
-    $hidden = @$frx_options['hidden']=='1' ? 1 : 0;
-    $report_form = @$frx_options['form'];
-    $attributes = $r->get_attributes_by_id();
-    $category = $r->getCategory();
-    $menu = $r->getMenu();
-    $cache = $r->getCache();
-    $body = $r->simplexml->body->asXML();
-    $css = @(string)$r->simplexml->head->style;
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Title'),
+    '#default_value' => $title,
+  );
 
-    $form = array();
+  $form['visibility'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Visibility'),
+  );
 
-    //array of xml attributes that are required to have a value
-    $required = array('id' => TRUE, 'label' => TRUE);
+  $form['visibility']['category'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Category'),
+    '#default_value' => $category,
+    '#autocomplete_path' => 'forena/categories/autocomplete',
+    '#description' => t('The heading your report will be grouped under on the report list.'),
+  );
 
-    $form['report_name'] = array(
-      '#type' => 'value',
-      '#value' => $name,
-    );
+  $form['visibility']['hidden'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Hidden'),
+    '#default_value' => $hidden,
+    '#description' => t('Hide your report from showing up on the report list.'),
+  );
 
-    $form['name_in'] = array(
-      '#type' => 'value',
-      '#value' => $name_in,
-    );
+  $form['menu'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Menu'),
+    '#tree' => TRUE,
+    '#collapsible' => TRUE,
+    '#collapsed' => empty($menu),
+  );
 
-    $form['attributes'] = array(
-      '#type' => 'value',
-      '#value' => $attributes,
-    );
+  $form['menu']['path'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Menu Path'),
+    '#description' => t('Indicate site reletive path to menu.  Parameters may be embedded in the url using a :parm syntax (e.g. states/:state)'),
+    '#default_value' => @$menu['path'],
+  );
 
-    $form['title'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Title'),
-      '#default_value' => $title,
-    );
+  $form['menu']['args'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Additional Arguments'),
+    '#description' => t('Indicate additonal parameters that should be extracted after the menu path using a :parm syntax (e.g. :parma/:parmb)'),
+    '#default_value' => @$menu['args'],
+  );
 
-    $form['body'] = array(
-      '#type' => 'text_format',
-      '#title' => t('Body'),
-      '#default_value' => $body,
-      '#rows' => 25,
-    '#format' => variable_get('forena_input_format', filter_default_format())
-    );
-    $form['visibility'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Visibility'),
-    );
+  $form['menu']['title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Menu Title'),
+    '#description' => t('Title of menu item.  Leave blank to use the report title as the menu title.'),
+    '#default_value' => @$menu['title'],
+  );
 
-    $form['visibility']['category'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Category'),
-      '#default_value' => $category,
-      '#autocomplete_path' => 'forena/categories/autocomplete',
-      '#description' => t('The heading your report will be grouped under on the report list.'),
-    );
+  $menu_options = array(
+    'normal-item' => t('Normal'),
+    'local-task' => t('Tab'),
+    'default-local-taks' => t('Default Tab'),
+    'callback' => t('Callback'),
+  );
 
-    $form['visibility']['hidden'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Hidden'),
-      '#default_value' => $hidden,
-      '#description' => t('Hide your report from showing up on the report list.'),
-    );
+  $form['menu']['type'] = array(
+    '#type' => 'select',
+    '#title' => 'Type of menu to create',
+    '#options' => $menu_options,
+    '#default_value' => @$menu['type'],
+  );
 
-    $form['menu'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Menu'),
-      '#tree' => TRUE,
-      '#collapsible' => TRUE,
-      '#collapsed' => empty($menu),
-    );
+  $form['cache'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Cache'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#tree' => TRUE,
+  );
 
-    $form['menu']['path'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Menu Path'),
-      '#description' => t('Indicate site reletive path to menu.  Parameters may be embedded in the url using a :parm syntax (e.g. states/:state)'),
-      '#default_value' => @$menu['path'],
-    );
+  $form['cache']['duration'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Duration'),
+    '#description' => t('Specify a php strtotime relative date duration, (e.g. +1 hour, +2 days)'),
+    '#default_value' => @$cache['duration'],
+  );
 
-    $form['menu']['args'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Additional Arguments'),
-      '#description' => t('Indicate additonal parameters that should be extracted after the menu path using a :parm syntax (e.g. :parma/:parmb)'),
-      '#default_value' => @$menu['args'],
-    );
+  $form['cache']['per_user'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Per User'),
+    '#default_value' => @$cache['per_user'],
+  );
 
-    $form['menu']['title'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Menu Title'),
-      '#description' => t('Title of menu item.  Leave blank to use the report title as the menu title.'),
-      '#default_value' => @$menu['title'],
-    );
+  $form['cache']['per_doctype'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Per Document Type'),
+    '#default_value' => @$cache['per_doctype'],
+  );
 
-    $menu_options = array(
-      'normal-item' => t('Normal'),
-      'local-task' => t('Tab'),
-      'default-local-taks' => t('Default Tab'),
-      'callback' => t('Callback'),
-    );
+  $form['update'] = array(
+    '#type' => 'submit',
+    '#value' => 'Update',
+  );
 
-    $form['menu']['type'] = array(
-      '#type' => 'select',
-      '#title' => 'Type of menu to create',
-      '#options' => $menu_options,
-      '#default_value' => @$menu['type'],
-    );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Save',
+    '#submit' => array('forena_general_form_submit', 'forena_save_submit'),
+  );
 
-    $form['style'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('CSS Styles'),
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
-    );
+  $form['cancel'] = array(
+    '#type' => 'submit',
+    '#value' => 'Cancel',
+    '#submit' => array('forena_save_cancel'),
+  );
 
-    $form['style']['css'] = array(
-      '#type' => 'textarea',
-      '#default_value' => $css,
-      '#description' => t('Specify small css snipets that can be used in the reports.'),
-      '#rows' => 10,
-      '#cols' => 80,
-    );
-
-    $form['cache'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Cache'),
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
-      '#tree' => TRUE,
-    );
-
-    $form['cache']['duration'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Duration'),
-      '#description' => t('Specify a php strtotime relative date duration, (e.g. +1 hour, +2 days)'),
-      '#default_value' => @$cache['duration'],
-    );
-
-    $form['cache']['per_user'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Per User'),
-      '#default_value' => @$cache['per_user'],
-    );
-
-    $form['cache']['per_doctype'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Per Document Type'),
-      '#default_value' => @$cache['per_doctype'],
-    );
-
-    $form['buttons']['update'] = array(
-      '#type' => 'submit',
-      '#value' => 'Update',
-      '#submit' => array('forena_layout_form_submit'),
-    );
-
-    $form['buttons']['save'] = array(
-      '#type' => 'submit',
-      '#value' => 'Save',
-      '#submit' => array('forena_layout_form_submit', 'forena_save_submit'),
-    );
-
-    $form['buttons']['cancel'] = array(
-      '#type' => 'submit',
-      '#value' => 'Cancel',
-      '#submit' => array('forena_save_cancel'),
-    );  return $form;
-
-    if (user_access('delete report')) {
-      $form['buttons']['delete'] = array(
-        '#type' => 'submit',
-        '#value' => 'Delete',
-        '#submit' => array('forena_edit_delete_submit'),
-      );
-    }
-    return $form;
-
+  return $form;
 }
 
-function forena_layout_form_validate($form, &$form_state) {
-  $values = $form_state['values'];
-  $body = $values['body']['value'];
-  $doc_prefix = '<?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE root [
-    <!ENTITY nbsp "&#160;">
-    ]>';
-  if ($body) {
-    $body_doc = new DOMDocument('1.0', 'UTF-8');
-    $body_xml =  $doc_prefix . '<html xmlns:frx="urn:FrxReports">' . $body . '</html>';
-    if (@$body_doc->loadXML($body_xml) === FALSE) {
-      form_set_error('body', t('Invalid XHTML Document. Check for unclosed tags or stray &'));
-    }
-  }
+function forena_general_form_validate($form, &$form_state) {
   if ($values['menu']['path']) {
     if (!valid_url(str_replace(':', '', $values['menu']['path']), FALSE)) {
       form_set_error('menu][path', t('Invalid Path'));
@@ -559,16 +476,11 @@ function forena_layout_form_validate($form, &$form_state) {
   }
 }
 
-/**
- * builds a string of the xml document,
- * submits it to forena_save_report.
- */
-function forena_layout_form_submit($form, &$form_state) {
-  $nodes = array();
-  $rebuild_menu = FALSE;
+function forena_general_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   $report_name = $values['report_name'];
   $r = Frx::Editor();
+
   // Title and category
   $r->setTitle($values['title']);
   $r->setCategory($values['category']);
@@ -587,6 +499,120 @@ function forena_layout_form_submit($form, &$form_state) {
   if ($values['cache']!=$cache) {
     $r->setCache($values['cache']);
   }
+
+  $r->update();
+}
+
+/**
+ * Form function for the edit report form
+ * @param $form_state
+ * @return the form
+ */
+function forena_layout_form($form, &$form_state, $report_name) {
+  $desc = Frx::Menu()->parseURL($report_name);
+  $name = $desc['name'];
+  $r = Frx::Editor($name);
+  drupal_set_title(filter_xss($r->title));
+  // Need to get all option attributes
+  $frx_options = $r->getOptions();
+  $report_form = @$frx_options['form'];
+  $attributes = $r->get_attributes_by_id();
+  $body = $r->simplexml->body->asXML();
+  $css = @(string)$r->simplexml->head->style;
+
+  //array of xml attributes that are required to have a value
+  $required = array('id' => TRUE, 'label' => TRUE);
+
+  $form['report_name'] = array(
+    '#type' => 'value',
+    '#value' => $name,
+  );
+
+  $form['attributes'] = array(
+    '#type' => 'value',
+    '#value' => $attributes,
+  );
+
+
+  $form['body'] = array(
+    '#type' => 'text_format',
+    '#title' => t('Body'),
+    '#default_value' => $body,
+    '#rows' => 25,
+  '#format' => variable_get('forena_input_format', filter_default_format())
+  );
+
+  $form['style'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('CSS Styles'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+
+  $form['style']['css'] = array(
+    '#type' => 'textarea',
+    '#default_value' => $css,
+    '#description' => t('Specify small css snipets that can be used in the reports.'),
+    '#rows' => 10,
+    '#cols' => 80,
+  );
+
+  $form['buttons']['update'] = array(
+    '#type' => 'submit',
+    '#value' => 'Update',
+    '#submit' => array('forena_layout_form_submit'),
+  );
+
+  $form['buttons']['save'] = array(
+    '#type' => 'submit',
+    '#value' => 'Save',
+    '#submit' => array('forena_layout_form_submit', 'forena_save_submit'),
+  );
+
+  $form['buttons']['cancel'] = array(
+    '#type' => 'submit',
+    '#value' => 'Cancel',
+    '#submit' => array('forena_save_cancel'),
+  );  return $form;
+
+  if (user_access('delete report')) {
+    $form['buttons']['delete'] = array(
+      '#type' => 'submit',
+      '#value' => 'Delete',
+      '#submit' => array('forena_edit_delete_submit'),
+    );
+  }
+  return $form;
+}
+
+function forena_layout_form_validate($form, &$form_state) {
+  $values = $form_state['values'];
+  $body = $values['body']['value'];
+  $doc_prefix = '<?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE root [
+    <!ENTITY nbsp "&#160;">
+    ]>';
+  if ($body) {
+    $body_doc = new DOMDocument('1.0', 'UTF-8');
+    $body_xml =  $doc_prefix . '<html xmlns:frx="urn:FrxReports">' . $body . '</html>';
+    if (@$body_doc->loadXML($body_xml) === FALSE) {
+      form_set_error('body', t('Invalid XHTML Document. Check for unclosed tags or stray &'));
+    }
+  }
+
+}
+
+/**
+ * builds a string of the xml document,
+ * submits it to forena_save_report.
+ */
+function forena_layout_form_submit($form, &$form_state) {
+  $nodes = array();
+  $rebuild_menu = FALSE;
+  $values = $form_state['values'];
+  $report_name = $values['report_name'];
+  $r = Frx::Editor();
+
 
   // Body
   $r->setBody($values['body']['value']);
