@@ -83,8 +83,9 @@ class FrxRenderer {
     }
     $skin_data = Frx::Data()->getContext('skin');
     $class = get_class($this);
+
     if (isset($skin_data[$class])) {
-      $attributes = array_merge($attributes, $skin_data[$class]);
+      $attributes = array_merge($skin_data[$class], $attributes);
     }
     $classes = class_parents($this);
     array_pop($classes);
