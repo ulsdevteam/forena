@@ -79,15 +79,6 @@ class FrxSVGGraph extends FrxChart {
 
   function renderGraph($type, $options, $data) {
     static $jsinc = FALSE;
-    // Default in Skin Options for Graph type
-    $skin = Frx::Data()->getContext('skin');
-    if (@is_array($skin['SVGGraph'][$type])) {
-      $skin_options = $skin['SVGGraph'][$type];
-      if (isset($skin['FrxSVGGraph'])) $skin_options = array_merge($skin['FrxSVGGraph'], $skin_options);
-      $options = array_merge($skin_option, $options);
-    }
-
-
     if (!isset($options['scatter_2d']) && ($type == 'ScatterGraph' || $type=='MultiScatterGraph') && $this->xy_data && !isset($options['scatter_2d'])) {
       $options['scatter_2d'] = TRUE;
     }
