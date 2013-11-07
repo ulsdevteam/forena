@@ -53,7 +53,13 @@ class FrxRenderer {
   }
 
   public static function addAttributes(&$attributes, $key, $value) {
-    @list($part, $suff) = explode('_', $key);
+    $parts = explode('_', $key);
+    $suff = '';
+    if (count($parts) > 1) {
+      $suff=array_pop($parts);
+      $part = implode('_', $parts);
+    }
+
     // If we have _0 _1 _2 attributes convert them into arrays.
     if ((int)$suff || $suff === '0') {
       $attributes[$part][] = (string)$value;
