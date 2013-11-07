@@ -475,7 +475,7 @@ function forena_parameter_form($formid, &$form_state, $parameters, $attributes= 
   $desc = $form_state['storage']['desc'];
   $report_name = @$desc['name'];
 
-  $collapse = isset($attributes['collapse']) ? $attributes['collapse'] : FALSE;
+  $collapse = isset($attributes['collapsed']) ? $attributes['collapsed'] : FALSE;
   if (isset($form_state['values'])) {
     $collapse=FALSE;
     $parms = array_merge($parms, $form_state['values']['params']);
