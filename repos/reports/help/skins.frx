@@ -61,7 +61,6 @@
   by specifying the <b>skin="skin_file_name"</b> attribute in the frx:options element in the head section of
   the .frx file as follows (whereas skin_file_name is the filename of your skin, without the .skinfo extension of it): 
 </p>
-<pre>
 <html frx:renderer="FrxSource" id="forena-3">
   <head>
     <frx:options skin="skin_file_name"/>
@@ -70,7 +69,6 @@
   ... 
   </body>
 </html>
-</pre>
  <b>Hint</b>: if you have multiple skins defined (e.g. default_skin.skinfo and custom_skin.skinfo), you might
 want to switch between them to (temporarily) change the look and feel of your report (e.g.: using a
 dataTables display via the custom_skin, and default_skin to not use the dataTables).
