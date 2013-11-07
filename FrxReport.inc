@@ -163,10 +163,19 @@ class FrxReport {
     return $o;
     }
 
-    //Ignore certain node types
+    //Handle comment nodes
     if ($node_type == XML_COMMENT_NODE) {
-      return '';
+      if (!empty($dom_node->length) &&
+      !empty($dom_node->data)) {
+        $text = $dom_node->data;
+        // comment markup is stripped so need to add it back in
+        $o .= '<!--' . $this->teng->replace($text) . '-->';
+        return $o;
+      } else {
+        return '';
+      }
     }
+
     // Continue processing non text nodes
     $node = simplexml_import_dom($dom_node);
     // Special catch to make sure we don't process bad nodes
