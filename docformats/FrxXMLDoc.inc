@@ -19,7 +19,7 @@ class FrxXMLDoc extends FrxDocument {
   public function render($r, $format, $options = array()) {
     $body = $this->check_markup($r->html);
     $tag = $this->root_tag;
-    $output .= "<$tag>\n  $body\n</$tag>";
+    $output = "<$tag>\n  $body\n</$tag>";
     return $output;
   }
 
