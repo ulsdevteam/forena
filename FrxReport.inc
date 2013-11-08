@@ -154,6 +154,8 @@ class FrxReport {
    * Walks the nodes rendering the report.
    */
   public function render_section(DOMNode $dom_node) {
+    $skin = Frx::Data()->getContext('skin');
+    $settings = isset($skin['FrxReport']) ? $skin['FrxReport'] : array();
     $continue = TRUE;
     $is_data_block = FALSE;
     $node_type = $dom_node->nodeType;
@@ -259,13 +261,26 @@ class FrxReport {
           $i++;
           $odd = $i & 1;
           $row_class = $odd ? 'odd' : 'even';
-          unset($tmp_attrs['id']);
-          $tmp_attrs['class'] = trim($attrs['class'] . ' ' . $row_class);
           $r_attr_text = '';
+
+          if (isset($attrs['id'])) {
+            if (strpos($attrs['id'],'{')!== FALSE) {
+              $id = $this->teng->replace($attrs['id']);
+            }
+            else {
+              $id = $attrs['id'] . '-' . $i;
+            }
+            $tmp_attrs['id'] =  $id;
+          }
+
+          if (@!$settings['noHelperClasses']) {
+            $tmp_attrs['class'] = trim($attrs['class'] . ' ' . $row_class);
+          }
 
           foreach ($tmp_attrs as $key => $value) {
             $r_attr_text .=  ' ' . $key . '="' . (string)$value . '"';
           }
+
           if ($include_root) $o .= $this->teng->replace('<' . $tag . $r_attr_text . '>');
           foreach ($dom_node->childNodes as $child) {
             $o .= $this->render_section($child);

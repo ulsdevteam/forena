@@ -25,6 +25,16 @@ stylesheets[all][] = table_padding.css
 ; 
 ; FrxSVGGraph[colors][] = red 
 ; FrxSVGGraph[colors][] = blue
+;---------------------------
+; Settings for Forena Classes
+; 
+; The following settings can be used to further control how forena renders reprots 
+; 
+; Disable helper classes such as even and odd 
+; FrxReport[noHelperClasses] = true
+; 
+; Control the root element taga name using teh following. 
+; FrxXMLDoc[rootElementName] = node 
 ; ---------------------------------------------------------
 ; Arbitrary values may be added and referenced in the report as
 ; using the skin data context.  For exmaple if you uncomment the following: 
@@ -32,3 +42,4 @@ stylesheets[all][] = table_padding.css
 ; company_name = My Cool Company
 ; 
 ; Then you could reference {skin.company_name} anywhere in your report. 
+
