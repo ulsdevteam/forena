@@ -7,6 +7,7 @@
  */
 class FrxXMLDoc extends FrxDocument {
   public $root_tag = 'div';
+  public $root_attributes = array();
 
   public function __construct() {
     $this->content_type = 'application/xml';
@@ -14,13 +15,20 @@ class FrxXMLDoc extends FrxDocument {
     if (isset($skin['FrxXMLDoc']['rootElementName'])) {
       $this->root_tag = $skin['FrxXMLDoc']['rootElementName'];
     }
+    if (isset($skin['FrxXMLDoc']['rootElementAttributes'])) { 
+      if (is_array($skin['FrxXMLDoc']['rootElementAttributes'])) {
+        $this->root_attributes = $skin['FrxXMLDoc']['rootElementAttributes'];
+      }
+    }
   }
 
   public function render($r, $format, $options = array()) {
     $body = $this->check_markup($r->html);
-    $tag = $this->root_tag;
     $output = '<?xml version="1.0"?>' . "\n";
-    $output .= "<$tag>\n  $body\n</$tag>";
+    $opening_tag = $this->_build_opening_root_tag_contents();
+    $ending_tag = $this->root_tag;
+    $output = '<?xml version="1.0"?>' . "\n";
+    $output .= "<$opening_tag>\n  $body\n</$ending_tag>";
     return $output;
   }
 
@@ -31,5 +39,19 @@ class FrxXMLDoc extends FrxDocument {
       header('Cache-Control: must-revalidate');
       print  $output;
       return TRUE;
+  }
+
+  private function _build_opening_root_tag_contents() {
+    $tag_contents = $this->root_tag;
+    if (isset($this->root_attributes) && is_array($this->root_attributes)) {
+      foreach ($this->root_attributes as $attr_key => $attr_val) {
+        if (!empty($attr_key) && !empty($attr_val)) {
+          $attr_val = addslashes($attr_val);
+          $tag_contents .= " " . $attr_key . "=" . "'$attr_val'";
+        }
       }
+    }
+    return $tag_contents;
+  }
+
 }
