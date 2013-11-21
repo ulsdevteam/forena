@@ -175,6 +175,13 @@ class FrxReport {
       if (!empty($dom_node->length) &&
       !empty($dom_node->data)) {
         $text = $dom_node->data;
+        // strip empty comments if configured to
+        if (!empty($settings['stripEmptyComments'])) {
+          $comment_text = trim($this->teng->replace($text));
+          if ($comment_text === '') {
+            return '';
+          }
+        }
         // comment markup is stripped so need to add it back in
         $o .= '<!--' . $this->teng->replace($text) . '-->';
         return $o;
@@ -189,7 +196,6 @@ class FrxReport {
     if (!is_object($node)) {
       return '';
     }
-
 
     $frx = $node->attributes(FRX_NS);
     $include_root = !isset($frx['skip_root']) || !$frx['skip_root'];
@@ -314,9 +320,17 @@ class FrxReport {
       }
     }
     else {
-
       // We can render so lets do it.
       $text = $node->asXML();
+      $node_xml = $this->teng->replace($text);
+      // Strip out empty leaf nodes if report is configured to
+      if (!empty($settings['stripEmptyElements'])) {
+        $node_updated = new SimpleXMLElement($node_xml);
+        if ($this->_check_xml_node_empty($node_updated)) {
+          return '';
+        }
+      }
+
       $o .= $this->teng->replace($text);
     }
 
@@ -726,7 +740,40 @@ class FrxReport {
     return drupal_get_form('forena_parameter_form', $parms, $variables);
   }
 
-
+  /**
+   * Returns true if a node has no children, no attributes (or empty values
+   * in it's attributes), and no text content
+   */
+  private function _check_xml_node_empty($node) {
+    if (!count($node->children())) {
+      $empty_attributes = false;
+      if (count($node->attributes()) > 0) {
+        foreach ($node->attributes() as $attr => $attr_val) {
+          $num_total_attr = 0;
+          $num_empty_attr = 0;
+          $attr_val = (string)$attr_val;
+          if ($attr_val == "") {
+            ++$num_empty_attr;
+            //return '';
+          }
+          ++$num_total_attr;
+        }
+        if ($num_total_attr == $num_empty_attr) {
+          $empty_attributes = true;
+        }
+      } else {
+        $empty_attributes = true;
+      }
+      if ($empty_attributes) {
+        $node_text = dom_import_simplexml($node)->textContent;
+        if ($node_text == "") {
+          // empty xml element
+          return true;
+        }
+      }
+    }
+    return false;
+  }
 }
 
 
