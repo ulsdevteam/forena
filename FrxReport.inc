@@ -173,7 +173,7 @@ class FrxReport {
         // strip empty comments if configured to
         if (!empty($settings['stripEmptyComments'])) {
           $comment_text = trim($this->teng->replace($text));
-          if ($comment_text = '') {
+          if ($comment_text === '') {
             return '';
           }
         }
