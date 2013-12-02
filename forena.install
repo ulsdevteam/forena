@@ -148,7 +148,7 @@ function forena_install() {
     variable_set('forena_input_format', 'full_html');
   }
   require_once 'forena.admin.inc';
-  forena_sync_reports(TRUE);
+  forena_sync_reports();
 }
 
 /**

@@ -304,7 +304,7 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
     }
   }
 
-  if (!_forena_verify_directory($report_name)) {
+  if (!_forena_verify_directory($report_name) && $save_file) {
     drupal_set_message(t('Error creating directory.  Check Permissions'), 'error');
     return 0;
   };
