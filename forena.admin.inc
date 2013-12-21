@@ -1949,7 +1949,7 @@ function forena_data_block_form_submit($form, &$form_state) {
     $r->get_attributes_by_id();
     $data = array();
     foreach ($values['blocks'] as $block) {
-      if (!$block['delete']) {
+      if (!@$block['delete']) {
 
         $attrs = $block;
         unset($attrs['delete']);

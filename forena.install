@@ -147,8 +147,10 @@ function forena_install() {
   if (isset($filters['full_html'])) {
     variable_set('forena_input_format', 'full_html');
   }
+  $report_path = variable_get('file_' . file_default_scheme() . '_path', conf_path() . '/files/reports');
+  @drupal_mkdir($report_path);
   require_once 'forena.admin.inc';
-  forena_sync_reports();
+  forena_sync_reports(FALSE);
 }
 
 /**

@@ -1328,6 +1328,7 @@ function forena_db_sync_all() {
 function _forena_db_sync($base_path, $subdir='') {
   $path = rtrim($base_path . '/' . $subdir, '/');
   //Iterate through each file
+  $skins = array();
   $d = dir($path);
   if ($d) while (false !== ($rpt_file = $d->read())) {
     $src_file = trim($d->path, '/') . '/' . trim($rpt_file, '/');
