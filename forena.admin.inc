@@ -1759,7 +1759,7 @@ function forena_data_select_block_submit($form, &$form_state) {
         $r = FrxReportGenerator::instance()->get_report($values['report_name']);
         $rpt_params = $r->parameters;
         if ($rpt_params) foreach ($block_info['tokens'] as $index => $id) {
-          $parms[$id] = (string)@$rpt_params[$id];
+          $parms[$id] = @$rpt_params[$id];
         }
       }
 
