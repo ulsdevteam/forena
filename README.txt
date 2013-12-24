@@ -10,10 +10,10 @@ Installation
 Install in your sites/all/modules folder per the normal module installation 
 method. 
 
-Next visit the Site configuration->Forena page and configure the path where 
+Next visit the  Configuration->Content Authoring->Forena Reports page and configure the path where 
 reports wil be saved.  This path should be in a place that is writable by your 
 the user context which runs your web server.  When in doubt, specify the report
-location within your files directory. 
+location within your files directory (the default). 
 
 After saving your settings, visit your my reports page to see help reports, 
 sample reports, as well as some useful canned drupal administration reports. 
