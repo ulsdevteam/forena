@@ -269,7 +269,11 @@ class FrxReport {
               $id = $this->teng->replace($attrs['id']);
             }
             else {
-              $id = $attrs['id'] . '-' . $i;
+              if (!empty($settings['numericFrxForeachID'])) {
+                $id = $i;
+              } else {
+                $id = $attrs['id'] . '-' . $i;
+              }
             }
             $tmp_attrs['id'] =  $id;
           }
