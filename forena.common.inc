@@ -145,10 +145,16 @@ function forena_get_html($tag, $r_text) {
  *
  */
 
-function forena_get_user_reports() {
+function forena_get_user_reports($category = '') {
   GLOBAL $language;
-
-  $result = db_query('SELECT * FROM {forena_reports} where hidden=0 and language=:language ORDER BY category,title asc', array(':language' => $language->language));
+  $select = db_select('forena_reports', 'r')
+    ->fields('r')
+    ->condition('language', $language->language)
+    ->condition('hidden', 0);
+  if ($category) {
+    $select = $select->condition('category', $category);
+  }
+  $result = $select->execute();
   $reports = array();
   foreach ($result AS $row) {
     $access = TRUE;

@@ -762,10 +762,10 @@ function forena_permission() {
 
 
 
-function forena_user_reports() {
+function forena_user_reports($category = '') {
   require_once('forena.common.inc');
   $output='';
-  $reports = forena_get_user_reports();
+  $reports = forena_get_user_reports($category);
   $report_repos = variable_get('forena_path', 'reports');
   if (!$reports) {
     $output = 'No Reports Found';
