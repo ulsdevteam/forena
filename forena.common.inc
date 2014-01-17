@@ -202,6 +202,19 @@ function forena_my_reports_block() {
  * @param integer $count Number of documents to send.
  */
 function forena_confirm_email($formid, &$form_state, $docs, $count, $prompt_subject, $prompt_body) {
+  // Save arguments away for rebuild
+  if (!isset($form_state['storage']['args'])) {
+    $form_state['storage']['args'] = array(
+      'docs' => $docs,
+      'count' => $count,
+      'prompt_subject' => $prompt_subject,
+      'prompt_body' => $prompt_body,
+    );
+  }
+  else {
+    // Retrieve arguements for rebuild case
+    extract($form_state['storage']['args']);
+  }
   if ($docs) {
     $values = @$form_state['values'];
     if ($prompt_subject) {
@@ -267,6 +280,7 @@ function forena_confirm_email_submit($form, &$form_state) {
     if ($test_send) $i++;
     if ($i <= $max) drupal_mail('forena', 'mailmerge', $to, language_default(), $doc['parms'], $from, TRUE);
   }
+  $form_state['rebuild'] = TRUE;
 }
 
 /**
