@@ -1,4 +1,3 @@
---ACCESS=access demo reports
 select 
   code AS state,
   name,

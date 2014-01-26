@@ -757,6 +757,10 @@ function forena_permission() {
     'perform email merge' => array('title' => t('Peform email merge')),
     'access forena block xml' => array('title' => t('Access xml from data blocks directly'), 'description' => t('Useful for ajax calls to data blocks')),
   );
+  foreach (Frx::RepoMan()->repositories as $repos => $conf) {
+    $name = $conf['title'] ? $conf['title'] : $repos;
+    $perms['access '. $repos . ' data'] = array('title' =>  'Access ' . $name . ' Data');
+  }
   return $perms;
 }
 
@@ -900,15 +904,21 @@ function forena_report_menu_callback() {
 function forena_check_all_access($checks) {
   // Check each callback function to see if we have an error.
   $access = FALSE;
-  if ($checks) foreach ((array)$checks as $callback => $args) {
-    if ($callback && $args) foreach ($args as $arg) {
-      if (function_exists($callback)) {
-        $a = $callback($arg);
+  // Check each callback function to see if we have an error.
+  if ($checks) foreach ($checks as $provider => $callbacks) {
+    if (user_access('access ' . $provider . ' data')) foreach ($callbacks as $callback=>$args) {
+      if ($callback) foreach ($args as $arg) {
+        if (function_exists($callback) && $arg) {
+          $a = $callback($arg);
+          if ($a) $access = TRUE;
+        }
+        else {
+          $access = TRUE;
+        }
       }
-      if ($a) $access = TRUE;
-    }
-    else {
-      $access = TRUE;
+      else {
+        $access = TRUE;
+      }
     }
   }
   return $access;

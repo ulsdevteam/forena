@@ -52,25 +52,23 @@ function forena_load_cache($r_xhtml) {
       }
     }
 
-    if ($repos) foreach ($repos as $provider => $blocks) {
-      $provider = Frx::RepoMan()->repository($provider);
+    if ($repos) foreach ($repos as $provider_key => $blocks) {
+      $provider = Frx::RepoMan()->repository($provider_key);
       if (isset($provider->conf))$conf = $provider->conf;
       $access = array();
-
       foreach ($blocks as $block_name) {
         if ($provider && $block_name) {
           if (method_exists($provider, 'loadBlock')) {
             $conf = $provider->conf;
             $block = $provider->loadBlock($block_name);
-            if (isset($block['access']) && array_search($block['access'], $access)===FALSE) $access[]=$block['access'];
+            $obj = @$block['access'];
+            if (array_search($obj, $access)===FALSE) $access[]=$obj;
           }
-        }
-        else {
-          //drupal_set_message('no provider found', 'error');
         }
       }
 
-      if (isset($conf['access callback']) && $access) $cache['access'][$conf['access callback']]=$access;
+      if (isset($conf['access callback']) && $access) $cache['access'][$provider_key][$conf['access callback']]=$access;
+
 
     }
 
@@ -126,9 +124,6 @@ function forena_get_html($tag, $r_text) {
   return $str;
 }
 
-
-
-
 /**
  * Form to edit parameters
  * Extra features:
@@ -151,29 +146,34 @@ function forena_get_user_reports($category = '') {
     ->fields('r')
     ->condition('language', $language->language)
     ->condition('hidden', 0);
+
   if ($category) {
     $select = $select->condition('category', $category);
   }
-  $result = $select->execute();
+  $result = $select->orderBy('title')->execute();
   $reports = array();
   foreach ($result AS $row) {
-    $access = TRUE;
+    $access = FALSE;
     $cache = $row->cache;
 
     if ($cache) {
       $cache = unserialize($cache);
 
       // Check each callback function to see if we have an error.
-      if (@$cache['access']) foreach ($cache['access'] as $callback => $args) {
-        if ($callback) foreach ($args as $arg) {
-          $access = FALSE;
-          if (function_exists($callback)) {
-            $a = $callback($arg);
+      if (@$cache['access']) foreach ($cache['access'] as $provider => $callbacks) {
+        if (user_access('access ' . $provider . ' data')) foreach ($callbacks as $callback=>$args) {
+          if ($callback) foreach ($args as $arg) {
+            if (function_exists($callback) && $arg) {
+              $a = $callback($arg);
+              if ($a) $access = TRUE;
+            }
+            else {
+              $access = TRUE;
+            }
           }
-          if ($a) $access = TRUE;
-        }
-        else {
-          $access = TRUE;
+          else {
+            $access = TRUE;
+          }
         }
       }
     }
