@@ -234,6 +234,17 @@ class FrxReportGenerator {
         return '';
       }
 
+      // When doing outputs lets check to make sure
+      // we have access to the reports.   If not throw an error.
+      if ($print) {
+        $cache = forena_load_cache($r->rpt_xml);
+        $access = forena_check_all_access($cache['access']);
+        if (!$access) {
+          drupal_access_denied();
+          exit;
+        }
+      }
+
       //check for default parameters
       $r->processParameters();
       Frx::Skin()->load($r->skin);
