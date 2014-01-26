@@ -37,19 +37,21 @@ class FrxDataSource{
    * @return unknown
    */
   public function access($arg) {
+    $obj_access = TRUE;
+    $access = user_access('access ' . $this->name . ' data');
     $f = @$this->conf['access callback'];
-    if ($f && is_callable($f)) {
-      return $f($arg);
+    if ($arg) {
+      if ($f && is_callable($f)) {
+        $obj_access =  $f($arg);
+      }
+      elseif (isset($this->conf['access block'])) {
+        $block = @$this->conf['access block'];
+        $path='';
+        if (isset($this->conf['access path'])) $path = $this->conf['access path'];
+        $obj_access =  FrxReportGenerator::instance()->block_access($block, $path, $arg);
+      }
     }
-    elseif (isset($this->conf['access block'])) {
-      $block = @$this->conf['access block'];
-      $path='';
-      if (isset($this->conf['access path'])) $path = $this->conf['access path'];
-      return FrxReportGenerator::instance()->block_access($block, $path, $arg);
-    }
-    else {
-      return user_access('access content');
-    }
+    return $access && $obj_access;
   }
 
   protected function loadBlockFromDB($block_name) {

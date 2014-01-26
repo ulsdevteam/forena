@@ -461,6 +461,7 @@ function forena_general_form($form, &$form_state, $report_name) {
 }
 
 function forena_general_form_validate($form, &$form_state) {
+  $values = $form_state['values'];
   if ($values['menu']['path']) {
     if (!valid_url(str_replace(':', '', $values['menu']['path']), FALSE)) {
       form_set_error('menu][path', t('Invalid Path'));
