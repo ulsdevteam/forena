@@ -141,6 +141,12 @@ function forena_update_7304() {
   if (!db_field_exists('forena_data_blocks', 'builder')) db_add_field('forena_data_blocks', 'builder', array('type' => 'text'));
 }
 
+function forena_update_7401()  {
+  require_once 'forena.common.inc';
+  require_once 'forena.admin.inc';
+  forena_sync_reports(TRUE);
+}
+
 function forena_install() {
   $filters = filter_formats();
   // Set default input format.
