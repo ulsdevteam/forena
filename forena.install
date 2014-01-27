@@ -144,7 +144,7 @@ function forena_update_7304() {
 function forena_update_7401()  {
   require_once 'forena.common.inc';
   require_once 'forena.admin.inc';
-  forena_sync_reports(TRUE);
+  forena_sync_reports(FALSE);
 }
 
 function forena_install() {
