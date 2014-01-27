@@ -196,6 +196,9 @@ links prior to presenting them.  Supports the following values:  </p>
 	replacement syntax. The default context is changed to be the rendered
 	form so that the parmeter ids will allow replacement of a form control.
 </p>
+<h3 id="FrxMyReports">FrxMyReports</h3>
+<p>Displays the users list of reports. If you add an frx:category attribute you
+  can limit the display to a particular category.</p>
 <h3 id="FrxSource">FrxSource</h3>
 <p>Display markup as a code snippet. No token replacement is done
 	for the children and all embedded code is escaped html. This is used in

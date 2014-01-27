@@ -29,13 +29,15 @@
   <h3>Security and data blocks</h3>
   <p>
     The line beginning with<strong>--ACCESS=<em>some_permission</em>
-    </strong> is a required comment that indicates the permission required to
-    access the data retrived by this block. The security for data block
+    </strong> is a comment that indicates the permission required to
+    access the data retrieved by this block. The security for data block
     repository is configurable and pluggable, meaning that developers
     may create functions that determine how the permission is checked.
     In the drupal repository delivered with forena, access permissions
     are tested using the drupal user_access() function, so the value
-    should match a drupal permission.
+    should match a drupal permission.  If no value is provided, it assumed 
+    that all users with the &quot;access <em>repository name</em> data&quot; 
+    right will be able to access this data. 
   </p>
   <p>In Drupal 7, drupal permissions passed to the user_access
     function are string keys that are usually lower cased versions of
