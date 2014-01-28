@@ -270,12 +270,12 @@ class FrxReport {
             }
             else {
               if (!empty($settings['numericFrxForeachID'])) {
-                $id = $i;
+                $id_attr = $i;
               } else {
-                $id = $attrs['id'] . '-' . $i;
+                $id_attr = $attrs['id'] . '-' . $i;
               }
             }
-            $tmp_attrs['id'] =  $id;
+            $tmp_attrs['id'] =  $id_attr;
           }
 
           if (@!$settings['noHelperClasses']) {
