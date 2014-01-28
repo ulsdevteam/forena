@@ -11,7 +11,7 @@
 
 </head>
 <body>
-  <div frx:block="sampledb/states" id="forena-1">
+  <div frx:block="sampledb/states" id="state-block">
     <table>
       <thead>
         <tr>
@@ -20,7 +20,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr frx:foreach="*" id="forena-2" class="test {code}">
+        <tr frx:foreach="*" id="state" class="test {code}">
           <td>{code}</td>
           <td>{name}</td>
         </tr>
