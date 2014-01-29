@@ -35,6 +35,7 @@ class FrxCSVDoc extends FrxDocument {
     $rowspans = array();
     if ($rows) foreach ($rows as $row) {
       $c = 0;
+      $line = '';
       foreach ($row as $column) {
         $c++;
         if (@$rowspans[$c]) {
@@ -50,13 +51,13 @@ class FrxCSVDoc extends FrxDocument {
         $value = decode_entities($value);
         $value = str_replace('"', '""', $value);
         $value = str_replace(array("\n"), '', $value);
-        $value =  '"' . $value . '",';
-        $output .= $value;
+        $value =  strpos($value, ',')!==FALSE || strpos($value, '"') !==FALSE ?  '"' . $value . '",' : "$value,";
+        $line .= $value;
         // Add Column span elements
         if ((int)$column['colspan'] > 1) {
           for ($i=2; $i<=(int)$column['colspan']; $i++) {
             $c++;
-            $output .= ',';
+            $line .= ',';
           }
         }
         // Check to see if we have some rowspans that we need to save
@@ -64,7 +65,9 @@ class FrxCSVDoc extends FrxDocument {
           $rowspans[$c] = (int)$column['rowspan'] - 1;
         }
       }
-      $output .= "\n";
+      // Trim off the last comma so we don't put in an extra null column
+      $line = substr($line,0,-1);
+      $output .= "$line\n";
     }
     return $output;
   }
