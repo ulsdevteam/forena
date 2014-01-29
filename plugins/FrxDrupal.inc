@@ -53,6 +53,9 @@ class FrxDrupal extends FrxDataSource {
       $rownum++;
       $row_node = $xml->addChild('row');
         $row_node['num'] = $rownum;
+        foreach ($data as $key => $value) {
+          $row_node->addChild($key, htmlspecialchars($value));
+        }
       /* If we are querying entities, we will store away IDs
        * for later querying and XML processing in the
        * loadEntitys method
@@ -64,12 +67,6 @@ class FrxDrupal extends FrxDataSource {
         if ($id) {
           $entity_map[$id] = $row_node;
           $select_fields[$id] = $data;
-        }
-
-      } else {
-        foreach ($data as $key => $value) {
-          $row_node->addChild($key, htmlspecialchars($value));
-          //$row_node->$key = $value;
         }
       }
 
@@ -115,7 +112,7 @@ class FrxDrupal extends FrxDataSource {
           }
           else {
 
-            foreach ($e as $key => $val) if ($val) {
+            foreach ($e as $key => $val) if ($val && !isset($row_node->$key)) {
               if (strpos($key, 'field_') === 0) {
                 //$fields = field_get_items('node', $node, $key);
                 $field = field_view_field($type, $e, $key);

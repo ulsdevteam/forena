@@ -1257,7 +1257,7 @@ function _forena_verify_directory($fullpath, $recursive=FALSE) {
   if (!$recursive) {
     $path = forena_report_path();
     if (!is_writable($path)) {
-      drupal_set_message(t('Report directory %s is not modifiable', array('%s' => $path)), 'error');
+      drupal_set_message(t('Report directory %s is not modifiable', array('%s' => $path)), 'error', FALSE);
       return FALSE;
     }
   }
