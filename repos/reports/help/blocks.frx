@@ -110,6 +110,26 @@
     is a value specified for :state. If no value for :state is provided
     the WHERE clause limits the selection to code of 'AL'. The order by
     clause is always included.</p>
+  <p>
+  Alternatively a switch/case syntax provides a way to test the values of an
+  incoming parameter and conditionaly run some SQ: 
+  </p>
+  <pre>
+  SELECT * from some_database_table
+  --SWITCH=:sort
+  --CASE=code
+  ORDER BY code
+  --CASE=total
+  ORDER BY total
+  --ELSE
+  ORDER BY name
+  --END 
+  </pre>
+  <p> 
+  In the above example, sort pased a value of code it would sort by the code column, 
+  but if it passed a value of total it would sort by the total column, otherwise it would sort by the 
+  name column.
+  </p>
   <h3>Includes</h3>
   <p>Blocks can be build from other data blocks. To accomplish this
     use the --INCLUDE directive as follows:</p>
