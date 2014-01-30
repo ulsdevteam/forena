@@ -334,14 +334,25 @@ class FrxDataSource{
             case 'ACCESS':
               $access = trim($o);
               break;
+            case 'SWITCH':
+              $switch = trim($o);
+              $found_case = FALSE;
+              break;
+            case 'CASE':
+              dpm ($this->te->replace($switch), 'SWITCH');
+              $match = $this->te->replace($switch, TRUE) == $this->te->replace($o);
+              if ($match) $found_case = TRUE;
+              $skip = !$match;
+              break;
             case 'IF':
               $skip = !$this->te->test(trim($o));
               break;
             case 'END':
               $skip = FALSE;
+              $switch = '';
               break;
             case 'ELSE':
-              $skip = !$skip;
+              $skip = $switch ? $found_case : !$skip;
               break;
             case 'INFO':
               $in_info = TRUE;
