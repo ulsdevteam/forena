@@ -18,6 +18,6 @@ class FrxReportFile extends FrxFile {
     }
 
     // Parent constructor.
-    parent::__construct($dir, $directories);
+    parent::__construct($dir, $directories, array('frx', 'skinfo', 'css', 'js'));
   }
 }

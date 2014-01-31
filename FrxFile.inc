@@ -5,17 +5,52 @@
  * contained tn the report directory.
  */
 class FrxFile {
-  public $dir; // Path to directoy containing report paths.
+  public $dir; // Path to Default directory
   public $writable;
   public $includes = array(); //Other places to look for a directory.
   public $use_includes;
+  public $allowed_extensions;
 
-  public function __construct($default_directory, $include_directories, $use_includes=TRUE) {
+  public function __construct($default_directory, $include_directories, $extentions = array(), $use_includes=TRUE) {
     // Check to see if directory is writable
     $this->dir = $default_directory;
     $this->includes = $include_directories;
     $this->use_includes = $use_includes;
     $this->writable = is_writable($this->dir);
+    $this->cached_extensions = $extentions;
+  }
+
+  private function scanDirectory($directory, &$files, $recursive=TRUE) {
+    // Loop through the directories, ignoring hidden files.
+    $path = $directory;
+    // Scan the directory for files.
+    $d = dir($path);
+    if ($d) while (false !== ($rpt_file = $d->read())) {
+      $src_file = trim($d->path, '/') . '/' . trim($rpt_file, '/');
+      if (is_file($src_file)) {
+        @list($base_file, $ext) = explode('.', $rpt_file, 2);
+        if (array_search($ext, $this->cached_extensions) !== FALSE) {
+          $files[$ext][$src_file] = $src_file;
+        }
+      }
+      elseif (is_dir($src_file)) {
+        if (strpos($rpt_file, '.')!==0 && $recursive) {
+          $this->scanDirectory($src_file, $files, $recursive);
+        }
+      }
+    }
+    if ($d) $d->close();
+
+  }
+
+  public function scan($mask_dir='') {
+    // Find all the directories that match this one.
+    $files = array();
+    $this->scanDirectory($this->dir, $files);
+    foreach( $this->includes as $directory) {
+      $this->scanDirectory($directory, $files);
+    }
+    return $files;
   }
 
   /**
