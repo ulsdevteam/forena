@@ -8,6 +8,15 @@ class FrxFile {
   public $dir; // Path to directoy containing report paths.
   public $writable;
   public $includes = array(); //Other places to look for a directory.
+  public $use_includes;
+
+  public function __construct($default_directory, $include_directories, $use_includes=TRUE) {
+    // Check to see if directory is writable
+    $this->dir = $default_directory;
+    $this->includes = $include_directories;
+    $this->use_includes = $use_includes;
+    $this->writable = is_writable($this->dir);
+  }
 
   /**
    * Revert an individual report
@@ -46,24 +55,6 @@ class FrxFile {
       $i++;
     }
     return $found;
-  }
-
-  /**
-   * Constructor
-   *   Sets the initial reort directory
-   */
-  public function __construct() {
-    $report_path = variable_get('forena_report_repos', '');
-    if (!$report_path) {
-      $report_path = variable_get('file_' . file_default_scheme() . '_path', conf_path() . '/files/reports');
-    }
-    $this->dir = rtrim($report_path, '/');
-    $directories = module_invoke_all('forena_report_directory');
-    foreach ($directories as $dir) {
-      $this->includes[] = rtrim($dir, '/');
-    }
-    // Check to see if directory is writable
-    $this->writable = is_writable($this->dir);
   }
 
   /**

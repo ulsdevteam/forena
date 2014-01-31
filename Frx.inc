@@ -43,8 +43,8 @@ class Frx {
   public static function File() {
     static $o = '';
     if (!$o) {
-      require_once 'FrxFile.inc';
-      $o = new FrxFile();
+      require_once 'FrxReportFile.inc';
+      $o = new FrxReportFile();
     }
     return $o;
   }
