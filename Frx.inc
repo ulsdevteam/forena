@@ -38,7 +38,7 @@ class Frx {
 
   /**
    * File singleton factory
-   * @return FrxFile
+   * @return FrxReportFile
    */
   public static function File() {
     static $o = '';

@@ -10,7 +10,7 @@ class FrxFile {
   public $includes = array(); //Other places to look for a directory.
   public $use_includes;
   public $allowed_extensions;
-  private $cache;
+  protected $cache;
   private $cacheDirty = TRUE;
 
   public function __construct($default_directory, $include_directories, $extentions = array(), $use_includes=TRUE) {
@@ -77,8 +77,6 @@ class FrxFile {
     if ($this->includes) foreach ($this->includes as $directory) {
       $this->scanInclude($directory, $prefix);
     }
-    $this->validateAllCache('frx');
-    return $this->cache;
   }
 
   /**
@@ -92,13 +90,24 @@ class FrxFile {
     $object->cache = array();
   }
 
-  public function validateAllCache($ext) {
+  private function _validateAllCache($ext, $prefix) {
     if (isset($this->cache[$ext]) && is_array($this->cache[$ext])) {
       $names = array_keys($this->cache[$ext]);
       foreach ($names as $base_name) {
         $this->validateCache($ext, $base_name);
       }
     }
+  }
+
+  public function validateAllCache($ext, $prefix='') {
+    $this->cacheDirty = FALSE;
+    $this->scan($prefix);
+    $this->_validateAllCache($ext, $prefix);
+    if ($this->cacheDirty) {
+      $this->scan($prefix);
+      $this->_validateAllCache($ext, $prefix);
+    }
+    $this->cacheDirty = FALSE;
   }
 
   /**
