@@ -50,14 +50,15 @@ class FrxReportFile extends FrxFile {
     	  //@TODO: Determine language based on file path.
     	  try {
     	    $r_xml =file_get_contents($object->file);
+      	  // Load the report
+      	  $r = new FrxReport($r_xml);
     	  } catch (Exception $e) {
-    	    $s = t('unable to load Report %s', $r_xml);
-    	    forena_error($s, $s . $e->getMessage());
-
+    	    $s = t('Unable to load Report %s', array('%s' => $object->file));
+    	    if (user_access('design any report')) {
+    	      drupal_set_message($s, 'error');
+    	    }
     	  }
 
-    	  // Load the report
-    	  $r = new FrxReport($r_xml);
         // Get the security caches from the reports
         if ($r) $cache = $r ? forena_load_cache($r->rpt_xml) : 'report load error';
         $cache['title'] = $r->title;

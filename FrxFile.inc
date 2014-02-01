@@ -11,7 +11,9 @@ class FrxFile {
   public $use_includes;
   public $allowed_extensions;
   protected $cache;
-  private $cacheDirty = TRUE;
+  private $needSave = TRUE;
+  private $needScan = TRUE;
+  private $cacheKey = NULL;
 
   public function __construct($default_directory, $include_directories, $extentions = array(), $use_includes=TRUE) {
     // Check to see if directory is writable
@@ -20,7 +22,9 @@ class FrxFile {
     $this->use_includes = $use_includes;
     $this->writable = is_writable($this->dir);
     $this->cached_extensions = $extentions;
+    $this->cacheKey = 'forena:' . get_class($this);
   }
+
 
   private function scanDirectory($directory, &$files, $recursive=TRUE) {
     // Loop through the directories, ignoring hidden files.
@@ -64,10 +68,29 @@ class FrxFile {
           $obj->cache = NULL;
           $this->cache[$ext][$base_name] = $obj;
         }
+        else {
+          unset($this->filesToDelete[$ext][$base_name]);
+        }
       }
     }
   }
 
+  private function setFilesToDelete() {
+    $this->filesToDelete = array();
+    //Quickly make a list of files in the cache right now.
+    if ($this->cache) foreach ($this->cache as $ext => $files_of_type) {
+      $this->filesToDelete[$ext] = array_fill_keys(array_keys($files_of_type), 1);
+    }
+  }
+
+  private function deleteMissingEntries() {
+    foreach ($this->filesToDelete as $ext => $files_of_type ) {
+      foreach ($files_of_type as $base_name => $val) {
+        unset($this->cache[$ext][$base_name]);
+        $this->needSave = TRUE;
+      }
+    }
+  }
 
   public function scan($prefix = '') {
     // Add the base report files.
@@ -77,6 +100,7 @@ class FrxFile {
     if ($this->includes) foreach ($this->includes as $directory) {
       $this->scanInclude($directory, $prefix);
     }
+    $this->needScan = FALSE;
   }
 
   /**
@@ -99,15 +123,39 @@ class FrxFile {
     }
   }
 
+  /**
+   * Called anytime we want to
+   * make sure the include cache is good and complete. Any file modifications
+   * will cause cache to be rebuild to be rebuilt.
+   * @param unknown $ext
+   * @param string $prefix
+   */
   public function validateAllCache($ext, $prefix='') {
-    $this->cacheDirty = FALSE;
+    // Load data form the cache
+    if (!$this->cache) {
+      $cache = cache_get($this->cacheKey, 'cache');
+      if ($cache) {
+        $this->cache = $cache->data;
+      }
+      $this->needSave = FALSE;
+    }
+    // Save current paths away.
+    $this->setFilesToDelete();
     $this->scan($prefix);
     $this->_validateAllCache($ext, $prefix);
-    if ($this->cacheDirty) {
+    //Rescan in case we found deleted files.
+    if ($this->needScan) {
       $this->scan($prefix);
       $this->_validateAllCache($ext, $prefix);
     }
-    $this->cacheDirty = FALSE;
+
+    //Remove any reports that have dissapeared.
+    $this->deleteMissingEntries();
+
+    //Resave the cache if had to be altered.
+    if ($this->needSave) {
+      cache_set($this->cacheKey, $this->cache, 'cache', CACHE_PERMANENT);
+    }
   }
 
   /**
@@ -124,13 +172,15 @@ class FrxFile {
           if ($obj->cache === NULL || $mtime != $obj->mtime) {
             //Expensive cache building process.
             $this->buildCache($ext, $base_name, $obj);
+            $this->needSave = TRUE;
           }
           $this->cache[$ext][$base_name] = $obj;
         }
         else {
           // Remove the file from the cache.
           unset($this->cache[$ext][$base_name]);
-          $this->cacheDirty = TRUE;
+          $this->needScan = TRUE;
+          $this->needSave=TRUE;
         }
       }
     }
