@@ -318,6 +318,7 @@ class FrxDataSource{
     $info_text = '';
     $tokens = array();
     $options = array();
+    $switch = '';
     while ($i<$cnt) {
       $l = trim($lines[$i], "\r");
       @list($d, $c) = explode($comment, $l, 2);
@@ -339,7 +340,6 @@ class FrxDataSource{
               $found_case = FALSE;
               break;
             case 'CASE':
-              dpm ($this->te->replace($switch), 'SWITCH');
               $match = $this->te->replace($switch, TRUE) == $this->te->replace($o);
               if ($match) $found_case = TRUE;
               $skip = !$match;
