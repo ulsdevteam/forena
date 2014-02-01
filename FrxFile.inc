@@ -10,6 +10,8 @@ class FrxFile {
   public $includes = array(); //Other places to look for a directory.
   public $use_includes;
   public $allowed_extensions;
+  private $cache;
+  private $cacheDirty = TRUE;
 
   public function __construct($default_directory, $include_directories, $extentions = array(), $use_includes=TRUE) {
     // Check to see if directory is writable
@@ -30,7 +32,8 @@ class FrxFile {
       if (is_file($src_file)) {
         @list($base_file, $ext) = explode('.', $rpt_file, 2);
         if (array_search($ext, $this->cached_extensions) !== FALSE) {
-          $files[$ext][$src_file] = $src_file;
+
+          $files[$ext][$src_file] = filemtime($src_file);
         }
       }
       elseif (is_dir($src_file)) {
@@ -43,14 +46,85 @@ class FrxFile {
 
   }
 
-  public function scan($mask_dir='') {
-    // Find all the directories that match this one.
+  /**
+   * Parse a drectory
+   * @param unknown $directory
+   * @param string $prefix a prefix to use in the base name
+   */
+  private function scanInclude($directory, $prefix='') {
     $files = array();
-    $this->scanDirectory($this->dir, $files);
-    foreach( $this->includes as $directory) {
-      $this->scanDirectory($directory, $files);
+    $this->scanDirectory($directory, $files);
+    foreach($files as $ext => $files_of_type ) {
+      foreach($files_of_type as $file=>$mtime) {
+        $base_name = $prefix . substr($file, strlen($directory) + 1, -1 * (strlen($ext) + 1));
+        if (!isset($this->cache[$ext][$base_name])) {
+          $obj = new stdClass();
+          $obj->file = $file;
+          $obj->mtime = $mtime;
+          $obj->cache = NULL;
+          $this->cache[$ext][$base_name] = $obj;
+        }
+      }
     }
-    return $files;
+  }
+
+
+  public function scan($prefix = '') {
+    // Add the base report files.
+    $this->scanInclude($this->dir, $prefix);
+
+    // Now add the module provided ones.
+    if ($this->includes) foreach ($this->includes as $directory) {
+      $this->scanInclude($directory, $prefix);
+    }
+    $this->validateAllCache('frx');
+    return $this->cache;
+  }
+
+  /**
+   * This is a wrapper function used to build the cache.  It should
+   * be overrident by
+   * @param $ext extension of the cache name
+   * @param $base_name of the object.
+   * @param $object Object
+   */
+  protected function buildCache($ext, $base_name, &$object) {
+    $object->cache = array();
+  }
+
+  public function validateAllCache($ext) {
+    if (isset($this->cache[$ext]) && is_array($this->cache[$ext])) {
+      $names = array_keys($this->cache[$ext]);
+      foreach ($names as $base_name) {
+        $this->validateCache($ext, $base_name);
+      }
+    }
+  }
+
+  /**
+   * Validate a single cache entry
+   * @param unknown $ext
+   * @param unknown $base_name
+   */
+  public function validateCache($ext, $base_name) {
+    if (isset($this->cache[$ext])) {
+      if (isset($this->cache[$ext][$base_name])) {
+        $obj = $this->cache[$ext][$base_name];
+        if (file_exists($obj->file)) {
+          $mtime = filemtime($obj->file);
+          if ($obj->cache === NULL || $mtime != $obj->mtime) {
+            //Expensive cache building process.
+            $this->buildCache($ext, $base_name, $obj);
+          }
+          $this->cache[$ext][$base_name] = $obj;
+        }
+        else {
+          // Remove the file from the cache.
+          unset($this->cache[$ext][$base_name]);
+          $this->cacheDirty = TRUE;
+        }
+      }
+    }
   }
 
   /**
@@ -74,6 +148,7 @@ class FrxFile {
     }
     return $i;
   }
+
 
   /**
    * Determine if the file exists in the include path.

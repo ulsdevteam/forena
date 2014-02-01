@@ -1,6 +1,9 @@
 <?php
 require_once 'FrxFile.inc';
 class FrxReportFile extends FrxFile {
+
+  private $report_cache = array();
+
   /**
    * Constructor
    *   Sets the initial reort directory
@@ -20,4 +23,5 @@ class FrxReportFile extends FrxFile {
     // Parent constructor.
     parent::__construct($dir, $directories, array('frx', 'skinfo', 'css', 'js'));
   }
+
 }
