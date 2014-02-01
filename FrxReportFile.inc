@@ -13,16 +13,16 @@ class FrxReportFile extends FrxFile {
     // Load default directory from configuration.
     $report_path = variable_get('forena_report_repos', '');
     if (!$report_path) {
-      $default_directory = variable_get('file_' . file_default_scheme() . '_path', conf_path() . '/files/reports');
+      $report_path = variable_get('file_' . file_default_scheme() . '_path', conf_path() . '/files/reports');
     }
-    $dir = rtrim($report_path, '/');
+    $default_directory = rtrim($report_path, '/');
     $directories = module_invoke_all('forena_report_directory');
     foreach ($directories as $dir) {
       $this->includes[] = rtrim($dir, '/');
     }
 
     // Parent constructor.
-    parent::__construct($dir, $directories, array('frx', 'skinfo', 'css', 'js'));
+    parent::__construct($default_directory, $directories, array('frx', 'skinfo', 'css', 'js'));
   }
 
   public function reportsByCategory() {
