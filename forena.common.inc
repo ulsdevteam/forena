@@ -29,7 +29,8 @@ function forena_load_cache($r_xhtml) {
   $nodes = array();
   if (is_object($r_xhtml)) {
     $head = @$r_xhtml->head;
-    if ($head) $nodes = $head->xpath('frx:menu');
+
+    if ($head)  $nodes = $head->xpath('frx:menu');
     $menu = array();
     if ($nodes) {
       $m = $nodes[0];
@@ -39,6 +40,7 @@ function forena_load_cache($r_xhtml) {
       }
     }
     if ($menu) $cache['menu'] = $menu;
+
     $block_xml = $r_xhtml->xpath('//*[@frx:block]');
     // Extract all the blocks and organize by provider
 

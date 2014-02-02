@@ -182,7 +182,7 @@ class FrxReportFile extends FrxFile {
         $cache['title'] = $r->title;
         $cache['language'] = $lang;
         $cache['category'] = $r->category;
-        $cache['hidden'] = @$r->options['cache']['hidden'];
+        $cache['hidden'] = @$r->options['hidden'];
         //$cache['hidden'] = $r->options['hidden'];
         $object->cache = $cache;
     	  if ($r) $r->__destruct();
