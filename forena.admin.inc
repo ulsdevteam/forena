@@ -834,7 +834,7 @@ function forena_create_trans_form_submit($form, &$form_state) {
   $filename = $desc['filename'];
   $report_name = $desc['name'];
 
-  $r = Frx::Editor($values['report_name']);
+  $r = Frx::Editor($base_name);
 
   // Title and category
   $r->setTitle($values['title']);
@@ -845,11 +845,13 @@ function forena_create_trans_form_submit($form, &$form_state) {
     drupal_set_message(t('Report %s already exists', array('%s' => $new_name)), 'error');
     return;
   }
+  else {
+    $r->rename($new_name);
+    drupal_set_message(t('Translation,  %s has been created. Switch languages to translate.', array('%s' => $values['title'])));
+    $form_state['redirect']= array( $desc['i_link'] . '/edit/layout');
+  }
 
-  $r->update();
-  drupal_set_message(t('Translation,  %s has been created. Switch languages to translate.', array('%s' => $values['title'])));
   //if this is a new report then redirect to data blocks
-  $form_state['redirect']= array( $desc['i_link'] . '/edit/layout');
 }
 
 
@@ -1965,7 +1967,7 @@ function forena_report_translations($name_in='') {
   foreach ($languages as $key => $language) {
     $i_name = ($key=='en') ? $name : $key . '/' . $name;
     $i_link = $key . '.' . $name;
-    if (Frx::File()->exists($report_path . '/' . $i_name . '.frx')) {
+    if (Frx::File()->exists($i_name . '.frx')) {
       $modified = format_date(filemtime(Frx::File()->path($i_name . '.frx')));
       $r = Frx::Editor($i_name);
       $title = $r->title;

@@ -49,6 +49,14 @@ class FrxEditor {
     return $dom->saveXML();
   }
 
+  // Renames session storage.
+  public function rename($name) {
+    $old_name = $this->report_name;
+    $this->report_name = $name;
+    unset($_SESSION['forena_report_editor'][$old_name]);
+    $this->update();
+  }
+
   /**
    * Save data away in the session state.
    */
