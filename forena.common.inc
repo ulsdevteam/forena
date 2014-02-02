@@ -140,50 +140,9 @@ function forena_get_html($tag, $r_text) {
  *
  */
 
-function forena_get_user_reports($category = '') {
-  GLOBAL $language;
-  $select = db_select('forena_reports', 'r')
-    ->fields('r')
-    ->condition('language', $language->language)
-    ->condition('hidden', 0);
-
-  if ($category) {
-    $select = $select->condition('category', $category);
-  }
-  $result = $select->orderBy('title')->execute();
-  $reports = array();
-  foreach ($result AS $row) {
-    $access = FALSE;
-    $cache = $row->cache;
-
-    if ($cache) {
-      $cache = unserialize($cache);
-
-      // Check each callback function to see if we have an error.
-      if (@$cache['access']) foreach ($cache['access'] as $provider => $callbacks) {
-        if (user_access('access ' . $provider . ' data')) foreach ($callbacks as $callback=>$args) {
-          if ($callback) foreach ($args as $arg) {
-            if (function_exists($callback) && $arg) {
-              $a = $callback($arg);
-              if ($a) $access = TRUE;
-            }
-            else {
-              $access = TRUE;
-            }
-          }
-          else {
-            $access = TRUE;
-          }
-        }
-      }
-    }
-    if ($access) {
-      $reports[$row->category][] = array(
-        'title' => $row->title,
-        'report_name' => $row->report_name,
-      );
-    }
-  }
+function forena_get_user_reports($category = array()) {
+  if (!$category) $category = array();
+  $reports = Frx::File()->reportsByCategory((array)$category);
   return $reports;
 }
 

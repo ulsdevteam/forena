@@ -25,9 +25,52 @@ class FrxReportFile extends FrxFile {
     parent::__construct($default_directory, $directories, array('frx', 'skinfo', 'css', 'js'));
   }
 
-  public function reportsByCategory() {
-    $this->validateAllCache('frx');
-    return $this->cache['frx'];
+  public function reportsByCategory($categories = array()) {
+    GLOBAL $language;
+    $data = $this->validateAllCache('frx');
+    $reports = array();
+    if ($data) foreach ($data as $base_name => $obj) {
+      if ($obj->cache && @$obj->cache['category'] && !$obj->cache['hidden'] && $obj->cache['language'] == $language->language ) {
+        $cache = $obj->cache;
+        if (!$categories || array_search($cache['category'], $categories)!==FALSE) {
+          // Check each callback function to see if we have an error.
+
+          $access = FALSE;
+          if (@$cache['access']) foreach ($cache['access'] as $provider => $callbacks) {
+            if (user_access('access ' . $provider . ' data')) foreach ($callbacks as $callback=>$args) {
+              if ($callback) foreach ($args as $arg) {
+                if (function_exists($callback) && $arg) {
+                  $a = $callback($arg);
+                  if ($a) $access = TRUE;
+                }
+                else {
+                  $access = TRUE;
+                }
+              }
+              else {
+                $access = TRUE;
+              }
+            }
+          }
+          if ($access) {
+            $reports[$cache['category']][$cache['title']] = array(
+                'title' => $cache['title'],
+                'report_name' => $base_name,
+            );
+          }
+
+        }
+      }
+    }
+
+    // Sort the reports
+    if ($reports) foreach ($reports as $category => $list) {
+      ksort($reports[$category], SORT_NATURAL);
+    }
+    ksort($reports, SORT_NATURAL);
+
+
+    return $reports;
   }
 
   public function skins() {
@@ -47,11 +90,20 @@ class FrxReportFile extends FrxFile {
   public function buildCache($ext, $base_name, &$object) {
     switch ($ext) {
     	case 'frx':
-    	  //@TODO: Determine language based on file path.
+    	  // Save language info
+    	  $lang = 'en';
+    	  if (module_exists('locale')) {
+    	    @list($tlang, $tname) = explode('/', $base_name, 2);
+    	    if (array_key_exists($tlang, language_list())) {
+    	      $lang = $tlang;
+    	    }
+    	  }
+
+
     	  try {
     	    $r_xml =file_get_contents($object->file);
       	  // Load the report
-      	  $r = new FrxReport($r_xml);
+        	 $r = new FrxReport($r_xml);
     	  } catch (Exception $e) {
     	    $s = t('Unable to load Report %s', array('%s' => $object->file));
     	    if (user_access('design any report')) {
@@ -60,13 +112,14 @@ class FrxReportFile extends FrxFile {
     	  }
 
         // Get the security caches from the reports
-        if ($r) $cache = $r ? forena_load_cache($r->rpt_xml) : 'report load error';
+        $cache = isset($r->rpt_xml) ? forena_load_cache($r->rpt_xml) : 'report load error';
         $cache['title'] = $r->title;
+        $cache['language'] = $lang;
         $cache['category'] = $r->category;
         $cache['hidden'] = @$r->options['cache']['hidden'];
         //$cache['hidden'] = $r->options['hidden'];
         $object->cache = $cache;
-    	  $r->__destruct();
+    	  if ($r) $r->__destruct();
     	  unset($r);
     	  break;
     	case 'skinfo':

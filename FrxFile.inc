@@ -156,6 +156,7 @@ class FrxFile {
     if ($this->needSave) {
       cache_set($this->cacheKey, $this->cache, 'cache', CACHE_PERMANENT);
     }
+    return $this->cache[$ext];
   }
 
   /**
