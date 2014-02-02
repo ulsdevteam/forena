@@ -39,9 +39,7 @@ class FrxReportFile extends FrxFile {
         $reports[ $obj->cache['category'] . $obj->cache['title']] = $obj;
       }
     }
-    dpm($reports);
     uasort($reports, 'FrxReportFile::reportCompare');
-    dpm($reports);
     return $reports;
   }
 
