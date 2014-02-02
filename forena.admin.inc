@@ -2486,34 +2486,8 @@ function forena_admin_params_form_submit($form, &$form_state) {
  * @return An array containing all matching categories
  */
 function forena_get_categories($string='') {
-  $result = db_query("SELECT * FROM {forena_reports} where hidden=0 AND category LIKE :category ORDER BY category, title asc",
-  array(':category' => $string . '%'));
-  $categories = array();
-  foreach ($result as $row)  {
-    $access = TRUE;
-    $cache = $row->cache;
-
-    if ($cache) {
-      $cache = unserialize($cache);
-
-      // Check each callback function to see if we have an error.
-      if ($cache['access']) foreach ($cache['access'] as $callback => $args) {
-        if ($callback) foreach ($args as $arg) {
-          $access = FALSE;
-          if (function_exists($callback)) {
-            $a = $callback($arg);
-          }
-          if ($a) $access = TRUE;
-        }
-        else {
-          $access = TRUE;
-        }
-      }
-    }
-    if ($access && !isset($categories[$row->category])) {
-      $categories[$row->category] = $row->category;
-    }
-  }
+  $data = Frx::File()->reportsByCategory();
+  $categories = array_keys($data);
   return $categories;
 }
 

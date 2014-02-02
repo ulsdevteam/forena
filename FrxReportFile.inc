@@ -43,6 +43,12 @@ class FrxReportFile extends FrxFile {
     return $reports;
   }
 
+  /**
+   * Sort compare function for sorting data by category then title.
+   * @param unknown $a
+   * @param unknown $b
+   * @return number
+   */
   static public function reportCompare($a, $b) {
     $c = strnatcasecmp($a->cache['category'], $b->cache['category']);
     if (!$c) {
@@ -50,6 +56,35 @@ class FrxReportFile extends FrxFile {
     }
     return $c;
   }
+  /**
+   * Get the cached information for a single report.
+   * @param unknown $name
+   * @return unknown
+   */
+  public function getReportCacheInfo($name) {
+    GLOBAL $language;
+    $data = $this->validateAllCache('frx');
+    if ($language->language != 'en') {
+      $lang = $language->language;
+      $name = "$lang/$name";
+    }
+    return $data[$name];
+  }
+
+  public function menuReports() {
+    GLOBAL $language;
+    $data = $this->validateAllCache('frx');
+
+    $reports = array();
+    foreach ($data as $base_name => $obj) {
+      if ($obj->cache && $obj->cache['language'] == $language->language && isset($obj->cache['menu']['path'])) {
+        $obj->name = $base_name;
+        $reports[] = $obj;
+      }
+    }
+    return $reports;
+  }
+
 
   /**
    * Generate an ordered  list of reports by category

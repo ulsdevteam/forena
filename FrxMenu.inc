@@ -138,23 +138,18 @@ class FrxMenu {
   public function addMenuItems(&$items) {
     GLOBAL $language;
 
-    $result = db_query("SELECT report_name, path, title, cache FROM {forena_reports} where path<>'' AND language='en' ORDER BY path asc");
+    $result = Frx::File()->menuReports();
     $reports = array();
     foreach ($result AS $row) {
       $access = TRUE;
       $cache = $row->cache;
       if ($cache) {
-
-        $cache = unserialize($cache);
         // Load menu item defaults
         $menu = @$cache['menu'];
         $path = $menu['path'];
         $path_args = @$menu['args'];
         $type = @$menu['type'];
-        $title = @$menu['title'] ? $menu['title']:  $row->title;
-        if (module_exists('locale')) {
-
-        }
+        $title = isset($menu['title']) ? $menu['title']:  $row->cache['title'];
 
         //Default type
         switch ($type) {
@@ -182,7 +177,7 @@ class FrxMenu {
         $parts = explode( '/', $new_path);
         $page_args = array_keys($parts, '%');
         $path_args = $path_args ? rtrim($path,'/') . '/' . ltrim($path_args, '/') : $path;
-        $page_args = array_merge(array($path_args, $row->report_name), $page_args);
+        $page_args = array_merge(array($path_args, $row->name), $page_args);
 
         // Set the access callback
         $access_callback = isset($cache['access']) ? 'forena_check_all_access' : TRUE;
@@ -197,7 +192,7 @@ class FrxMenu {
           if (!isset($items[$parent_path])) {
             $items[$parent_path] = array(
              'type' => MENU_CALLBACK,
-             'title' => $row->title,
+             'title' => $row->cache['title'],
              'access callback' => $access_callback,
              'access arguments' => array($cache['access']),
              'page callback' => 'forena_report_menu_callback',
@@ -205,7 +200,7 @@ class FrxMenu {
             );
             if (module_exists('locale')) {
               $items[$parent_path]['title callback'] = 'forena_report_title_callback';
-              $items[$parent_path]['title arguments'] = array($row->report_name, FALSE);
+              $items[$parent_path]['title arguments'] = array($row->name, FALSE);
             }
             if ($access_callback === 'forena_check_all_access') $items[$parent_path]['access arguments'][] = $cache['access'];
           }
@@ -221,7 +216,7 @@ class FrxMenu {
         );
         if (module_exists('locale')) {
           $items[$new_path]['title callback'] = 'forena_report_title_callback';
-          $items[$new_path]['title arguments'] = array($row->report_name, TRUE);
+          $items[$new_path]['title arguments'] = array($row->name, TRUE);
         }
         if ($access_callback === 'forena_check_all_access') $items[$new_path]['access arguments'][] = $cache['access'];
       }

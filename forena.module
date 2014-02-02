@@ -375,37 +375,11 @@ function forena_reports_autocomplete($string='', $string2='') {
     $mode = $string;
     $string = $string2;
   }
-  $string = '%' .$string .'%';
-  $result = db_query('SELECT * FROM {forena_reports} where language=:language
-	  AND report_name like :string
-	  ORDER BY category,title', array(':language' => $language->language, ':string' => $string));
+  $string = '*' .$string .'*';
+  $result = Frx::File()->allReports();
   foreach ($result as $row) {
-    $access = TRUE;
-    $cache = $row->cache;
-
-    if ($cache) {
-      $cache = unserialize($cache);
-
-      // Check each callback function to see if we have an error.
-      if ($cache['access']) foreach ($cache['access'] as $callback => $args) {
-        if ($callback) foreach ($args as $arg) {
-          $access = FALSE;
-          if (function_exists($callback)) {
-            $a = @$callback($arg);
-          }
-          if ($a) $access = TRUE;
-        }
-        else {
-          $access = TRUE;
-        }
-      }
-    }
-    if ($access) {
-      $key = $row->report_name;
-      if ($mode == 'link') {
-        $key = 'reports/' . str_replace('/', '.', $key);
-      }
-      $reports[$key] = $key . ' - ' . $row->title;
+    if (drupal_match_path($row->name, $string)) {
+      $reports[$row->name] = $row->name . ' - ' . $row->cache['title'];
     }
   }
   return drupal_json_output($reports);
@@ -930,20 +904,9 @@ function forena_check_all_access($checks) {
  * @param $use_menu_title boolean indicate wether to use menu title attribute.
  */
 function forena_report_title_callback($report_name, $use_menu_title=TRUE) {
-  GLOBAL $language;
   $title = '';
-  $lang = $language->language;
-  $result = db_query('SELECT * FROM {forena_reports} where report_name = :name and language=:language',
-  array(':name' => $report_name, 'language' => $lang));
-  foreach ($result as $row) {
-    $cache = $row->cache;
-    if ($cache) {
-      $cache = unserialize($cache);
-      // Load menu item defaults
-      $menu = $cache['menu'];
-    }
-    $title = $use_menu_title && @$menu['title'] ? $menu['title']:  $row->title;
-  }
+  $info = Frx::File()->getReportCacheInfo($report_name);
+  $title = $use_menu_title && $info && isset($info->cache['menu']['title']) ? $info->cache['menu']['title']:  $info->cache['title'];
   return $title;
 }
 

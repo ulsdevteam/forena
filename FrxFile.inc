@@ -36,7 +36,6 @@ class FrxFile {
       if (is_file($src_file)) {
         @list($base_file, $ext) = explode('.', $rpt_file, 2);
         if (array_search($ext, $this->cached_extensions) !== FALSE) {
-
           $files[$ext][$src_file] = filemtime($src_file);
         }
       }
@@ -69,6 +68,16 @@ class FrxFile {
           $this->cache[$ext][$base_name] = $obj;
         }
         else {
+          // If its our first pas on this replace the entry
+          if (isset($this->filesToDelete[$ext][$base_name])) {
+            $entry = $this->cache[$ext][$base_name];
+            if ($entry->file != $file) {
+              $entry->file = $file;
+              $entry->cache = NULL;
+              $entry->mtime = $mtime;
+            }
+
+          }
           unset($this->filesToDelete[$ext][$base_name]);
         }
       }
