@@ -337,12 +337,14 @@ class FrxFile {
    * @return boolean
    */
   public function delete($filename) {
-    $filepath = $this->path($filename, FALSE);
-    $info = pathinfo($filepath);
+    $path = $this->dir . '/' . $filename;
+    $dir = getcwd();
     $do = TRUE;
-    if (file_exists($filepath)) {
-      chdir($info['dirname']);
-      if ($delete_file) $do = unlink($info['basename']);
+    if (file_exists($path) && is_writeable($path) && is_writable(dirname($path))) {
+      $info = pathinfo($path);
+      chdir(dirname($path));
+      $do = unlink($info['basename']);
+      chdir($dir); ;
     }
     return $do;
   }

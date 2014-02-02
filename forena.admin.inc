@@ -35,7 +35,7 @@ function forena_admin_reports() {
     $rpt = str_replace('/', '.', $row->name);
     $edit = l(t('Edit'), 'reports/' . $rpt . '/edit');
     $clone = l(t('Clone'), 'reports/add/' . $rpt);
-    $delete = l(t('Delete'), 'reports/' . $rpt . '/delete', array('query' => array('destination' => 'admin/structure/reports')));
+    $delete = l(t('Delete'), 'reports/' . $rpt . '/delete', array('query' => array('destination' => 'admin/structure/forena')));
     $title = l(t($row->cache['title']), 'reports/' . $rpt);
     $data[] = array($row->cache['category'], $title, $row->name, $edit . ' ' . $clone . ' ' . $delete);
   }
@@ -49,30 +49,10 @@ function forena_admin_reports() {
  * Remove the report from the database and file system.
  * @param string $report_name
  */
-function forena_delete_report($report_name, $delete_file = TRUE) {
-  $report_path = forena_report_path();
-  $language = 'en';
+function forena_delete_report($report_name) {
 
-
-  $filepath = $report_path . '/' . $report_name . '.frx';
-  $info = Frx::File()->pathinfo($filepath);
+  $filepath = $report_name . '.frx';
   $do = Frx::File()->delete($filepath);
-  if (module_exists('locale')) {
-    @list($tlang, $tname) = explode('/', $report_name, 2);
-    if (array_key_exists($tlang, language_list())) {
-      $report_name = $tname;
-      $language = $tlang;
-    }
-  }
-  if ($do) {
-    db_delete('forena_reports')
-    ->condition('report_name', $report_name)
-    ->condition('language', $language)
-    ->execute();
-  }
-  else {
-    drupal_set_message(t('Unable to delete file %s', array('%s' => $info['basename'])), 'error');
-  }
 }
 
 
