@@ -25,6 +25,39 @@ class FrxReportFile extends FrxFile {
     parent::__construct($default_directory, $directories, array('frx', 'skinfo', 'css', 'js'));
   }
 
+  /**
+   * List all the reports for a language.
+   * @return unknown
+   */
+  public function allReports() {
+    GLOBAL $language;
+    $reports = array();
+    $data = $this->validateAllCache('frx');
+    if ($data) foreach ($data as $base_name => $obj) {
+      if ($obj->cache && $obj->cache['language'] == $language->language) {
+        $obj->name = $base_name;
+        $reports[ $obj->cache['category'] . $obj->cache['title']] = $obj;
+      }
+    }
+    dpm($reports);
+    uasort($reports, 'FrxReportFile::reportCompare');
+    dpm($reports);
+    return $reports;
+  }
+
+  static public function reportCompare($a, $b) {
+    $c = strnatcasecmp($a->cache['category'], $b->cache['category']);
+    if (!$c) {
+      $c = strnatcasecmp($a->cache['title'], $b->cache['title']);
+    }
+    return $c;
+  }
+
+  /**
+   * Generate an ordered  list of reports by category
+   * @param $categories
+   * @return array Categories
+   */
   public function reportsByCategory($categories = array()) {
     GLOBAL $language;
     $data = $this->validateAllCache('frx');

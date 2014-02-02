@@ -29,15 +29,15 @@ function forena_admin_reports() {
     drupal_add_js(drupal_get_path('module', 'forena') . '/forena.admin.js');
     drupal_add_js('sites/all/libraries/dataTables/media/js/jquery.dataTables.min.js');
   }
-  $headers = array(t('title'), t('name'), t('category'), t('operation'));
-  $result = db_query('SELECT * FROM {forena_reports} where language=:language ORDER BY category,title', array(':language' => $language->language));
+  $headers = array(t('category'), t('title'), t('name'), t('operation'));
+  $result = Frx::File()->allReports();
   foreach ($result as $row) {
-    $rpt = str_replace('/', '.', $row->report_name);
+    $rpt = str_replace('/', '.', $row->name);
     $edit = l(t('Edit'), 'reports/' . $rpt . '/edit');
     $clone = l(t('Clone'), 'reports/add/' . $rpt);
     $delete = l(t('Delete'), 'reports/' . $rpt . '/delete', array('query' => array('destination' => 'admin/structure/reports')));
-    $title = l(t($row->title), 'reports/' . $rpt);
-    $data[] = array($title, $row->report_name, $row->category, $edit . ' ' . $clone . ' ' . $delete);
+    $title = l(t($row->cache['title']), 'reports/' . $rpt);
+    $data[] = array($row->cache['category'], $title, $row->name, $edit . ' ' . $clone . ' ' . $delete);
   }
   $output .= '<div id="forena-reports-list">';
   $output .= theme_table(array('header' => $headers, 'rows' => $data, 'attributes' => array('class' => array( 'dataTable-paged')), 'caption' => '', 'sticky' => TRUE, 'colgroups' => array(), 'empty' => ''));
