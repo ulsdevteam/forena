@@ -128,12 +128,12 @@ class FrxReportFile extends FrxFile {
         }
       }
     }
-
+    $sort = defined('SORT_NATURAL') ? SORT_NATURAL : SORT_LOCALE_STRING;
     // Sort the reports
     if ($reports) foreach ($reports as $category => $list) {
-      ksort($reports[$category], SORT_NATURAL);
+      ksort($reports[$category], $sort);
     }
-    ksort($reports, SORT_NATURAL);
+    ksort($reports, $sort);
 
 
     return $reports;
