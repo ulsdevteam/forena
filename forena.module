@@ -751,7 +751,7 @@ function forena_user_reports($category = '') {
   $links = '';
   foreach ($reports as $category => $reports) {
     $links .= '<li><a href="#' . urlencode($category) . '">' . $category . '</a></li> ';
-    $output .= '<h3><a name="' . urlencode($category) . '"/>' . $category . '</h3>';
+    $output .= '<h3 id="' . urlencode($category) . '">' . $category . '</h3>';
     $output .= '<ul>';
     foreach ($reports as $r) {
       $output .= '<li>' . l($r['title'], $report_repos . '/' . str_replace('/', '.', $r['report_name'])) . '</li>';
