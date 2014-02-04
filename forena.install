@@ -46,9 +46,7 @@ function forena_schema() {
 
 
 function forena_update_7401()  {
-  require_once 'forena.common.inc';
-  require_once 'forena.admin.inc';
-  forena_sync_reports(FALSE);
+  // Clear cache mechanism no longer needed
 }
 
 function forena_update_7402() {

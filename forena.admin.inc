@@ -204,7 +204,6 @@ function forena_settings_submit($form, &$form_state) {
       }
     }
   }
-  forena_sync_reports();
 }
 
 function forena_settings_sync_submit($form, &$form_state) {
