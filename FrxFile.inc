@@ -55,6 +55,7 @@ class FrxFile {
    * @param string $prefix a prefix to use in the base name
    */
   private function scanInclude($directory, $prefix='') {
+    $default = strpos($directory, $this->dir) === 0;
     $files = array();
     $this->scanDirectory($directory, $files);
     foreach($files as $ext => $files_of_type ) {
@@ -65,18 +66,27 @@ class FrxFile {
           $obj->file = $file;
           $obj->mtime = $mtime;
           $obj->cache = NULL;
+          $obj->include = !$default;
+          $obj->override = FALSE;
           $this->cache[$ext][$base_name] = $obj;
         }
         else {
           // If its our first pas on this replace the entry
+          $entry = $this->cache[$ext][$base_name];
           if (isset($this->filesToDelete[$ext][$base_name])) {
-            $entry = $this->cache[$ext][$base_name];
             if ($entry->file != $file) {
               $entry->file = $file;
               $entry->cache = NULL;
               $entry->mtime = $mtime;
+              $entry->include = !$default;
+              $entry->override = FALSE;
             }
 
+          }
+          else {
+            if (!$entry->override) {
+              $entry->override = TRUE;
+            }
           }
           unset($this->filesToDelete[$ext][$base_name]);
         }

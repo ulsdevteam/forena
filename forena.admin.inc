@@ -33,9 +33,24 @@ function forena_admin_reports() {
   $result = Frx::File()->allReports();
   foreach ($result as $row) {
     $rpt = str_replace('/', '.', $row->name);
-    $edit = l(t('Edit'), 'reports/' . $rpt . '/edit');
+    if ($row->include) {
+      $edit = l(t('Override'), 'reports/' . $rpt . '/edit');
+    }
+    else {
+      $edit = l(t('Edit'), 'reports/' . $rpt . '/edit');
+    }
     $clone = l(t('Clone'), 'reports/add/' . $rpt);
-    $delete = l(t('Delete'), 'reports/' . $rpt . '/delete', array('query' => array('destination' => 'admin/structure/forena')));
+    // Determine the nature of the report delete link.
+    if ($row->override) {
+      $delete = l(t('Revert'), 'reports/' . $rpt . '/delete', array('query' => array('destination' => 'admin/structure/forena')));
+    }
+    else if (!$row->include) {
+      $delete = l(t('Delete'), 'reports/' . $rpt . '/delete', array('query' => array('destination' => 'admin/structure/forena')));
+    }
+    else {
+      $delete = '';
+    }
+
     $title = l(t($row->cache['title']), 'reports/' . $rpt);
     $data[] = array($row->cache['category'], $title, $row->name, $edit . ' ' . $clone . ' ' . $delete);
   }
@@ -2035,7 +2050,7 @@ function forena_delete_form($form_state, $formid, $name_in) {
     );
     $form['delete_all_languages'] = array(
       '#type' => 'radios',
-      '#title' => t('Delete report in all languages?'),
+      '#title' => t('Remove custom reports in all languages?'),
       '#options' => $options,
       '#default_value' => 'single',
     );
@@ -2045,10 +2060,10 @@ function forena_delete_form($form_state, $formid, $name_in) {
     );
   }
   return confirm_form($form,
-  t('Are you sure you want to delete %title?', array('%title' => $report_name)),
+  t('Are you sure you want to remove %title?', array('%title' => $report_name)),
   isset($_GET['destination']) ? $_GET['destination'] : $link,
   t('This action cannot be undone.'),
-  t('Delete'),
+  t('Remove'),
   t('Cancel')
   );
   return $form;
