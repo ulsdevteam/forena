@@ -29,6 +29,8 @@ class FrxReport {
   private $ids;
   private $data_passed = FALSE;
   public $teng;
+  private $compareType; // Sort compare type
+  private $sort; // Fields to sort by
   public $parms;
   public $missing_parms = FALSE;
   private $dom;
@@ -163,11 +165,12 @@ class FrxReport {
 
     // Shortcut process a text node
     if ($node_type == XML_TEXT_NODE
-    || $node_type == XML_ENTITY_REF_NODE
-    || $node_type == XML_ENTITY_NODE
-    ) {     $text = $dom_node->textContent;
-    $o .= $this->teng->replace($text);
-    return $o;
+      || $node_type == XML_ENTITY_REF_NODE
+      || $node_type == XML_ENTITY_NODE)
+    {
+      $text = $dom_node->textContent;
+      $o .= $this->teng->replace($text);
+      return $o;
     }
 
     //Handle comment nodes
@@ -258,11 +261,28 @@ class FrxReport {
         else {
           $nodes = (array)$data;
         }
+
+        // Sort values
+        $sort = @(string)$frx['sort'];
+        if ($sort) {
+          $compare_type = @(string)$frx['compare'];
+          $this->sort($data, $sort, $compare_type);
+        }
+
+        // Group values
+        $group = @(string)$frx['group'];
+        if ($group) {
+          $nodes = $this->group($nodes, $group);
+        }
+
         $i=0;
 
         //$tmp_attrs = (array)$attrs;
 
         if ($nodes) foreach ($nodes as $x) {
+          if ($group) {
+            Frx::Data()->setContext('group', $x[0]);
+          }
           Frx::Data()->push($x, $id);
           $i++;
           $odd = $i & 1;
@@ -778,6 +798,104 @@ class FrxReport {
     }
     return false;
   }
+
+
+
+  public function setSort($sort, $compare_type='') {
+    if (!$compare_type) {
+      if (defined(SORT_NATURAL)) $compare_type = SORT_NATURAL;
+    }
+    else {
+      if (is_string($compare_type)) {
+        if (defined($compare_type)) {
+          $compare_type = constant($compare_type);
+        }
+        else {
+          $compare_type = SORT_REGULAR;
+        }
+      }
+    }
+    $this->compareType = $compare_type;
+    // Assume an array of sort algorithms
+    if (is_array($sort)) {
+      $this->sortCriteria = $sort;
+    }
+    else {
+      $this->sortCriteria = (array)$sort;
+    }
+  }
+
+
+  /**
+   * Comparison fucntion for user defined sorts.
+   */
+  public function compareFunction($a, $b) {
+    $c=0;
+    foreach ($this->sortCriteria as $sort) {
+      //Get a value
+      $this->push($a, '_sort');
+      $va = $this->teng->replace($sort);
+      $this->pop();
+      $this->push($b, '_sort');
+      $vb = $this->teng->replace($sort);
+
+
+      switch ($this->compareType) {
+      	case SORT_REGULAR:
+      	  $c =  $c= $va < $vb ? -1 : ($va == $vb ? 0 : 1);
+      	  break;
+      	case SORT_NUMERIC:
+      	  $va = floatval($va);
+      	  $vb = floatval($vb);
+      	  $c =  $c= $va < $vb ? -1 : ($va == $vb ? 0 : 1);
+      	  break;
+      	case SORT_STRING:
+      	  $c = strcasecmp($va, $vb);
+      	  break;
+      	case SORT_NATURAL:
+      	  $c = strnatcasecmp($va, $vb);
+      	  break;
+      	default:
+      	  $c =  $c= $va < $vb ? -1 : ($va == $vb ? 0 : 1);
+      }
+      if ($c!==0) break;
+    }
+    return $c;
+  }
+
+  /**
+   * Sort the current data context if it is an array.
+   * @param $teng Token replacement engine to use for sort
+   * @param unknown $sort
+   * @param string $compare_type
+   */
+  public function sort(&$data, $sort, $compare_type='') {
+    $this->setSort($sort, $compare_type);
+    if (is_array($data)) {
+      uasort($data, array($this, 'compareFunction'));
+    }
+  }
+
+  /**
+   * Iterate the data based on the provided path.
+   *
+   * @param $path xpath to iterate xml on
+   * @param $group grouping value
+   * @param $sort Sort criteria
+   */
+  public function group($data,  $group='') {
+    $rows = array();
+    if (is_array($data) || is_object($data)) {
+      foreach ($data as $row) {
+        Frx::Data()->push($row, '_group');
+        $gval = $this->teng->replace($group);
+        Frx::Data()->pop();
+        $rows[$gval][] = $row;
+      }
+    }
+    return $rows;
+  }
+
 }
 
 

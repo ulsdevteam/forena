@@ -1084,6 +1084,11 @@ function forena_forena_controls() {
     'class' => 'FrxTitle',
   );
 
+  $controls[] = array(
+  	'file' => 'renderers/FrxCrosstab.inc',
+    'class' => 'FrxCrosstab',
+  );
+
   $library_dir = FrxReportGenerator::instance()->configuration('library_path');
   $library = rtrim($library_dir,'/') . '/SVGGraph/SVGGraph.php';
   if (file_exists($library)) {

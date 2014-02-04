@@ -45,7 +45,7 @@ class FrxSyntaxEngine {
    * @param $key
    * @return unknown_type
    */
-  protected function get_value( $key, $raw=FALSE) {
+  protected function get_value($key, $raw=FALSE) {
     $context = '';
     $raw_key = $key;
     if ($key && strpos($key, '.')) {

@@ -18,6 +18,7 @@ class FrxData extends FrxContext {
   private $data_stack = array();
   private $id_stack = array();
 
+
   // For backward compatibility.
   public static function instance() {
     return Frx::Data();
@@ -76,6 +77,7 @@ class FrxData extends FrxContext {
     $ret = $xpath->evaluate($path, $dom_node);
     return $ret;
   }
+
 
   /**
    * Get the value from the data.

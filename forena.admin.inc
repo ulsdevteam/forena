@@ -1755,7 +1755,7 @@ function forena_data_select_block_submit($form, &$form_state) {
       //if there were not any parameters passed. Use the report parameters
       if (!$parms) {
         $r = FrxReportGenerator::instance()->get_report($values['report_name']);
-        $rpt_params = $r->parameters;
+        $rpt_params = isset($r->parameters) ? $r->parameters : array();
         if ($rpt_params) foreach ($block_info['tokens'] as $index => $id) {
           $parms[$id] = @$rpt_params[$id]['value'];
         }

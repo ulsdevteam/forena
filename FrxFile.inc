@@ -81,7 +81,6 @@ class FrxFile {
               $entry->include = !$default;
               $entry->override = FALSE;
             }
-
           }
           else {
             if (!$entry->override) {
