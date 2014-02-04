@@ -124,29 +124,6 @@ class FrxDrupalApplication {
         $r_text = Frx::File()->contents($filename);
         $modified = filemtime(Frx::File()->path($filename));
       }
-      $result = db_query("SELECT * FROM {forena_reports} WHERE report_name=:report_name AND language=:language",
-      array(':report_name' => $report_name, ':language' => $language->language));
-      $save = FALSE;
-      if ($rpt = $result->fetchObject()) {
-        // If the file modification time has changed then save.
-        if ($modified && $rpt->modified != $modified) {
-          $save = TRUE;
-        }
-        // If the report has been altered by a user then use that.
-        if ($rpt->altered == -1) {
-          if ($rpt->src) {
-            $r_text = $rpt->src;
-          }
-        }
-      }
-      elseif ($r_text) {
-        $save = TRUE;
-      }
-
-      if ($save) {
-        require_once('forena.admin.inc');
-        forena_save_report($i_report_name, $r_text, FALSE);
-      }
       return $r_text;
     }
   }

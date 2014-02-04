@@ -29,15 +29,30 @@ function forena_admin_reports() {
     drupal_add_js(drupal_get_path('module', 'forena') . '/forena.admin.js');
     drupal_add_js('sites/all/libraries/dataTables/media/js/jquery.dataTables.min.js');
   }
-  $headers = array(t('title'), t('name'), t('category'), t('operation'));
-  $result = db_query('SELECT * FROM {forena_reports} where language=:language ORDER BY category,title', array(':language' => $language->language));
+  $headers = array(t('category'), t('title'), t('name'), t('operation'));
+  $result = Frx::File()->allReports();
   foreach ($result as $row) {
-    $rpt = str_replace('/', '.', $row->report_name);
-    $edit = l(t('Edit'), 'reports/' . $rpt . '/edit');
+    $rpt = str_replace('/', '.', $row->name);
+    if ($row->include) {
+      $edit = l(t('Override'), 'reports/' . $rpt . '/edit');
+    }
+    else {
+      $edit = l(t('Edit'), 'reports/' . $rpt . '/edit');
+    }
     $clone = l(t('Clone'), 'reports/add/' . $rpt);
-    $delete = l(t('Delete'), 'reports/' . $rpt . '/delete', array('query' => array('destination' => 'admin/structure/reports')));
-    $title = l(t($row->title), 'reports/' . $rpt);
-    $data[] = array($title, $row->report_name, $row->category, $edit . ' ' . $clone . ' ' . $delete);
+    // Determine the nature of the report delete link.
+    if ($row->override) {
+      $delete = l(t('Revert'), 'reports/' . $rpt . '/delete', array('query' => array('destination' => 'admin/structure/forena')));
+    }
+    else if (!$row->include) {
+      $delete = l(t('Delete'), 'reports/' . $rpt . '/delete', array('query' => array('destination' => 'admin/structure/forena')));
+    }
+    else {
+      $delete = '';
+    }
+
+    $title = l(t($row->cache['title']), 'reports/' . $rpt);
+    $data[] = array($row->cache['category'], $title, $row->name, $edit . ' ' . $clone . ' ' . $delete);
   }
   $output .= '<div id="forena-reports-list">';
   $output .= theme_table(array('header' => $headers, 'rows' => $data, 'attributes' => array('class' => array( 'dataTable-paged')), 'caption' => '', 'sticky' => TRUE, 'colgroups' => array(), 'empty' => ''));
@@ -49,30 +64,10 @@ function forena_admin_reports() {
  * Remove the report from the database and file system.
  * @param string $report_name
  */
-function forena_delete_report($report_name, $delete_file = TRUE) {
-  $report_path = forena_report_path();
-  $language = 'en';
+function forena_delete_report($report_name) {
 
-
-  $filepath = $report_path . '/' . $report_name . '.frx';
-  $info = Frx::File()->pathinfo($filepath);
+  $filepath = $report_name . '.frx';
   $do = Frx::File()->delete($filepath);
-  if (module_exists('locale')) {
-    @list($tlang, $tname) = explode('/', $report_name, 2);
-    if (array_key_exists($tlang, language_list())) {
-      $report_name = $tname;
-      $language = $tlang;
-    }
-  }
-  if ($do) {
-    db_delete('forena_reports')
-    ->condition('report_name', $report_name)
-    ->condition('language', $language)
-    ->execute();
-  }
-  else {
-    drupal_set_message(t('Unable to delete file %s', array('%s' => $info['basename'])), 'error');
-  }
 }
 
 
@@ -130,12 +125,13 @@ function forena_sync_form($formid, &$form_state) {
   $form['sync_overwrite'] = array(
     '#type' => 'checkbox',
     '#title' => t('Revert all delivered reports to orignial'),
+    '#required' => TRUE,
     '#description' => t('All customizations to module delivered reports will be lost.')
   );
 
   $form['sync'] = array(
     '#type' => 'submit',
-    '#value' => t('Clear Cache'),
+    '#value' => t('Revert'),
     '#submit' => array('forena_settings_sync_submit'),
   );
 
@@ -854,7 +850,7 @@ function forena_create_trans_form_submit($form, &$form_state) {
   $filename = $desc['filename'];
   $report_name = $desc['name'];
 
-  $r = Frx::Editor($values['report_name']);
+  $r = Frx::Editor($base_name);
 
   // Title and category
   $r->setTitle($values['title']);
@@ -865,11 +861,13 @@ function forena_create_trans_form_submit($form, &$form_state) {
     drupal_set_message(t('Report %s already exists', array('%s' => $new_name)), 'error');
     return;
   }
+  else {
+    $r->rename($new_name);
+    drupal_set_message(t('Translation,  %s has been created. Switch languages to translate.', array('%s' => $values['title'])));
+    $form_state['redirect']= array( $desc['i_link'] . '/edit/layout');
+  }
 
-  $r->update();
-  drupal_set_message(t('Translation,  %s has been created. Switch languages to translate.', array('%s' => $values['title'])));
   //if this is a new report then redirect to data blocks
-  $form_state['redirect']= array( $desc['i_link'] . '/edit/layout');
 }
 
 
@@ -1985,7 +1983,7 @@ function forena_report_translations($name_in='') {
   foreach ($languages as $key => $language) {
     $i_name = ($key=='en') ? $name : $key . '/' . $name;
     $i_link = $key . '.' . $name;
-    if (Frx::File()->exists($report_path . '/' . $i_name . '.frx')) {
+    if (Frx::File()->exists($i_name . '.frx')) {
       $modified = format_date(filemtime(Frx::File()->path($i_name . '.frx')));
       $r = Frx::Editor($i_name);
       $title = $r->title;
@@ -2052,7 +2050,7 @@ function forena_delete_form($form_state, $formid, $name_in) {
     );
     $form['delete_all_languages'] = array(
       '#type' => 'radios',
-      '#title' => t('Delete report in all languages?'),
+      '#title' => t('Remove custom reports in all languages?'),
       '#options' => $options,
       '#default_value' => 'single',
     );
@@ -2062,10 +2060,10 @@ function forena_delete_form($form_state, $formid, $name_in) {
     );
   }
   return confirm_form($form,
-  t('Are you sure you want to delete %title?', array('%title' => $report_name)),
+  t('Are you sure you want to remove %title?', array('%title' => $report_name)),
   isset($_GET['destination']) ? $_GET['destination'] : $link,
   t('This action cannot be undone.'),
-  t('Delete'),
+  t('Remove'),
   t('Cancel')
   );
   return $form;
@@ -2486,34 +2484,8 @@ function forena_admin_params_form_submit($form, &$form_state) {
  * @return An array containing all matching categories
  */
 function forena_get_categories($string='') {
-  $result = db_query("SELECT * FROM {forena_reports} where hidden=0 AND category LIKE :category ORDER BY category, title asc",
-  array(':category' => $string . '%'));
-  $categories = array();
-  foreach ($result as $row)  {
-    $access = TRUE;
-    $cache = $row->cache;
-
-    if ($cache) {
-      $cache = unserialize($cache);
-
-      // Check each callback function to see if we have an error.
-      if ($cache['access']) foreach ($cache['access'] as $callback => $args) {
-        if ($callback) foreach ($args as $arg) {
-          $access = FALSE;
-          if (function_exists($callback)) {
-            $a = $callback($arg);
-          }
-          if ($a) $access = TRUE;
-        }
-        else {
-          $access = TRUE;
-        }
-      }
-    }
-    if ($access && !isset($categories[$row->category])) {
-      $categories[$row->category] = $row->category;
-    }
-  }
+  $data = Frx::File()->reportsByCategory();
+  $categories = array_keys($data);
   return $categories;
 }
 

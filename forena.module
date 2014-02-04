@@ -211,7 +211,7 @@ function forena_menu() {
   );
 
   $items['reports/%/delete'] = array(
-     'title' => 'Delete Report',
+     'title' => 'Remove Custom Report',
      'page callback' => 'drupal_get_form',
      'page arguments' => array('forena_delete_form', 1),
      'access arguments' => array('delete report'),
@@ -375,37 +375,11 @@ function forena_reports_autocomplete($string='', $string2='') {
     $mode = $string;
     $string = $string2;
   }
-  $string = '%' .$string .'%';
-  $result = db_query('SELECT * FROM {forena_reports} where language=:language
-	  AND report_name like :string
-	  ORDER BY category,title', array(':language' => $language->language, ':string' => $string));
+  $string = '*' .$string .'*';
+  $result = Frx::File()->allReports();
   foreach ($result as $row) {
-    $access = TRUE;
-    $cache = $row->cache;
-
-    if ($cache) {
-      $cache = unserialize($cache);
-
-      // Check each callback function to see if we have an error.
-      if ($cache['access']) foreach ($cache['access'] as $callback => $args) {
-        if ($callback) foreach ($args as $arg) {
-          $access = FALSE;
-          if (function_exists($callback)) {
-            $a = @$callback($arg);
-          }
-          if ($a) $access = TRUE;
-        }
-        else {
-          $access = TRUE;
-        }
-      }
-    }
-    if ($access) {
-      $key = $row->report_name;
-      if ($mode == 'link') {
-        $key = 'reports/' . str_replace('/', '.', $key);
-      }
-      $reports[$key] = $key . ' - ' . $row->title;
+    if (drupal_match_path($row->name, $string)) {
+      $reports[$row->name] = $row->name . ' - ' . $row->cache['title'];
     }
   }
   return drupal_json_output($reports);
@@ -777,7 +751,7 @@ function forena_user_reports($category = '') {
   $links = '';
   foreach ($reports as $category => $reports) {
     $links .= '<li><a href="#' . urlencode($category) . '">' . $category . '</a></li> ';
-    $output .= '<h3><a name="' . urlencode($category) . '"/>' . $category . '</h3>';
+    $output .= '<h3 id="' . urlencode($category) . '">' . $category . '</h3>';
     $output .= '<ul>';
     foreach ($reports as $r) {
       $output .= '<li>' . l($r['title'], $report_repos . '/' . str_replace('/', '.', $r['report_name'])) . '</li>';
@@ -930,20 +904,9 @@ function forena_check_all_access($checks) {
  * @param $use_menu_title boolean indicate wether to use menu title attribute.
  */
 function forena_report_title_callback($report_name, $use_menu_title=TRUE) {
-  GLOBAL $language;
   $title = '';
-  $lang = $language->language;
-  $result = db_query('SELECT * FROM {forena_reports} where report_name = :name and language=:language',
-  array(':name' => $report_name, 'language' => $lang));
-  foreach ($result as $row) {
-    $cache = $row->cache;
-    if ($cache) {
-      $cache = unserialize($cache);
-      // Load menu item defaults
-      $menu = $cache['menu'];
-    }
-    $title = $use_menu_title && @$menu['title'] ? $menu['title']:  $row->title;
-  }
+  $info = Frx::File()->getReportCacheInfo($report_name);
+  $title = $use_menu_title && $info && isset($info->cache['menu']['title']) ? $info->cache['menu']['title']:  $info->cache['title'];
   return $title;
 }
 
@@ -1313,84 +1276,7 @@ function _forena_revert_reports($subdir = '') {
   return $i;
 }
 
-/**
- * Load cache for all databases.
- */
-function forena_db_sync_all() {
-  $skins = array();
-  db_delete('forena_reports')
-    ->execute();
 
-  foreach(Frx::File()->includes as $path) {
-    $data = _forena_db_sync($path);
-    if ($data) $skins = array_merge($skins, $data);
-  }
-
-  $data = _forena_db_sync(Frx::File()->dir);
-  if ($data) $skins = array_merge($skins, $data);
-  asort($skins);
-  variable_set('forena_skins', $skins);
-  // Rebuild menus.
-  menu_rebuild();
-
-}
-
-/**
- *
- * @param $base_path Directory
- * @param $subdir Relative directory.
- * @return array skins that were detected.
- */
-function _forena_db_sync($base_path, $subdir='') {
-  $path = rtrim($base_path . '/' . $subdir, '/');
-  //Iterate through each file
-  $skins = array();
-  $d = dir($path);
-  if ($d) while (false !== ($rpt_file = $d->read())) {
-    $src_file = trim($d->path, '/') . '/' . trim($rpt_file, '/');
-      $dest_file = $path . '/' . trim($rpt_file, '/');
-    if (is_file($src_file)) {
-      @list($base_file, $ext) = explode('.', $rpt_file, 2);
-      switch($ext) {
-        // Load Forena Reports
-        case 'frx':
-          $base_file = trim($subdir . '/' . $base_file, '/');
-
-          try {
-            $r_xml =file_get_contents($src_file);
-          } catch (Exception $e) {
-            $s = t('unable to load Report %s', $r_xml);
-            forena_error($s, $s . $e->getMessage());
-
-          }
-
-          // Load the report
-
-          $r = new FrxReport($r_xml);
-          $save_count = forena_save_report($base_file, $r_xml, FALSE);
-          $r->__destruct();
-          unset($r);
-          break;
-
-          //load into list of skins
-        case 'skinfo':
-          $data = file_get_contents($src_file);
-          $skin = drupal_parse_info_format($data);
-          $skin_name = @$skin['name'] ? $skin['name'] : $base_file;
-          $skins[$base_file] = $skin_name;
-          break;
-
-      }
-    }
-    elseif (is_dir($src_file)) {
-      if (strpos($rpt_file, '.')!==0) {
-        _forena_db_sync($base_path, rtrim($subdir, '/') . '/' . $rpt_file);
-      }
-    }
-  }
-  if ($d) $d->close();
-  return $skins;
-}
 
 /**
  *
@@ -1403,7 +1289,6 @@ function forena_sync_reports($copy_reports=FALSE) {
     $i = _forena_revert_reports();
     if ($i > 0) drupal_set_message($i . ' reports reverted');
   }
-  forena_db_sync_all();
 }
 
 function forena_theme() {

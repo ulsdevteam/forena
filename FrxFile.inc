@@ -5,9 +5,206 @@
  * contained tn the report directory.
  */
 class FrxFile {
-  public $dir; // Path to directoy containing report paths.
+  public $dir; // Path to Default directory
   public $writable;
   public $includes = array(); //Other places to look for a directory.
+  public $use_includes;
+  public $allowed_extensions;
+  protected $cache;
+  private $needSave = TRUE;
+  private $needScan = TRUE;
+  private $cacheKey = NULL;
+
+  public function __construct($default_directory, $include_directories, $extentions = array(), $use_includes=TRUE) {
+    // Check to see if directory is writable
+    $this->dir = $default_directory;
+    $this->includes = $include_directories;
+    $this->use_includes = $use_includes;
+    $this->writable = is_writable($this->dir);
+    $this->cached_extensions = $extentions;
+    $this->cacheKey = 'forena:' . get_class($this);
+  }
+
+
+  private function scanDirectory($directory, &$files, $recursive=TRUE) {
+    // Loop through the directories, ignoring hidden files.
+    $path = $directory;
+    // Scan the directory for files.
+    $d = dir($path);
+    if ($d) while (false !== ($rpt_file = $d->read())) {
+      $src_file = trim($d->path, '/') . '/' . trim($rpt_file, '/');
+      if (is_file($src_file)) {
+        @list($base_file, $ext) = explode('.', $rpt_file, 2);
+        if (array_search($ext, $this->cached_extensions) !== FALSE) {
+          $files[$ext][$src_file] = filemtime($src_file);
+        }
+      }
+      elseif (is_dir($src_file)) {
+        if (strpos($rpt_file, '.')!==0 && $recursive) {
+          $this->scanDirectory($src_file, $files, $recursive);
+        }
+      }
+    }
+    if ($d) $d->close();
+
+  }
+
+  /**
+   * Parse a drectory
+   * @param unknown $directory
+   * @param string $prefix a prefix to use in the base name
+   */
+  private function scanInclude($directory, $prefix='') {
+    $default = strpos($directory, $this->dir) === 0;
+    $files = array();
+    $this->scanDirectory($directory, $files);
+    foreach($files as $ext => $files_of_type ) {
+      foreach($files_of_type as $file=>$mtime) {
+        $base_name = $prefix . substr($file, strlen($directory) + 1, -1 * (strlen($ext) + 1));
+        if (!isset($this->cache[$ext][$base_name])) {
+          $obj = new stdClass();
+          $obj->file = $file;
+          $obj->mtime = $mtime;
+          $obj->cache = NULL;
+          $obj->include = !$default;
+          $obj->override = FALSE;
+          $this->cache[$ext][$base_name] = $obj;
+        }
+        else {
+          // If its our first pas on this replace the entry
+          $entry = $this->cache[$ext][$base_name];
+          if (isset($this->filesToDelete[$ext][$base_name])) {
+            if ($entry->file != $file) {
+              $entry->file = $file;
+              $entry->cache = NULL;
+              $entry->mtime = $mtime;
+              $entry->include = !$default;
+              $entry->override = FALSE;
+            }
+
+          }
+          else {
+            if (!$entry->override) {
+              $entry->override = TRUE;
+            }
+          }
+          unset($this->filesToDelete[$ext][$base_name]);
+        }
+      }
+    }
+  }
+
+  private function setFilesToDelete() {
+    $this->filesToDelete = array();
+    //Quickly make a list of files in the cache right now.
+    if ($this->cache) foreach ($this->cache as $ext => $files_of_type) {
+      $this->filesToDelete[$ext] = array_fill_keys(array_keys($files_of_type), 1);
+    }
+  }
+
+  private function deleteMissingEntries() {
+    foreach ($this->filesToDelete as $ext => $files_of_type ) {
+      foreach ($files_of_type as $base_name => $val) {
+        unset($this->cache[$ext][$base_name]);
+        $this->needSave = TRUE;
+      }
+    }
+  }
+
+  public function scan($prefix = '') {
+    // Add the base report files.
+    $this->scanInclude($this->dir, $prefix);
+
+    // Now add the module provided ones.
+    if ($this->includes) foreach ($this->includes as $directory) {
+      $this->scanInclude($directory, $prefix);
+    }
+    $this->needScan = FALSE;
+  }
+
+  /**
+   * This is a wrapper function used to build the cache.  It should
+   * be overrident by
+   * @param $ext extension of the cache name
+   * @param $base_name of the object.
+   * @param $object Object
+   */
+  protected function buildCache($ext, $base_name, &$object) {
+    $object->cache = array();
+  }
+
+  private function _validateAllCache($ext, $prefix) {
+    if (isset($this->cache[$ext]) && is_array($this->cache[$ext])) {
+      $names = array_keys($this->cache[$ext]);
+      foreach ($names as $base_name) {
+        $this->validateCache($ext, $base_name);
+      }
+    }
+  }
+
+  /**
+   * Called anytime we want to
+   * make sure the include cache is good and complete. Any file modifications
+   * will cause cache to be rebuild to be rebuilt.
+   * @param unknown $ext
+   * @param string $prefix
+   */
+  public function validateAllCache($ext, $prefix='') {
+    // Load data form the cache
+    if (!$this->cache) {
+      $cache = cache_get($this->cacheKey, 'cache');
+      if ($cache) {
+        $this->cache = $cache->data;
+      }
+      $this->needSave = FALSE;
+    }
+    // Save current paths away.
+    $this->setFilesToDelete();
+    $this->scan($prefix);
+    $this->_validateAllCache($ext, $prefix);
+    //Rescan in case we found deleted files.
+    if ($this->needScan) {
+      $this->scan($prefix);
+      $this->_validateAllCache($ext, $prefix);
+    }
+
+    //Remove any reports that have dissapeared.
+    $this->deleteMissingEntries();
+
+    //Resave the cache if had to be altered.
+    if ($this->needSave) {
+      cache_set($this->cacheKey, $this->cache, 'cache', CACHE_PERMANENT);
+    }
+    return $this->cache[$ext];
+  }
+
+  /**
+   * Validate a single cache entry
+   * @param unknown $ext
+   * @param unknown $base_name
+   */
+  public function validateCache($ext, $base_name) {
+    if (isset($this->cache[$ext])) {
+      if (isset($this->cache[$ext][$base_name])) {
+        $obj = $this->cache[$ext][$base_name];
+        if (file_exists($obj->file)) {
+          $mtime = filemtime($obj->file);
+          if ($obj->cache === NULL || $mtime != $obj->mtime) {
+            //Expensive cache building process.
+            $this->buildCache($ext, $base_name, $obj);
+            $this->needSave = TRUE;
+          }
+          $this->cache[$ext][$base_name] = $obj;
+        }
+        else {
+          // Remove the file from the cache.
+          unset($this->cache[$ext][$base_name]);
+          $this->needScan = TRUE;
+          $this->needSave=TRUE;
+        }
+      }
+    }
+  }
 
   /**
    * Revert an individual report
@@ -31,6 +228,7 @@ class FrxFile {
     return $i;
   }
 
+
   /**
    * Determine if the file exists in the include path.
    * @param $file
@@ -46,24 +244,6 @@ class FrxFile {
       $i++;
     }
     return $found;
-  }
-
-  /**
-   * Constructor
-   *   Sets the initial reort directory
-   */
-  public function __construct() {
-    $report_path = variable_get('forena_report_repos', '');
-    if (!$report_path) {
-      $report_path = variable_get('file_' . file_default_scheme() . '_path', conf_path() . '/files/reports');
-    }
-    $this->dir = rtrim($report_path, '/');
-    $directories = module_invoke_all('forena_report_directory');
-    foreach ($directories as $dir) {
-      $this->includes[] = rtrim($dir, '/');
-    }
-    // Check to see if directory is writable
-    $this->writable = is_writable($this->dir);
   }
 
   /**
@@ -167,12 +347,14 @@ class FrxFile {
    * @return boolean
    */
   public function delete($filename) {
-    $filepath = $this->path($filename, FALSE);
-    $info = pathinfo($filepath);
+    $path = $this->dir . '/' . $filename;
+    $dir = getcwd();
     $do = TRUE;
-    if (file_exists($filepath)) {
-      chdir($info['dirname']);
-      if ($delete_file) $do = unlink($info['basename']);
+    if (file_exists($path) && is_writeable($path) && is_writable(dirname($path))) {
+      $info = pathinfo($path);
+      chdir(dirname($path));
+      $do = unlink($info['basename']);
+      chdir($dir); ;
     }
     return $do;
   }

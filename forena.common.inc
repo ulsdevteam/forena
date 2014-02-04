@@ -29,7 +29,8 @@ function forena_load_cache($r_xhtml) {
   $nodes = array();
   if (is_object($r_xhtml)) {
     $head = @$r_xhtml->head;
-    if ($head) $nodes = $head->xpath('frx:menu');
+
+    if ($head)  $nodes = $head->xpath('frx:menu');
     $menu = array();
     if ($nodes) {
       $m = $nodes[0];
@@ -39,6 +40,7 @@ function forena_load_cache($r_xhtml) {
       }
     }
     if ($menu) $cache['menu'] = $menu;
+
     $block_xml = $r_xhtml->xpath('//*[@frx:block]');
     // Extract all the blocks and organize by provider
 
@@ -140,50 +142,9 @@ function forena_get_html($tag, $r_text) {
  *
  */
 
-function forena_get_user_reports($category = '') {
-  GLOBAL $language;
-  $select = db_select('forena_reports', 'r')
-    ->fields('r')
-    ->condition('language', $language->language)
-    ->condition('hidden', 0);
-
-  if ($category) {
-    $select = $select->condition('category', $category);
-  }
-  $result = $select->orderBy('title')->execute();
-  $reports = array();
-  foreach ($result AS $row) {
-    $access = FALSE;
-    $cache = $row->cache;
-
-    if ($cache) {
-      $cache = unserialize($cache);
-
-      // Check each callback function to see if we have an error.
-      if (@$cache['access']) foreach ($cache['access'] as $provider => $callbacks) {
-        if (user_access('access ' . $provider . ' data')) foreach ($callbacks as $callback=>$args) {
-          if ($callback) foreach ($args as $arg) {
-            if (function_exists($callback) && $arg) {
-              $a = $callback($arg);
-              if ($a) $access = TRUE;
-            }
-            else {
-              $access = TRUE;
-            }
-          }
-          else {
-            $access = TRUE;
-          }
-        }
-      }
-    }
-    if ($access) {
-      $reports[$row->category][] = array(
-        'title' => $row->title,
-        'report_name' => $row->report_name,
-      );
-    }
-  }
+function forena_get_user_reports($category = array()) {
+  if (!$category) $category = array();
+  $reports = Frx::File()->reportsByCategory((array)$category);
   return $reports;
 }
 
@@ -361,56 +322,7 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
     $data['hidden'] = ($data['category'])? 0 : 1;
   }
 
-  // Save language info
-  $lang = 'en';
-  if (module_exists('locale')) {
-    @list($tlang, $tname) = explode('/', $name, 2);
-    if (array_key_exists($tlang, language_list())) {
-      $lang = $tlang;
-      $name = $tname;
-    }
-  }
-
-
-  // Save to the Database
-  if (Frx::File()->exists($filepath)) {
-    $modified = filemtime(Frx::File()->path($filepath));
-    $result = db_query("SELECT report_name FROM {forena_reports} WHERE report_name=:report_name AND language=:language", array(':report_name' => $name, 'language' => $lang) );
-    $path = isset($cache['menu']) ? @$cache['menu']['path'] : '';
-    if ($rpt = $result->fetchObject() ) {
-      db_update('forena_reports')
-      -> condition('report_name', $name)
-      -> condition('language', $lang)
-      ->fields(array(
-          'title' => $data['title'],
-          'descriptor' => $data['descriptor'],
-          'category' => $data['category'],
-          'hidden' => $data['hidden'],
-          'cache' => $rpt_cache,
-          'altered' => $data['altered'],
-          'modified' => $modified,
-          'path' => $path))
-      ->execute();
-    }
-    else {
-      db_insert('forena_reports')->
-      fields( array('report_name' => $name,
-          'language' => $lang,
-          'title' => $data['title'],
-          'descriptor' => $data['descriptor'],
-          'category' => $data['category'],
-          'hidden' => $data['hidden'],
-          'cache' => $rpt_cache,
-          'altered' => $data['altered'],
-          'modified' => $modified,
-          'path' => $path,
-      ))
-      ->execute();
-    }
-
-    $save_count++;
-  }
-
+  $save_count++;
   $r = NULL;
   $result = NULL;
   $r_xml = NULL;
