@@ -756,7 +756,7 @@ function forena_user_reports($category = '') {
     foreach ($reports as $r) {
       $output .= '<li>' . l($r['title'], $report_repos . '/' . str_replace('/', '.', $r['report_name'])) . '</li>';
     }
-    $output .= '</ul       >';
+    $output .= '</ul>';
   }
   return $output;
 }
