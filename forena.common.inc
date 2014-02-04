@@ -322,56 +322,7 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
     $data['hidden'] = ($data['category'])? 0 : 1;
   }
 
-  // Save language info
-  $lang = 'en';
-  if (module_exists('locale')) {
-    @list($tlang, $tname) = explode('/', $name, 2);
-    if (array_key_exists($tlang, language_list())) {
-      $lang = $tlang;
-      $name = $tname;
-    }
-  }
-
-
-  // Save to the Database
-  if (Frx::File()->exists($filepath)) {
-    $modified = filemtime(Frx::File()->path($filepath));
-    $result = db_query("SELECT report_name FROM {forena_reports} WHERE report_name=:report_name AND language=:language", array(':report_name' => $name, 'language' => $lang) );
-    $path = isset($cache['menu']) ? @$cache['menu']['path'] : '';
-    if ($rpt = $result->fetchObject() ) {
-      db_update('forena_reports')
-      -> condition('report_name', $name)
-      -> condition('language', $lang)
-      ->fields(array(
-          'title' => $data['title'],
-          'descriptor' => $data['descriptor'],
-          'category' => $data['category'],
-          'hidden' => $data['hidden'],
-          'cache' => $rpt_cache,
-          'altered' => $data['altered'],
-          'modified' => $modified,
-          'path' => $path))
-      ->execute();
-    }
-    else {
-      db_insert('forena_reports')->
-      fields( array('report_name' => $name,
-          'language' => $lang,
-          'title' => $data['title'],
-          'descriptor' => $data['descriptor'],
-          'category' => $data['category'],
-          'hidden' => $data['hidden'],
-          'cache' => $rpt_cache,
-          'altered' => $data['altered'],
-          'modified' => $modified,
-          'path' => $path,
-      ))
-      ->execute();
-    }
-
-    $save_count++;
-  }
-
+  $save_count++;
   $r = NULL;
   $result = NULL;
   $r_xml = NULL;
