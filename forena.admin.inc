@@ -110,12 +110,13 @@ function forena_sync_form($formid, &$form_state) {
   $form['sync_overwrite'] = array(
     '#type' => 'checkbox',
     '#title' => t('Revert all delivered reports to orignial'),
+    '#required' => TRUE,
     '#description' => t('All customizations to module delivered reports will be lost.')
   );
 
   $form['sync'] = array(
     '#type' => 'submit',
-    '#value' => t('Clear Cache'),
+    '#value' => t('Revert'),
     '#submit' => array('forena_settings_sync_submit'),
   );
 
