@@ -49,9 +49,6 @@ class FrxCrossTab extends FrxRenderer {
         $dim_rows[$gk][$dk] = $r[0];
       }
     }
-    dpm($dim_rows, 'Dimensions');
-    dpm($rows, 'Rows');
-    dpm($dim_values, 'values');
 
     // Default controling attributes
     $this->defaultHeaders($dim_values);
@@ -102,7 +99,7 @@ class FrxCrossTab extends FrxRenderer {
     	'header' => $hrow,
       'rows' => $trows,
     );
-    dpm($vars);
+
     $output = theme('table', $vars);
     return $output;
   }
