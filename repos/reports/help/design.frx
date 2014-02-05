@@ -199,6 +199,18 @@ links prior to presenting them.  Supports the following values:  </p>
 <h3 id="FrxMyReports">FrxMyReports</h3>
 <p>Displays the users list of reports. If you add an frx:category attribute you
   can limit the display to a particular category.</p>
+<h3 id="FrxCrosstab">FrxCrosstab</h3>
+<p>When placed on a table tag, this will generate a crosstab version of 
+a table.  The structure of the encolsed table determines the general layout.  TH elements 
+in the tbody tag indicate the fixed columns of the table, while the TD elements 
+will be generated for each value in the cell.  Liwise in the THEAD section of the table, 
+TH elements indicate fixed column headers, while the TD cell indicates the values that will 
+be generated for each dimention value. Special attributes are as follows:</p>
+
+<table> 
+  <tr><th>frx:group</th><td>Indicate which data field elements to group the rows by using the brace token replacement syntax.</td></tr>
+  <tr><th>frx:dim</th><td>TD columns will be generated for each value of the dimension attribute, again using the token replacement syntax. </td></tr>
+</table>
 <h3 id="FrxSource">FrxSource</h3>
 <p>Display markup as a code snippet. No token replacement is done
 	for the children and all embedded code is escaped html. This is used in
