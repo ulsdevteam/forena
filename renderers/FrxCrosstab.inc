@@ -58,13 +58,16 @@ class FrxCrossTab extends FrxRenderer {
       if (count($this->dim_columns) > 1) $cell['rowspan'] = 2;
       $hrow[] = $cell;
     }
+
     // Add the dimension headers.
     foreach ($dim_values as $dk) {
-      foreach ($this->dim_headers as $col) {
+      foreach ($this->dim_headers as $i => $col) {
         $cell = $col;
         $cell['data'] = $dk;
+        if (count($this->dim_columns) > 1) {
+          $cell['data'] = $i ? $col['data'] : $dk . ' ' . $col['data'];
+        }
         $hrow []  = $cell;
-
       }
     }
 
