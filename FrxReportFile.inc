@@ -169,21 +169,25 @@ class FrxReportFile extends FrxFile {
     	  try {
     	    $r_xml =file_get_contents($object->file);
       	  // Load the report
-        	 $r = new FrxReport($r_xml);
+        	 $r = @new FrxReport($r_xml);
     	  } catch (Exception $e) {
+    	  }
+        if (!$r->rpt_xml) {
     	    $s = t('Unable to load Report %s', array('%s' => $object->file));
     	    if (user_access('design any report')) {
-    	      drupal_set_message($s, 'error');
+    	      drupal_set_message($s, 'error', FALSE);
     	    }
-    	  }
+        }
 
         // Get the security caches from the reports
-        $cache = isset($r->rpt_xml) ? forena_load_cache($r->rpt_xml) : 'report load error';
-        $cache['title'] = $r->title;
-        $cache['language'] = $lang;
-        $cache['category'] = $r->category;
-        $cache['hidden'] = @$r->options['hidden'];
-        //$cache['hidden'] = $r->options['hidden'];
+        $cache = isset($r->rpt_xml) ? forena_load_cache($r->rpt_xml) : NULL;
+        if ($r->rpt_xml) {
+          $cache['title'] = $r->title;
+          $cache['language'] = $lang;
+          $cache['category'] = $r->category;
+          $cache['hidden'] = @$r->options['hidden'];
+          //$cache['hidden'] = $r->options['hidden'];
+        }
         $object->cache = $cache;
     	  if ($r) $r->__destruct();
     	  unset($r);

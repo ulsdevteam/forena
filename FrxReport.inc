@@ -51,7 +51,14 @@ class FrxReport {
       if (is_object($xhtml)) $xhtml = $xhtml->asXML();
 
       // Load document and simplexml representation
-      $dom->loadXML($xhtml);
+      try {
+        $success = $dom->loadXML($xhtml);
+      }
+      catch(Exception $e) {
+        return;
+      }
+      if (!$success) return;
+
       $dom->formatOutput = TRUE;
       $rpt_xml = $this->rpt_xml = simplexml_import_dom($dom);
 
