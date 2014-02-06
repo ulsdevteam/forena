@@ -30,7 +30,7 @@ class FrxFile {
     // Loop through the directories, ignoring hidden files.
     $path = $directory;
     // Scan the directory for files.
-    $d = dir($path);
+    $d = @dir($path);
     if ($d) while (false !== ($rpt_file = $d->read())) {
       $src_file = trim($d->path, '/') . '/' . trim($rpt_file, '/');
       if (is_file($src_file)) {
@@ -54,7 +54,7 @@ class FrxFile {
    * @param unknown $directory
    * @param string $prefix a prefix to use in the base name
    */
-  private function scanInclude($directory, $prefix='') {
+  protected function scanInclude($directory, $prefix='') {
     $default = strpos($directory, $this->dir) === 0;
     $files = array();
     $this->scanDirectory($directory, $files);

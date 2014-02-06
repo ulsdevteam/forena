@@ -51,6 +51,19 @@ class Frx {
 
   /**
    * File singleton factory
+   * @return FrxDataFile
+   */
+  public static function DataFile() {
+    static $o = '';
+    if (!$o) {
+      require_once 'FrxDataFile.inc';
+      $o = new FrxDataFile();
+    }
+    return $o;
+  }
+
+  /**
+   * File singleton factory
    * @return FrxMenu
    */
   public static function Menu() {
