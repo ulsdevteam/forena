@@ -36,22 +36,22 @@ class FrxDataFile extends FrxFile {
    */
   public function userBlocks($search = '*') {
     $blocks = array();
-    $sql = array_values($this->validateAllCache('sql'));
-    $inc = array_values($this->validateAllCache('inc'));
-    $xml = array_values($this->validateAllCache('xml'));
-    $data =$sql + $inc + $xml;
+    $sql = $this->validateAllCache('sql');
+    $inc = $this->validateAllCache('inc');
+    $xml = $this->validateAllCache('xml');
+    $data = array_merge($xml, $sql, $inc);
     if ($data) foreach ($data as $base_name => $obj) {
+
   	  if ($search == '*' || drupal_match_path($base_name, $search)) {
         if ($obj->cache) {
-    	    $r = Frx::RepoMan()->repository($provider);
-    	    if ($r && $r->access($obj->access)) {
-            $obj->name = $base_name;
-            $blocks[$obj->cache['name']] = $obj;
+    	    $r = Frx::RepoMan()->repository($obj->cache['provider']);
+    	    if ($r && $r->access($obj->cache['access'])) {
+            $blocks[$base_name] = $obj;
     	    }
         }
   	  }
     }
-    uasort($blocks, 'FrxDataFile::blockCompare');
+    uksort($blocks, 'FrxDataFile::blockCompare');
     return $blocks;
   }
 
@@ -73,10 +73,7 @@ class FrxDataFile extends FrxFile {
    * @return number
    */
   static public function blockCompare($a, $b) {
-    $c = strnatcasecmp($a->cache['provider'], $b->cache['name']);
-    if (!$c) {
-      $c = strnatcasecmp($a->cache['provider'], $b->cache['name']);
-    }
+    $c = strnatcasecmp($a, $b);
     return $c;
   }
 

@@ -351,11 +351,20 @@ function forena_categories_autocomplete($string='') {
  * @param $string
  * @return unknown_type
  */
-function forena_data_block_autocomplete($string='') {
+function forena_data_block_autocomplete() {
   require_once('forena.admin.inc');
-  $data_blocks = Frx::DataFile()->userBlocks($string);
+  $args = func_get_args();
+  $search = implode('/', $args);
+  if (strlen($search) < 2) {
+    $search .= '*';
+  }
+  else {
+    $search = "*$search*";
+  }
+
+  $data_blocks = Frx::DataFile()->userBlocks($search);
   if ($data_blocks) {
-    $temp = array_values($data_blocks);
+    $temp = array_keys($data_blocks);
     $data_blocks = array_combine($temp, $temp);
   }
   else {
