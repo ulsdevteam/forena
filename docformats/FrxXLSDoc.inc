@@ -46,6 +46,9 @@ class FrxXLSDoc extends FrxDocument {
       if ($rows) foreach ($rows as $row) {
         $output .= '    <Row>' . "\n";
         foreach ($row as $column) {
+          $class = @(string)$column['class'];
+          $classes = explode(' ', $class);
+          $text_class = array_search('XLSText', $classes)!==FALSE;
           $value = $column->asXML();
           $value = strip_tags($value);
           $tval = trim($value);
@@ -56,7 +59,7 @@ class FrxXLSDoc extends FrxDocument {
           $inner_symbols = FALSE;
           if (strpos($tval, '+') || strpos($tval, '-') || strpos($tval, ' ')) $inner_symbols =  TRUE;
           if (substr_count($tval, '.') > 1) $inner_symbols = TRUE;
-          if (empty($non_numeric_chars) && trim($value)!=='' && !$inner_symbols) {
+          if (empty($non_numeric_chars) && trim($value)!=='' && !$inner_symbols && !$text_class) {
             $output .= '      <Cell><Data ss:Type="Number">' . $tval . '</Data></Cell>' . "\n";
           }
           else {
