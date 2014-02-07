@@ -2117,37 +2117,6 @@ function forena_clean_xhtml($xhtml) {
 }
 
 /**
- * Provides list of blocks that a user has access to that are in any repository matching
- * a specified search string
- *
- * @param string $search block to search for.
- * @return array list of blocks the user has access to.
- */
-function forena_user_data_blocks($search) {
-  $repos = Frx::RepoMan()->repositories;
-  $blocks= array();
-  $user_blocks = array();
-
-  foreach ($repos as $name => $r) {
-    // Make really sure the data provider objects have been instantiated
-    $o = Frx::RepoMan()->repository($name);
-    if (method_exists($o, 'list_blocks')) {
-      $blocks = array();
-      $o->list_blocks($search, $blocks);
-      foreach ($blocks as $block) {
-        $block_info = $o->loadBlock($block);
-        if (method_exists($o, 'access')) {
-          $allow = $o->access(@$block_info['access']);
-          if ($allow) $user_blocks[] = $name . '/' . $block;
-        }
-      }
-    }
-  }
-  if ($user_blocks) asort($user_blocks);
-  return $user_blocks;
-}
-
-/**
  *  Prettifies an XML string into a human-readable and indented work of art
  *  @param string $xml The XML as a string
  *  @param boolean $html_output True if the output should be escaped (for use in HTML)

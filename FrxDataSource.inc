@@ -190,9 +190,7 @@ class FrxDataSource{
    * @return unknown
    */
   public function list_blocks($search, &$block_list, $subdir='') {
-    static $count=0;
     // First find files that match the search string
-    if ($count > 100) return;
     $path = $this->block_path . '/';
     if ($subdir) $path .= $subdir . '/';
     $block_path = $path . '*' . $search . '*';

@@ -34,17 +34,22 @@ class FrxDataFile extends FrxFile {
    * List all the reports for a language.
    * @return unknown
    */
-  public function allBlocks() {
+  public function userBlocks($search = '*') {
     $blocks = array();
     $sql = array_values($this->validateAllCache('sql'));
     $inc = array_values($this->validateAllCache('inc'));
     $xml = array_values($this->validateAllCache('xml'));
     $data =$sql + $inc + $xml;
     if ($data) foreach ($data as $base_name => $obj) {
-      if ($obj->cache) {
-        $obj->name = $base_name;
-        $blocks[$obj->cache['name']] = $obj;
-      }
+  	  if ($search == '*' || drupal_match_path($base_name, $search)) {
+        if ($obj->cache) {
+    	    $r = Frx::RepoMan()->repository($provider);
+    	    if ($r && $r->access($obj->access)) {
+            $obj->name = $base_name;
+            $blocks[$obj->cache['name']] = $obj;
+    	    }
+        }
+  	  }
     }
     uasort($blocks, 'FrxDataFile::blockCompare');
     return $blocks;
