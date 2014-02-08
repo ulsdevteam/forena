@@ -330,7 +330,6 @@ class FrxFile {
    */
   public function save($filename, $data) {
     $path = $this->dir . '/' . $filename;
-    dpm($data, $path);
     $this->verifyDirectory($filename);
 
     if (is_writable($path) || (!file_exists($path) && is_writable(dirname($path)))) {
@@ -367,6 +366,15 @@ class FrxFile {
    */
   public function pathinfo($filename, $use_include = TRUE) {
     return pathinfo($this->path($filename, $use_include));
+  }
+  /**
+   * Return an indicator as to whether the file is savable.
+   * New files can be saved if the directory is writabel.
+   * @param unknown $filename
+   * @return boolean
+   */
+  public function isWritable($filename) {
+    return is_writeable($this->dir . "/$filename") || (!file_exists($this->dir . "/$filename") && is_writable('dir'));
   }
 
 

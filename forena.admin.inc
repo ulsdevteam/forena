@@ -160,7 +160,7 @@ function forena_settings() {
 
   $form['forena_last_report_path'] = array(
     '#type' => 'value',
-    '#value' => forena_report_path(),
+    '#value' => variable_get('forena_report_repos', '')
   );
 
   if (module_exists('forena_query')) {
@@ -176,7 +176,7 @@ function forena_settings() {
 
       $form['forena_last_query_data_path'] = array(
           '#type' => 'value',
-          '#value' =>  Frx::DataFile()->dir
+          '#value' =>  variable_get('forena_query_data_path', '')
       );
 
   }
@@ -203,7 +203,7 @@ function forena_settings_validate($form, &$form_state) {
     if (!file_exists($path)) {
       try {
         if (file_exists($path)) {
-          drupal_set_message(t('Created directory %s', array($path))) ;
+          drupal_set_message(t('Created directory %s', array('%s' => $path))) ;
         }
         mkdir($path);
 
@@ -223,7 +223,7 @@ function forena_settings_validate($form, &$form_state) {
 
           mkdir($path);
           if (file_exists($path)) {
-            drupal_set_message(t('Created directory %s', array($path))) ;
+            drupal_set_message(t('Created directory %s', array('%s' => $path))) ;
           }
 
         } catch (Exception $e) {
@@ -232,7 +232,6 @@ function forena_settings_validate($form, &$form_state) {
       }
     }
     if (!file_exists($path) || !is_writable($path)) {
-      dpm($path);
       form_set_error('forena_query_data_path', 'Data Directory must be writable by the web user');
     }
   }

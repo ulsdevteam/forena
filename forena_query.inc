@@ -141,7 +141,6 @@ function forena_query_builder_form($formid, &$form_state) {
         $form['file'] = array(
           '#type' => 'textarea',
           '#title' => t('Source'),
-          '#disabled' => @$block['locked'],
           '#default_value' => @$block['file'],
         );
 
@@ -227,7 +226,8 @@ function forena_query_load_block($form, &$form_state) {
 
 function forena_query_validate_block($form, &$form_state) {
    $repos_list = Frx::RepoMan()->repositories;
-   @list($provider, $block) = @explode('/', $form_state['values']['block'], 2);
+   $block_name = $form_state['values']['block'];
+   @list($provider, $block) = @explode('/', $block_name, 2);
    if (!isset($repos_list[$provider])) {
      form_set_error('block', t('Invalid Data Source'));
    }
@@ -243,8 +243,12 @@ function forena_query_validate_block($form, &$form_state) {
      $r = Frx::RepoMan()->repository($provider);
      $access = $r->access($form_state['values']['access']);
      if (!$access) {
-       form_set_error('access', 'You must have access to use this right.');
+       form_set_error('access', t('You must be granted access to use this right.'));
      }
+   }
+
+   if (!Frx::DataFile()->isWritable($block_name . '.sql')) {
+     form_set_error('block', t('Insufficient Permission to save file'));
    }
 
 
@@ -359,6 +363,7 @@ function forena_query_validate_new_block($form, &$form_state) {
   }
 
 }
+
 
 function forena_query_save_block($form, &$form_state) {
   $form_state['rebuild'] = FALSE;
