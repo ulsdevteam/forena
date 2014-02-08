@@ -43,7 +43,19 @@ class FrxDrupal extends FrxDataSource {
     // Load the block from the file
     $xml ='';
     $sql = $this->te->replace($sql);
-    $rs = db_query($sql);
+    try {
+      $rs = db_query($sql);
+    }
+    catch (PDOException $e) {
+      watchdog_exception('error',$e);
+      $text = $e->getMessage();
+      //if (user_access('build forena sql blocks')) {
+        $text .= ' in :<pre>' . $sql. '</pre>';
+      //}
+     drupal_set_message('Database Error:' . $text, 'error');
+     return;
+
+    }
     $entity_map = array();
     $select_fields = array();
     $rownum = 0;
