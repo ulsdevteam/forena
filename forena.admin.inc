@@ -144,7 +144,7 @@ function forena_sync_form($formid, &$form_state) {
  *
  */
 function forena_settings() {
-  $skins = variable_get('forena_skins', array());
+  $skins = Frx::File()->skins();
 
   $report_path = forena_report_path();
 
@@ -163,6 +163,23 @@ function forena_settings() {
     '#value' => forena_report_path(),
   );
 
+  if (module_exists('forena_query')) {
+      $form['forena_query_data_path'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Custom Data Block Repository'),
+        '#description' => t('Indicate the directory that you want to use to save custom created data blocks using
+            the forena query builder tool.  These will override any module delivered data blocks.  This needs to
+            be a directory that is writable by the web user but should not be browsable by the web.  It defaults to
+            '),
+        '#default_value' => Frx::DataFile()->dir,
+      );
+
+      $form['forena_last_query_data_path'] = array(
+          '#type' => 'value',
+          '#value' =>  Frx::DataFile()->dir
+      );
+
+  }
 
   $form['forena_input_format'] = forena_filter_element(variable_get('forena_input_format', filter_default_format()), 'forena_input_format');
   $form['forena_default_form'] = array(
@@ -175,24 +192,16 @@ function forena_settings() {
     );
 
     $form =  system_settings_form($form);
-    $form['#submit'][] = 'forena_settings_submit';
     return $form;
 
 }
-/**
- * Added submit handler to create directories and clear menu cache
- *
- * @param unknown_type $form
- * @param unknown_type $form_state
- */
-function forena_settings_submit($form, &$form_state) {
+
+function forena_settings_validate($form, &$form_state) {
   $values = $form_state['values'];
   $path = $values['forena_report_repos'];
-  $src_dir = drupal_get_path('module', 'forena') . '/repos/reports';
   if ($path != $values['forena_last_report_path']) {
     if (!file_exists($path)) {
       try {
-
         if (file_exists($path)) {
           drupal_set_message(t('Created directory %s', array($path))) ;
         }
@@ -200,10 +209,45 @@ function forena_settings_submit($form, &$form_state) {
 
       } catch (Exception $e) {
         forena_error(t('Unable to create report directory'), $e->getMessage());
-        return;
       }
     }
   }
+  if (!file_exists($path) || !is_writable($path)) {
+    form_set_error('forena_report_repos', 'Report Directory must be writable by the web user');
+  }
+  if ($values['forena_query_data_path']) {
+    $path = $values['forena_query_data_path'];
+    if ($path != $values['forena_last_query_data_path']) {
+      if (!file_exists($path)) {
+        try {
+
+          mkdir($path);
+          if (file_exists($path)) {
+            drupal_set_message(t('Created directory %s', array($path))) ;
+          }
+
+        } catch (Exception $e) {
+          forena_error(t('Unable to create data directory'), $e->getMessage());
+        }
+      }
+    }
+    if (!file_exists($path) || !is_writable($path)) {
+      dpm($path);
+      form_set_error('forena_query_data_path', 'Data Directory must be writable by the web user');
+    }
+  }
+
+
+}
+
+
+/**
+ * Added submit handler to create directories and clear menu cache
+ *
+ * @param unknown_type $form
+ * @param unknown_type $form_state
+ */
+function forena_settings_submit($form, &$form_state) {
 }
 
 function forena_settings_sync_submit($form, &$form_state) {

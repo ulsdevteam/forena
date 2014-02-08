@@ -12,7 +12,7 @@ class FrxDataFile extends FrxFile {
     // Load default directory from configuration.
     $report_path = variable_get('forena_query_data_path', '');
     if (!$report_path) {
-      $report_path = variable_get('file_private_path', conf_path() . '/data');
+      $report_path = variable_get('file_private_path' . '/data', conf_path() . '/data');
     }
 
     // Add directories for data  repos.

@@ -349,13 +349,6 @@ function forena_query_validate_new_block($form, &$form_state) {
   // Check to make sure a filename is specified.
   if (isset($form_state['values']['save_as_name'])) {
     $block_name = $form_state['storage']['provider'] . '/' . $form_state['values']['save_as_name'];
-
-
-    $block = Frx::RepoMan()->loadBlock($block_name);
-    if ($block) {
-      form_set_error('save_as_name', t('Block already exists'));
-    }
-
   }
   if (isset($form_state['values']['access'])) {
     $r = Frx::RepoMan()->repository($form_state['storage']['provider']);
@@ -364,6 +357,7 @@ function forena_query_validate_new_block($form, &$form_state) {
       form_set_error('access', 'You must have access to use this right.');
     }
   }
+
 }
 
 function forena_query_save_block($form, &$form_state) {

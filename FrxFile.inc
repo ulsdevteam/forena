@@ -215,7 +215,7 @@ class FrxFile {
       $file_to_delete = $this->dir . '/' . $file;
       if (file_exists($file_to_delete)) {
         if (is_writeable(dirname($file_to_delete))) {
-          drupal_set_message(t('Removing customised report %s', array('%s' => $file_to_delete)));
+          drupal_set_message(t('Removing customization %s', array('%s' => $file_to_delete)));
           unlink($file_to_delete);
           $i++;
         }
@@ -299,7 +299,7 @@ class FrxFile {
     if (!$recursive) {
       $path = $this->dir;
       if (!is_writable($path)) {
-        drupal_set_message(t('Report directory %s is not modifiable', array('%s' => $path)), 'error');
+        drupal_set_message(t('Directory %s is not modifiable', array('%s' => $path)), 'error');
         return FALSE;
       }
     }
@@ -310,7 +310,7 @@ class FrxFile {
     // Path
     if (!file_exists($path) && $file) {
       @mkdir($path);
-      if (!@is_writable($path)) {
+      if (!is_writable($path)) {
         drupal_set_message(t('Error creating directory %path', array('%path' => $path)), 'error');
         return FALSE;
       }
@@ -330,6 +330,7 @@ class FrxFile {
    */
   public function save($filename, $data) {
     $path = $this->dir . '/' . $filename;
+    dpm($data, $path);
     $this->verifyDirectory($filename);
 
     if (is_writable($path) || (!file_exists($path) && is_writable(dirname($path)))) {

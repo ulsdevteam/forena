@@ -425,65 +425,6 @@ class FrxDataSource{
   }
 
   /**
-   * Save a data block
-   * @param $block_name String name of block to save
-   * @param $data array fields of block to save.
-   */
-  public function saveBlock($block_name, $data) {
-    $modified = time();
-    $builder = @$data['builder'];
-    if (is_array($builder)) {
-      $builder = serialize($builder);
-    }
-
-    $rs = db_query('SELECT * from {forena_data_blocks} WHERE repository=:repos AND
-      block_name = :block_name',
-    array(
-        ':repos' => $this->name,
-        ':block_name' => $block_name,
-    )
-    );
-    if ($block = $rs->fetchObject()) {
-      db_update('forena_data_blocks')
-      ->fields(array(
-          'src' => $data['file'],
-          'builder' => $builder,
-          'access' => $data['access'],
-          'modified' => $modified,
-      ))
-      ->condition('repository', $this->name)
-      ->condition('block_name', $block_name)
-      ->execute();
-    }
-    else {
-      db_insert('forena_data_blocks')
-      ->fields( array(
-          'repository' => $this->name,
-          'block_name' => $block_name,
-          'block_type' => $data['type'],
-          'src' => $data['file'],
-          'builder' => $builder,
-          'access' => $data['access'],
-          'locked' => 0,
-          'modified' => $modified,
-      ))
-      ->execute();
-    }
-  }
-
-  /**
-   *
-   * Delete data block stored in database.
-   * @param $block_name Data block to delete
-   */
-  public function deleteBlock($block_name) {
-    db_delete('forena_data_blocks')
-    ->condition('repository', $this->name)
-    ->condition('block_name', $block_name)
-    ->execute();
-  }
-
-  /**
    * Build the SQL clause based on builder data.
    * @param  $data
    */
