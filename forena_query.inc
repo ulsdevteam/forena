@@ -20,20 +20,25 @@ function forena_query_display_blocks() {
   $data=array();
   foreach ($blocks as $block_name => $block) {
     $blck = str_replace('/', '.', $block_name);
-    if ($block->include) {
-      $actions = l(t('Override'), 'admin/structure/forena/data/' . $blck . '/edit');
+    $actions = '';
+    if ($block->cache['type'] == 'sql') {
+      if ($block->include) {
+        $actions = l(t('Override'), 'admin/structure/forena/data/' . $blck . '/edit');
+      }
+      else {
+        $actions = l(t('Edit'), 'admin/structure/forena/data/' . $blck . '/edit');
+      }
+      $clone = l(t('Clone'), 'admin/structure/forena/data/clone/' . $blck);
+      // Determine the nature of the report delete link.
+      if ($block->override) {
+        $actions .= ' ' .l(t('Revert'), 'admin/structure/forena/data/' . $blck . '/delete', array('query' => array('destination' => 'admin/structure/forena/data')));
+      }
+      else if (!$block->include) {
+        $actions .= ' ' . l(t('Delete'), 'admin/structure/forena/data/' . $blck . '/delete', array('query' => array('destination' => 'admin/structure/forena/data')));
+      }
     }
-    else {
-      $actions = l(t('Edit'), 'admin/structure/forena/data/' . $blck . '/edit');
-    }
-    $clone = l(t('Clone'), 'admin/structure/forena/data/clone/' . $blck);
-    // Determine the nature of the report delete link.
-    if ($block->override) {
-      $actions .= ' ' .l(t('Revert'), 'admin/structure/forena/data/' . $blck . '/delete', array('query' => array('destination' => 'admin/structure/forena/data')));
-    }
-    else if (!$row->include) {
-      $actions .= ' ' . l(t('Delete'), 'admin/structure/forena/data/' . $blck . '/delete', array('query' => array('destination' => 'admin/structure/forena/data')));
-    }
+
+
     $data[] = array(
     	$block_name,
       @$block->cache['keywords'],
