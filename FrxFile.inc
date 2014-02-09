@@ -374,7 +374,7 @@ class FrxFile {
    * @return boolean
    */
   public function isWritable($filename) {
-    return is_writeable($this->dir . "/$filename") || (!file_exists($this->dir . "/$filename") && is_writable('dir'));
+    return is_writeable($this->dir . "/$filename") || (!file_exists($this->dir . "/$filename"));
   }
 
 

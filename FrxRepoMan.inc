@@ -161,7 +161,8 @@ class FrxRepoMan {
     if (is_array($builder)) {
       $builder = serialize($builder);
     }
-    Frx::DataFile()->save($data_block .'.sql', $data['source']);
+    $file = $data['access'] ?  "--ACCESS=" . $data['access'] . "\n" . $data['file'] : $data['file '];
+    Frx::DataFile()->save($data_block .'.sql', $file);
     Frx::DataFile()->validateAllCache('sql');
 
     $rs = db_query('SELECT * from {forena_data_blocks} WHERE repository=:repos AND

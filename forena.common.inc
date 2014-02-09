@@ -494,3 +494,24 @@ function theme_forena_fieldset_template(&$variables) {
 }
 
 
+function theme_forena_data_table($variables) {
+  $defaults = array(
+      'caption' => '',
+      'sticky' => FALSE,
+      'colgroups' => array(),
+      'empty' => '',
+  );
+  drupal_add_css(drupal_get_path('module', 'forena') . '/forena.css');
+  if (file_exists('sites/all/libraries/dataTables/media/js/jquery.dataTables.min.js')) {
+    drupal_add_js(drupal_get_path('module', 'forena') . '/forena.admin.js');
+    drupal_add_js('sites/all/libraries/dataTables/media/js/jquery.dataTables.min.js');
+  }
+  // Default in values that theme_table expects.
+  $variables['attributes'] = isset($variables['attributes']) ? array_merge($defaults, $variables['attributes']) : $defaults;
+  $variables['attributes']['class'][] = 'dataTable-paged';
+  $output = theme('table', $variables);
+  return $output;
+}
+
+
+

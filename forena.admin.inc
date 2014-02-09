@@ -13,9 +13,9 @@ require_once('forena.common.inc');
 function forena_admin_reports() {
   GLOBAL $language;
   $data = array();
-  $links[] = array('href' => 'reports/add', 'title' => 'Create New Report' );
   $content = drupal_get_form('forena_sync_form');
   $output = drupal_render($content);
+  $links[] = array('href' => 'reports/add', 'title' => 'Create New Report' );
   $output .= theme('links',
     array(
       'links' => $links,
@@ -23,12 +23,6 @@ function forena_admin_reports() {
     )
   );
   // Add Data tables if it exists.
-
-  drupal_add_css(drupal_get_path('module', 'forena') . '/forena.css');
-  if (file_exists('sites/all/libraries/dataTables/media/js/jquery.dataTables.min.js')) {
-    drupal_add_js(drupal_get_path('module', 'forena') . '/forena.admin.js');
-    drupal_add_js('sites/all/libraries/dataTables/media/js/jquery.dataTables.min.js');
-  }
   $headers = array(t('category'), t('title'), t('name'), t('operation'));
   $result = Frx::File()->allReports();
   foreach ($result as $row) {
@@ -55,7 +49,7 @@ function forena_admin_reports() {
     $data[] = array($row->cache['category'], $title, $row->name, $edit . ' ' . $clone . ' ' . $delete);
   }
   $output .= '<div id="forena-reports-list">';
-  $output .= theme_table(array('header' => $headers, 'rows' => $data, 'attributes' => array('class' => array( 'dataTable-paged')), 'caption' => '', 'sticky' => TRUE, 'colgroups' => array(), 'empty' => ''));
+  $output .= theme('forena_data_table', array('header' => $headers, 'rows' => $data));
   $output .= '</div>';
   return $output;
 }

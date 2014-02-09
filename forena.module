@@ -1321,6 +1321,10 @@ function forena_theme() {
       'render element' => 'fieldset',
       'file' => 'forena.common.inc',
   ),
+    'forena_data_table' => array(
+    	'file' => 'forena.common.inc',
+      'variables' => array('header' => NULL, 'data' => NULL),
+    )
 
   );
 }

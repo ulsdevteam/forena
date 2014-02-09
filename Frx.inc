@@ -333,6 +333,11 @@ class Frx {
   }
 
 
+  /**
+   *
+   * @param  $report_name
+   * @return FrxEditor <string, FrxEditor>
+   */
   static public function Editor($report_name = '') {
     static $o='';
     require_once('FrxEditor.inc');
@@ -341,6 +346,23 @@ class Frx {
     }
     else {
       if ($report_name) $o->load($report_name) ;
+    }
+    return $o;
+  }
+
+  /**
+   *
+   * @param $block_name
+   * @return FrxBlockEditor
+   */
+  static public function BlockEditor($block_name = '') {
+    static $o='';
+    require_once('FrxBlockEditor.inc');
+    if (!$o) {
+      $o = new FrxBlockEditor($block_name);
+    }
+    else {
+      if ($block_name) $o->load($block_name);
     }
     return $o;
   }
