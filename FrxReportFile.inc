@@ -32,7 +32,8 @@ class FrxReportFile extends FrxFile {
   public function allReports() {
     GLOBAL $language;
     $reports = array();
-    $data = $this->validateAllCache('frx');
+    $this->validateAllCache();
+    $data = $this->getCache('frx');
     if ($data) foreach ($data as $base_name => $obj) {
       if ($obj->cache && $obj->cache['language'] == $language->language) {
         $obj->name = $base_name;
@@ -63,7 +64,8 @@ class FrxReportFile extends FrxFile {
    */
   public function getReportCacheInfo($name) {
     GLOBAL $language;
-    $data = $this->validateAllCache('frx');
+    $this->validateAllCache();
+    $data = $this->getCache('frx');
     if ($language->language != 'en') {
       $lang = $language->language;
       $name = "$lang/$name";
@@ -73,7 +75,8 @@ class FrxReportFile extends FrxFile {
 
   public function menuReports() {
     GLOBAL $language;
-    $data = $this->validateAllCache('frx');
+    $this->validateAllCache();
+    $data = $this->getCache('frx');
 
     $reports = array();
     foreach ($data as $base_name => $obj) {
@@ -93,7 +96,8 @@ class FrxReportFile extends FrxFile {
    */
   public function reportsByCategory($categories = array()) {
     GLOBAL $language;
-    $data = $this->validateAllCache('frx');
+    $this->validateAllCache();
+    $data = $this->getCache('frx');
     $reports = array();
     if ($data) foreach ($data as $base_name => $obj) {
       if ($obj->cache && @$obj->cache['category'] && !$obj->cache['hidden'] && $obj->cache['language'] == $language->language ) {
@@ -140,8 +144,8 @@ class FrxReportFile extends FrxFile {
   }
 
   public function skins() {
-
-    $this->validateAllCache('skinfo');
+    $this->validateAllCache();
+    $this->getCache('skinfo');
     $skins = array();
     if (isset($this->cache['skinfo'])) foreach ($this->cache['skinfo'] as $name => $obj) {
       $skins[$name] = $obj->cache['name'];

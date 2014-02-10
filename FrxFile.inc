@@ -9,7 +9,7 @@ class FrxFile {
   public $writable;
   public $includes = array(); //Other places to look for a directory.
   public $use_includes;
-  public $allowed_extensions;
+  public $cached_extensions;
   protected $cache;
   private $needSave = TRUE;
   private $needScan = TRUE;
@@ -132,11 +132,13 @@ class FrxFile {
     $object->cache = array();
   }
 
-  private function _validateAllCache($ext, $prefix) {
-    if (isset($this->cache[$ext]) && is_array($this->cache[$ext])) {
-      $names = array_keys($this->cache[$ext]);
-      foreach ($names as $base_name) {
-        $this->validateCache($ext, $base_name);
+  private function _validateAllCache($prefix) {
+    foreach($this->cached_extensions as $ext) {
+      if (isset($this->cache[$ext]) && is_array($this->cache[$ext])) {
+        $names = array_keys($this->cache[$ext]);
+        foreach ($names as $base_name) {
+          $this->validateCache($ext, $base_name);
+        }
       }
     }
   }
@@ -148,7 +150,7 @@ class FrxFile {
    * @param unknown $ext
    * @param string $prefix
    */
-  public function validateAllCache($ext, $prefix='') {
+  public function validateAllCache($prefix='') {
     // Load data form the cache
     if (!$this->cache) {
       $cache = cache_get($this->cacheKey, 'cache');
@@ -160,11 +162,11 @@ class FrxFile {
     // Save current paths away.
     $this->setFilesToDelete();
     $this->scan($prefix);
-    $this->_validateAllCache($ext, $prefix);
+    $this->_validateAllCache($prefix);
     //Rescan in case we found deleted files.
     if ($this->needScan) {
       $this->scan($prefix);
-      $this->_validateAllCache($ext, $prefix);
+      $this->_validateAllCache($prefix);
     }
 
     //Remove any reports that have dissapeared.
@@ -174,7 +176,15 @@ class FrxFile {
     if ($this->needSave) {
       cache_set($this->cacheKey, $this->cache, 'cache', CACHE_PERMANENT);
     }
-    return $this->cache[$ext];
+  }
+
+  public function getCache($ext) {
+    if (isset($this->cache[$ext])) {
+      return $this->cache[$ext];
+    }
+    else {
+      return array();
+    }
   }
 
   /**

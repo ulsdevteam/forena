@@ -7,7 +7,7 @@ require_once 'FrxDataSource.inc';
 
 function forena_query_display_blocks() {
 
-  $header = array(t('Block'), t('Keywords'), t('Actions'));
+  $header = array(t('Block'), t('Access'), t('Keywords'), t('Actions'));
 
   $blocks = Frx::DataFile()->userBlocks();
   $links[] = array('href' => 'admin/structure/forena/data/add', 'title' => 'Create New SQL Query)' );
@@ -30,7 +30,7 @@ function forena_query_display_blocks() {
       }
       $clone = l(t('Clone'), 'admin/structure/forena/data/clone/' . $blck);
       // Determine the nature of the report delete link.
-      if ($block->override) {
+      if ($block->override && $block->include) {
         $actions .= ' ' .l(t('Revert'), 'admin/structure/forena/data/' . $blck . '/delete', array('query' => array('destination' => 'admin/structure/forena/data')));
       }
       else if (!$block->include) {
@@ -41,6 +41,7 @@ function forena_query_display_blocks() {
 
     $data[] = array(
     	$block_name,
+      @$block->cache['access'],
       @$block->cache['keywords'],
       $actions,
     );

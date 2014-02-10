@@ -163,7 +163,7 @@ class FrxRepoMan {
     }
     $file = $data['access'] ?  "--ACCESS=" . $data['access'] . "\n" . $data['file'] : $data['file '];
     Frx::DataFile()->save($data_block .'.sql', $file);
-    Frx::DataFile()->validateAllCache('sql');
+    Frx::DataFile()->validateAllCache();
 
     $rs = db_query('SELECT * from {forena_data_blocks} WHERE repository=:repos AND
       block_name = :block_name',

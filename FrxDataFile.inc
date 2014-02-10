@@ -36,9 +36,10 @@ class FrxDataFile extends FrxFile {
    */
   public function userBlocks($search = '*') {
     $blocks = array();
-    $sql = $this->validateAllCache('sql');
-    $inc = $this->validateAllCache('inc');
-    $xml = $this->validateAllCache('xml');
+    $this->validateAllCache();
+    $sql = $this->getCache('sql');
+    $inc = $this->getCache('inc');
+    $xml = $this->getCache('xml');
     $data = array_merge($xml, $sql, $inc);
     if ($data) foreach ($data as $base_name => $obj) {
 
