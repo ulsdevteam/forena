@@ -4,6 +4,7 @@ class FrxBlockEditor {
   public $block_name;
   public $modified;
   public $provider;
+  private $teng;
   private $new_block = array(
     'type' => 'sql',
     'file' => '',
@@ -16,6 +17,7 @@ class FrxBlockEditor {
     if ($block_name) {
       $this->load($block_name);
     }
+    $this->teng = Frx::SyntaxEngine(FRX_SQL_TOKEN, ':');
   }
 
   /**
@@ -144,6 +146,16 @@ class FrxBlockEditor {
     }
     return $preview;
 
+  }
+
+  /**
+   * Return the tokens for the block.
+   */
+  public function tokens()  {
+    $tokens = $this->teng->tokens($this->block['file']);
+    $c_idx = array_search('current_user', $tokens);
+    if ($c_idx !==FALSE) unset($tokens[$c_idx]);
+    return $tokens;
   }
 
 }

@@ -120,7 +120,8 @@ function forena_query_sql_editor($form, &$form_state, $block_name='') {
     $form_state['storage']['parameters'] = array();
   }
   $block_name = $form_state['storage']['block_name'];
-  $block = Frx::BlockEditor($block_name)->block;
+  $o = Frx::BlockEditor($block_name);
+  $block = $o->block;
 
   $form['access'] = array(
       '#title' => t('Data Security'),
@@ -145,18 +146,21 @@ function forena_query_sql_editor($form, &$form_state, $block_name='') {
   );
   $form['cancel'] = array('#type' => 'submit', '#value' => t('Cancel'), '#submit' => array('forena_query_close'), '#limit_validation_errors' => array());
 
-  if (@$block['tokens']) {
+
+  $tokens = $o->tokens();
+  if ($tokens) {
     $form['parameters'] = array(
         '#title' => 'Parameters',
         '#type' => 'fieldset',
         '#tree' => TRUE
     );
 
-    foreach ($block['tokens'] as $name) {
+    foreach ($tokens as $name) {
       $ctl = array(
           '#type' => 'textfield',
           '#title' => check_plain($name),
       );
+
       $form['parameters'][$name] = $ctl;
     }
   }
