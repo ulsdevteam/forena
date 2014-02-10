@@ -769,9 +769,11 @@ function forena_add_report_form($formid, $form_state, $report_name='') {
 
 function forena_add_report_form_validate($form, &$form_state) {
   $values = $form_state['values'];
-  $regexp = "/^[A-Za-z0-9\/\_\-]*$/";
+  $pattern = "@^[A-Za-z0-9\/\_]$@";
   $save_report_name = $values['save_report_name'];
-
+  if (preg_match($pattern, $save_report_name)) {
+    form_set_error('save_report_name', t('Invalid characters in report name') );
+  }
   //comparing the report names to see if they have changed.
   //If they have, making sure the new name does not already exist.
   $filename = $save_report_name . '.frx';

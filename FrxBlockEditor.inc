@@ -4,6 +4,13 @@ class FrxBlockEditor {
   public $block_name;
   public $modified;
   public $provider;
+  private $new_block = array(
+    'type' => 'sql',
+    'file' => '',
+    'access' => '',
+    'source' => '',
+    'info' => array(),
+  );
 
   public function __construct($block_name = '') {
     if ($block_name) {
@@ -23,6 +30,10 @@ class FrxBlockEditor {
     if (!isset($_SESSION['forena_query_editor'][$block_name])) {
       $block = Frx::RepoMan()->loadBlock($block_name);
       $this->modified = FALSE;
+      if (!$block) {
+        $block = $this->block = $this->new_block;
+        $this->update($this->block);
+      }
     }
     else {
       $block = $_SESSION['forena_query_editor'][$block_name];
@@ -32,6 +43,7 @@ class FrxBlockEditor {
     $this->block = $block;
     return $block;
   }
+
 
   /**
    * Update the block data.
@@ -100,11 +112,13 @@ class FrxBlockEditor {
     $block = $this->block;
     if ($block['type'] == 'sql') {
       $sql = $block['file'];
+
       $data = Frx::RepoMan()->sqlData($this->provider, $sql, $parms);
     }
     else {
       Frx::Data()->push($parms, 'parm');
       Frx::RepoMan()->data($this->block_name);
+      Frx::Data()->pop();
     }
 
     // Generate the template

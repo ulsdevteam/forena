@@ -5,6 +5,7 @@
  */
 require_once 'FrxDataSource.inc';
 
+
 function forena_query_display_blocks() {
 
   $header = array(t('Block'), t('Access'), t('Keywords'), t('Actions'));
@@ -63,7 +64,6 @@ function forena_query_create_block_form($form, &$form_state, $provider='') {
     '#title' => t('Data Source'),
     '#type' => 'select',
     '#options' => Frx::RepoMan()->listRepos(),
-    '#empty_value' => '',
     '#default_value' => $provider,
 
   );
@@ -83,9 +83,15 @@ function forena_query_create_block_form($form, &$form_state, $provider='') {
 
 function forena_query_create_block_form_validate($form, &$form_state) {
   extract ($form_state['values']);
-  $path = $provider . '/' . $block_name;
-  $block = Frx::RepoMan()->loadBlock($path);
-  if ($block) form_set_error('block_name', t('Data Block already exists'));
+  $pattern = "@^[A-Za-z0-9\/\_]$@";
+  if (preg_match($pattern, $block_name)) {
+    form_set_error('block_name', t('Invalid characters in block name') );
+  }
+  else {
+    $path = $provider . '/' . $block_name;
+    $block = Frx::RepoMan()->loadBlock($path);
+    if ($block) form_set_error('block_name', t('Data Block already exists'));
+  }
 }
 
 function forena_query_create_block_form_submit($form, &$form_state) {
@@ -121,8 +127,7 @@ function forena_query_sql_editor($form, &$form_state, $block_name='') {
       '#description' => t('Value depends on the security for the data block,
           but for drupal data, this is a right as defined by the module provided.  '),
       '#type' => 'textfield',
-      '#required' => TRUE,
-      '#disabled' => !user_access('forena data security') || @$block['locked'],
+      '#disabled' => !user_access('forena data security'),
       '#default_value' => $block['access'],
   );
 
@@ -138,9 +143,25 @@ function forena_query_sql_editor($form, &$form_state, $block_name='') {
       '#validate' => array('forena_query_validate_block'),
       '#submit' => array('forena_query_editor_update', 'forena_query_save_block')
   );
+  $form['cancel'] = array('#type' => 'submit', '#value' => t('Cancel'), '#submit' => array('forena_query_close'), '#limit_validation_errors' => array());
+
+  if (@$block['tokens']) {
+    $form['parameters'] = array(
+        '#title' => 'Parameters',
+        '#type' => 'fieldset',
+        '#tree' => TRUE
+    );
+
+    foreach ($block['tokens'] as $name) {
+      $ctl = array(
+          '#type' => 'textfield',
+          '#title' => check_plain($name),
+      );
+      $form['parameters'][$name] = $ctl;
+    }
+  }
 
   $form['submit'] = array('#type' => 'submit', '#value' => t('Test Changes'), '#submit' => array('forena_query_editor_update', 'forena_query_preview'));
-  $form['cancel'] = array('#type' => 'submit', '#value' => 'Close', '#submit' => array('forena_query_close'), '#limit_validation_errors' => array());
   $form['preview'] = array('#markup' => @$form_state['storage']['preview']);
   return $form;
 }
@@ -339,8 +360,8 @@ function forena_query_builder_form($formid, &$form_state) {
 
       if (!$data['new']) $form['delete'] = array('#type' => 'submit', '#value' => t('Delete'), '#submit' => array( 'forena_query_try_delete'));
     }
-    $form['submit'] = array('#type' => 'submit', '#value' => 'Preview', '#submit' => array('forena_query_editor_update', 'forena_query_preview'));
-    $form['cancel'] = array('#type' => 'submit', '#value' => 'Close', '#submit' => array('forena_query_close'), '#limit_validation_errors' => array());
+    $form['submit'] = array('#type' => 'submit', '#value' => t('Preview'), '#submit' => array('forena_query_editor_update', 'forena_query_preview'));
+    $form['cancel'] = array('#type' => 'submit', '#value' => t('Cancel'), '#submit' => array('forena_query_close'), '#limit_validation_errors' => array());
     $form['preview'] = array('#markup' => @$form_state['storage']['preview']);
   }
 
@@ -436,23 +457,56 @@ function forena_query_preview($form, &$form_state) {
   if (isset($form_state['values']['parameters'])) {
     $parms = $form_state['storage']['parameters'] = $form_state['values']['parameters'];
   }
-
   $form_state['storage']['preview'] = Frx::BlockEditor()->preview($parms);
+}
 
+function forena_query_delete_form($form, &$form_state, $block_name) {
+  $block_name = str_replace('.', '/', $block_name);
+  $o =  Frx::BlockEditor($block_name);
+  $block = $o->block;
+  $file = @$block['file'];
+  if ($o->modified) {
+    $o->cancel();
+    drupal_not_found($block_name);
+    exit;
+  }
 
+  $form_state['storage']['block_name'] = $block_name;
+
+  $form['block_title'] = array('#markup' => "<h2>$block_name</h2>");
+
+  $form['file'] = array('#markup' => "<pre>$file</pre>");
+
+  $form['confirm'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Are you sure you want to delete this block?'),
+    '#required' => TRUE,
+  );
+
+  $form['block_name'] = array(
+  	'#type' => 'value',
+    '#value' => $o->block_name,
+  );
+
+  $form['delete'] = array(
+  	'#type' => 'submit',
+    '#value' => t('Delete'),
+    '#submit' => array('forena_query_delete_block', 'forena_query_close'),
+  );
+  $form['cancel'] = array('#type' => 'submit', '#value' => t('Cancel'), '#submit' => array('forena_query_close'), '#limit_validation_errors' => array());
+  return $form;
 }
 
 
 function forena_query_save_block($form, &$form_state) {
   $form_state['rebuild'] = FALSE;
   Frx::BlockEditor()->update($form_state['values'])->save();
-  drupal_set_message( t('Saved Block'));
 }
 
 function forena_query_delete_block($form, &$form_state) {
-  $block_name = $form_state['storage']['block_name'];
+  $block_name = $form_state['values']['block_name'];
   Frx::RepoMan()->deleteBlock($block_name);
-  $form_state['rebuild'] = FALSE;
+  $form_state['redirect'] = 'admin/structure/forena/data';
   drupal_set_message(t('Deleted %s', array('%s' => $block_name)));
 }
 
@@ -461,26 +515,6 @@ function forena_query_close($form, &$form_state) {
   $form_state['rebuild'] = FALSE;
   $form_state['redirect'] = 'admin/structure/forena/data';
 
-}
-
-function forena_query_sql_view($form, &$form_state) {
-  $form_state['rebuild'] = TRUE;
-  $form_state['storage']['step'] = 'sql';
-}
-
-function forena_query_builder_view($form, &$form_state) {
-  $form_state['rebuild'] = TRUE;
-  $form_state['storage']['step'] = 'builder';
-}
-
-function forena_query_delete_cancel($form, &$form_state) {
-  $form_state['rebuild'] = TRUE;
-  $form_state['storage']['delete'] = FALSE;
-}
-
-function forena_query_try_delete($form, &$form_state) {
-  $form_state['storage']['delete'] = TRUE;
-  $form_state['rebuild'] = TRUE;
 }
 
 
@@ -501,64 +535,7 @@ function _forena_query_clean_values(&$values, &$elements) {
 }
 
 
-/**
- * Implements query builder form.
- * @param $formid
- * @param $form_state
- */
 
-/**
- * Recursively build query form.
- * @param $data array of data where clause filters
- * @param $ctl form control to modify
- * @param unknown_type $fields
- */
-function _forena_query_filter_ctl(&$data, &$ctl, $fields) {
-  static $i = 0;
-  $i++;
-  $operators = array(
-    '=' => 'is',
-    '<>' => 'is not',
-    '>' => 'is greater than',
-    '<' => 'is less than',
-    'LIKE' => 'is like',
-    'IS NOT NULL' => 'is not null',
-    'IS NULL' => 'is null');
-  $ctl['op'] = array(
-    '#type' => 'select',
-    '#options' => array('AND' => 'all of', 'OR' => 'any of' ),
-    '#default_value' => $data['op'],
-  );
-  $ctl['filter'] = array('#type' => 'fieldset');
-  if ($i>1) $ctl['filter']['ungroup'] = array(
-    '#type' => 'submit',
-    '#value' => t('Remove'),
-    '#name' => $i,
-    '#submit' => array('forena_query_remove_group'),
-    '#weight' => 1);
-
-  $i++;
-  foreach ($data['filter'] as $k => $crit) {
-    $i++;
-    if (isset($crit['filter'])) {
-      $cnd = array();
-      _forena_query_filter_ctl($data['filter'][$k], $cnd, $fields);
-    }
-    else {
-      $cnd = array('#prefix' => '<div class="forena-filter">', '#suffix' => '</div>');
-      $cnd['field'] = array('#type' => 'select', '#options' => $fields, '#default_value' => $crit['field']);
-      $cnd['op'] = array('#type' => 'select', '#options' => $operators, '#default_value' => $crit['op']);
-      $cnd['value'] = array('#type' => 'textfield', '#default_value' => $crit['value'] );
-      $cnd['group'] = array('#type' => 'submit', '#value' => '( )', '#submit' => array('forena_query_group_filter'), '#name' => $i);
-      $i++;
-      if ($k>0) $cnd['remove_filter'] = array('#type' => 'submit', '#value' => '-', '#submit' => array('forena_query_remove_filter'), '#name' => $i);
-      $i++;
-    }
-    $ctl['filter'][]  = $cnd;
-  }
-  $i++;
-  $ctl['filter']['add_filter'] = array('#type' => 'submit', '#value' => '+', '#submit' => array('forena_query_add_filter'), '#name' => $i);
-}
 
 /**
  * Function to allow all normal button submits to be for the form.
@@ -741,7 +718,3 @@ function forena_query_build_sql($form, &$form_state) {
 
   }
 }
-
-
-
-

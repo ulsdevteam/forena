@@ -161,7 +161,7 @@ class FrxRepoMan {
     if (is_array($builder)) {
       $builder = serialize($builder);
     }
-    $file = $data['access'] ?  "--ACCESS=" . $data['access'] . "\n" . $data['file'] : $data['file '];
+    $file = $data['access'] ?  "--ACCESS=" . $data['access'] . "\n" . $data['file'] : $data['file'];
     Frx::DataFile()->save($data_block .'.sql', $file);
     Frx::DataFile()->validateAllCache();
 

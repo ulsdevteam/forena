@@ -31,14 +31,38 @@ function forena_query_menu() {
   $items['admin/structure/forena/data/%/edit']  = array(
     'type' => MENU_CALLBACK,
     'title' => 'SQL Editor',
-    'access arguments' => array('build forena sql blocks'),
+    'access callback' => 'forena_query_editor_access',
+    'access arguments' => array(4, 'create'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('forena_query_sql_editor', 4),
     'file' => 'forena_query.inc',
   );
 
+  $items['admin/structure/forena/data/%/delete']  = array(
+      'type' => MENU_CALLBACK,
+      'title' => 'SQL Editor',
+      'access callback' => 'forena_query_editor_access',
+      'access arguments' => array(4, 'delete'),
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('forena_query_delete_form', 4),
+      'file' => 'forena_query.inc',
+  );
+
   return $items;
 }
+
+/**
+ * Access function based on data b
+ * @param unknown $block_name
+ * @param string $action
+ * @return boolean
+ */
+function forena_query_editor_access($block_name, $action='create') {
+  $block_name = str_replace('.', '/', $block_name);
+  @list($provider,$block) = explode('/', $block_name);
+  return user_access("access $provider data")  && user_access("$action $provider blocks");
+}
+
 
 /**
  * Implementation of hook_permission
@@ -47,12 +71,14 @@ function forena_query_permission() {
   $perms =  array(
     'build forena sql blocks' => array('title' => 'Build Forena Data Blocks using SQL',
     	'description' => 'Direct access to SQL should not be given without understanding of security ramifications'),
-      'forena data security' => array('title' => 'Manage forena data security',
+      'forena data security' => array('title' => 'Manage data security',
       'description' => 'Allows to create new data queries and alter security on saved queries.') ,
   );
   foreach (Frx::RepoMan()->repositories as $repos => $conf) {
     $name = $conf['title'] ? $conf['title'] : $repos;
     $perms['create '. $repos . ' blocks'] = array('title' =>  'Create ' . $name . ' Data Blocks');
+    $perms['delete '. $repos . ' blocks'] = array('title' =>  'Delete ' . $name . ' Data Blocks');
+
   }
   return $perms;
 }
