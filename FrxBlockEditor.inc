@@ -1,9 +1,15 @@
 <?php
 class FrxBlockEditor {
-  private $block;
+  public $block = array();
   public $block_name;
   public $modified;
   public $provider;
+
+  public function __construct($block_name = '') {
+    if ($block_name) {
+      $this->load($block_name);
+    }
+  }
 
   /**
    * Block loader method.
@@ -20,6 +26,7 @@ class FrxBlockEditor {
     }
     else {
       $block = $_SESSION['forena_query_editor'][$block_name];
+      drupal_set_message(t('All changes are stored temporarily.  Click Save to make your changes permanent.  Click Cancel to discard your changes.'), 'warning', FALSE);
       $this->modified = TRUE;
     }
     $this->block = $block;
@@ -32,13 +39,18 @@ class FrxBlockEditor {
    * @return FrxBlockEditor
    */
   public function update($block = array()) {
-    // Make sure we don't put any invalid values
-    $block = array_intersect_key($block, $this->block);
-    $this->block = array_merge($this->block, $block);
-
-    // UPdate the block;
-    $_SESSION['forena_query_editor'][$this->block_name] = $this->block;
-    $this->modified = TRUE;
+    if ($block) {
+      // Make sure we don't put any invalid values
+      $block = array_intersect_key($block, $this->block);
+      $block = array_merge($this->block, $block);
+      $same = $block['file']== $this->block['file'] && $block['access']==$this->block['access'];
+      // UPdate the block;
+      if (!$same) {
+        $this->block = $block;
+        $_SESSION['forena_query_editor'][$this->block_name] = $this->block;
+        $this->modified = TRUE;
+      }
+    }
     return $this;
   }
 
@@ -48,6 +60,8 @@ class FrxBlockEditor {
   public function save() {
     Frx::RepoMan()->saveBlock($this->block_name, $this->block);
     unset($_SESSION['forena_query_editor'][$this->block_name]);
+    drupal_get_messages('warning');
+    drupal_set_message(t('Saved Changes'));
     return $this;
   }
 
@@ -57,6 +71,7 @@ class FrxBlockEditor {
    */
   public function cancel() {
     unset($_SESSION['forena_query_editor'][$this->block_name]);
+    drupal_get_messages('warning');
     $this->modified = FALSE;
   }
 

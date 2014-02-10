@@ -362,7 +362,7 @@ class Frx {
       $o = new FrxBlockEditor($block_name);
     }
     else {
-      if ($block_name) $o->load($block_name);
+      if ($block_name && $o->block_name != $block_name) $o->load($block_name);
     }
     return $o;
   }

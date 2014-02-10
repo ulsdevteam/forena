@@ -416,4 +416,14 @@ class FrxRepoMan {
     return $list;
   }
 
+  public function listRepos() {
+    $r = array();
+
+    foreach ($this->repositories as $k=>$repos) {
+      $r[$k] = $repos['title'];
+    }
+    asort($r);
+    return $r;
+  }
+
 }

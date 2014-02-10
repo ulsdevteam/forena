@@ -19,6 +19,15 @@ function forena_query_menu() {
     'file' => 'forena_query.inc',
   );
 
+  $items['admin/structure/forena/data/add'] = array(
+  	'type' => MENU_CALLBACK,
+    'title' => 'Create new SQL Query',
+    'access arguments' => array('build forena sql blocks'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('forena_query_create_block_form'),
+    'file' => 'forena_query.inc',
+  );
+
   $items['admin/structure/forena/data/%/edit']  = array(
     'type' => MENU_CALLBACK,
     'title' => 'SQL Editor',

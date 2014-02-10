@@ -37,8 +37,7 @@ function forena_query_display_blocks() {
         $actions .= ' ' . l(t('Delete'), 'admin/structure/forena/data/' . $blck . '/delete', array('query' => array('destination' => 'admin/structure/forena/data')));
       }
     }
-
-
+    // Build the table.
     $data[] = array(
     	$block_name,
       @$block->cache['access'],
@@ -51,13 +50,72 @@ function forena_query_display_blocks() {
   return $content;
 }
 
+/**
+ * Create new sql data form hook
+ * @param unknown $form
+ * @param unknown $form_state
+ * @return unknown
+ */
+function forena_query_create_block_form($form, &$form_state, $provider='') {
+  $providers = Frx::RepoMan()->repositories;
+  $form['provider'] = array(
+    '#required' => TRUE,
+    '#title' => t('Data Source'),
+    '#type' => 'select',
+    '#options' => Frx::RepoMan()->listRepos(),
+    '#empty_value' => '',
+    '#default_value' => $provider,
+
+  );
+
+  $form['block_name'] = array(
+  	'#type' => 'textfield',
+    '#required' => TRUE,
+    '#title' => t('Block to create'),
+  );
+
+  $form['add'] = array(
+  	'#type' => 'submit',
+    '#value' => t('Create'),
+  );
+  return $form;
+}
+
+function forena_query_create_block_form_validate($form, &$form_state) {
+  extract ($form_state['values']);
+  $path = $provider . '/' . $block_name;
+  $block = Frx::RepoMan()->loadBlock($path);
+  if ($block) form_set_error('block_name', t('Data Block already exists'));
+}
+
+function forena_query_create_block_form_submit($form, &$form_state) {
+  extract($form_state['values']);
+  $path = $provider . '/' . $block_name;
+  Frx::BlockEditor($path)->update(
+  	array('type' => 'sql',
+  	      'access' => '',
+  	      'file' => '',
+  	      'source' => '',
+  	)
+  );
+  $form_state['redirect'] = 'admin/structure/forena/data/' . str_replace('/', '.', $path) . "/edit";
+}
+
+/**
+ * Basic SQL Editor form hook implementation
+ * @param unknown $form
+ * @param unknown $form_state
+ * @param string $block_name
+ * @return multitype:NULL
+ */
 function forena_query_sql_editor($form, &$form_state, $block_name='') {
   if (!isset($form_state['storage'])) {
     $form_state['storage']['block_name'] = $block_name;
     $form_state['storage']['parameters'] = array();
   }
   $block_name = $form_state['storage']['block_name'];
-  $block = Frx::BlockEditor()->load($block_name);
+  $block = Frx::BlockEditor($block_name)->block;
+
   $form['access'] = array(
       '#title' => t('Data Security'),
       '#description' => t('Value depends on the security for the data block,
@@ -78,10 +136,10 @@ function forena_query_sql_editor($form, &$form_state, $block_name='') {
       '#type' => 'submit',
       '#value' => 'Save',
       '#validate' => array('forena_query_validate_block'),
-      '#submit' => array('forena_query_form_update', 'forena_query_save_block')
+      '#submit' => array('forena_query_editor_update', 'forena_query_save_block')
   );
 
-  $form['submit'] = array('#type' => 'submit', '#value' => 'Preview', '#submit' => array('forena_query_form_update', 'forena_query_preview'));
+  $form['submit'] = array('#type' => 'submit', '#value' => t('Test Changes'), '#submit' => array('forena_query_editor_update', 'forena_query_preview'));
   $form['cancel'] = array('#type' => 'submit', '#value' => 'Close', '#submit' => array('forena_query_close'), '#limit_validation_errors' => array());
   $form['preview'] = array('#markup' => @$form_state['storage']['preview']);
   return $form;
@@ -276,12 +334,12 @@ function forena_query_builder_form($formid, &$form_state) {
         '#type' => 'submit',
         '#value' => 'Save',
         '#validate' => array('forena_query_validate_new_block'),
-        '#submit' => array('forena_query_form_update', 'forena_query_save_block')
+        '#submit' => array('forena_query_editor_update', 'forena_query_save_block')
       );
 
       if (!$data['new']) $form['delete'] = array('#type' => 'submit', '#value' => t('Delete'), '#submit' => array( 'forena_query_try_delete'));
     }
-    $form['submit'] = array('#type' => 'submit', '#value' => 'Preview', '#submit' => array('forena_query_form_update', 'forena_query_preview'));
+    $form['submit'] = array('#type' => 'submit', '#value' => 'Preview', '#submit' => array('forena_query_editor_update', 'forena_query_preview'));
     $form['cancel'] = array('#type' => 'submit', '#value' => 'Close', '#submit' => array('forena_query_close'), '#limit_validation_errors' => array());
     $form['preview'] = array('#markup' => @$form_state['storage']['preview']);
   }
@@ -507,9 +565,9 @@ function _forena_query_filter_ctl(&$data, &$ctl, $fields) {
  * @param unknown_type $form
  * @param unknown_type $form_state
  */
-function forena_query_form_update($form, &$form_state) {
+function forena_query_editor_update($form, &$form_state) {
   // Instantiate form values
-  Frx::BlockEditor()->load($form_state['storage']['block_name']);
+  $o = Frx::BlockEditor($form_state['storage']['block_name']);
   Frx::BlockEditor()->update($form_state['values']);
   $form_state['rebuild'] = TRUE;
 }
