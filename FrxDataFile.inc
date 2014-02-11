@@ -102,17 +102,19 @@ class FrxDataFile extends FrxFile {
    * @see FrxFile::buildCache()
    */
   public function buildCache($ext, $base_name, &$object) {
-    $block_name = $base_name;
-    $parts = explode('/', $base_name);
-    $provider = array_shift($parts);
-    $block = Frx::RepoMan()->loadBlock($block_name);
-    $object->cache = array(
-    	'provider' => $provider,
-      'name' => $block_name,
-      'access' => @$block['access'],
-      'type' => @$block['type'],
-      'options' => @$block['options'],
-    );
+    if ($base_name) {
+      $block_name = $base_name;
+      $parts = explode('/', $base_name);
+      $provider = array_shift($parts);
+      $block = Frx::RepoMan()->loadBlock($block_name);
+      $object->cache = array(
+      	'provider' => $provider,
+        'name' => $block_name,
+        'access' => @$block['access'],
+        'type' => @$block['type'],
+        'options' => @$block['options'],
+      );
+    }
   }
 
 }

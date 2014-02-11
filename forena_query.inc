@@ -9,7 +9,7 @@ require_once 'FrxDataSource.inc';
 function forena_query_display_blocks() {
 
   $header = array(t('Block'), t('Access'), t('Keywords'), t('Actions'));
-
+  $blocks = Frx::BlockEditor()->revertDBBLocks();
   $blocks = Frx::DataFile()->userBlocks();
   $links[] = array('href' => 'admin/structure/forena/data/add', 'title' => 'Create New SQL Query)' );
   $content['add']['#markup'] = theme('links',

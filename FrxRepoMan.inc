@@ -163,7 +163,6 @@ class FrxRepoMan {
     }
     $file = $data['access'] ?  "--ACCESS=" . $data['access'] . "\n" . $data['file'] : $data['file'];
     Frx::DataFile()->save($data_block .'.sql', $file);
-    Frx::DataFile()->validateAllCache();
 
   }
 

@@ -152,12 +152,42 @@ class FrxBlockEditor {
    * @TODO: Write code to revert blocks saved to database.
    */
   public function revertDBBLocks() {
-    $rs = db_query('SELECT * from {forena_data_blocks}',
-        array(
-            ':repos' => $provider,
-            ':block_name' => $block_name,
-        )
-    );
+    $block = array();
+    $fo = Frx::DataFile();
+
+    if (db_table_exists('forena_data_blocks') && is_writable($fo->dir)) {
+      // Get all blocks from the db.
+      $sql = 'SELECT * FROM {forena_data_blocks} order by repository, block_name';
+      $rs = db_query(
+        $sql
+      );
+      foreach ($rs as $b) {
+        $block = array(
+          'repository' => $b->repository,
+          'block_name' => $b->block_name,
+          'type' => $b->block_type,
+          'file' => $b->src,
+          'builder' => $b->builder,
+          'access' => $b->access,
+          'title' => $b->title,
+          'locked' => $b->locked,
+          'modified' => $b->modified,
+        );
+        $d = Frx::RepoMan()->repository($b->repository);
+        switch ($block['type']) {
+          case 'sql':
+            $block = array_merge($block, $d->parseSQLFile($block['file']));
+            break;
+        }
+        if ($block['builder']) {
+          $block['builder'] = unserialize($block['builder']);
+        }
+        $path = $b->repository . '/' . $b->block_name;
+        Frx::RepoMan()->saveBlock($path, $block);
+      }
+      $fo->validateAllCache();
+    }
+
   }
 
   /**
