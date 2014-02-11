@@ -31,7 +31,10 @@ class FrxCSVDoc extends FrxDocument {
     @$dom->loadHTML($xmlBody);
     $xml = simplexml_import_dom($dom);
     $output = '';
-    $rows = $xml->xpath('//tr');
+    $rows = array();
+    if (!empty($xml)) {
+      $rows = $xml->xpath('//tr');
+    }
     $rowspans = array();
     if ($rows) foreach ($rows as $row) {
       $c = 0;
