@@ -165,40 +165,6 @@ class FrxRepoMan {
     Frx::DataFile()->save($data_block .'.sql', $file);
     Frx::DataFile()->validateAllCache();
 
-    $rs = db_query('SELECT * from {forena_data_blocks} WHERE repository=:repos AND
-      block_name = :block_name',
-    array(
-        ':repos' => $provider,
-        ':block_name' => $block_name,
-    )
-    );
-    if ($block = $rs->fetchObject()) {
-      db_update('forena_data_blocks')
-      ->fields(array(
-          'src' => $data['file'],
-          'builder' => $builder,
-          'access' => $data['access'],
-          'modified' => $modified,
-      ))
-      ->condition('repository', $provider)
-      ->condition('block_name', $block_name)
-      ->execute();
-    }
-    else {
-      db_insert('forena_data_blocks')
-      ->fields( array(
-          'repository' => $provider,
-          'block_name' => $block_name,
-          'block_type' => $data['type'],
-          'src' => $data['file'],
-          'builder' => $builder,
-          'access' => $data['access'],
-          'locked' => 0,
-          'modified' => $modified,
-      ))
-      ->execute();
-    }
-
   }
 
   /**
@@ -210,10 +176,8 @@ class FrxRepoMan {
     $block = array();
     list($provider, $block_name) = explode('/', $data_block, 2);
     Frx::DataFile()->delete($data_block . '.sql');
-    db_delete('forena_data_blocks')
-    ->condition('repository', $provider)
-    ->condition('block_name', $block_name)
-    ->execute();
+    Frx::DataFile()->validateAllCache();
+
   }
 
 

@@ -13,8 +13,9 @@ require_once('forena.common.inc');
 function forena_admin_reports() {
   GLOBAL $language;
   $data = array();
+  $output = '';
   $content = drupal_get_form('forena_sync_form');
-  $output = drupal_render($content);
+  $sync_form = drupal_render($content);
   $links[] = array('href' => 'reports/add', 'title' => 'Create New Report' );
   $output .= theme('links',
     array(
@@ -51,6 +52,7 @@ function forena_admin_reports() {
   $output .= '<div id="forena-reports-list">';
   $output .= theme('forena_data_table', array('header' => $headers, 'rows' => $data));
   $output .= '</div>';
+  $output .= $sync_form;
   return $output;
 }
 

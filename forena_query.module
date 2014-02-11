@@ -40,7 +40,7 @@ function forena_query_menu() {
 
   $items['admin/structure/forena/data/%/delete']  = array(
       'type' => MENU_CALLBACK,
-      'title' => 'SQL Editor',
+      'title' => 'Delete/Revert Custom Data Query',
       'access callback' => 'forena_query_editor_access',
       'access arguments' => array(4, 'delete'),
       'page callback' => 'drupal_get_form',

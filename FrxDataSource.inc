@@ -101,16 +101,17 @@ class FrxDataSource{
   protected function loadBlockFromFile($block_name) {
     $base_file = $this->block_path . '/' . $block_name;
     $parts = @explode('.', $block_name);
+    $full_name = $this->name . '/' . $block_name;
     $php_method = array_pop($parts);
     $php_class = implode('.', $parts);
     $php_file = $this->block_path . '/' . $php_class . '.inc';
-    if (file_exists($base_file . '.sql')) {
-      $contents = file_get_contents($base_file . '.sql');
+    if (Frx::DataFile()->exists($full_name . '.sql')) {
+      $contents = Frx::DataFile()->contents($full_name . '.sql');
       $block = $this->parseSQLFile($contents);
       $block['type'] = 'sql';
     }
-    elseif (file_exists($base_file . '.xml')) {
-      $contents = file_get_contents($base_file . '.xml');
+    elseif (Frx::DataFile()->exists($full_name . '.xml')) {
+      $contents = Frx::DataFile()->contents($full_name . '.xml');
       $block = $this->parseXMLFile($contents);
       $block['type'] = 'xml';
     }
@@ -146,13 +147,11 @@ class FrxDataSource{
    * @param $block_name
    */
   function loadBlock($block_name, $include=FALSE) {
-
-    $block = array();
     if ($include) $this->block_name = $block_name;
-    $block = $this->loadBlockFromDB($block_name);
-    if (!$block) {
+    // $block = $this->loadBlockFromDB($block_name);
+    //if (!$block) {
       $block = $this->loadBlockFromFile($block_name);
-    }
+   //}
     return $block;
   }
 

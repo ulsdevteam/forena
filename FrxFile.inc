@@ -84,7 +84,7 @@ class FrxFile {
           }
           else {
             if (!$entry->override) {
-              $entry->override = TRUE;
+              if ($entry->file != $file && strpos($entry->file, $this->dir) ===0) $entry->override = TRUE;
             }
           }
           unset($this->filesToDelete[$ext][$base_name]);
@@ -294,7 +294,6 @@ class FrxFile {
    */
   public function contents($filename) {
     $path = $this->path($filename);
-
     if (file_exists($path)) {
       return file_get_contents($path);
     }

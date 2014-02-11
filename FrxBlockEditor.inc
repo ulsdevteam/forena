@@ -149,6 +149,18 @@ class FrxBlockEditor {
   }
 
   /**
+   * @TODO: Write code to revert blocks saved to database.
+   */
+  public function revertDBBLocks() {
+    $rs = db_query('SELECT * from {forena_data_blocks}',
+        array(
+            ':repos' => $provider,
+            ':block_name' => $block_name,
+        )
+    );
+  }
+
+  /**
    * Return the tokens for the block.
    */
   public function tokens()  {

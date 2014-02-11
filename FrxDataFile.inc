@@ -56,6 +56,25 @@ class FrxDataFile extends FrxFile {
     return $blocks;
   }
 
+  /**
+   * Return the full path to the filename
+   *   @param $filename
+   */
+  public function path($filename, $use_include = TRUE) {
+    $path = $this->dir . '/' . $filename;
+    if ($use_include && !file_exists($path)) {
+      foreach ($this->includes as $prefix=>$dir) {
+        if (strpos($filename, $prefix)===0) {
+          $inc_file = substr($filename, strlen($prefix) +1);
+          if (file_exists($dir . '/' . $inc_file)) {
+            $path = $dir . '/' . $inc_file;
+          }
+        }
+      }
+    }
+    return $path;
+  }
+
 
   public function scan($prefix = '') {
     // Add the base report files.

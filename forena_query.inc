@@ -31,7 +31,7 @@ function forena_query_display_blocks() {
       }
       $clone = l(t('Clone'), 'admin/structure/forena/data/clone/' . $blck);
       // Determine the nature of the report delete link.
-      if ($block->override && $block->include) {
+      if ($block->override && !$block->include) {
         $actions .= ' ' .l(t('Revert'), 'admin/structure/forena/data/' . $blck . '/delete', array('query' => array('destination' => 'admin/structure/forena/data')));
       }
       else if (!$block->include) {
@@ -129,7 +129,7 @@ function forena_query_sql_editor($form, &$form_state, $block_name='') {
           but for drupal data, this is a right as defined by the module provided.  '),
       '#type' => 'textfield',
       '#disabled' => !user_access('forena data security'),
-      '#default_value' => $block['access'],
+      '#default_value' => @$block['access'],
   );
 
   $form['file'] = array(
