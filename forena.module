@@ -1406,5 +1406,22 @@ function forena_form_reflector($formid, &$form_state, $form) {
   return $form;
 }
 
+function forena_requirements($phase) {
+  $requirements = array();
+  switch ($phase) {
+  	case 'runtime':
+  	  $writable = is_writable(Frx::File()->dir);
+  	  if (!$writeable) {
+    	  $requirements['fornea_writable'] = array(
+    	    'title' => 'Report File Location',
+    	    'value' => Frx::File()->dir,
+    	    'severity' => REQUIREMENT_ERROR,
+    	    'description' => t('The directory must be writable by the web user in order to create custom reports. '),
+    	  ) ;
+  	  }
+  	  break;
+  }
+  return $requirements;
+}
 
 
