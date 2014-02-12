@@ -182,7 +182,6 @@ class FrxBlockEditor {
         $path = $b->repository . '/' . $b->block_name;
         Frx::RepoMan()->saveBlock($path, $block);
         if (Frx::DataFile()->isCustom($path . '.sql')) {
-          dpm($path, 'deleting');
           db_delete('forena_data_blocks')
             ->condition('repository', $b->repository)
             ->condition('block_name' , $b->block_name)
