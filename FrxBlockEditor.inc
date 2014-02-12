@@ -161,6 +161,7 @@ class FrxBlockEditor {
       $rs = db_query(
         $sql
       );
+      $empty_table = TRUE;
       foreach ($rs as $b) {
         $block = array(
           'repository' => $b->repository,
@@ -174,16 +175,24 @@ class FrxBlockEditor {
           'modified' => $b->modified,
         );
         $d = Frx::RepoMan()->repository($b->repository);
-        switch ($block['type']) {
-          case 'sql':
-            $block = array_merge($block, $d->parseSQLFile($block['file']));
-            break;
-        }
+        $block = array_merge($block, $d->parseSQLFile($block['file']));
         if ($block['builder']) {
           $block['builder'] = unserialize($block['builder']);
         }
         $path = $b->repository . '/' . $b->block_name;
         Frx::RepoMan()->saveBlock($path, $block);
+        if (Frx::DataFile()->isCustom($path . '.sql')) {
+          dpm($path, 'deleting');
+          db_delete('forena_data_blocks')
+            ->condition('repository', $b->repository)
+            ->condition('block_name' , $b->block_name)
+            ->execute();
+        }
+        $empty_table = FALSE;
+
+      }
+      if ($empty_table) {
+        db_drop_table('forena_data_blocks');
       }
       $fo->validateAllCache();
     }

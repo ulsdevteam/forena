@@ -21,26 +21,6 @@ function forena_schema() {
     'primary_key' => array('repository'),
   );
 
-  $schema['forena_data_blocks'] = array(
-    'fields' => array(
-       'repository' => array('type' => 'varchar', 'length' => '63', 'not null' => TRUE),
-       'block_name' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE),
-       'block_type' => array('type' => 'varchar', 'length' => 30, 'not null' => TRUE),
-       'access' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE),
-       'title' => array('type' => 'varchar', 'length' => 63, 'not null' => FALSE),
-       'descriptor' => array('type' => 'varchar', 'length' => '255'),
-       'category' => array('type' => 'varchar', 'length' => 255, 'not null' => FALSE),
-       'modified' => array('type' => 'int'),
-       'src' => array('type' => 'text'),
-       'builder' => array('type' => 'text'),
-       'locked' => array('type' => 'int', 'not null' => TRUE),
-  ),
-    'primary key' => array('block_name'),
-    'indexes' => array(
-      'category' => array('category'),
-      'repository' => array('repository'),
-  ),
-  );
   return $schema;
 }
 

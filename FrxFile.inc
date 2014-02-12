@@ -386,6 +386,27 @@ class FrxFile {
     return is_writeable($this->dir . "/$filename") || (!file_exists($this->dir . "/$filename"));
   }
 
+  /**
+   * Returns the cache entry based on a filename.
+   * @param unknown $filename
+   * @return unknown
+   */
+  public function getCacheEntry($filename) {
+    if (!$this->cache) $this->validateAllCache();
+    list($base_name, $ext) = explode('.', $filename , 2);
+    $cache = $this->cache[$ext][$base_name];
+    return $cache;
+  }
+
+  public function isOverriden($filename) {
+    $cache = $this->getCacheEntry($filename);
+    return $cache->override;
+  }
+
+  public function isCustom($filename) {
+    $cache = $this->getCacheEntry($filename);
+    return !$cache->include;
+  }
 
 
 }

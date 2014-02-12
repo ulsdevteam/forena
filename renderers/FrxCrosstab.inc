@@ -128,7 +128,7 @@ class FrxCrossTab extends FrxRenderer {
     		foreach ($node->tbody->tr->children() as $name => $cell) {
     		  $col['data'] = @(string)$cell;
     		  $col['class'] = @(string)$cell['class'];
-    		  $col['style'] = @(string)['style'];
+    		  $col['style'] = @(string)$col['style'];
     		  if ($name == 'th') {
     		    $this->group_columns[] = $col;
     		  }
