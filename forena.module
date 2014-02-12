@@ -303,6 +303,17 @@ function forena_admin_paths_alter(&$paths) {
 }
 
 
+function forena_library_file($library) {
+  $libraries = array(
+      'dataTables' => 'dataTables/media/js/jquery.dataTables.min.js',
+      'mpdf' => 'mpdf/mpdf.php',
+      'SVGGraph' => 'SVGGraph/SVGGraph.php',
+      'prince' => 'prince/prince.php'
+  );
+  $path = isset($libraries[$library]) && file_exists('sites/all/libraries/' . $libraries[$library]) ? 'sites/all/libraries/' . $libraries[$library] : '';
+  return $path;
+}
+
 /**
  * Implementation of hook_block_info
  */
@@ -1410,14 +1421,27 @@ function forena_requirements($phase) {
   $requirements = array();
   switch ($phase) {
   	case 'runtime':
-  	  $writable = is_writable(Frx::File()->dir);
+  	  $writeable = is_writable(Frx::File()->dir);
   	  if (!$writeable) {
     	  $requirements['fornea_writable'] = array(
-    	    'title' => 'Report File Location',
+    	    'title' => 'Forena Report Directory',
     	    'value' => Frx::File()->dir,
     	    'severity' => REQUIREMENT_ERROR,
     	    'description' => t('The directory must be writable by the web user in order to create custom reports. '),
     	  ) ;
+  	  }
+
+  	  $req = array('severity' => REQUIREMENT_INFO, 'requirement');
+  	  $libraries = array('dataTables' ,'mpdf', 'prince', 'SVGGraph' );
+  	  foreach ($libraries as $lib) {
+  	    $requirements['forena_' . $lib] = $req;
+  	    $requirements['forena_' . $lib]['title'] = "Forena $lib support";
+  	    $requirements['forena_' . $lib]['value'] = forena_library_file($lib) ? t('Enabled') : t('Not Enabled:');
+  	    $requirements['forena_' . $lib]['severity'] = forena_library_file($lib) ? REQUIREMENT_OK : REQUIREMENT_INFO;
+  	  }
+  	  if (!module_exists('forena_pdf')) {
+  	    unset($requirements['forena_prince']);
+  	    unset($requirements['forena_mpdf']);
   	  }
   	  break;
   }

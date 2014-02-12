@@ -11,8 +11,7 @@ class FrxSVGGraph extends FrxChart {
   private $graph;
   private $links;
   function __construct() {
-    $directory = FrxReportGenerator::instance()->configuration('library_path');
-    $library = rtrim($directory, '/') . '/SVGGraph/SVGGraph.php';
+    $library = forena_library_file('SVGGraph');
     require_once $library;
   }
 

@@ -84,6 +84,27 @@ function forena_query_permission() {
 }
 
 /**
+ * Implmentation of hook_requirements
+ * @param unknown $phase
+ */
+function forena_query_requirements($phase) {
+  $requirements = array();
+  switch ($phase) {
+  	case 'runtime':
+  	  $writeable = is_writable(Frx::DataFile()->dir);
+  	  if (!$writeable) {
+    	  $requirements['fornea_writable'] = array(
+    	      'title' => 'Forena Data Directory',
+    	      'value' => Frx::File()->dir,
+    	      'severity' => REQUIREMENT_ERROR,
+    	      'description' => t('The directory must be writable by the web user in order to create custom SQL data sources. '),
+    	  ) ;
+  	  }
+  }
+}
+
+
+/**
  * Return permission as to whether the user can save data
  * in the repository.
  * @param $repos string

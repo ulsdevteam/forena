@@ -502,9 +502,9 @@ function theme_forena_data_table($variables) {
       'empty' => '',
   );
   drupal_add_css(drupal_get_path('module', 'forena') . '/forena.css');
-  if (file_exists('sites/all/libraries/dataTables/media/js/jquery.dataTables.min.js')) {
+  if (forena_library_file('dataTables')) {
     drupal_add_js(drupal_get_path('module', 'forena') . '/forena.admin.js');
-    drupal_add_js('sites/all/libraries/dataTables/media/js/jquery.dataTables.min.js');
+    drupal_add_js(forena_library_file('dataTables'));
   }
   // Default in values that theme_table expects.
   $variables['attributes'] = isset($variables['attributes']) ? array_merge($defaults, $variables['attributes']) : $defaults;

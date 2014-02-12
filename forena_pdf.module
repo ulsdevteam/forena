@@ -49,14 +49,14 @@ function forena_pdf_configure($formid, &$form_state)  {
   $pdf_generator = variable_get('forena_pdf_generator', '');
 
   $mpdf_path = t('MDPF Libarary not found. Please install so sites/all/libraries/mpdf/mpdf.php exists.');
-  if (file_exists('sites/all/libraries/mpdf/mpdf.php')) {
+  if (forena_library_file('mpdf')) {
     $mpdf_path = 'sites/all/libraries/mpdf';
   }
   else {
     unset($pdf_options['FrxMPDF']);
   }
   $prince_path = t('Prince XML library not found.  Please install so sites/all/libraries/prince/prince.php exists.');
-  if (file_exists('sites/all/libraries/prince/prince.php')) {
+  if (forena_library_file('prince')) {
     $prince_path = 'sites/all/libraries/prince';
   }
   else {
