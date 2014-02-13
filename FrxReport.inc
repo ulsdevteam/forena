@@ -38,13 +38,13 @@ class FrxReport {
   public $link_mode = '';
 
 
-  public function __construct($xhtml, $data=array()) {
+  public function __construct($xhtml='', $data=array()) {
     $this->access = array();
     $this->parameters = array();
     $this->options = array();
-    $this->parms = $data;
-    if ($data) $this->data_passed = TRUE;
     $this->teng = new FrxSyntaxEngine(FRX_TOKEN_EXP, '{}', $this);
+    $this->setParameters($data);
+
     if ($xhtml) {
       $dom = $this->dom = new DOMDocument('1.0', 'UTF-8');
       // Old assumption is an ojbect is a simplexml one
@@ -58,70 +58,10 @@ class FrxReport {
         return;
       }
       if (!$success) return;
-
-      $dom->formatOutput = TRUE;
-      $rpt_xml = $this->rpt_xml = simplexml_import_dom($dom);
-
-
-      // Load header data
-      $this->body = $rpt_xml->body;
-      if ($rpt_xml->head) {
-        $this->title = (string)$rpt_xml->head->title;
-        $nodes = $rpt_xml->xpath('//frx:docgen/frx:doc');
-        $this->formats = array();
-        if ($nodes) foreach ($nodes as $value) {
-          $arr = $value->attributes();
-          $this->formats[] = (string)$arr['type'];
-        }
-
-
-        foreach ($rpt_xml->head->children(FRX_NS) as $name => $node) {
-          switch ($name) {
-            case 'fields':
-              $this->fields = $node;
-              break;
-            case 'category':
-              $this->category = (string)$node;
-              break;
-            case 'descriptor':
-              $this->descriptor = (string)$node;
-              break;
-            case 'options':
-              foreach ($node->attributes() as $key => $value) {
-                $this->options[$key] = (string)$value;
-              }
-              break;
-            case 'cache':
-              foreach ($node->attributes() as $key => $value) {
-                $this->cache[$key] = (string)$value;
-              }
-            case 'title':
-              $this->frx_title = (string)$node;
-              break;
-            case 'form':
-              $this->form = (string) $value;
-              break;
-            case 'parameters':
-              foreach ($node->children(FRX_NS) as $key => $node) {
-                $parm = array();
-                foreach ($node->attributes() as $akey => $attr) {
-                  $parm[$akey] = (string)$attr;
-                }
-                $id = $parm['id'];
-                $val = isset($parm['value']) ? $parm['value'] : '';
-                $parm['value']= ((string)$node) ? (string)$node : $val;
-                $this->parameters[$id] = $parm;
-              }
-              break;
-            case 'doctypes':
-              $this->doctypes = $value;
-              break;
-          }
-        }
-
-        $this->skin = isset($this->options['skin']) ? $this->options['skin'] : @$this->options['form'];
-      }
+      $this->setReport($dom);
     }
+
+
   }
 
   function __destruct() {
@@ -130,6 +70,79 @@ class FrxReport {
     }
   }
 
+  public function setParameters($parms) {
+    $this->data = $parms;
+    if ($parms) $this->data_passed = TRUE;
+  }
+
+  /**
+   * Sets the report.
+   * @param DOMDocument $dom
+   */
+  public function setReport(DOMDocument $dom) {
+    $this->dom = $dom;
+    $dom->formatOutput = TRUE;
+    $rpt_xml = $this->rpt_xml = simplexml_import_dom($dom);
+
+    // Load header data
+    $this->body = $rpt_xml->body;
+    if ($rpt_xml->head) {
+      $this->title = (string)$rpt_xml->head->title;
+      $nodes = $rpt_xml->xpath('//frx:docgen/frx:doc');
+      $this->formats = array();
+      if ($nodes) foreach ($nodes as $value) {
+        $arr = $value->attributes();
+        $this->formats[] = (string)$arr['type'];
+      }
+
+
+      foreach ($rpt_xml->head->children(FRX_NS) as $name => $node) {
+        switch ($name) {
+        	case 'fields':
+        	  $this->fields = $node;
+        	  break;
+        	case 'category':
+        	  $this->category = (string)$node;
+        	  break;
+        	case 'descriptor':
+        	  $this->descriptor = (string)$node;
+        	  break;
+        	case 'options':
+        	  foreach ($node->attributes() as $key => $value) {
+        	    $this->options[$key] = (string)$value;
+        	  }
+        	  break;
+        	case 'cache':
+        	  foreach ($node->attributes() as $key => $value) {
+        	    $this->cache[$key] = (string)$value;
+        	  }
+        	case 'title':
+        	  $this->frx_title = (string)$node;
+        	  break;
+        	case 'form':
+        	  $this->form = (string) $value;
+        	  break;
+        	case 'parameters':
+        	  foreach ($node->children(FRX_NS) as $key => $node) {
+        	    $parm = array();
+        	    foreach ($node->attributes() as $akey => $attr) {
+        	      $parm[$akey] = (string)$attr;
+        	    }
+        	    $id = $parm['id'];
+        	    $val = isset($parm['value']) ? $parm['value'] : '';
+        	    $parm['value']= ((string)$node) ? (string)$node : $val;
+        	    $this->parameters[$id] = $parm;
+        	  }
+        	  break;
+        	case 'doctypes':
+        	  $this->doctypes = $value;
+        	  break;
+        }
+      }
+
+      $this->skin = isset($this->options['skin']) ? $this->options['skin'] : @$this->options['form'];
+    }
+  }
 
   /**
    * Get the data block

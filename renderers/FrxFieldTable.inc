@@ -3,7 +3,6 @@
  * @file FrxFieldTable
  * Template that displays a table of column/value vertically.
  */
-require_once('FrxTemplate.inc');
 class FrxFieldTable extends FrxTemplate {
   public function generate($xml, $config) {
     $config['foreach'] = '*';

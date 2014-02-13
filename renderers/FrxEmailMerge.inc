@@ -3,8 +3,7 @@
  * @file FrxEmailMerge
  * Email merge template.
  */
-require_once('FrxTemplate.inc');
-class FrxEmailMerge extends FrxTemplate {
+class FrxEmailMerge extends FrxRenderer {
 
   public function configForm($config, $xml='') {
     $form_ctl['from'] = array(

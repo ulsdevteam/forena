@@ -170,13 +170,10 @@ class Frx {
   /**
    * Returns an object of the template class
    * that has a method named templates.
-   * @return FrxTemplate
+   * @return FrxRenderer
    */
   public static function Template($class) {
-    FrxReportGenerator::instance()->supported_templates();
-    if (class_exists($class)) {
-      return new $class();
-    }
+    return Frx::Controls($class);
   }
 
   /**

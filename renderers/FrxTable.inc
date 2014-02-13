@@ -3,8 +3,7 @@
  * @file FrxTable
  * Template that lays out a report in a particular table format.
  */
-require_once('FrxTemplate.inc');
-class FrxTable extends FrxTemplate {
+class FrxTable extends FrxRenderer {
   public function generate($xml, $config) {
     $block = @$config['block'];
     $id = @$config['id'];

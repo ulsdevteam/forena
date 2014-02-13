@@ -2,7 +2,6 @@
 class FrxCrossTab extends FrxRenderer {
 
   private $headers = array();
-  private $columns = array();
   private $dim_columns = array();
   private $group_columns = array();
   private $dim_headers = array();

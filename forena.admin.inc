@@ -1529,10 +1529,16 @@ function forena_add_data_block_form($formid, &$form_state, $report_name) {
   // General report data variables;
   drupal_set_title($form_state['storage']['title']);
   $form = array();
-  $template_array = FrxReportGenerator::instance()->supported_templates();
+  $template_array = array(
+      'FrxTable' => 'Table',
+      'FrxTemplate' => 'Document',
+      'FrxEmailMerge' => 'Email Merge',
+      'FrxFieldTable' => 'Fields',
+      'FrxGraphTemplate' => 'Graph or Chart',
+  );
   @$default_template = (isset($form_state['values']['templates'])) ? $form_state['values']['templates'] : $form_state['storage']['template'];
   $template = ($default_template) ? $default_template : 'FrxTable';
-  $template_obj = FrxReportGenerator::instance()->get_templates($template);
+  $template_obj = Frx::Controls($template);
   $params = @$form_state['storage']['parameters'];
   $param_values = @$form_state['storage']['parms'];
   $form = array();

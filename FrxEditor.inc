@@ -30,13 +30,11 @@ class FrxEditor {
    * @param unknown_type $xml_string
    */
   public function __construct($report_name) {
-
-
     $this->dom = new DOMDocument('1.0', 'UTF-8');
     $dom = $this->dom;
     $this->load($report_name);
-
-
+    $this->frxReport = new FrxReport();
+    $this->frxReport->setReport($this->dom);
   }
 
   /**
@@ -89,6 +87,7 @@ class FrxEditor {
         $r_text = Frx::File()->contents($filename);
       }
     }
+
     if (!$r_text) {
       $m_path = drupal_get_path('module', 'forena');
       $r_text = file_get_contents($m_path . '/default.frx');
@@ -633,6 +632,19 @@ class FrxEditor {
       $dom->parentNode->removeChild($dom);
     }
 
+  }
+
+  public function addTemplate( $class, $conf, $data,  $id='') {
+    if ($id) {
+      $node = $this->dom->getElementById($id);
+    }
+    else {
+      $nodes = $this->dom->getElementsByTagName('body');
+      $node = $nodes->item(0);
+    }
+    $c = Frx::Template($class);
+    $c->initReportNode($node, $this->frxReport);
+    $c->generate($data, $config);
   }
 
 }
