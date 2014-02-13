@@ -135,21 +135,32 @@ class Frx {
     return $supported_doctypes;
   }
 
-  public static function Controls( $class='') {
+  /**
+   * Retreive the classes from other modules.
+   * @param string $class
+   * @return Ambigous <string, unknown>
+   */
+  public static function Controls($class='') {
     static $instances = '';
-    static $classes = '';
     if (!$instances) {
-      $classes = FrxReportGenerator::instance()->app->controls();
-      foreach ($classes as $c) {
-        if ($c['file']) {
-          include_once($c['file'] );
-          if (class_exists($c['class'])) {
-            $instances[$c['class']] =  new $c['class'];
+      foreach (module_list() as $module) {
+        $function = $module . '_forena_controls';
+        if (function_exists($function)) {
+          $returned_controls = $function();
+          if ($returned_controls) foreach ((array)$returned_controls as $c) {
+            $c['module'] = $module;
+            $c['file'] = drupal_get_path('module' , $c['module']) . '/' . trim($c['file'], '/');
+            if ($c['file']) {
+              include_once($c['file'] );
+              if (class_exists($c['class'])) {
+                $instances[$c['class']] =  new $c['class'];
+              }
+            }
           }
         }
       }
     }
-
+    // Return class if we asked for one.
     if ($class) {
       return @$instances[$class];
     }

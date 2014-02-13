@@ -6,7 +6,7 @@
  */
 define('FRX_NS', 'urn:FrxReports');
 require_once('FrxSyntaxEngine.inc');
-require_once('FrxRenderer.inc');
+require_once('renderers/FrxRenderer.inc');
 
 class FrxReport {
   public $blocks_loaded;
@@ -33,9 +33,9 @@ class FrxReport {
   private $sort; // Fields to sort by
   public $parms;
   public $missing_parms = FALSE;
-  private $dom;
-  private $format;
-  private $link_mode = '';
+  public $dom;
+  public $format;
+  public $link_mode = '';
 
 
   public function __construct($xhtml, $data=array()) {
@@ -136,7 +136,7 @@ class FrxReport {
    * @param $block
    * @return unknown_type
    */
-  private function get_data($block, $clause='', $id='', $data_uri='') {
+  public function getData($block, $clause='', $id='', $data_uri='') {
     if ($data_uri) {
       parse_str($data_uri, $data);
       if (is_array($data)) foreach ($data as $key => $value) {
@@ -158,220 +158,6 @@ class FrxReport {
     return $xml;
   }
 
-  /**
-   * Recursive report renderer
-   * Walks the nodes rendering the report.
-   */
-  public function render_section(DOMNode $dom_node) {
-    $skin = Frx::Data()->getContext('skin');
-    $settings = isset($skin['FrxReport']) ? $skin['FrxReport'] : array();
-    $continue = TRUE;
-    $is_data_block = FALSE;
-    $node_type = $dom_node->nodeType;
-    $o = '';
-
-    // Shortcut process a text node
-    if ($node_type == XML_TEXT_NODE
-      || $node_type == XML_ENTITY_REF_NODE
-      || $node_type == XML_ENTITY_NODE)
-    {
-      $text = $dom_node->textContent;
-      $o .= $this->teng->replace($text);
-      return $o;
-    }
-
-    //Handle comment nodes
-    if ($node_type == XML_COMMENT_NODE) {
-      if (!empty($dom_node->length) &&
-      !empty($dom_node->data)) {
-        $text = $dom_node->data;
-        // strip empty comments if configured to
-        if (!empty($settings['stripEmptyComments'])) {
-          $comment_text = trim($this->teng->replace($text));
-          if ($comment_text === '') {
-            return '';
-          }
-        }
-        // comment markup is stripped so need to add it back in
-        $o .= '<!--' . $this->teng->replace($text) . '-->';
-        return $o;
-      } else {
-        return '';
-      }
-    }
-
-    // Continue processing non text nodes
-    $node = simplexml_import_dom($dom_node);
-    // Special catch to make sure we don't process bad nodes
-    if (!is_object($node)) {
-      return '';
-    }
-
-    $frx = $node->attributes(FRX_NS);
-    $include_root = !isset($frx['skip_root']) || !$frx['skip_root'];
-    $elements = $dom_node->childNodes->length;
-
-    // Check for invalid link processing.
-    if (@(string)$frx['invalid_link']) {
-      $old_link_mode = $this->link_mode;
-      $this->link_mode = (string)$frx['invalid_link'];
-    }
-
-    // Test to see if we have any nodes that contain data url
-    if ($node->xpath('*//@frx:*') || $frx) {
-      $attrs = $node->attributes();
-      $id = (string)$attrs['id'];
-      $frx = $node->attributes(FRX_NS);
-      $tag = $node->getName();
-
-      if ((string)$frx['block']) {
-        $is_data_block = TRUE;
-        $xml = $this->get_data((string)$frx['block'], (string)$frx['clause'], $id, (string)$frx['parameters']);
-        if ($xml) {
-          Frx::Data()->push($xml, $id);
-        }
-        else {
-          return '';
-        }
-      }
-
-      //Implment if then logic
-      if ((string)$frx['if']) {
-        $cond = (string)$frx['if'];
-        if (!$this->teng->test($cond)) return '';
-      }
-
-      // Preserve non frx attributes
-      $attr_text='';
-      $tmp_attrs = array();
-      if ($attrs) foreach ($attrs as $key => $value) {
-        $attr_text .=  ' ' . $key . '="' . (string)$value . '"';
-        $tmp_attrs[$key] = (string)$value;
-      }
-
-      // Determine if we have a custom renderer
-      $renderer = (string)$frx['renderer'];
-      // if we have a foreach in this node, we need to iterate the children
-      if ((string)$frx['foreach'] ) {
-        // Save xml
-        $path = $this->teng->replace((string)$frx['foreach'], TRUE);
-        $data = Frx::Data()->currentContext();
-
-        if (is_object($data)) {
-          if (method_exists($data, 'xpath')) {
-            $nodes = $data->xpath($path);
-          }
-          else {
-            $nodes = $data;
-          }
-        }
-        else {
-          $nodes = (array)$data;
-        }
-
-        // Sort values
-        $sort = @(string)$frx['sort'];
-        if ($sort) {
-          $compare_type = @(string)$frx['compare'];
-          $this->sort($data, $sort, $compare_type);
-        }
-
-        // Group values
-        $group = @(string)$frx['group'];
-        if ($group) {
-          $nodes = $this->group($nodes, $group);
-        }
-
-        $i=0;
-
-        //$tmp_attrs = (array)$attrs;
-
-        if ($nodes) foreach ($nodes as $x) {
-          if ($group) {
-            Frx::Data()->setContext('group', $x[0]);
-          }
-          Frx::Data()->push($x, $id);
-          $i++;
-          $odd = $i & 1;
-          $row_class = $odd ? 'odd' : 'even';
-          $r_attr_text = '';
-
-          if (isset($attrs['id'])) {
-            if (strpos($attrs['id'],'{')!== FALSE) {
-              $id = $this->teng->replace($attrs['id']);
-            }
-            else {
-              if (!empty($settings['numericFrxForeachID'])) {
-                $id_attr = $i;
-              } else {
-                $id_attr = $attrs['id'] . '-' . $i;
-              }
-            }
-            $tmp_attrs['id'] =  $id_attr;
-          }
-
-          if (@!$settings['noHelperClasses']) {
-            $tmp_attrs['class'] = trim($attrs['class'] . ' ' . $row_class);
-          }
-
-          foreach ($tmp_attrs as $key => $value) {
-            $r_attr_text .=  ' ' . $key . '="' . (string)$value . '"';
-          }
-
-          if ($include_root) $o .= $this->teng->replace('<' . $tag . $r_attr_text . '>');
-          foreach ($dom_node->childNodes as $child) {
-            $o .= $this->render_section($child);
-          }
-          if ($include_root) $o .= '</' . $tag . '>';
-          Frx::Data()->pop();
-        }
-      }
-      elseif ($continue) {
-        if ($renderer) {
-          // Implement custom renderer.
-          $co = Frx::Controls($renderer);
-          if ($co) {
-            $co->initReportNode($dom_node, $this, $this->format);
-            $o = $co->render();
-
-          }
-        }
-        else {
-          if ($include_root) $o .= $this->teng->replace('<' . $tag . $attr_text . '>');
-
-          // None found, so render children
-          foreach ($dom_node->childNodes as $child) {
-            $o .= $this->render_section($child);
-          }
-          if ($include_root) $o .= '</' . $tag . '>';
-        }
-      }
-      if ($is_data_block && $continue) {
-        Frx::Data()->pop();
-      }
-    }
-    else {
-      // We can render so lets do it.
-      $text = $node->asXML();
-      $node_xml = $this->teng->replace($text);
-      // Strip out empty leaf nodes if report is configured to
-      if (!empty($settings['stripEmptyElements'])) {
-        $node_updated = new SimpleXMLElement($node_xml);
-        if ($this->_check_xml_node_empty($node_updated)) {
-          return '';
-        }
-      }
-
-      $o .= $this->teng->replace($text);
-    }
-
-    // Restore link processing.
-    if (@(string)$frx['invalid_link']) {
-      $this->link_mode = $old_link_mode;
-    }
-
-    return $o;
-  }
 
   /**
    * Render the report
@@ -392,9 +178,9 @@ class FrxReport {
         $o .= $cache_data['content'];
       }
       else {
-        foreach ($body->childNodes as $node) {
-          $o .= $this->render_section($node);
-        }
+        $c = Frx::Controls('FrxRenderer');
+        $c->initReportNode($body, $this);
+        $o .= $c->renderChildren($body);
       }
     }
 
@@ -771,40 +557,7 @@ class FrxReport {
     return drupal_get_form('forena_parameter_form', $parms, $variables);
   }
 
-  /**
-   * Returns true if a node has no children, no attributes (or empty values
-   * in it's attributes), and no text content
-   */
-  private function _check_xml_node_empty($node) {
-    if (!count($node->children())) {
-      $empty_attributes = false;
-      if (count($node->attributes()) > 0) {
-        foreach ($node->attributes() as $attr => $attr_val) {
-          $num_total_attr = 0;
-          $num_empty_attr = 0;
-          $attr_val = (string)$attr_val;
-          if ($attr_val == "") {
-            ++$num_empty_attr;
-            //return '';
-          }
-          ++$num_total_attr;
-        }
-        if ($num_total_attr == $num_empty_attr) {
-          $empty_attributes = true;
-        }
-      } else {
-        $empty_attributes = true;
-      }
-      if ($empty_attributes) {
-        $node_text = dom_import_simplexml($node)->textContent;
-        if ($node_text == "") {
-          // empty xml element
-          return true;
-        }
-      }
-    }
-    return false;
-  }
+
 
 
 
