@@ -29,8 +29,8 @@ class FrxReport {
   private $ids;
   private $data_passed = FALSE;
   public $teng;
-  private $compareType; // Sort compare type
-  private $sort; // Fields to sort by
+  public $compareType; // Sort compare type
+  public $sort; // Fields to sort by
   public $parms;
   public $missing_parms = FALSE;
   public $dom;
@@ -355,7 +355,7 @@ class FrxReport {
   /**
    * Make sure all xml elements have ids
    */
-  private function parse_ids() {
+  public function parse_ids() {
     $i=0;
     if ($this->rpt_xml) {
       $this->rpt_xml->registerXPathNamespace('frx', FRX_NS);
@@ -551,15 +551,9 @@ class FrxReport {
   }
 
   public function parametersForm($variables = array()) {
-
     $parms = $this->parametersArray();
-
     return drupal_get_form('forena_parameter_form', $parms, $variables);
   }
-
-
-
-
 
   public function setSort($sort, $compare_type='') {
     if (!$compare_type) {
