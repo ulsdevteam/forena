@@ -32,6 +32,8 @@ class FrxEditor {
   public function __construct($report_name) {
     $this->dom = new DOMDocument('1.0', 'UTF-8');
     $dom = $this->dom;
+    $dom->formatOutput = TRUE;
+    $dom->preserveWhiteSpace = TRUE;
     $this->load($report_name);
     $this->frxReport = new FrxReport();
     $this->frxReport->setReport($this->dom);
@@ -631,20 +633,73 @@ class FrxEditor {
       $dom=dom_import_simplexml($node);
       $dom->parentNode->removeChild($dom);
     }
-
+    return $this;
   }
 
-  public function addTemplate( $class, $conf, $data,  $id='') {
+
+  /**
+   * Apply a template based on the block id.
+   * @param unknown $id
+   * @param unknown $class
+   * @param unknown $config
+   */
+  public function applyTemplate($id, $template_class, $config=array()) {
+    $path = "//*[@id='$id']";
+    $nodes = $this->simplexml->xpath($path);
+    if ($nodes) ( $node = dom_import_simplexml($nodes[0]));
+    if (!$node) {
+
+      drupal_set_message(t('Could not find %s in report', array('%s' => $id)), 'error');
+      return;
+    }
+
+    $block_name = $node->getAttributeNS($this->xmlns, 'block');
+    $class = $node->getAttribute("class");
+
+    $config['block'] = $block_name;
+    $data= Frx::BlockEditor($block_name)->data();
+    $c = Frx::Template($template_class);
+    if ($c) {
+      $c->initReportNode($node, $this->frxReport);
+      if (strpos($class, $template_class)===FALSE) {
+        $c->resetTemplate();
+      }
+      $c->generate($data, $config);
+    }
+    else {
+      drupal_set_message(t('Could not find template %s', array('%s' => $templateClass)), 'error');
+    }
+  }
+
+  /**
+   * Add a data blcok
+   * @param unknown $block
+   * @param unknown $class
+   * @param unknown $id
+   * @return FrxEditor
+   */
+  public function addBlock($block_name, $template_class='FrxTable', $config=array(),  $id='') {
     if ($id) {
       $node = $this->dom->getElementById($id);
     }
     else {
       $nodes = $this->dom->getElementsByTagName('body');
-      $node = $nodes->item(0);
+      $pnode = $nodes->item(0);
+      $node = $this->dom->createElement('div');
+      $pnode->appendChild($node);
+
     }
-    $c = Frx::Template($class);
-    $c->initReportNode($node, $this->frxReport);
-    $c->generate($data, $config);
+    $config['block'] = $block_name;
+    $data= Frx::BlockEditor($block_name)->data();
+    $c = Frx::Template($template_class);
+    if ($c) {
+      $c->initReportNode($node, $this->frxReport);
+      $c->generate($data, $config);
+    }
+    else {
+      drupal_set_message(t('Could not find template %s', array('%s' => $template_class)), 'error');
+    }
+    return $this;
   }
 
 }

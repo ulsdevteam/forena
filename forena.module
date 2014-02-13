@@ -1075,8 +1075,28 @@ function forena_forena_controls() {
   );
 
   $controls[] = array(
+  	'file' => 'renderers/FrxCrosstab.inc',
+    'class' => 'FrxCrosstab',
+  );
+
+  $controls[] = array(
+      'file' => 'renderers/FrxEmailMerge.inc',
+      'class' => 'FrxEmailMerge',
+  );
+
+  $controls[] = array(
+      'file' => 'renderers/FrxFieldTable.inc',
+      'class' => 'FrxFieldTable',
+  );
+
+  $controls[] = array(
   	'file' => 'renderers/FrxRenderer.inc',
     'class' => 'FrxRenderer',
+  );
+
+  $controls[] = array(
+  	'file' => 'renderers/FrxTable.inc',
+    'class' => 'FrxTable',
   );
 
   $controls[] = array(
@@ -1107,11 +1127,6 @@ function forena_forena_controls() {
   $controls[] = array(
     'file' => 'renderers/FrxTitle.inc',
     'class' => 'FrxTitle',
-  );
-
-  $controls[] = array(
-  	'file' => 'renderers/FrxCrosstab.inc',
-    'class' => 'FrxCrosstab',
   );
 
   $library_dir = FrxReportGenerator::instance()->configuration('library_path');

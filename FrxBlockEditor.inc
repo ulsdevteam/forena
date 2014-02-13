@@ -145,11 +145,25 @@ class FrxBlockEditor {
       }
     }
     return $preview;
+  }
 
+  public function data($parms = array()) {
+
+    if ($parms) {
+      // Merge in current_context
+      $data = array_merge(Frx::Data()->currentContextArray(), $data);
+      $id = str_replace('/', '-', $this->block_name) . '-parm';
+      Frx::Data()->push($data, $id);
+    }
+
+    $xml = Frx::RepoMan()->data($this->block_name, NULL);
+    if ($parms) Frx::Data()->pop();
+
+    return $xml;
   }
 
   /**
-   * @TODO: Write code to revert blocks saved to database.
+   * Writes blocks from the old db structure to the new one.
    */
   public function revertDBBLocks() {
     $block = array();

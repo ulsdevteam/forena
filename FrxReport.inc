@@ -358,12 +358,9 @@ class FrxReport {
    * @return unknown
    */
   public function asXML() {
-    if ($this->rpt_xml) {
-      return $this->rpt_xml->asXML();
-    }
-    else {
-      return '';
-    }
+    $dom =  $this->dom;
+    $dom->formatOutput = TRUE;
+    return $dom->saveXML();
   }
   /**
    * Make sure all xml elements have ids

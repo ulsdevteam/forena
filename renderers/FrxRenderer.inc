@@ -18,8 +18,10 @@ class FrxRenderer {
   public $frxReport;  // The report object being used.
   public $columns;
   public $numeric_columns;
+  public $xmlns = 'urn:FrxReports';
 
-  public function initReportNode(DOMNode $domNode, FrxReport $frxReport) {
+
+  public function initReportNode(DOMElement $domNode, FrxReport $frxReport) {
     $this->dom = $frxReport->dom;
     $this->reportDocDomNode = $domNode;
     $this->dataProvider = Frx::Data();
@@ -316,6 +318,61 @@ class FrxRenderer {
     }
   }
 
+  public function resetTemplate() {
+     $node = $this->reportDocDomNode;
+     $this->removeChildren($node);
+     $tag = $node->tagName;
+     $new_node = $this->dom->createElement($tag);
+     $this->frxAttributes = array();
+     $parent = $node->parentNode;
+     $parent->replaceChild($new_node, $node);
+     $this->reportDocDomNode = $new_node;
+     $this->initReportNode($new_node, $this->frxReport);
+     return $node;
+  }
+
+
+
+  /**
+   * Set FRX attributes.
+   * @param DOMNode $node
+   * @param unknown $attributes
+   * @param unknown $frxattributes
+   */
+  public function setAttributes(DOMElement $node, $attributes, $frx_attributes) {
+    if ($attributes) foreach ($attributes as $key => $value) {
+
+      $node->setAttribute($key, $value);
+
+    }
+
+    // Iterate the value
+    if ($frx_attributes) foreach ($frx_attributes as $key => $value) {
+
+      // If the value is an array create multiple attributes
+      // that are of the form key_1, key_2 .... etc.
+      if (is_array($value)) {
+        $i=0;
+        $done=FALSE;
+        while(!$done) {
+          $v = '';
+          if ($value) $v = array_shift($value);
+          $i++;
+          $k = $key . '_' . trim((string)$i);
+          $node->setAttribute($v,NULL);
+          if (!$v) {
+            $done = TRUE;
+          }
+        }
+      }
+      // A normal value.
+      else {
+        if ($value) $node->setAttributeNS($this->xmlns, $key, $value);
+      }
+    }
+
+  }
+
   /**
    * Standard php array containing merged attributes
    * Enter description here ...
@@ -408,48 +465,21 @@ class FrxRenderer {
     return $form_ctl;
   }
 
-  function addNode($cur_node, $indent=0, $tag='div', $value='', $attributes=array(), $frx_attributes=array()) {
+  function addNode($cur_node, $indent, $tag='div', $value='', $attributes=array(), $frx_attributes=array()) {
     $dom = $this->dom;
     if (!$cur_node) {
       return;
     }
-    if ($indent!==FALSE) {
+
+    if ($indent) {
       $tnode = $dom->createTextNode("\n" . str_repeat(' ', $indent));
       $cur_node->appendChild($tnode);
     }
-    $pnode = $dom->createElement($tag, $value);
-    if ($attributes) foreach ($attributes as $key => $value) {
-      if ($value) {
-        $attr = $dom->createAttribute($key);
-        $attr->value = $value;
-        $pnode->appendChild($attr);
-      }
-    }
-    if ($frx_attributes) foreach ($frx_attributes as $key => $value) {
-      if ($value) {
-        // If the value is an array create multiple attributes
-        // that are of the form key_1, key_2 .... etc.
-
-        if (is_array($value)) {
-          $i=0;
-          foreach ($value as $v) {
-            $i++;
-            $k = $key . '_' . trim((string)$i);
-            $attr = $dom->createAttributeNS($this->xmlns, $k);
-            $attr->value = htmlentities($v);
-            $pnode->appendChild($attr);
-          }
-        }
-        // A normal value.
-        else {
-          $attr = $dom->createAttributeNS($this->xmlns, $key);
-          $attr->value = htmlentities($value);
-          $pnode->appendChild($attr);
-        }
-      }
-    }
-    $cur_node->appendChild($pnode);
-    return $pnode;
+    $node = $this->dom->createElement($tag, $value);
+    $cur_node->appendChild($node);
+    $this->setAttributes($node, $attributes, $frx_attributes);
+    $cur_node->appendChild($this->dom->createTextNode(""));
+    return $node;
   }
 
   public function columns($xml, $path='/*/*') {
@@ -509,7 +539,7 @@ class FrxRenderer {
    * @param unknown_type $text
    */
   public function blockDiv(&$config, $text='') {
-    $body = $this->reportDocDomNode;
+    $node = $this->reportDocDomNode;
     $heading = $this->extract('heading', $config);
     $descr = $this->extract('description', $config);
     $include = $this->extract('include', $config);
@@ -522,15 +552,14 @@ class FrxRenderer {
     $class = $this->extract('class', $config);
     $frx_attributes = array(
         'block' => $block,
-        'foreach' => $foreach,
     );
-
+    if ($foreach) $frx_attributes['foreach'] = $foreach;
     $attributes = array(
         'id' => $id,
         'class' => $class,
     );
 
-    $node = $this->addNode($body, 2, 'div', $text, $attributes, $frx_attributes);
+    $this->setAttributes($node, $attributes, $frx_attributes);
     if ($heading) {
       $this->addNode($node, 4, 'h2', $heading);
     }
@@ -539,7 +568,7 @@ class FrxRenderer {
     }
     if ($include) {
       $src = 'reports/' . str_replace('/', '.', $include);
-      $this->addNode($node, 4, 'div', NULL, NULL, array('renderer' => 'FrxInclude', 'src' => $src));
+      $this->addNode($node, 4, 'div', NULL, NULL, array('renderer' => get_class($this), 'src' => $src));
     }
 
     return $node;
@@ -591,19 +620,35 @@ class FrxRenderer {
     return $id;
   }
 
-  public function verifyElement(DOMNode $node, $tag, $indent) {
-    $e = '';
-    foreach ($domNode->childNodes as $child) {
-      if (is_object($child) && $child->getName()==$tag) {
-        $e = $child;
-        break;
-      }
+  /**
+   * Sets the first child element to a node and returns it.
+   * IF the node
+   * @param DOMNode $node
+   * @param unknown $tag
+   * @param unknown $indent
+   * @return Ambigous <string, void, DOMElement>
+   */
+  public function setFirstNode(DOMElement $parent_node,  $indent=0, $tag='div',  $value='', $attributes=array(), $frx_attributes=array()) {
+    $dom = $this->dom;
+    if (!$parent_node) {
+      return;
     }
+    $nodes = $parent_node->getElementsByTagName($tag);
+    if ($nodes->length) {
+      $node = $nodes->item(0);
+      $this->setAttributes($node, $attributes, $frx_attributes);
+    }
+    else {
+      $node = $this->addNode($parent_node, $indent, $tag, $value, $attributes, $frx_attributes);
+    }
+    return $node;
+  }
 
-    if (!$e) {
-      $e = $this->addNode($node, $indent, $tag );
+  public function removeChildren(DOMNode $node) {
+    while (isset($node->firstChild)) {
+      $this->removeChildren($node->firstChild);
+      $node->removeChild($node->firstChild);
     }
-    return $e;
   }
 
 
