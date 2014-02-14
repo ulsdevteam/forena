@@ -264,6 +264,13 @@ function forena_menu() {
    	'type' => MENU_CALLBACK,
   );
 
+  $items['forena/preview'] = array(
+  	'page callback' => 'forena_data_preview',
+     'access arguments' => array('create any report'),
+     'file' => 'forena.admin.inc',
+     'type' => MENU_CALLBACK,
+  );
+
   $items['forena/fields/format/autocomplete'] = array(
      'page callback' => 'forena_fields_format_autocomplete',
      'access callback' => TRUE,

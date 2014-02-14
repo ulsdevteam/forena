@@ -385,6 +385,7 @@ function _forena_render_form_template($fields, $template) {
   return $build;
 }
 
+
 function _forena_set_inline_theme(&$elements) {
   foreach ($elements as $key => $value) if (strpos($key, '#')===FALSE) {
     $type = @$value['#type'];
@@ -512,6 +513,7 @@ function theme_forena_data_table($variables) {
   $output = theme('table', $variables);
   return $output;
 }
+
 
 
 

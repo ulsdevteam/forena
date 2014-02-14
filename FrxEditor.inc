@@ -15,6 +15,7 @@ class FrxEditor {
   public $report_name;
   public $frx_attributes;
   public $cache;
+  public $frxReport;
   public $doc_prefix = '<?xml version="1.0" encoding="UTF-8"?>
     <!DOCTYPE root [
     <!ENTITY nbsp "&#160;">
@@ -702,4 +703,13 @@ class FrxEditor {
     return $this;
   }
 
+  public function preview() {
+    $r = $this->frxReport;
+    //check for default parameters
+    $r->processParameters();
+    Frx::Skin()->load($r->skin);
+    Frx::Skin()->loadSkinFiles('');
+    return $r->render('web');
+
+  }
 }

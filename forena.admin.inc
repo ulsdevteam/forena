@@ -1712,6 +1712,20 @@ function forena_add_cancel($form, &$form_state) {
   $form_state['redirect'] = $form_state['values']['return'];
 }
 
+
+function forena_data_preview() {
+  $args = func_get_args();
+  $block_name = implode('/', $args);
+  $block_name = str_replace('.', '/', $block_name);
+  $r = Frx::Editor('__block_preview__');
+  $r->cancel();
+  $r->addBlock($block_name);
+  $output = 'hello';
+  $output .= $r->preview();
+  return $output;
+
+}
+
 /**
  * submit handler for forena_data_block_form.
  * This adds the datablock to an existing report.
