@@ -1,4 +1,5 @@
 <?php
+require_once 'FrxReport.inc';
 /**
  * @file FrxEditor.inc
  * Wrapper XML class for working with DOM object.
@@ -16,6 +17,7 @@ class FrxEditor {
   public $frx_attributes;
   public $cache;
   public $frxReport;
+  public $desc;
   public $doc_prefix = '<?xml version="1.0" encoding="UTF-8"?>
     <!DOCTYPE root [
     <!ENTITY nbsp "&#160;">
@@ -76,9 +78,10 @@ class FrxEditor {
    * @return string
    */
   public function load($report_name) {
+    $this->desc = Frx::Menu()->parseURL($report_name);
     $r_text='';
     $dom = $this->dom;
-    $this->report_name = $report_name;
+    $this->report_name = $report_name = $this->desc['name'];
     // Load the latest copy of the report editor
     if ($report_name) {
       if (isset($_SESSION['forena_report_editor'][$report_name])) {
@@ -637,6 +640,44 @@ class FrxEditor {
     return $this;
   }
 
+  /**
+   * Scrape Data block configuration
+   * This tries to introspect the frx:block configuration based
+   * on the child nodes in the report by calling the
+   * getConfig method on the block.
+   */
+  public function scrapeBlockConfig($id, &$config) {
+    $path = "//*[@id='$id']";
+    $nodes = $this->simplexml->xpath($path);
+    if ($nodes) ( $node = dom_import_simplexml($nodes[0]));
+    if (!$node) {
+      drupal_set_message(t('Could not find %s in report', array('%s' => $id)), 'error');
+      return '';
+    }
+
+    $block_name = $node->getAttributeNS($this->xmlns, 'block');
+    $class = $node->getAttribute("class");
+    $templates = $this->templateOptions();
+    foreach ($templates as $tclass => $desc) {
+      if (strpos($class, $tclass)!==FALSE) {
+        $template_class = $tclass;
+        break;
+      }
+    }
+    if ($template_class) {
+      $c = Frx::Template($template_class);
+      if ($c && method_exists($c, 'getConfig')) {
+        $c->initReportNode($node, $$this->frxReport);
+        $config = array_merge($config,$c->getConfig());
+      }
+      return $template_class;
+    }
+    else {
+      return 'FrxTable';
+    }
+  }
+
+
 
   /**
    * Apply a template based on the block id.
@@ -680,6 +721,7 @@ class FrxEditor {
    * @return FrxEditor
    */
   public function addBlock($block_name, $template_class='FrxTable', $config=array(),  $id='') {
+    $block_name = str_replace('.', '/', $block_name);
     if ($id) {
       $node = $this->dom->getElementById($id);
     }
@@ -705,11 +747,55 @@ class FrxEditor {
 
   public function preview() {
     $r = $this->frxReport;
+    if(strpos($this->report_name, '__') !== 0) $r->preview_mode = TRUE;
     //check for default parameters
     $r->processParameters();
     Frx::Skin()->load($r->skin);
     Frx::Skin()->loadSkinFiles('');
     return $r->render('web');
 
+  }
+
+  public function editLinks($frx, $id='') {
+    $o = '';
+    if ($frx['block']) {
+      $block_name = (string)$frx['block'];
+      $block_link = str_replace('/', '.', $block_name);
+      $report_name = str_replace('/', '.' , $this->report_name);
+      //$b=Frx::BlockEditor($block_name)->block;
+
+
+      $o = '<div class="forena-edit-links">' . l($block_name, "reports/$report_name/edit/data/$block_link/$id" ) . "</div>";
+    }
+    return $o;
+
+  }
+
+  /**
+   * Generate the configuration form for the template for a class.
+   * @param unknown $class
+   * @param unknown $config
+   */
+  public function templateConfigForm($class, $config) {
+    $form  = array();
+    $c = Frx::Template($class);
+    if ($c && method_exists($c, 'configForm')) {
+      $form = $c->configForm($config);
+    }
+    return $form;
+  }
+
+  /**
+   * Generate the list of possible templates.
+   */
+  public function templateOptions() {
+     $controls = Frx::Controls();
+     $templates = array();
+     foreach ($controls as $control) {
+       if (method_exists($control, 'generate') && isset($control->templateName)) {
+         $templates[get_class($control)] = $control->templateName;
+       }
+     }
+     return $templates;
   }
 }

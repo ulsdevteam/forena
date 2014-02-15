@@ -10,6 +10,7 @@ require_once ('FrxChart.inc');
 class FrxSVGGraph extends FrxChart {
   private $graph;
   private $links;
+  public $templateName = 'SVG Graph or Chart';
   function __construct() {
     $library = forena_library_file('SVGGraph');
     require_once $library;

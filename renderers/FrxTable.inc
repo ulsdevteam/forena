@@ -4,7 +4,9 @@
  * Template that lays out a report in a particular table format.
  */
 class FrxTable extends FrxRenderer {
+  public $templateName = 'Simple Table';
   public function generate($xml, $config) {
+
     $block = @$config['block'];
     $id = @$config['id'];
     if ($block) {
@@ -26,6 +28,7 @@ class FrxTable extends FrxRenderer {
     $tbody = $this->setFirstNode($table, 6, 'tbody');
     $tdrow = $this->setFirstNode($tbody, 8, 'tr', NULL, array('id' => $id),$attrs);
     $this->removeChildren($tdrow);
+    $this->removeChildren($throw);
     if ($columns) foreach ($columns as $col => $label) {
       $this->addNode($throw, 10, 'th', $label);
       $this->addNode($tdrow, 10, 'td', '{' . $col . '}');

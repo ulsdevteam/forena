@@ -41,6 +41,7 @@ class FrxRenderer {
     return $this->teng->replace($text, $raw_mode);
   }
 
+
   /**
    * Returns true if a node has no children, no attributes (or empty values
    * in it's attributes), and no text content
@@ -95,7 +96,6 @@ class FrxRenderer {
       return $o;
     }
 
-
     //Handle comment nodes
     if ($node_type == XML_COMMENT_NODE) {
       if (!empty($dom_node->length) &&
@@ -115,6 +115,7 @@ class FrxRenderer {
         return '';
       }
     }
+
 
     // Continue processing non text nodes
     $node = simplexml_import_dom($dom_node);
@@ -140,6 +141,9 @@ class FrxRenderer {
       $frx = $node->attributes(FRX_NS);
       $tag = $node->getName();
 
+      if ($this->frxReport->preview_mode) $o .= Frx::Editor()->editLinks($frx, $id);
+
+
       if ((string)$frx['block']) {
         $is_data_block = TRUE;
         $xml = $this->frxReport->getData((string)$frx['block'], (string)$frx['clause'], $id, (string)$frx['parameters']);
@@ -147,7 +151,7 @@ class FrxRenderer {
           Frx::Data()->push($xml, $id);
         }
         else {
-          return '';
+          return $o;
         }
       }
 
@@ -454,15 +458,19 @@ class FrxRenderer {
         '#title' => t('Description'),
         '#rows' => 2,
         '#default_value' => @$config['description'],
+        '#ajax' => $this->configAjax('blur')
     );
 
-    $form_ctl['include'] = array(
-        '#type' => 'textfield',
-        '#title' => 'Include Report (graph/image)',
-        '#autocomplete_path' => 'forena/reports/autocomplete',
-        '#default_value' => @$config['include']
-    );
     return $form_ctl;
+  }
+
+  public function configAjax($event) {
+    $ajax = array(
+        'callback' => 'forena_template_callback',
+        'wrapper' => 'forena-template-wrapper',
+      );
+    if ($event) $ajax['event'] = $event;
+    return $ajax;
   }
 
   function addNode($cur_node, $indent, $tag='div', $value='', $attributes=array(), $frx_attributes=array()) {

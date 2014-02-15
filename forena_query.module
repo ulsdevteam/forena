@@ -11,14 +11,6 @@
 function forena_query_menu() {
   $items = array();
 
-  $items['admin/structure/forena/data'] = array(
-  	'type' => MENU_LOCAL_TASK,
-    'title' => 'Data',
-    'access arguments' => array('build forena sql blocks'),
-    'page callback' => 'forena_query_display_blocks',
-    'file' => 'forena_query.inc',
-  );
-
   $items['admin/structure/forena/data/add'] = array(
   	'type' => MENU_CALLBACK,
     'title' => 'Create new SQL Query',

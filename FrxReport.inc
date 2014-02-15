@@ -36,6 +36,7 @@ class FrxReport {
   public $dom;
   public $format;
   public $link_mode = '';
+  public $preview_mode = FALSE;    // This will make the report renderer put in editing controls when TRUE
 
 
   public function __construct($xhtml='', $data=array()) {

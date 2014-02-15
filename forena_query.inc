@@ -5,52 +5,6 @@
  */
 require_once 'FrxDataSource.inc';
 
-
-function forena_query_display_blocks() {
-
-  $header = array(t('Block'), t('Access'), t('Keywords'), t('Actions'));
-  $blocks = Frx::BlockEditor()->revertDBBLocks();
-  $blocks = Frx::DataFile()->userBlocks();
-  $links[] = array('href' => 'admin/structure/forena/data/add', 'title' => 'Create New SQL Query)' );
-  $content['add']['#markup'] = theme('links',
-      array(
-          'links' => $links,
-          'attributes' => array('class' => 'action-links'),
-      )
-  );
-  $data=array();
-  foreach ($blocks as $block_name => $block) {
-    $blck = str_replace('/', '.', $block_name);
-    $actions = '';
-    if ($block->cache['type'] == 'sql') {
-      if ($block->include) {
-        $actions = l(t('Override'), 'admin/structure/forena/data/' . $blck . '/edit');
-      }
-      else {
-        $actions = l(t('Edit'), 'admin/structure/forena/data/' . $blck . '/edit');
-      }
-      $clone = l(t('Clone'), 'admin/structure/forena/data/clone/' . $blck);
-      // Determine the nature of the report delete link.
-      if ($block->override && !$block->include) {
-        $actions .= ' ' .l(t('Revert'), 'admin/structure/forena/data/' . $blck . '/delete', array('query' => array('destination' => 'admin/structure/forena/data')));
-      }
-      else if (!$block->include) {
-        $actions .= ' ' . l(t('Delete'), 'admin/structure/forena/data/' . $blck . '/delete', array('query' => array('destination' => 'admin/structure/forena/data')));
-      }
-    }
-    // Build the table.
-    $data[] = array(
-    	$block_name,
-      @$block->cache['access'],
-      @$block->cache['keywords'],
-      $actions,
-    );
-  }
-  // Theme the table
-  $content['data_blocks'] = array('#markup' => theme('forena_data_table', array('header' => $header, 'rows' => $data)));
-  return $content;
-}
-
 /**
  * Create new sql data form hook
  * @param unknown $form

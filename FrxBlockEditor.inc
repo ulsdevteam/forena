@@ -222,4 +222,19 @@ class FrxBlockEditor {
     return $tokens;
   }
 
+  /**
+   * Get persisted parateters from a block from a session.
+   */
+  public function getParms() {
+    return $_SESSION['forena_data_block_parms'][$this->block_name];
+  }
+
+  /**
+   * Persist paramaters for a block into a session
+   */
+  public function saveParms() {
+    $parms = Frx::Data()->getContext('parm');
+    $_SESSION['forena_data_block_parms'][$this->block_name] = $parms;
+  }
+
 }

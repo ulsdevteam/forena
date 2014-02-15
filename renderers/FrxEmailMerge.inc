@@ -4,6 +4,7 @@
  * Email merge template.
  */
 class FrxEmailMerge extends FrxRenderer {
+  public $templateName = 'Mail Merge';
 
   public function configForm($config, $xml='') {
     $form_ctl['from'] = array(
