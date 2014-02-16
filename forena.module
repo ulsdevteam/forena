@@ -837,7 +837,7 @@ function forena_include_data_tables() {
  *
  * @return unknown
  */
-function forena_report($name_in, $parms = array(), $print = TRUE) {
+function forena_report($name_in, $parms = NULL, $print = TRUE) {
   require_once('forena.common.inc');
   $desc = Frx::Menu()->parseURL($name_in);
   $time = @new DateTime($value);
@@ -852,18 +852,18 @@ function forena_report($name_in, $parms = array(), $print = TRUE) {
   $report_name = $desc['name'];
   // Load dataTable plugin if possible.
   //forena_include_data_tables();
-  $output = FrxReportGenerator::instance()->report($name_in, $parms, $print);
+  $content = Frx::Editor($name_in, FALSE)->report($parms, $print, FALSE);
+
   $m_path = drupal_get_path('module', 'forena');
-  if ($output) {
+  if ($content) {
     // This has been deprecated, but we'll eave it in for now.
     if ($print) drupal_add_js($m_path . '/forena.js');
     $forena_js = array();
     $forena_js['form'] = preg_replace('/[^\w\-]+/u', '_', Frx::Skin()->name);
     $forena_js['report'] = preg_replace('/[^\w\-]+/u', '_', $name_in);
     if ($print) drupal_add_js(array('forena' => $forena_js), 'setting');
-    if (!$print && is_array($output)) $output = drupal_render($output);
-    return $output;
   }
+  return $content;
 
 
 }
@@ -1158,9 +1158,7 @@ function forena_forena_controls() {
     'class' => 'FrxTitle',
   );
 
-  $library_dir = FrxReportGenerator::instance()->configuration('library_path');
-  $library = rtrim($library_dir,'/') . '/SVGGraph/SVGGraph.php';
-  if (file_exists($library)) {
+  if (forena_library_file('SVGGraph')) {
     $controls[] = array(
       'file' => 'renderers/FrxSVGGraph.inc',
       'class' => 'FrxSVGGraph'

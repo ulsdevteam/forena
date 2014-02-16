@@ -347,14 +347,14 @@ class Frx {
    * @param  $report_name
    * @return FrxEditor <string, FrxEditor>
    */
-  static public function Editor($report_name = '') {
+  static public function Editor($report_name = '', $edit=TRUE) {
     static $o='';
     require_once('FrxEditor.inc');
     if (!$o) {
-      $o = new FrxEditor($report_name);
+      $o = new FrxEditor($report_name, $edit);
     }
     else {
-      if ($report_name) $o->load($report_name) ;
+      if ($report_name) $o->load($report_name, $edit) ;
     }
     return $o;
   }
@@ -364,17 +364,18 @@ class Frx {
    * @param $block_name
    * @return FrxBlockEditor
    */
-  static public function BlockEditor($block_name = '') {
+  static public function BlockEditor($block_name = '', $edit=TRUE) {
     static $o='';
     require_once('FrxBlockEditor.inc');
     if (!$o) {
-      $o = new FrxBlockEditor($block_name);
+      $o = new FrxBlockEditor($block_name, $edit);
     }
     else {
-      if ($block_name && $o->block_name != $block_name) $o->load($block_name);
+      if ($block_name) $o->load($block_name, $edit);
     }
     return $o;
   }
+
 
 
 }

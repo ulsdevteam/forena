@@ -242,7 +242,7 @@ class FrxDataSource{
   }
 
   public function debug($msg='', $log='') {
-    FrxReportGenerator::instance()->app->debug($msg, $log);
+    Frx::debug($msg, $log);
   }
 
   public function error($msg='', $log='') {

@@ -29,7 +29,7 @@ class FrxMSSQL extends FrxDataSource {
     if ($uri) {
       // Test for mssql suport
       if (!is_callable('mssql_connect')) {
-        FrxReportGenerator::instance()->error('MSSQL support not installed.', 'MSSQL mssql support not installed.');
+        Frx::error('MSSQL support not installed.', 'MSSQL mssql support not installed.');
         return;
       }
       try {
@@ -43,12 +43,12 @@ class FrxMSSQL extends FrxDataSource {
           mssql_query("SET QUOTED_IDENTIFIER ON");
         }
       } catch (Exception $e) {
-        FrxReportGenerator::instance()->error('Unable to connect to database ' . $conf['title'], $e->getMessage());
+        Frx::error('Unable to connect to database ' . $conf['title'], $e->getMessage());
       }
 
     }
     else {
-      FrxReportGenerator::instance()->error('No database connection string specified', 'No database connection: ' . print_r($conf, 1));
+      Frx::error('No database connection string specified', 'No database connection: ' . print_r($conf, 1));
     }
 
     // Set up the stuff required to translate.
@@ -83,7 +83,7 @@ class FrxMSSQL extends FrxDataSource {
       }
       if ($this->debug) {
         if ($xml) $d = htmlspecialchars($xml->asXML());
-        FrxReportGenerator::instance()->debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "\n</pre>");
+        FRx::debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "\n</pre>");
       }
       return $xml;
     }
@@ -110,7 +110,7 @@ class FrxMSSQL extends FrxDataSource {
       $xml = new SimpleXMLElement($xml_text);
       if ($xml->getName() == 'error') {
         $msg = (string)$xml . ' in ' . $block . '.sql. ';
-        FrxReportGenerator::instance()->error($msg . 'See logs for more info', $msg . ' in <pre> ' . $sql . '</pre>');
+        Frx::error($msg . 'See logs for more info', $msg . ' in <pre> ' . $sql . '</pre>');
       }
     }
     if ($rs) mssql_free_result($rs);

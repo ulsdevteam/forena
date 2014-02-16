@@ -9,6 +9,7 @@ require_once('FrxSyntaxEngine.inc');
 require_once('renderers/FrxRenderer.inc');
 
 class FrxReport {
+  public $block_edit_mode = false;
   public $blocks_loaded;
   public $rpt_xml;
   public $fields;
@@ -151,19 +152,16 @@ class FrxReport {
    * @return unknown_type
    */
   public function getData($block, $clause='', $id='', $data_uri='') {
+    $data = array();
     if ($data_uri) {
       parse_str($data_uri, $data);
       if (is_array($data)) foreach ($data as $key => $value) {
         $data[$key] = $this->teng->replace($value, TRUE);
       }
-
-      // Merge in current_context
-      $data = array_merge(Frx::Data()->currentContextArray(), $data);
-      $id .= '-parm';
-      Frx::Data()->push($data, $id);
     }
 
-    $xml = Frx::RepoMan()->data($block, NULL);
+    $xml = Frx::BlockEditor($block, $this->block_edit_mode)->data($data);
+    //$xml = Frx::RepoMan()->data($block, NULL);
     if ($data_uri) Frx::Data()->pop();
 
     if ($xml) {
@@ -172,6 +170,17 @@ class FrxReport {
     return $xml;
   }
 
+  /**
+   * Collapse the parameters if the data is loaded.
+   */
+  public function collapseParameters() {
+    if (is_array($this->parameters_form) && $this->parameters_form) {
+      $form = $this->parameters_form;
+      if (isset($form['params']) && @$forms['params']['#collapsible'])  {
+        $this->parameters_form['params']['#collapsed'] = !$this->blocks_loaded;
+      }
+    }
+  }
 
   /**
    * Render the report
@@ -182,37 +191,27 @@ class FrxReport {
     // Only push the parameter conte
     Frx::Data()->push($this->parms, 'parm');
 
+    // Find the Body of the report.
     $this->format = $format;
     $dom = $this->dom;
     $body = $dom->getElementsByTagName('body')->item(0);
 
+    // Render the rport.
     $o='';
-    if (!$this->missing_parms || $this->rpt_xml->xpath('//*[@frx:renderer="FrxParameterForm"]'))  {
-      if ($cache_data && $cache_data['content']) {
-        $o .= $cache_data['content'];
-      }
-      else {
-        $c = Frx::Controls('FrxRenderer');
-        $c->initReportNode($body, $this);
-        $o .= $c->renderChildren($body);
-      }
-    }
-
+    $this->parametersForm(array('collapsible' => TRUE));
+    $c = Frx::Controls('FrxRenderer');
+    $c->initReportNode($body, $this);
+    if (!$this->missing_parms) $o .= $c->renderChildren($body);
+    $this->collapseParameters();
     $this->html = $o;
+
     // Default in dynamic title from head.
     if ($this->frx_title) {
       $title = check_plain($this->teng->replace($this->frx_title));
       if ($title) $title = $this->title = $title;
     }
 
-    if ($render_form && !$this->rpt_xml->xpath('//*[@frx:renderer="FrxParameterForm"]') && $format=='web') {
-      $variables = array('collapse' => $this->blocks_loaded);
-      $this->parameters_form = $form = $this->parametersForm($variables);
-    }
     Frx::Data()->pop();
-    if ($this->cache) {
-      $this->cache['content'] = $this->html;
-    }
     return $this->html;
   }
 
@@ -496,8 +495,13 @@ class FrxReport {
    * @param $parms Array of parameters.
    * @return boolean indicating whether the required parameters are present.
    */
-  public function processParameters() {
-    $parms = $this->parms;
+  public function processParameters($parms=NULL) {
+    if ($parms==NULL) {
+      $parms = $this->parms;
+    }
+    else {
+      $this->parms = $parms;
+    }
     $missing_parms = FALSE;
 
     foreach ($this->parameters as $key => $parm) {
@@ -538,7 +542,8 @@ class FrxReport {
     }
     $this->parms = $parms;
     $this->missing_parms = $missing_parms;
-    return $missing_parms;
+    //$this->parameters_form = $this->parametersForm(array('collapsible' => TRUE));
+    return $this->missing_parms;
   }
 
   public function parametersArray() {
@@ -563,7 +568,8 @@ class FrxReport {
 
   public function parametersForm($variables = array()) {
     $parms = $this->parametersArray();
-    return drupal_get_form('forena_parameter_form', $parms, $variables);
+    $form =  drupal_get_form('forena_parameter_form', $parms, $variables);
+    $this->parameters_form = $form;
   }
 
   public function setSort($sort, $compare_type='') {

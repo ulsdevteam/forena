@@ -9,6 +9,7 @@ require_once 'FrxReport.inc';
  *
  */
 class FrxEditor {
+  public $edit = TRUE;   // Indicates we are running in edit mode.
   public $dom;
   public $document_root;
   public $simplexml;
@@ -18,6 +19,8 @@ class FrxEditor {
   public $cache;
   public $frxReport;
   public $desc;
+  public $parms = array(); // Current editor parameters.
+  public $access = TRUE; // The user has access to the report.
   public $doc_prefix = '<?xml version="1.0" encoding="UTF-8"?>
     <!DOCTYPE root [
     <!ENTITY nbsp "&#160;">
@@ -28,18 +31,21 @@ class FrxEditor {
 
 
   /**
-   * Create initial FRX report
+   * Construct the editor
    * Enter description here ...
-   * @param unknown_type $xml_string
+   * @param unknown_type $report_name name of report to load
    */
-  public function __construct($report_name) {
+  public function __construct($report_name, $edit = TRUE) {
     $this->dom = new DOMDocument('1.0', 'UTF-8');
+    $this->edit = $edit;
     $dom = $this->dom;
     $dom->formatOutput = TRUE;
     $dom->preserveWhiteSpace = TRUE;
     $this->load($report_name);
     $this->frxReport = new FrxReport();
     $this->frxReport->setReport($this->dom);
+    $cache = forena_load_cache($this->frxReport->rpt_xml);
+    if (isset($cache['access'])) $this->access = forena_check_all_access($cache['access']);
   }
 
   /**
@@ -77,14 +83,14 @@ class FrxEditor {
    * @param unknown_type $report_name
    * @return string
    */
-  public function load($report_name) {
+  public function load($report_name, $edit=TRUE) {
     $this->desc = Frx::Menu()->parseURL($report_name);
     $r_text='';
     $dom = $this->dom;
     $this->report_name = $report_name = $this->desc['name'];
     // Load the latest copy of the report editor
     if ($report_name) {
-      if (isset($_SESSION['forena_report_editor'][$report_name])) {
+      if (isset($_SESSION['forena_report_editor'][$report_name]) && $edit) {
         $r_text = $_SESSION['forena_report_editor'][$report_name];
         drupal_set_message(t('All changes are stored temporarily.  Click Save to make your changes permanent.  Click Cancel to discard your changes.'), 'warning', FALSE);
       }
@@ -342,13 +348,17 @@ class FrxEditor {
       'value');
   }
 
-  public function addParameter($parm) {
-    $parms= array();
-    $parms[$parm['id']] = $parm;
-    $this->setFrxHeader('parameters', 'parm',
-    $parms,
-    array('id', 'label', 'require', 'desc', 'data_source', 'data_field', 'type'),
-      'value');
+
+  public function addParameters($parms_to_add) {
+    $parms_to_add = (array)$parms_to_add;
+    foreach ($parms_to_add as $parm) {
+      $parms= array();
+      $parms[$parm] = array('id' => $parm );
+      $this->setFrxHeader('parameters', 'parm',
+      $parms,
+      array('id', 'label', 'require', 'desc', 'data_source', 'data_field', 'type'),
+        'value');
+    }
   }
 
   /**
@@ -647,6 +657,7 @@ class FrxEditor {
    * getConfig method on the block.
    */
   public function scrapeBlockConfig($id, &$config) {
+    $template_class = "FrxTable";
     $path = "//*[@id='$id']";
     $nodes = $this->simplexml->xpath($path);
     if ($nodes) ( $node = dom_import_simplexml($nodes[0]));
@@ -670,11 +681,8 @@ class FrxEditor {
         $c->initReportNode($node, $$this->frxReport);
         $config = array_merge($config,$c->getConfig());
       }
-      return $template_class;
     }
-    else {
-      return 'FrxTable';
-    }
+    return $template_class;
   }
 
 
@@ -699,7 +707,7 @@ class FrxEditor {
     $class = $node->getAttribute("class");
 
     $config['block'] = $block_name;
-    $data= Frx::BlockEditor($block_name)->data();
+    $data= Frx::BlockEditor($block_name)->data($this->parms);
     $c = Frx::Template($template_class);
     if ($c) {
       $c->initReportNode($node, $this->frxReport);
@@ -711,6 +719,10 @@ class FrxEditor {
     else {
       drupal_set_message(t('Could not find template %s', array('%s' => $templateClass)), 'error');
     }
+  }
+
+  public function setEditorParms($parms) {
+    $this->parms = $parms;
   }
 
   /**
@@ -733,7 +745,10 @@ class FrxEditor {
 
     }
     $config['block'] = $block_name;
-    $data= Frx::BlockEditor($block_name)->data();
+    $b = Frx::BlockEditor($block_name, $this->frxReport->block_edit_mode);
+    $data= $b->data($this->parms);
+    $this->addParameters($b->tokens());
+    $this->frxReport->setReport($this->dom);
     $c = Frx::Template($template_class);
     if ($c) {
       $c->initReportNode($node, $this->frxReport);
@@ -745,27 +760,116 @@ class FrxEditor {
     return $this;
   }
 
-  public function preview() {
+  public function preview($parms = array()) {
+
     $r = $this->frxReport;
     if(strpos($this->report_name, '__') !== 0) $r->preview_mode = TRUE;
+    return $this->report($parms, TRUE, TRUE);
+  }
+
+  /**
+   * Load and render a report based on a drupal path.
+   * In this function the arglist is used to get the full path to the report.
+   * Pass parameters or NULL to use get /post parameters.
+   *
+   * @return unknown
+   */
+  function report($parms = array(), $print = FALSE, $no_cache=FALSE) {
+    global $user;
+    $content = array();
+    $format = $this->desc['format'];
+    $r = $this->frxReport;
+    // Determine the data to get.
+    if (!$parms) {
+      $parms = array_merge($_GET, $_POST);
+      unset($parms['q']);
+    }
+    else $parms = (array)$parms;
+    // Allow other modules to alter paramters.
+    $this->alterParameters($parms);
+
     //check for default parameters
-    $r->processParameters();
+    $r->processParameters($parms);
     Frx::Skin()->load($r->skin);
-    Frx::Skin()->loadSkinFiles('');
-    return $r->render('web');
+    Frx::Skin()->loadSkinFiles($this->report_name);
+    $cached_data = FALSE;
+    $cache = array();
+
+    /**
+     * Allow modules to alter the parameters of a report.
+     * @param unknown_type $report_name
+     * @param unknown_type $parms
+     */
+    // Set parameters
+    Frx::Data()->push($parms, 'parm');
+
+    // Check for cache data
+    if ($r->cache) {
+      $cid = 'forena:report:' . $name . ':' . drupal_http_build_query($parms);
+      if (@$r->cache['per_user'] && $user) $cid .= ':' . $user->uid;
+      if (@$r->cache['per_doctype']) @$cid .= ':' . $format;
+      $cache = cache_get($cid, 'cache');
+      if (!$cache || (isset($r->cache['duration']) && $cache->expire < time()) || $no_cache) {
+        $r->render($format);
+        $time = null;
+        if (isset($r->cache['duration'])) {
+          try {
+            $time = @new DateTime($r->cache['duration']);
+          }
+          catch (Exception $e) {
+            drupal_set_message('Invalid Cache Duration', 'error', TRUE);
+          }
+          if ($time) $time = $time->getTimeStamp();
+        }
+        if (!$time) {
+          $time = CACHE_PERMANENT;
+        }
+        $r->cache['content'] = $r->html;
+        cache_set($cid, $r->cache, 'cache', $time);
+      }
+      else {
+        $r->html = $r->cache['content'];
+      }
+
+    }
+    else {
+      $r->render($format);
+    }
+
+    Frx::Data()->pop();
+    $content = array(
+      'parameter_form' => $r->parameters_form,
+      'links' => $this->documentLinks(),
+      'content' => array('#markup' => $r->html),
+    );
+    $o =  Frx::Document($format);
+    if ($o) {
+      $output = $o->render($r, $format,  array());
+      if ($print) {
+        $printed = $o->output($output);
+      }
+      else {
+        $printed = FALSE;
+      }
+      if (!$printed) {
+        return  $content;
+      }
+    }
 
   }
 
-  public function editLinks($frx, $id='') {
+
+  public function editLinks($frx, $id='', $context = array()) {
     $o = '';
     if ($frx['block']) {
       $block_name = (string)$frx['block'];
       $block_link = str_replace('/', '.', $block_name);
       $report_name = str_replace('/', '.' , $this->report_name);
       //$b=Frx::BlockEditor($block_name)->block;
+      $options = array();
+      if ($context) $options['query'] = $context;
 
-
-      $o = '<div class="forena-edit-links">' . l($block_name, "reports/$report_name/edit/data/$block_link/$id" ) . "</div>";
+      $o = '<div class="forena-edit-links">' . l($block_name, "reports/$report_name/edit/data/$block_link/$id", $options ) . "</div>";
     }
     return $o;
 
@@ -797,5 +901,27 @@ class FrxEditor {
        }
      }
      return $templates;
+  }
+
+  public function documentLinks() {
+    $doctypes = array_keys(Frx::documentTypes());
+    $links = array();
+    $r = $this->frxReport;
+    foreach ($doctypes as $ext) {
+      if (array_search($ext, $r->formats) !== FALSE) {
+        $links[] = array('title' => $ext, 'href' => str_replace('/', '.', $this->report_name) . ".$ext");
+      }
+    }
+    if ($links) return array('#theme' => $links, '#links' => $links);
+    return '';
+  }
+
+  /**
+   * Allow modules to alter the parameters of a report.
+   * @param unknown_type $report_name
+   * @param unknown_type $parms
+   */
+  function alterParameters(&$parms) {
+    drupal_alter('forena_parameters', $this->report_name, $parms );
   }
 }

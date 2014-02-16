@@ -6,14 +6,87 @@
  * @author davidmetzler
  *
  */
-require_once ('FrxChart.inc');
-class FrxSVGGraph extends FrxChart {
+class FrxSVGGraph extends FrxRenderer {
   private $graph;
   private $links;
   public $templateName = 'SVG Graph or Chart';
+  public $xy_data = FALSE;
+
   function __construct() {
     $library = forena_library_file('SVGGraph');
     require_once $library;
+  }
+
+  public function render() {
+
+    // Get data from source
+    $output = '';
+    $options = array();
+    $series = array();
+    $seriesx = array();
+    $data = array();
+    $attributes = $this->mergedAttributes();
+    $path = isset($attributes['xpath']) ? $attributes['xpath'] :  '*';
+    $label = '';
+    $links = '';
+    $type = $attributes['type'];
+    $link = @$attributes['link'];
+    // Legacy options.  New charts should be generated using Frx:attribute syntax
+    if (isset($attributes['options'])) {
+      parse_str($attributes['options'], $options);
+      unset($attributes['options']);
+      $options  = array_merge($attributes, $options);
+    }
+    else {
+      $options = $attributes;
+    }
+
+    $series = @$options['series'];
+    if (isset($options['seriesx']))  {
+      $seriesx = $options['seriesx'];
+      unset($options['seriesx']);
+    }
+    if (isset($options['label'])) {
+      $label =  $options['label'];
+      unset($options['label']);
+    }
+    foreach ($options as $key => $value) {
+      $options[$key] = $this->teng->replace($value, TRUE);
+    }
+
+    if (isset($attributes['height'])) $options['height'] = $this->teng->replace($attributes['height']);
+    if (isset($attributes['width'])) $options['width'] = $this->teng->replace($attributes['width']);
+
+    // Extract chart series data from xml.
+    if ($series) {
+      foreach ((array)$series as $i => $d) {
+        if ($seriesx) {
+          $this->xy_data = TRUE;
+          $data[] = $this->xmlToValues($path, $d, $seriesx[$i], TRUE);
+        }
+        else {
+          $data[] = $this->xmlToValues($path, $d, $label, FALSE);
+        }
+      }
+    }
+
+    if ($link) {
+      $links = $this->xmlToValues($path, $link, $label);
+    }
+
+    // Deal with rare case where attributes are supposed to come from data
+    if (@$attributes['color'] && !is_array($attributes['color']) && strpos($attributes['color'], '{') !==FALSE) {
+      $options['colors'] = $this->xmlToValues($path, $attributes['color']);
+    }
+
+    if ($data) {
+
+      if (method_exists($this, 'renderChart')) {
+        $output = $this->renderChart($type, $data, $options, $links);
+      }
+
+    }
+    return $output;
   }
 
   static function graphTypes() {
@@ -140,39 +213,43 @@ class FrxSVGGraph extends FrxChart {
         '#title' => t('Graph Type'),
         '#options' => $graph_options['types'],
         '#default_value' => $type,
+        '#ajax' => $this->configAjax(),
     );
 
-    forena_template_ajax($form_ctl['type']);
     $form_ctl['style'] = array(
         '#type' => 'select',
         '#title' => t('Style'),
         '#options' => $styles,
         '#default_value' => $style,
+        '#ajax' => $this->configAjax(),
     );
-    forena_template_ajax($form_ctl['style']);
 
     $form_ctl['gen_table'] = array(
         '#type' => 'checkbox',
         '#title' => t('Include data table with graph'),
         '#default_value' => @$config['gen_table'],
+        '#ajax' => $this->configAjax(),
     );
 
     $form_ctl['label'] = array(
         '#type' => 'textfield',
         '#title' => t('Label'),
         '#default_value' => @$config['label'],
+        '#ajax' => $this->configAjax('blur'),
     );
 
 
     $form_ctl['series'] = array(
         '#type' => 'fieldset',
         '#title' => t('Series'),
+        '#ajax' => $this->configAjax('blur'),
     );
     if ($xvalues) {
       $form_ctl['seriesx'] = array(
           '#type' => 'fieldset',
           '#title' => t('Series X'),
           '#description' => t('Forena token expression to get the X value (.e.g. {years}'),
+          '#ajax' => $this->configAjax('blur'),
       );
       $form_ctl['series']['#title'] = t('Series Y');
     }

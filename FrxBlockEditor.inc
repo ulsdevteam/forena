@@ -4,7 +4,9 @@ class FrxBlockEditor {
   public $block_name;
   public $modified;
   public $provider;
+  public $cache = FALSE;    // Turn on caching of parameter to facilitate block caching.
   private $teng;
+  public $edit;
   private $new_block = array(
     'type' => 'sql',
     'file' => '',
@@ -13,9 +15,11 @@ class FrxBlockEditor {
     'info' => array(),
   );
 
-  public function __construct($block_name = '') {
+
+  public function __construct($block_name = '', $edit = TRUE) {
+    $this->edit = $edit;
     if ($block_name) {
-      $this->load($block_name);
+      $this->load($block_name, $edit);
     }
     $this->teng = Frx::SyntaxEngine(FRX_SQL_TOKEN, ':');
   }
@@ -24,23 +28,23 @@ class FrxBlockEditor {
    * Block loader method.
    * @param  $block_name
    */
-  public function load($block_name) {
+  public function load($block_name, $edit=TRUE) {
     $block_name = str_replace('.', '/', $block_name);
     @list($provider, $path) = explode('/', $block_name, 2);
     $this->provider = $provider;
     $this->block_name = $block_name;
-    if (!isset($_SESSION['forena_query_editor'][$block_name])) {
+    if (isset($_SESSION['forena_query_editor'][$block_name]) && $edit) {
+      $block = $_SESSION['forena_query_editor'][$block_name];
+      drupal_set_message(t('All changes are stored temporarily.  Click Save to make your changes permanent.  Click Cancel to discard your changes.'), 'warning', FALSE);
+      $this->modified = TRUE;
+    }
+    else {
       $block = Frx::RepoMan()->loadBlock($block_name);
       $this->modified = FALSE;
       if (!$block) {
         $block = $this->block = $this->new_block;
         $this->update($this->block);
       }
-    }
-    else {
-      $block = $_SESSION['forena_query_editor'][$block_name];
-      drupal_set_message(t('All changes are stored temporarily.  Click Save to make your changes permanent.  Click Cancel to discard your changes.'), 'warning', FALSE);
-      $this->modified = TRUE;
     }
     $this->block = $block;
     return $block;
@@ -108,55 +112,26 @@ class FrxBlockEditor {
     $this->update($this->block);
   }
 
-  public function preview($parms = array()) {
-    $preview = '';
-    FrxReportGenerator::instance()->alter_parameters('', $parms);
-    $block = $this->block;
-    if ($block['type'] == 'sql') {
-      $sql = $block['file'];
-
-      $data = Frx::RepoMan()->sqlData($this->provider, $sql, $parms);
-    }
-    else {
-      Frx::Data()->push($parms, 'parm');
-      Frx::RepoMan()->data($this->block_name);
-      Frx::Data()->pop();
-    }
-
-    // Generate the template
-    $t = Frx::Template('FrxTable');
-    $config = array('class' => 'dataTable', 'id' => 'preview-data');
-    if ($data && $t) {
-      $t->generate($data, $config);
-      $fields = $t->columns;
-      if ($fields) $fields = array_combine($fields, $fields);
-      if ($fields) {
-        $report = $t->asXML();
-        $rpt = new FrxReport($report, $data);
-        $preview = $rpt->render('web', FALSE);
-      }
-      else {
-        if (is_object($data) && method_exists($data, 'asXML')) {
-          $preview = '<pre>' . htmlspecialchars($data->asXML()) . '</pre>';
-        }
-        else {
-          $preview = '<pre>' .htmlspecialchars(print_r($data,1)) .'</pre>';
-        }
-      }
-    }
-    return $preview;
-  }
-
+  /**
+   * Get data and working cache.
+   * @param unknown $parms
+   * @return Ambigous <unknown, string, NULL>
+   */
   public function data($parms = array()) {
 
     if ($parms) {
       // Merge in current_context
-      $data = array_merge(Frx::Data()->currentContextArray(), $data);
+      $parms = array_merge(Frx::Data()->currentContextArray(), $parms);
       $id = str_replace('/', '-', $this->block_name) . '-parm';
-      Frx::Data()->push($data, $id);
+      Frx::Data()->push($parms, $id);
+    }
+    if ($this->edit) {
+      $xml = Frx::RepoMan()->sqlData($this->provider,  $this->block['file'], $parms);
+    }
+    else {
+      $xml = Frx::RepoMan()->data($this->block_name);
     }
 
-    $xml = Frx::RepoMan()->data($this->block_name, NULL);
     if ($parms) Frx::Data()->pop();
 
     return $xml;

@@ -4,6 +4,7 @@
  * Data block building and testing forms.
  */
 require_once 'FrxDataSource.inc';
+require_once 'forena.data.inc';
 
 /**
  * Create new sql data form hook
@@ -120,7 +121,7 @@ function forena_query_sql_editor($form, &$form_state, $block_name='') {
   }
 
   $form['submit'] = array('#type' => 'submit', '#value' => t('Test Changes'), '#submit' => array('forena_query_editor_update', 'forena_query_preview'));
-  $form['preview'] = array('#markup' => @$form_state['storage']['preview']);
+  $form['preview'] = @$form_state['storage']['preview'];
   return $form;
 }
 
@@ -415,7 +416,8 @@ function forena_query_preview($form, &$form_state) {
   if (isset($form_state['values']['parameters'])) {
     $parms = $form_state['storage']['parameters'] = $form_state['values']['parameters'];
   }
-  $form_state['storage']['preview'] = Frx::BlockEditor()->preview($parms);
+  $preview = forena_data_block_preview($form_state['storage']['block_name'], $parms, TRUE);
+  $form_state['storage']['preview'] = $preview['content'];
 }
 
 function forena_query_delete_form($form, &$form_state, $block_name) {

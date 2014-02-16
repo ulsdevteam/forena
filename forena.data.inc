@@ -49,15 +49,25 @@ function forena_display_blocks() {
   return $content;
 }
 
+function forena_data_block_preview($block_name, $parms = array(), $edit=FALSE) {
+  $o = Frx::Editor('__forena_block_preview__');
+  $o->cancel();
+  $o->frxReport->block_edit_mode = $edit;
+  $o->setEditorParms($parms);
+  $o->addBlock($block_name);
+  $o->update();
+  $content = $o->preview($parms);
+  //$o->cancel();
+  return $content;
+}
+
 function forena_data_preview() {
   $args = func_get_args();
   $block_name = implode('/', $args);
-  $block_name = str_replace('.', '/', $block_name);
-  $r = Frx::Editor('__block_preview__');
-  $r->cancel();
-  $r->addBlock($block_name);
-  $content ['preview']['#markup'] =  $r->preview();
-  $content ['add_report'] = drupal_get_form('forena_data_quick_report_form', $block_name);
+  $parms = $_GET;
+  unset($parms['q']);
+  $content['add_report']['form'] = drupal_get_form('forena_data_quick_report_form', $block_name);
+  $content['preview'] = forena_data_block_preview($block_name, $parms);
   return $content;
 }
 
@@ -69,7 +79,6 @@ function forena_data_preview() {
  */
 function forena_data_quick_report_form($form, &$form_state, $block_name) {
   require_once 'forena.report.inc';
-  //@TODO: Make sure report name is unique.
 
   // Get the add form.
   $form['add'] = array('#type' => 'fieldset', '#title' => t('Quick Report'), '#collapsible' => TRUE, '#collapsed' => TRUE);
@@ -88,5 +97,8 @@ function forena_data_quick_report_form_submit($form, &$form_state) {
   Frx::BlockEditor($form_state['values']['block_name'])->saveParms();
   $report_name = str_replace('/', '.', $form_state['values']['report_name']);
   $block_name = str_replace('/', '.', $form_state['values']['block_name']);
-  $form_state['redirect'] = "reports/$report_name/edit/add-data/$block_name";
+  $path =  "reports/$report_name/edit/add-data/$block_name";
+  $parms = $_GET;
+  unset($parms['q']);
+  $form_state['redirect'] = array($path, array('query' => $parms));
 }

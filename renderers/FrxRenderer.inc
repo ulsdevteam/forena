@@ -87,6 +87,7 @@ class FrxRenderer {
     $o = '';
     $node_type = $dom_node->nodeType;
     $settings = $this->settings;
+    $context = Frx::Data()->currentContextArray();
 
     // Shortcut process a text node
     if ($node_type == XML_TEXT_NODE|| $node_type == XML_ENTITY_REF_NODE || $node_type == XML_ENTITY_NODE)
@@ -116,7 +117,6 @@ class FrxRenderer {
       }
     }
 
-
     // Continue processing non text nodes
     $node = simplexml_import_dom($dom_node);
     // Special catch to make sure we don't process bad nodes
@@ -141,7 +141,7 @@ class FrxRenderer {
       $frx = $node->attributes(FRX_NS);
       $tag = $node->getName();
 
-      if ($this->frxReport->preview_mode) $o .= Frx::Editor()->editLinks($frx, $id);
+      if ($this->frxReport->preview_mode) $o .= Frx::Editor()->editLinks($frx, $id, $context);
 
 
       if ((string)$frx['block']) {
@@ -205,7 +205,6 @@ class FrxRenderer {
         $i=0;
 
         //$tmp_attrs = (array)$attrs;
-
         if ($nodes) foreach ($nodes as $x) {
           if ($group) {
             Frx::Data()->setContext('group', $x[0]);
@@ -215,7 +214,6 @@ class FrxRenderer {
           $odd = $i & 1;
           $row_class = $odd ? 'odd' : 'even';
           $r_attr_text = '';
-
           if (isset($attrs['id'])) {
             if (strpos($attrs['id'],'{')!== FALSE) {
               $id = $this->teng->replace($attrs['id']);
@@ -274,6 +272,7 @@ class FrxRenderer {
       // We can render so lets do it.
       $text = $node->asXML();
       $node_xml = $this->teng->replace($text);
+
       // Strip out empty leaf nodes if report is configured to
       if (!empty($settings['stripEmptyElements'])) {
         $node_updated = new SimpleXMLElement($node_xml);
@@ -281,7 +280,6 @@ class FrxRenderer {
           return '';
         }
       }
-
       $o .= $this->teng->replace($text);
     }
 
@@ -363,7 +361,7 @@ class FrxRenderer {
           if ($value) $v = array_shift($value);
           $i++;
           $k = $key . '_' . trim((string)$i);
-          $node->setAttribute($v,NULL);
+          $node->setAttribute($k,$v);
           if (!$v) {
             $done = TRUE;
           }
@@ -464,7 +462,7 @@ class FrxRenderer {
     return $form_ctl;
   }
 
-  public function configAjax($event) {
+  public function configAjax($event='') {
     $ajax = array(
         'callback' => 'forena_template_callback',
         'wrapper' => 'forena-template-wrapper',
@@ -659,5 +657,34 @@ class FrxRenderer {
     }
   }
 
+  public function xmlToValues($path, $data_path, $label_path='', $pairs = FALSE) {
+    $do = Frx::Data();
+    $data = $do->currentContext();
+    $values = array();
+    if (is_object($data)) {
+      $nodes = $data->xpath($path);
+      if ($nodes) foreach ($nodes as $i => $node) {
+        $do->push($node, $this->id);
+
+        $val = $this->teng->replace($data_path, TRUE);
+        if ($label_path) {
+          $key = strip_tags($this->teng->replace($label_path, FALSE));
+        }
+        else {
+          $key = $i;
+        }
+        if ($pairs && $label_path) {
+          $values[] = array(floatval($key), floatval($val));
+        }
+        else {
+          $values[$key] = $val;
+        }
+
+
+        $do->pop();
+      }
+    }
+    return $values;
+  }
 
 }

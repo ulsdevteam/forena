@@ -151,6 +151,11 @@ function forena_create_report_submit($form, &$form_state) {
  * @return multitype:string multitype:string  NULL
  */
 function forena_report_save_form($form, &$form_state, $report_name) {
+  $form['report_name'] = array(
+  	'#type' => 'value',
+    '#value' => $report_name,
+  );
+
   $form['save'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
@@ -176,7 +181,7 @@ function forena_report_preview($report_name) {
   $r = Frx::Editor($report_name);
   drupal_set_title($r->title);
   $content['save'] = drupal_get_form('forena_report_save_form', $report_name);
-  $content['preview'] = array('#markup' => $r->preview());
+  $content['preview'] = $r->preview();
   return $content;
 }
 
@@ -192,6 +197,12 @@ function forena_report_data_block_form($formid, &$form_state, $report_name, $blo
   $r = Frx::Editor($report_name);
   // List of templates
   $templates = $r->templateOptions();
+  if (!isset($form_state['storage'])) {
+    $form_state['storage']['id'] = $id;
+    $parms = $_GET;
+    unset($parms['q']);
+    $form_state['storage']['parms'] = $parms;
+  }
   $id = isset($form_state['storage']['id']) ? $form_state['storage']['id'] : $id;
   $template_class = isset($form_state['values']['template_class']) ? $form_state['values']['template_class'] : 'FrxTable';
   if (isset($form_state['values']['config'])) {
@@ -220,7 +231,7 @@ function forena_report_data_block_form($formid, &$form_state, $report_name, $blo
   $form['cancel'] = array(
       '#type' => 'submit',
       '#value' => 'Cancel',
-      '#submit' => array('forena_save_cancel'),
+      '#submit' => array('forena_update_cancel'),
   );
   $form['report_name'] = array(
   	'#type' => 'value',
@@ -262,10 +273,13 @@ function forena_report_data_block_form($formid, &$form_state, $report_name, $blo
 
 
   // Generate a preview
+  $parms = $form_state['storage']['parms'];
   $r = Frx::Editor('__report_block_preview__');
   $r->cancel();
+  $r->setEditorParms($parms);
   $r->addBlock($block_name, $template_class, $config);
-  $form['template']['preview']['#markup'] = $r->preview();
+  $preview = $r->preview($parms);
+  $form['template']['preview']['content'] = $preview['content'];
   $r->cancel();
 
   return $form;
@@ -299,6 +313,9 @@ function forena_template_preview($form, &$form_state) {
 function forena_report_edit_template_submit($form, &$form_state){
   extract($form_state['values']);
   $r = Frx::Editor($report_name);
+  $parms = $form_state['storage']['parms'];
+  $r = Frx::Editor($report_name);
+  $r->setEditorParms($parms);
   $r->applyTemplate($id, $template_class, $config);
   $r->update();
   $form_state['redirect'] = "reports/$report_name/edit";
@@ -306,13 +323,16 @@ function forena_report_edit_template_submit($form, &$form_state){
 
 function forena_report_add_template_submit($form, &$form_state) {
   extract($form_state['values']);
+  $parms = $form_state['storage']['parms'];
+  $r = Frx::Editor($report_name);
+  $r->setEditorParms($parms);
   Frx::Editor($report_name)->addBlock($block_name, $template_class, (array)$config, $id);
   Frx::Editor() ->update();
   $form_state['redirect'] = "reports/$report_name/edit";
 }
 
-function forena_update_cancel($form, $form_state) {
-  $extract($form_state['values']);
+function forena_update_cancel($form, &$form_state) {
+  extract($form_state['values']);
   $form_state['redirect'] = "reports/$report_name/edit";
 }
 

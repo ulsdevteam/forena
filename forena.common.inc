@@ -279,7 +279,7 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
       $report = new SimpleXMLElement($report);
     }
     catch (Exception $e) {
-      FrxReportGenerator::instance()->app->error(t('Could not save %s because XML was malformed', htmlspecialchars($report_name)),
+      Frx::error(t('Could not save %s because XML was malformed', htmlspecialchars($report_name)),
         "<p>Invalid XML</p><pre>XML:" . htmlspecialchars($report) . "\n" . $e->getMessage() . "</pre>");
       return;
     }
