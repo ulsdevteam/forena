@@ -744,6 +744,7 @@ class FrxEditor {
       $pnode->appendChild($node);
 
     }
+
     $config['block'] = $block_name;
     $b = Frx::BlockEditor($block_name, $this->frxReport->block_edit_mode);
     $data= $b->data($this->parms);
@@ -802,7 +803,6 @@ class FrxEditor {
      */
     // Set parameters
     Frx::Data()->push($parms, 'parm');
-
     // Check for cache data
     if ($r->cache) {
       $cid = 'forena:report:' . $name . ':' . drupal_http_build_query($parms);
@@ -835,12 +835,19 @@ class FrxEditor {
     else {
       $r->render($format);
     }
-
+    $links = '';
+    if ($r->preview_mode) {
+      $r_link = str_replace('/', '.', $this->report_name);
+      $parms = $_GET;
+      unset($parms['q']);
+      $links = l('Add data', "reports/$r_link/edit/select-data", array('query' => $parms));
+    }
     Frx::Data()->pop();
     $content = array(
+      '#has_data' => $r->blocks_loaded,
       'parameter_form' => $r->parameters_form,
       'links' => $this->documentLinks(),
-      'content' => array('#markup' => $r->html),
+      'content' => array('#markup' => $r->html . $links),
     );
     $o =  Frx::Document($format);
     if ($o) {
@@ -869,7 +876,7 @@ class FrxEditor {
       $options = array();
       if ($context) $options['query'] = $context;
 
-      $o = '<div class="forena-edit-links">' . l($block_name, "reports/$report_name/edit/data/$block_link/$id", $options ) . "</div>";
+      $o = '<div class="forena-edit-links">' . l($block_name, "reports/$report_name/edit/edit-data/$block_link/$id", $options ) . "</div>";
     }
     return $o;
 

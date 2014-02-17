@@ -22,8 +22,8 @@ class FrxRenderer {
 
 
   public function initReportNode(DOMElement $domNode, FrxReport $frxReport) {
-    $this->dom = $frxReport->dom;
     $this->reportDocDomNode = $domNode;
+    $this->dom = $domNode->ownerDocument;
     $this->dataProvider = Frx::Data();
     $this->reportDocNode = $node = simplexml_import_dom($domNode);
     $this->teng = $frxReport->teng;
@@ -651,7 +651,7 @@ class FrxRenderer {
   }
 
   public function removeChildren(DOMNode $node) {
-    while (isset($node->firstChild)) {
+    while (isset($node->firstChild) && $node->firstChild->nodeType < 9) {
       $this->removeChildren($node->firstChild);
       $node->removeChild($node->firstChild);
     }

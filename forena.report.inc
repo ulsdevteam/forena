@@ -140,7 +140,7 @@ function forena_create_report_submit($form, &$form_state) {
     $edit = '/edit';
   }
   else {
-    $edit = '/edit/data/add';
+    $edit = '/edit/seletc-data';
   }
   $form_state['redirect']= $desc['i_link'] . $edit;
 
@@ -167,7 +167,9 @@ function forena_report_save_form($form, &$form_state, $report_name) {
     '#value' => t('Cancel'),
     '#submit' => array('forena_report_save_cancel'),
   );
-  $form_state['redirect'] = "reports/$report_name";
+  $parms = $_GET;
+  unset($parms['q']);
+  $form_state['redirect'] = array("reports/$report_name", array('query' => $parms));
   return $form;
 }
 
@@ -192,7 +194,7 @@ function forena_report_preview($report_name) {
  * @param $form_state Array of block type
  * @return unknown_type
  */
-function forena_report_data_block_form($formid, &$form_state, $report_name, $block_name='', $id='', $action='add') {
+function forena_report_data_block_form($formid, &$form_state, $report_name, $block_name='', $id='', $action='add-data') {
   $config = array();
   $r = Frx::Editor($report_name);
   // List of templates
@@ -218,14 +220,14 @@ function forena_report_data_block_form($formid, &$form_state, $report_name, $blo
       '#type' => 'submit',
       '#value' => 'Add',
       '#submit' => array('forena_report_add_template_submit'),
-      '#access' => $action=='add',
+      '#access' => $action=='add-data',
   );
 
   $form['update'] = array(
       '#type' => 'submit',
       '#value' => 'Update',
       '#submit' => array('forena_report_edit_template_submit'),
-      '#access' => $action=='edit',
+      '#access' => $action=='edit-data',
   );
 
   $form['cancel'] = array(
@@ -275,10 +277,19 @@ function forena_report_data_block_form($formid, &$form_state, $report_name, $blo
   // Generate a preview
   $parms = $form_state['storage']['parms'];
   $r = Frx::Editor('__report_block_preview__');
-  $r->cancel();
   $r->setEditorParms($parms);
   $r->addBlock($block_name, $template_class, $config);
+  $r->update();
   $preview = $r->preview($parms);
+  if (!$preview['#has_data']) {
+    $path = "reports/$report_name/edit/preview-data/$action/$block_name";
+    if ($id) $path .= "/$id";
+    $parms = $_GET;
+    unset($parms['q']);
+    $options = array();
+    if ($parms) $options['query'] = $parms;
+    drupal_goto("$path", $options);
+  }
   $form['template']['preview']['content'] = $preview['content'];
   $r->cancel();
 
@@ -318,7 +329,9 @@ function forena_report_edit_template_submit($form, &$form_state){
   $r->setEditorParms($parms);
   $r->applyTemplate($id, $template_class, $config);
   $r->update();
-  $form_state['redirect'] = "reports/$report_name/edit";
+  $parms = $_GET;
+  $unset($parms['q']);
+  $form_state['redirect'] = array("reports/$report_name/edit", array('query' => $parms));
 }
 
 function forena_report_add_template_submit($form, &$form_state) {
@@ -328,18 +341,110 @@ function forena_report_add_template_submit($form, &$form_state) {
   $r->setEditorParms($parms);
   Frx::Editor($report_name)->addBlock($block_name, $template_class, (array)$config, $id);
   Frx::Editor() ->update();
-  $form_state['redirect'] = "reports/$report_name/edit";
-}
+  $parms = $_GET;
+  $unset($parms['q']);
+  $form_state['redirect'] = array("reports/$report_name/edit", array('query' => $parms));
+  }
 
 function forena_update_cancel($form, &$form_state) {
   extract($form_state['values']);
-  $form_state['redirect'] = "reports/$report_name/edit";
-}
+  $parms = $_GET;
+  $unset($parms['q']);
+  $form_state['redirect'] = array("reports/$report_name/edit", array('query' => $parms));
+  }
 
 function forena_report_save_cancel($form, &$form_state) {
   extract($form_state['values']);
   Frx::Editor($report_name)->cancel();
   $form_state['redirect'] = 'forena';
+}
+
+function forena_select_block_list($report_name, $id='') {
+  $header = array(t('Block'), t('Access'), t('Keywords'));
+  $blocks = Frx::DataFile()->userBlocks();
+  $data=array();
+
+  foreach ($blocks as $block_name => $block) {
+    $blck = str_replace('/', '.', $block_name);
+    $path = "reports/$report_name/edit/preview-data/add-data/$blck";
+    // Build the table.
+    if ($id) $path .= "/$id";
+    $data[] = array(
+      l($block_name, $path),
+      @$block->cache['access'],
+      @$block->cache['keywords']
+    );
+  }
+
+  // Theme the table
+  $content['data_blocks'] = array('#markup' => theme('forena_data_table', array('header' => $header, 'rows' => $data)));
+  return $content;
+}
+
+/**
+ * Preview the block
+ * @param unknown $report_name
+ * @param unknown $block_name
+ * @param string $id
+ * @return multitype:string unknown multitype:string unknown  multitype:string  multitype:string Ambigous <The, string, A, Optional>
+ */
+function forena_report_block_select_form($form, &$form_state, $report_name, $action, $block_name, $id='') {
+
+  $form['action'] = array(
+      '#type' => 'value',
+      '#value' => $action,
+  );
+
+  $form['report_name'] = array(
+  	'#type' => 'value',
+    '#value' => $report_name,
+  );
+
+  $form['block_name'] = array(
+  	'#type' => 'value',
+    '#value' => $block_name,
+  );
+
+  $form['id'] = array(
+  	'#type' => 'value',
+    '#value' => $id,
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Select'),
+  );
+  return $form;
+}
+
+function forena_report_block_select_form_submit($form, &$form_state) {
+  //Instantiate form variables
+  extract($form_state['values']);
+  $parms = $_GET;
+  unset($parms['q']);
+  $path = "reports/$report_name/edit/$action/$block_name";
+  if ($id) $path = "$path/$id";
+  $form_state['redirect'] = array($path, array('query' => $parms));
+}
+/**
+ * Page to allow selection of a data block with parameters.
+ * @param unknown $report_name
+ * @param unknown $block_name
+ * @param string $id
+ * @return Ambigous <unknown, multitype:multitype:NULL  Ambigous <string, multitype:multitype:multitype:string   multitype:multitype:string unknown   > Ambigous <The, boolean, string> >
+ */
+function forena_report_block_preview($report_name, $action, $block_name, $id='') {
+  $parms = $_GET;
+  unset($parms['q']);
+  $preview = forena_data_block_preview($block_name, $parms);
+  if (@trim($preview['content']['#markup'])) {
+    $content['select'] = drupal_get_form('forena_report_block_select_form', $report_name, $action, $block_name, $id);
+  }
+  else {
+    drupal_set_message(t('Sample data is required in order to correctly generate a template.  Try changing parameters'), 'warning');
+  }
+  $content['preview'] = $preview;
+  return $content;
 }
 
 

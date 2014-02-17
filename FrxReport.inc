@@ -84,7 +84,8 @@ class FrxReport {
   public function setReport(DOMDocument $dom) {
     $this->dom = $dom;
     $dom->formatOutput = TRUE;
-    $rpt_xml = $this->rpt_xml = simplexml_import_dom($dom);
+    $rpt_xml = $this->rpt_xml = simplexml_import_dom($this->dom->documentElement);
+    $this->missing_parms = FALSE;
 
     // Load header data
     $this->body = $rpt_xml->body;
@@ -541,7 +542,6 @@ class FrxReport {
       }
     }
     $this->parms = $parms;
-    $this->missing_parms = $missing_parms;
     //$this->parameters_form = $this->parametersForm(array('collapsible' => TRUE));
     return $this->missing_parms;
   }

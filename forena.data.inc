@@ -49,15 +49,15 @@ function forena_display_blocks() {
   return $content;
 }
 
+
 function forena_data_block_preview($block_name, $parms = array(), $edit=FALSE) {
   $o = Frx::Editor('__forena_block_preview__');
-  $o->cancel();
   $o->frxReport->block_edit_mode = $edit;
   $o->setEditorParms($parms);
   $o->addBlock($block_name);
   $o->update();
   $content = $o->preview($parms);
-  //$o->cancel();
+  $o->cancel();
   return $content;
 }
 
