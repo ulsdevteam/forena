@@ -326,7 +326,6 @@ class FrxEditor {
     NULL,
       'type'
       );
-    print_r($this->simplexml);
   }
 
   /**
@@ -660,8 +659,10 @@ class FrxEditor {
     $template_class = "FrxTable";
     $path = "//*[@id='$id']";
     $nodes = $this->simplexml->xpath($path);
-    if ($nodes) ( $node = dom_import_simplexml($nodes[0]));
-    if (!$node) {
+    if ($nodes)  {
+      $node = dom_import_simplexml($nodes[0]);
+    }
+    else {
       drupal_set_message(t('Could not find %s in report', array('%s' => $id)), 'error');
       return '';
     }
@@ -696,9 +697,10 @@ class FrxEditor {
   public function applyTemplate($id, $template_class, $config=array()) {
     $path = "//*[@id='$id']";
     $nodes = $this->simplexml->xpath($path);
-    if ($nodes) ( $node = dom_import_simplexml($nodes[0]));
-    if (!$node) {
-
+    if ($nodes) {
+       $node = dom_import_simplexml($nodes[0]);
+    }
+    else {
       drupal_set_message(t('Could not find %s in report', array('%s' => $id)), 'error');
       return;
     }
@@ -736,13 +738,14 @@ class FrxEditor {
     $block_name = str_replace('.', '/', $block_name);
     if ($id) {
       $node = $this->dom->getElementById($id);
+      drupal_set_message(t('Could not find id: %s', array('%s' => $id)), 'error');
+      return;
     }
     else {
       $nodes = $this->dom->getElementsByTagName('body');
       $pnode = $nodes->item(0);
       $node = $this->dom->createElement('div');
       $pnode->appendChild($node);
-
     }
 
     $config['block'] = $block_name;
@@ -760,6 +763,46 @@ class FrxEditor {
     }
     return $this;
   }
+
+
+  /**
+   * Insert a data block before a node.
+   * @param unknown $block
+   * @param unknown $class
+   * @param unknown $id
+   * @return FrxEditor
+   */
+  public function prependBlock($block_name, $template_class='FrxTable', $config=array(),  $id) {
+    $block_name = str_replace('.', '/', $block_name);
+    $path = "//*[@id='$id']";
+    $nodes = $this->simplexml->xpath($path);
+    if ($nodes) {
+       $target = dom_import_simplexml($nodes[0]);
+    }
+    else {
+      drupal_set_message(t('Could not find %s in report', array('%s' => $id)), 'error');
+      return;
+    }
+
+    $node = $this->dom->createElement('div');
+    $pnode = $target->parentNode;
+    $pnode->insertBefore($node, $target);
+    $config['block'] = $block_name;
+    $b = Frx::BlockEditor($block_name, $this->frxReport->block_edit_mode);
+    $data= $b->data($this->parms);
+    $this->addParameters($b->tokens());
+    $this->frxReport->setReport($this->dom);
+    $c = Frx::Template($template_class);
+    if ($c) {
+      $c->initReportNode($node, $this->frxReport);
+      $c->generate($data, $config);
+    }
+    else {
+      drupal_set_message(t('Could not find template %s', array('%s' => $template_class)), 'error');
+    }
+    return $this;
+  }
+
 
   public function preview($parms = array()) {
 
@@ -840,7 +883,7 @@ class FrxEditor {
       $r_link = str_replace('/', '.', $this->report_name);
       $parms = $_GET;
       unset($parms['q']);
-      $links = l('Add data', "reports/$r_link/edit/select-data", array('query' => $parms));
+      $links = l('Add data', "reports/$r_link/edit/select-data/add-data", array('query' => $parms));
     }
     Frx::Data()->pop();
     $content = array(
@@ -872,11 +915,11 @@ class FrxEditor {
       $block_name = (string)$frx['block'];
       $block_link = str_replace('/', '.', $block_name);
       $report_name = str_replace('/', '.' , $this->report_name);
-      //$b=Frx::BlockEditor($block_name)->block;
+      $b = Frx::RepoMan()->loadBlock($block_name);
       $options = array();
       if ($context) $options['query'] = $context;
-
-      $o = '<div class="forena-edit-links">' . l($block_name, "reports/$report_name/edit/edit-data/$block_link/$id", $options ) . "</div>";
+      $o .= '<div class="forena-edit-links">' . l('Insert Data', "reports/$report_name/edit/select-data/prepend-data/$id") . "</div>";
+      $o .= '<div class="forena-edit-links">' . l($block_name, "reports/$report_name/edit/edit-data/$block_link/$id", $options ) . "</div>";
     }
     return $o;
 

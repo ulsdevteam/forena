@@ -140,7 +140,7 @@ function forena_create_report_submit($form, &$form_state) {
     $edit = '/edit';
   }
   else {
-    $edit = '/edit/seletc-data';
+    $edit = '/edit/select-data/add-data';
   }
   $form_state['redirect']= $desc['i_link'] . $edit;
 
@@ -194,7 +194,7 @@ function forena_report_preview($report_name) {
  * @param $form_state Array of block type
  * @return unknown_type
  */
-function forena_report_data_block_form($formid, &$form_state, $report_name, $block_name='', $id='', $action='add-data') {
+function forena_report_data_block_form($formid, &$form_state, $report_name, $action, $block_name, $id='') {
   $config = array();
   $r = Frx::Editor($report_name);
   // List of templates
@@ -215,26 +215,38 @@ function forena_report_data_block_form($formid, &$form_state, $report_name, $blo
   }
   //The default submit handler
   //If someone presses enter, this handler will execute
+  $form['action'] = array(
+    '#type' => 'value',
+    '#value' => $action,
+  );
 
   $form['add'] = array(
-      '#type' => 'submit',
-      '#value' => 'Add',
-      '#submit' => array('forena_report_add_template_submit'),
-      '#access' => $action=='add-data',
+    '#type' => 'submit',
+    '#value' => 'Add',
+    '#submit' => array('forena_report_add_template_submit'),
+    '#access' => $action=='add-data',
   );
 
   $form['update'] = array(
-      '#type' => 'submit',
-      '#value' => 'Update',
-      '#submit' => array('forena_report_edit_template_submit'),
-      '#access' => $action=='edit-data',
+    '#type' => 'submit',
+    '#value' => 'Update',
+    '#submit' => array('forena_report_edit_template_submit'),
+    '#access' => $action=='edit-data',
+  );
+
+  $form['prepend'] = array(
+    '#type' => 'submit',
+    '#value' => 'Insert',
+    '#submit' => array('forena_report_prepend_template_submit'),
+    '#access' => $action=='prepend-data',
   );
 
   $form['cancel'] = array(
-      '#type' => 'submit',
-      '#value' => 'Cancel',
-      '#submit' => array('forena_update_cancel'),
+    '#type' => 'submit',
+    '#value' => 'Cancel',
+    '#submit' => array('forena_update_cancel'),
   );
+
   $form['report_name'] = array(
   	'#type' => 'value',
     '#value' => $report_name,
@@ -271,7 +283,7 @@ function forena_report_data_block_form($formid, &$form_state, $report_name, $blo
   );
 
   $form['template']['config'] = array_merge($form['template']['config'], $r->templateConfigForm($template_class, $config));
-  $form['template']['config']['preview'] = array('#type' => 'submit', '#value' => t('Preview'), '#submit' => array('forena_template_preview'));
+  $form['template']['config']['preview'] = array('#type' => 'button', '#value' => t('Preview'));
 
 
   // Generate a preview
@@ -307,16 +319,6 @@ function forena_template_callback($form, &$form_state) {
 }
 
 /**
- * PReview the template data
- * @param unknown $form
- * @param unknown $form_state
- */
-function forena_template_preview($form, &$form_state) {
-  $form_state['storage']['config'] = $form_state['values']['config'];
-  $form_state['rebuild'] = TRUE;
-}
-
-/**
  * Edit an existing id based on the template.
  * @param unknown $form
  * @param unknown $form_state
@@ -330,7 +332,7 @@ function forena_report_edit_template_submit($form, &$form_state){
   $r->applyTemplate($id, $template_class, $config);
   $r->update();
   $parms = $_GET;
-  $unset($parms['q']);
+  unset($parms['q']);
   $form_state['redirect'] = array("reports/$report_name/edit", array('query' => $parms));
 }
 
@@ -342,14 +344,26 @@ function forena_report_add_template_submit($form, &$form_state) {
   Frx::Editor($report_name)->addBlock($block_name, $template_class, (array)$config, $id);
   Frx::Editor() ->update();
   $parms = $_GET;
-  $unset($parms['q']);
+  unset($parms['q']);
   $form_state['redirect'] = array("reports/$report_name/edit", array('query' => $parms));
   }
+
+function forena_report_prepend_template_submit($form, &$form_state) {
+  extract($form_state['values']);
+  $parms = $form_state['storage']['parms'];
+  $r = Frx::Editor($report_name);
+  $r->setEditorParms($parms);
+  Frx::Editor($report_name)->prependBlock($block_name, $template_class, (array)$config, $id);
+  Frx::Editor() ->update();
+  $parms = $_GET;
+  unset($parms['q']);
+  $form_state['redirect'] = array("reports/$report_name/edit", array('query' => $parms));
+}
 
 function forena_update_cancel($form, &$form_state) {
   extract($form_state['values']);
   $parms = $_GET;
-  $unset($parms['q']);
+  unset($parms['q']);
   $form_state['redirect'] = array("reports/$report_name/edit", array('query' => $parms));
   }
 
@@ -359,14 +373,14 @@ function forena_report_save_cancel($form, &$form_state) {
   $form_state['redirect'] = 'forena';
 }
 
-function forena_select_block_list($report_name, $id='') {
+function forena_select_block_list($report_name, $action='add-data', $id='') {
   $header = array(t('Block'), t('Access'), t('Keywords'));
   $blocks = Frx::DataFile()->userBlocks();
   $data=array();
 
   foreach ($blocks as $block_name => $block) {
     $blck = str_replace('/', '.', $block_name);
-    $path = "reports/$report_name/edit/preview-data/add-data/$blck";
+    $path = "reports/$report_name/edit/preview-data/$action/$blck";
     // Build the table.
     if ($id) $path .= "/$id";
     $data[] = array(
@@ -389,7 +403,6 @@ function forena_select_block_list($report_name, $id='') {
  * @return multitype:string unknown multitype:string unknown  multitype:string  multitype:string Ambigous <The, string, A, Optional>
  */
 function forena_report_block_select_form($form, &$form_state, $report_name, $action, $block_name, $id='') {
-
   $form['action'] = array(
       '#type' => 'value',
       '#value' => $action,

@@ -185,35 +185,14 @@ function forena_menu() {
      'file' => 'forena.admin.inc',
   );
 
-  $items['reports/%/edit-data/preview'] = array(
-     'title' => 'Preview',
-     'page callback' => 'forena_report_preview',
-     'page arguments' => array(1),
-     'access arguments' => array('design any report'),
-     'description' => 'Preview the report',
-     'file' => 'forena.report.inc',
-     'type' => MENU_DEFAULT_LOCAL_TASK,
-
-  );
-
   $items['reports/%/edit/edit-data/%/%'] = array(
      'title' => 'Edit Block',
      'file' => 'forena.report.inc',
      'page callback' => 'drupal_get_form',
-     'page arguments' => array('forena_report_data_block_form', 1, 4, 5, 'edit-data'),
+     'page arguments' => array('forena_report_data_block_form', 1, 3, 4, 5, 'edit-data'),
      'access arguments' => array('design any report'),
      'description' => 'Add a data block to your report',
      'type' => MENU_CALLBACK,
-  );
-
-  $items['reports/%/edit/select-data'] = array(
-      'title' => 'Select Data Block',
-      'file' => 'forena.report.inc',
-      'page callback' => 'forena_select_block_list',
-      'page arguments' => array(1),
-      'access arguments' => array('design any report'),
-      'description' => 'Select the data blcok to add',
-      'type' => MENU_CALLBACK,
   );
 
   $items['reports/%/edit/select-data/%'] = array(
@@ -221,6 +200,17 @@ function forena_menu() {
       'file' => 'forena.report.inc',
       'page callback' => 'forena_select_block_list',
       'page arguments' => array(1, 4),
+      'access arguments' => array('design any report'),
+      'description' => 'Select the data blcok to add',
+      'type' => MENU_CALLBACK,
+  );
+
+
+  $items['reports/%/edit/select-data/%/%'] = array(
+      'title' => 'Select Data Block',
+      'file' => 'forena.report.inc',
+      'page callback' => 'forena_select_block_list',
+      'page arguments' => array(1, 4, 5),
       'access arguments' => array('design any report'),
       'description' => 'Select the data blcok to add',
       'type' => MENU_CALLBACK,
@@ -250,7 +240,7 @@ function forena_menu() {
       'title' => 'Data',
       'file' => 'forena.report.inc',
       'page callback' => 'drupal_get_form',
-      'page arguments' => array('forena_report_data_block_form', 1, 4),
+      'page arguments' => array('forena_report_data_block_form', 1, 3, 4),
       'access arguments' => array('design any report'),
       'description' => 'Edit a data block on the report. ',
       'type' => MENU_CALLBACK,
@@ -260,7 +250,17 @@ function forena_menu() {
       'title' => 'Add Data',
       'file' => 'forena.report.inc',
       'page callback' => 'drupal_get_form',
-      'page arguments' => array('forena_report_data_block_form', 1, 4, 5),
+      'page arguments' => array('forena_report_data_block_form', 1, 3, 4, 5),
+      'access arguments' => array('design any report'),
+      'description' => 'Edit a data block on the report. ',
+      'type' => MENU_CALLBACK,
+  );
+
+  $items['reports/%/edit/prepend-data/%/%'] = array(
+      'title' => 'Add Data',
+      'file' => 'forena.report.inc',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('forena_report_data_block_form', 1, 3, 4, 5),
       'access arguments' => array('design any report'),
       'description' => 'Edit a data block on the report. ',
       'type' => MENU_CALLBACK,
