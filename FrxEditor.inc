@@ -919,7 +919,10 @@ class FrxEditor {
       $options = array();
       if ($context) $options['query'] = $context;
       $o .= '<div class="forena-edit-links">' . l('Insert Data', "reports/$report_name/edit/select-data/prepend-data/$id") . "</div>";
-      $o .= '<div class="forena-edit-links">' . l($block_name, "reports/$report_name/edit/edit-data/$block_link/$id", $options ) . "</div>";
+      $o .= '<div class="forena-edit-links">'
+         . l($block_name, "reports/$report_name/edit/edit-data/$block_link/$id", $options )
+         . ' ' . l('Delete', "reports/$report_name/edit/delete-data/$id", $options)
+         . "</div>";
     }
     return $o;
 

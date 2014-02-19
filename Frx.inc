@@ -10,6 +10,15 @@ define('FRX_SQL_TOKEN', '/(?<!(:|[a-zA-Z]|[0-9]|[_\.])):[a-zA-Z]([a-zA-Z]|[0-9]|
 
 class Frx {
 
+  /**
+   * Helper method to return current url parameters.
+   * @return unknown
+   */
+  public static function parms() {
+    $parms = $_GET;
+    unset($parms['q']);
+    return $parms;
+  }
 
   /**
    * Skin Factory

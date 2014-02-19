@@ -461,5 +461,44 @@ function forena_report_block_preview($report_name, $action, $block_name, $id='')
 }
 
 
+function forena_report_delete_confirm($form, $form_state, $report_name, $id) {
+  $parms = $_GET;
+  unset($parms['q']);
+
+  $form['report_name'] = array(
+    '#type' => 'value',
+    '#value' => $report_name,
+  );
+
+  $form['id'] = array(
+    '#type' => 'value',
+    '#value' => $id,
+  );
+  $path = array('path' => "reports/$report_name/edit", 'options' => array('query' => $parms));
+  $form = confirm_form(
+    $form,
+    t('Are you sure you would like to remove the %s content', array('%s' => $id)),
+    $path,
+    'Detail blocks contain inside this block will also be deleted.',
+    'Yes', 'No'
+  );
+  return $form;
+}
+
+function forena_report_delete_confirm_submit($form, &$form_state) {
+  extract($form_state['values']);
+
+  // Delete the block
+  $r = Frx::Editor($report_name);
+  $r->deleteNode($id);
+  $r->update();
+
+
+  $parms = $_GET;
+  unset($parms['q']);
+  $form_state['redirect'] = array("reports/$report_name/edit", array('query' => $parms));
+}
+
+
 
 
