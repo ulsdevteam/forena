@@ -25,7 +25,7 @@
       to see the possibilities for inter-connecting reports</p>
   </div>
   <div frx:block="sampledb/users_by_state" id="forena-1">
-    <svg id="state-chart" frx:block="sampledb/users_by_state"
+    <svg id="state-chart"
       frx:renderer="FrxSVGGraph" frx:type="bargraph"
       frx:xpath="*[total&gt;10000]"
       frx:color="{color}"

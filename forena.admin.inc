@@ -247,7 +247,6 @@ function forena_settings_submit($form, &$form_state) {
 
 function forena_settings_sync_submit($form, &$form_state) {
   forena_sync_reports($form_state['values']['sync_overwrite']);
-  drupal_set_message(t('Report cache cleared'));
 }
 
 function forena_format_form($formid, $form_state, $report_name) {

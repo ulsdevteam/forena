@@ -499,6 +499,14 @@ function forena_report_delete_confirm_submit($form, &$form_state) {
   $form_state['redirect'] = array("reports/$report_name/edit", array('query' => $parms));
 }
 
+/**
+ * Form field translation editor.
+ * @param unknown $form
+ * @param unknown $form_state
+ * @param unknown $report_name
+ * @param unknown $id
+ * @return multitype:string multitype:string  Ambigous <The, string, A, Optional>
+ */
 function forena_report_field_form($form, &$form_state, $report_name, $id) {
   $r = Frx::Editor($report_name);
 
@@ -613,6 +621,60 @@ function forena_report_field_form_submit($form, &$form_state) {
   $parms = Frx::parms();
   $form_state['redirect'] = array("reports/$name/edit", array('query' => $parms));
 
+}
+
+function forena_report_parameters_Form($form, &$form_state, $report_name) {
+  $r = Frx::Editor($report_name);
+  $parameters = $r->frxReport->parametersArray();
+  $form_state['storage']['parameters'] = $parameters;
+  $links = array();
+  $links[] = array('href' => $r->report_link . '/edit/params/add', 'title' => 'Add Parameter' );
+  $form['add_link'] = array(
+      '#type' => 'markup',
+      '#markup' => theme('links',
+          array(
+              'links' => $links,
+              'attributes' => array('class' => 'action-links'),
+          )
+      )
+  );
+  foreach ($parameters as $parameter) {
+    $ctl = array();
+    $ctl['id'] = array(
+        '#markup' => check_plain($id),
+        );
+    $ctl['label'] = array(
+    	'#type' => 'textfield',
+      '#size' => 30,
+    );
+
+    $ctl['default'] = array(
+    	'#type' => 'textfield',
+      '#size' => 30,
+    );
+
+    $ctl['weight'] = array(
+    	'#type' => 'weight',
+
+    );
+
+  }
+
+  $form['update'] = array(
+  	'#type' => 'submit',
+    '#value' => t('Update'),
+  );
+
+  $form['cancel'] = array(
+  	'#type' => 'submit',
+    '#value' => t('Cancel'),
+    '#submit' => array('forena_update_cancel'),
+  );
+
+}
+
+function theme_forena_report_parameters_form($variables) {
+  return $output;
 }
 
 
