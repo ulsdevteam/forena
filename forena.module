@@ -195,6 +195,16 @@ function forena_menu() {
    'type' => MENU_CALLBACK,
   );
 
+  $items['reports/%/edit/edit-field/%'] = array(
+      'title' => 'Edit Block',
+      'file' => 'forena.report.inc',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('forena_report_field_form', 1, 4),
+      'access arguments' => array('design any report'),
+      'description' => 'Add a data block to your report',
+      'type' => MENU_CALLBACK,
+  );
+
   $items['reports/%/edit/select-data/%'] = array(
     'title' => 'Select Data Block',
     'file' => 'forena.report.inc',

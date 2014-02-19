@@ -141,7 +141,7 @@ class FrxRenderer {
       $frx = $node->attributes(FRX_NS);
       $tag = $node->getName();
 
-      if ($this->frxReport->preview_mode) $o .= Frx::Editor()->editLinks($frx, $id, $context);
+      if ($this->frxReport->preview_mode) $o .= Frx::Editor()->blockLinks($frx, $id, $context);
 
 
       if ((string)$frx['block']) {
@@ -236,7 +236,7 @@ class FrxRenderer {
             $r_attr_text .=  ' ' . $key . '="' . (string)$value . '"';
           }
 
-          if ($include_root) $o .= $this->teng->replace('<' . $tag . $r_attr_text . '>');
+          if ($include_root) $o .= $this->teng->replace('<' . $tag . $r_attr_text . '>', TRUE);
           foreach ($dom_node->childNodes as $child) {
             $o .= $this->renderDomNode($child);
           }
@@ -255,7 +255,7 @@ class FrxRenderer {
           }
         }
         else {
-          if ($include_root) $o .= $this->teng->replace('<' . $tag . $attr_text . '>');
+          if ($include_root) $o .= $this->teng->replace('<' . $tag . $attr_text . '>', TRUE);
 
           // None found, so render children
           foreach ($dom_node->childNodes as $child) {
@@ -280,7 +280,7 @@ class FrxRenderer {
           return '';
         }
       }
-      $o .= $this->teng->replace($text);
+      $o .= $node_xml;
     }
 
     // Restore link processing.

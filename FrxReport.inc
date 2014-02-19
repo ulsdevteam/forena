@@ -254,6 +254,29 @@ class FrxReport {
     return $l;
   }
 
+
+  public function getField($id) {
+    $field = array_fill_keys(array('default', 'link', 'add-query', 'class', 'rel', 'format', 'format-string', 'target'), '');
+    if ($this->fields) {
+      $path = 'frx:field[@id="' . $id . '"]';
+      $formatters = $this->fields->xpath($path);
+      if ($formatters) {
+        $formatter = $formatters[0];
+        //@TODO: Replace the default extraction with something that will get sub elements of the string
+        $field['default'] = (string)$formatter;
+        $field['link'] = (string)$formatter['link'];
+        $field['add-query'] = (string)$formatter['add-query'];
+        $field['class'] = (string)$formatter['class'];
+        $field['rel'] = (string)$formatter['rel'];
+        $field['format'] = (string) $formatter['format'];
+        $field['format-string'] = (string) $formatter['format-string'];
+        $field['target'] = (string) $formatter['target'];
+      }
+    }
+
+    return $field;
+  }
+
   /*
    * Formatter used by the syntax engine to alter data that gets extracted.
    * This invokes the field translation
@@ -335,6 +358,7 @@ class FrxReport {
         array('fragment' => $fragment, 'query' => $data, 'attributes' => $attributes, 'absolute' => TRUE)
       );
     }
+    if ($this->preview_mode) $value .= Frx::Editor()->fieldLink($key, $value);
     return $value;
   }
 

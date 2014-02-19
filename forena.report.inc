@@ -499,6 +499,123 @@ function forena_report_delete_confirm_submit($form, &$form_state) {
   $form_state['redirect'] = array("reports/$report_name/edit", array('query' => $parms));
 }
 
+function forena_report_field_form($form, &$form_state, $report_name, $id) {
+  $r = Frx::Editor($report_name);
+
+  $form['report_name'] = array(
+  	'#type' => 'value',
+    '#value' => $report_name,
+  );
+  $field = $r->frxReport->getField($id);
+  $form['field'] = array('#tree' => TRUE);
+
+  $form['field']['id'] = array(
+      '#type' => 'value',
+      '#value' => $id,
+  );
+
+  $form['field']['id_label'] = array(
+  	'#type' => 'item',
+    '#markup' => $id,
+    '#title' => t('token'),
+  );
+
+  $form['field']['format'] = array(
+      '#type' => 'textfield',
+      '#title' => t('format'),
+      '#default_value' => $field['format'],
+      '#size' => 30,
+      '#autocomplete_path' => 'forena/fields/format/autocomplete',
+      '#description' => t('Format a date and time field by entering the name of a supported format function. Enter a "*" to see all available formats.')
+  );
+
+  $form['field']['format-string'] = array(
+      '#type' => 'textfield',
+      '#title' => t('format-string'),
+      '#default_value' => $field['format-string'],
+      '#size' => 30,
+      '#description' => t('The display type of your format.')
+  );
+
+  $form['field']['link'] = array(
+      '#type' => 'textfield',
+      '#title' => t('link'),
+      '#default_value' => $field['link'],
+      '#size' => 100,
+      '#maxlength' => 256,
+      '#description' => t('Create a link that incorporates this field, e.g "profile/{field_name}" will create a link to this field_name\'s profile. *Note the field must be wrapped in {}.')
+  );
+
+  $form['field']['add-query'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Pass through url parameters'),
+      '#default_value' => $field['add-query'],
+      '#description' => t('Automatically pass through url parameters on this link'),
+  );
+
+  $form['field']['rel'] = array(
+      '#type' => 'textfield',
+      '#title' => t('rel') ,
+      '#description' => t('Relationship attribute to apply to the link.'),
+      '#size' => 100,
+      '#maxlength' => 256,
+      '#default_value' => $field['rel'],
+  );
+
+  $form['field']['class'] = array(
+      '#type' => 'textfield',
+      '#title' => t('class') ,
+      '#description' => t('Class applied to be applied to the link.'),
+      '#size' => 100,
+      '#maxlength' => 256,
+      '#default_value' => $field['class'],
+  );
+
+  $form['field']['target'] = array(
+      '#type' => 'textfield',
+      '#title' => t('target'),
+      '#default_value' => $field['target'],
+      '#size' => 30,
+      '#description' => t('Link target eg. _BLANK,  Targets that begin with "popup" will be opened in a new window using javascript.')
+  );
+
+  $form['field']['default'] = array(
+      '#type' => 'textfield',
+      '#title' => t('default value'),
+      '#default_value' => $field['default'],
+      '#size' => 30,
+      '#description' => t('The value to be displayed in the report when no value exists.')
+  );
+
+  $form['update'] = array(
+    '#type' => 'submit',
+    '#value' => t('Update'),
+  );
+
+  $form['cancel'] = array(
+    '#type' => 'submit',
+    '#value' => t('Cancel'),
+    '#submit' => array('forena_update_cacnel'),
+  );
+
+  return $form;
+}
+
+function forena_report_field_form_submit($form, &$form_state) {
+  $values = $form_state['values'];
+  $name = $values['report_name'];
+
+  $r = Frx::Editor($name);
+  /*now build the fields*/
+  $fields = $values['field'];
+  $r->setFields(array($fields));
+  $r->update();
+  $parms = Frx::parms();
+  $form_state['redirect'] = array("reports/$name/edit", array('query' => $parms));
+
+}
+
+
 
 
 

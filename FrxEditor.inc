@@ -15,6 +15,7 @@ class FrxEditor {
   public $simplexml;
   public $title;
   public $report_name;
+  public $report_link;
   public $frx_attributes;
   public $cache;
   public $frxReport;
@@ -26,6 +27,7 @@ class FrxEditor {
     <!ENTITY nbsp "&#160;">
     ]>';
   public $xmlns = 'urn:FrxReports';
+  private $field_ids;
   private $xpq;
 
 
@@ -62,6 +64,7 @@ class FrxEditor {
   public function rename($name) {
     $old_name = $this->report_name;
     $this->report_name = $name;
+    $this->report_link = 'reports/' . str_replace('/', '.', $name);
     unset($_SESSION['forena_report_editor'][$old_name]);
     $this->update();
   }
@@ -88,6 +91,7 @@ class FrxEditor {
     $r_text='';
     $dom = $this->dom;
     $this->report_name = $report_name = $this->desc['name'];
+    $this->report_link = 'reports/' . str_replace('/', '.', $report_name);
     // Load the latest copy of the report editor
     if ($report_name) {
       if (isset($_SESSION['forena_report_editor'][$report_name]) && $edit) {
@@ -307,6 +311,8 @@ class FrxEditor {
       'default');
 
   }
+
+
 
   /**
    * Set document generation types that apply to this report.
@@ -820,6 +826,7 @@ class FrxEditor {
    */
   function report($parms = array(), $print = FALSE, $no_cache=FALSE) {
     global $user;
+    $this->field_ids = array();
     $content = array();
     $format = $this->desc['format'];
     $r = $this->frxReport;
@@ -853,6 +860,7 @@ class FrxEditor {
       if (@$r->cache['per_doctype']) @$cid .= ':' . $format;
       $cache = cache_get($cid, 'cache');
       if (!$cache || (isset($r->cache['duration']) && $cache->expire < time()) || $no_cache) {
+        $this->field_ids = array();
         $r->render($format);
         $time = null;
         if (isset($r->cache['duration'])) {
@@ -883,7 +891,7 @@ class FrxEditor {
       $r_link = str_replace('/', '.', $this->report_name);
       $parms = $_GET;
       unset($parms['q']);
-      $links = l('Add data', "reports/$r_link/edit/select-data/add-data", array('query' => $parms));
+      $links = $this->l_icon("reports/$r_link/edit/select-data/add-data", 'doc-option-add.png', 'Add Data', $parms);
     }
     Frx::Data()->pop();
     $content = array(
@@ -908,8 +916,43 @@ class FrxEditor {
 
   }
 
+  public function fieldLink($id, $value) {
+    $o = '';
+    if (!isset($this->field_ids[$id])) {
+      $report_link = $this->report_link;
+      $image = array(
+          'path' => url("misc/configure.png"),
+          'alt' => t('Configure'),
+          'title' => t('Configure'),
+      );
+      $image = theme('image', $image);
+      $id = urlencode($id);
+      $o= l($image, "$report_link/edit/edit-field/$id", array('html' => TRUE));
+      $this->field_ids[$id] = 1;
+    }
+    return $o;
 
-  public function editLinks($frx, $id='', $context = array()) {
+  }
+
+  public function foreachLinks($id='') {
+
+  }
+
+
+  public function l_icon($link, $name, $alt, $context=array()) {
+    $path = drupal_get_path('module', 'forena') . '/icons';
+    $image = array(
+      'path' => url("$path/$name"),
+    	'alt' => t($alt),
+      'title' => t($alt),
+    );
+    $image = theme('image', $image);
+    $options = array('query' => $context, 'html' => TRUE);
+    return l($image, $link, $options);
+  }
+
+
+  public function blockLinks($frx, $id='', $context = array()) {
     $o = '';
     if ($frx['block']) {
       $block_name = (string)$frx['block'];
@@ -918,10 +961,10 @@ class FrxEditor {
       $b = Frx::RepoMan()->loadBlock($block_name);
       $options = array();
       if ($context) $options['query'] = $context;
-      $o .= '<div class="forena-edit-links">' . l('Insert Data', "reports/$report_name/edit/select-data/prepend-data/$id") . "</div>";
+      $o .= '<div class="forena-edit-links">' . $this->l_icon("reports/$report_name/edit/select-data/prepend-data/$id", 'doc-option-add.png', 'Add Data').  "</div>";
       $o .= '<div class="forena-edit-links">'
          . l($block_name, "reports/$report_name/edit/edit-data/$block_link/$id", $options )
-         . ' ' . l('Delete', "reports/$report_name/edit/delete-data/$id", $options)
+         . ' ' . $this->l_icon("reports/$report_name/edit/delete-data/$id", 'doc-option-remove.png', 'Remove Data',  $context)
          . "</div>";
     }
     return $o;
