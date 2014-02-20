@@ -140,6 +140,11 @@ class FrxEditor {
     menu_rebuild();
   }
 
+  public function delete() {
+    $filepath = $this->report_name . '.frx';
+    $do = Frx::File()->delete($filepath);
+  }
+
   /**
    * Set the value of an element within the report
    * @param String $xpath Xpath to element being saved
@@ -350,7 +355,7 @@ class FrxEditor {
     $this->setFrxHeader('parameters', 'parm',
     $parmElements,
     array('id', 'label', 'require', 'desc', 'data_source', 'data_field', 'label_field', 'type', 'class', 'options'),
-      'value');
+      'default');
   }
 
 
@@ -362,7 +367,7 @@ class FrxEditor {
       $this->setFrxHeader('parameters', 'parm',
       $parms,
       array('id', 'label', 'require', 'desc', 'data_source', 'data_field', 'type'),
-        'value');
+        'default');
     }
   }
 
@@ -940,7 +945,8 @@ class FrxEditor {
 
 
   public function l_icon($link, $name, $alt, $context=array()) {
-    $path = drupal_get_path('module', 'forena') . '/icons';
+    $path = $name=='configure.png' ? 'misc' : drupal_get_path('module', 'forena') . '/icons';
+
     $image = array(
       'path' => url("$path/$name"),
     	'alt' => t($alt),
@@ -1005,10 +1011,10 @@ class FrxEditor {
     $r = $this->frxReport;
     foreach ($doctypes as $ext) {
       if (array_search($ext, $r->formats) !== FALSE) {
-        $links[] = array('title' => $ext, 'href' => str_replace('/', '.', $this->report_name) . ".$ext");
+        $links[] = array('title' => $ext, 'href' => $this->report_link . ".$ext");
       }
     }
-    if ($links) return array('#theme' => $links, '#links' => $links);
+    if ($links) return array('#theme' => 'links', '#links' => $links);
     return '';
   }
 
