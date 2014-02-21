@@ -1457,9 +1457,6 @@ function forena_theme() {
     	'file' => 'forena.report.inc',
       'render element' => 'form',
     ),
-     'forena_doclinks' => array(
-    	'render element' => 'links',
-    ),
   );
 }
 

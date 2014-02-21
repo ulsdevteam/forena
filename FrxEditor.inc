@@ -834,6 +834,9 @@ class FrxEditor {
     $this->field_ids = array();
     $content = array();
     $format = $this->desc['format'];
+    if ($format == 'web' && $print) {
+      drupal_add_css(drupal_get_path('module', 'forena') . '/forena.css');
+    }
     $r = $this->frxReport;
     // Determine the data to get.
     if (!$parms) {
@@ -1011,10 +1014,13 @@ class FrxEditor {
     $r = $this->frxReport;
     foreach ($doctypes as $ext) {
       if (array_search($ext, $r->formats) !== FALSE) {
-        $links[] = array('title' => $ext, 'href' => $this->report_link . ".$ext");
+        $links[] = array('title' => strtoupper($ext), 'href' => $this->report_link . ".$ext");
       }
     }
-    if ($links) return array('#theme' => 'links', '#links' => $links);
+    if ($links) return array(
+        '#theme' => 'links',
+        '#links' => $links,
+        '#attributes' => array('class' => array('forena-doclinks')));
     return '';
   }
 
