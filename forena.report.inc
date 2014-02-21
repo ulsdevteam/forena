@@ -379,7 +379,7 @@ function forena_report_general_form($form, &$form_state, $report_name) {
   $form['cancel'] = array(
       '#type' => 'submit',
       '#value' => 'Cancel',
-      '#submit' => array('forena_save_cancel'),
+      '#submit' => array('forena_update_cancel'),
   );
 
   return $form;
@@ -1375,7 +1375,7 @@ function forena_report_layout_form($form, &$form_state, $report_name) {
 
   $form['report_name'] = array(
       '#type' => 'value',
-      '#value' => $name,
+      '#value' => $report_name,
   );
 
   $form['attributes'] = array(
@@ -1416,7 +1416,7 @@ function forena_report_layout_form($form, &$form_state, $report_name) {
   $form['buttons']['cancel'] = array(
       '#type' => 'submit',
       '#value' => 'Cancel',
-      '#submit' => array('forena_save_cancel'),
+      '#submit' => array('forena_update_cancel'),
   );  return $form;
 
   return $form;
