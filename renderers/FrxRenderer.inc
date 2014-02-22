@@ -21,8 +21,15 @@ class FrxRenderer {
   public $xmlns = 'urn:FrxReports';
   public $dom;   // Reports root document node.
   public $xpathQuery;
+  public $input_format = 'full_html';
 
 
+  /**
+   * This function is called to give the renderer the current conetxt in report rendering.
+   * It makes sure the renderer has the current DOM nodes dom documnent, and other attributes.
+   * @param DOMElement $domNode
+   * @param FrxReport $frxReport
+   */
   public function initReportNode(DOMElement $domNode, FrxReport $frxReport) {
     $this->reportDocDomNode = $domNode;
     $this->dom = $domNode->ownerDocument;
@@ -40,6 +47,13 @@ class FrxRenderer {
     $this->xpathQuery = new DOMXPath($this->dom);
   }
 
+  /**
+   * A helper function to allow replacement of tokens from inside a renderer wihout
+   * needing to understand the object
+   * @param unknown $text
+   * @param string $raw_mode Field
+   * @return Ambigous <unknown_type, text, mixed, string, unknown>
+   */
   public function replaceTokens($text, $raw_mode=FALSE) {
     return $this->teng->replace($text, $raw_mode);
   }
@@ -301,10 +315,22 @@ class FrxRenderer {
     return $o;
   }
 
+  /**
+   * Default Render action, which simply does normal forena rendering.
+   * You can use renderDomNode at any time to generate the default forena
+   * rendering methods.
+   * @return Ambigous <string, unknown, unknown_type, text, mixed>
+   */
   public function render() {
     return $this->renderDomNode($this->reportDocDomNode);
   }
 
+  /**
+   * Helper function for convergint methods to a standard associated array.
+   * @param unknown $attributes
+   * @param unknown $key
+   * @param unknown $value
+   */
   public static function addAttributes(&$attributes, $key, $value) {
     $parts = explode('_', $key);
     $suff = '';
@@ -322,6 +348,11 @@ class FrxRenderer {
     }
   }
 
+  /**
+   * Starting at the current report node, this function removes all child nodes.  It aso
+   * removes any FRX attributes on the current as well.
+   * @return Ambigous <DOMElement, unknown>
+   */
   public function resetTemplate() {
      $node = $this->reportDocDomNode;
      $this->removeChildren($node);
@@ -413,6 +444,10 @@ class FrxRenderer {
     return $attributes;
   }
 
+  /**
+   * Gives the token replaced attributes of a node.
+   * @return multitype:NULL Ambigous <unknown_type, text, mixed, string, unknown>
+   */
   public function replacedAttributes() {
     $attributes = array();
     if (isset($this->frxAttributes)) foreach ($this->frxAttributes as $key => $data) {
@@ -465,10 +500,21 @@ class FrxRenderer {
     return $form_ctl;
   }
 
+  /**
+   * Default configuration validator. Simply validates header and footer attributes.
+   * @param unknown $config
+   * @return multitype:Ambigous <The, string, A, Optional>
+   */
   public function configValidate(&$config) {
     return $this->validateTextFormats($config, array('header', 'footer'));
   }
 
+  /**
+   * Helper funciton for validating text_format type controls.
+   * @param unknown $config
+   * @param unknown $elements
+   * @return multitype:Ambigous <The, string, A, Optional>
+   */
   public function validateTextFormats(&$config, $elements) {
      $dom = Frx::tempDOM();
      $frag = $dom->createDocumentFragment();
@@ -488,11 +534,20 @@ class FrxRenderer {
      return $errors;
   }
 
+  /**
+   * Default method for extracting configuration information from the template.
+   * This just scrapes teh current child html as the template.
+   */
   public function scrapeConfig() {
     $content = array();
     $this->extractTemplateHTML($this->reportDocDomNode, $content);
   }
 
+  /**
+   * Generate ajax configuration attributes for use in template configurtion forms.
+   * @param string $event
+   * @return multitype:string
+   */
   public function configAjax($event='') {
     $ajax = array(
         'callback' => 'forena_template_callback',
@@ -502,6 +557,16 @@ class FrxRenderer {
     return $ajax;
   }
 
+  /**
+   * Add a node to the existing dom element with attributes
+   * @param $cur_node DOMNode Parent node
+   * @param $indent Integer Text indentation.
+   * @param $tag String Tag name
+   * @param $value String text value of the element
+   * @param $attributes array Html attributes to add
+   * @param $frx_attributes array FRX attributes.
+   * @return void|unknown
+   */
   function addNode($cur_node, $indent, $tag='div', $value='', $attributes=array(), $frx_attributes=array()) {
     $dom = $this->dom;
     if (!$cur_node) {
@@ -554,6 +619,12 @@ class FrxRenderer {
     }
   }
 
+  /**
+   * Extract a list of columns from the data context.
+   * @param $xml SimpleXMLElement The xml data
+   * @param string $path
+   * @return multitype:|multitype:string mixed
+   */
   public function columns($xml, $path='/*/*') {
     //create an array of columns
     if (!is_object($xml)) return array();
@@ -582,6 +653,12 @@ class FrxRenderer {
     return $column_array;
   }
 
+  /**
+   * Add a text node to the current dom node.
+   * @param unknown $cur_node
+   * @param unknown $text
+   * @return unknown
+   */
   function addText($cur_node, $text) {
     $dom = $this->dom;
     $tnode = $dom->createTextNode($text);
@@ -647,8 +724,7 @@ class FrxRenderer {
   }
 
   /**
-   *
-   * Enter description here ...
+   * Generate the template from the configuration.
    * @param string $data_block
    * @param SimpleXMLElement $xml
    * @param array $config
@@ -666,19 +742,6 @@ class FrxRenderer {
     }
     $this->blockDiv($config, $text);
 
-  }
-
-  public function template() {
-    $body = $this->body;
-    $output = '';
-    foreach ($body->childNodes as $node) {
-      $output .= $this->dom->saveXML($node);
-    }
-    return $output;
-  }
-
-  public function asXML() {
-    return $this->dom->saveXML();
   }
 
   /**
@@ -716,6 +779,10 @@ class FrxRenderer {
     return $node;
   }
 
+  /**
+   * Rmove all the children of a dom node in the current report.
+   * @param DOMNode $node
+   */
   public function removeChildren(DOMNode $node) {
     while (isset($node->firstChild) && $node->firstChild->nodeType < 9) {
       $this->removeChildren($node->firstChild);
@@ -723,6 +790,16 @@ class FrxRenderer {
     }
   }
 
+  /**
+   * Convert XML to key value pairs.
+   * This is used in support of graping to get specific key/value pairs in
+   * an array format suitable for passing off to php libraries.
+   * @param unknown $path
+   * @param unknown $data_path
+   * @param string $label_path
+   * @param string $pairs
+   * @return multitype:multitype:number  Ambigous <unknown_type, text, mixed, string, unknown>
+   */
   public function xmlToValues($path, $data_path, $label_path='', $pairs = FALSE) {
     $do = Frx::Data();
     $data = $do->currentContext();
@@ -753,6 +830,12 @@ class FrxRenderer {
     return $values;
   }
 
+  /**
+   * Removes all chidren from the dome node expect those with a tagname specified by the
+   * the $tags argurment
+   * @param $node Parent node to remove from
+   * @param $tags array Tags to eingore
+   */
   public function removeChildrenExcept(DOMNode $node, $tags = array('table')) {
     foreach ($node->childNodes as $child) {
       if ($child->nodeType != XML_ELEMENT_NODE || array_search($child->tagName, $tags)===FALSE) {
@@ -793,6 +876,12 @@ class FrxRenderer {
     }
   }
 
+  /**
+   * Extracts the inner html of all nodes that match a particular xpath expression.
+   * @param $query string xpath query expression
+   * @param DOMNode $context Dom node to use as source
+   * @return String XHTML source
+   */
   public function extractXPathInnerHTML($query, DOMNode $context) {
     $result = $this->xpathQuery->query($query, $context);
     $length = $result->length;
@@ -827,6 +916,4 @@ class FrxRenderer {
     }
     return $attributes;
   }
-
-
 }
