@@ -1198,6 +1198,11 @@ function forena_forena_controls() {
   );
 
   $controls[] = array(
+      'file' => 'renderers/FrxMergeDocument.inc',
+      'class' => 'FrxMergeDocument',
+  );
+
+  $controls[] = array(
     'file' => 'renderers/FrxSource.inc',
     'class' => 'FrxSource',
   );

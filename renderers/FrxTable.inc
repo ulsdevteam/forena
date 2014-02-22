@@ -13,7 +13,7 @@ class FrxTable extends FrxRenderer {
   }
 
   public function generate($xml, $config) {
-
+    $config['class'] = get_class($this);
     $block = @$config['block'];
     $id = @$config['id'];
     if ($block) {

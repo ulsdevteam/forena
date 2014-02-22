@@ -473,7 +473,7 @@ class FrxRenderer {
      $frag = $dom->createDocumentFragment();
      $errors = array();
      foreach ($elements as $element) if (isset($config[$element])) {
-        $config[$element] = $config[$element]['value'];
+        if (isset($config[$element]['value'])) $config[$element] = $config[$element]['value'];
         if ($config[$element]) {
           @$frag->appendXML($config[$element]);
           if (!isset($frag->firstChild)) {
@@ -520,7 +520,10 @@ class FrxRenderer {
 
 
   function addFragment(DOMNode $node, $xml_string, $ctl_name = 'Header') {
-    if ($xml_string) {
+    if (is_array($xml_string) && isset($xml_string['value'])) {
+      $xml_string = $xml_string['value'];
+    }
+    if ($xml_string && !is_array($xml_string)) {
       $frag = $this->dom->createDocumentFragment();
       try {
         @$frag->appendXML($xml_string);

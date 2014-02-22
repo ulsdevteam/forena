@@ -624,14 +624,13 @@ function forena_report_data_block_form($formid, &$form_state, $report_name, $act
   );
 
   $form['template']['config'] = array_merge($form['template']['config'], $r->templateConfigForm($template_class, $config));
-  $form['template']['config']['preview'] = array('#type' => 'button', '#value' => t('Preview'));
+  $form['preview'] = array('#type' => 'button', '#value' => t('Preview'));
 
 
   // Generate a preview
   $parms = $form_state['storage']['parms'];
   $r = Frx::Editor('__report_block_preview__');
   $r->setEditorParms($parms);
-  //$r->templateConfigFormValidate($template_class, $form_state['values']['config'], 'config][');
   $r->addBlock($block_name, $template_class, $config);
   $r->update();
   $preview = $r->preview($parms);
