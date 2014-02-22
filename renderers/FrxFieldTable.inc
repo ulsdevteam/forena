@@ -10,6 +10,9 @@ class FrxFieldTable extends FrxRenderer {
     $config['class'] = 'FrxFieldTable';
     $div = $this->blockDiv($config);
     $columns = $this->columns($xml);
+    // PUt on the header
+    $this->removeChildrenExcept($div, array('table'));
+    $this->addFragment($div, $config['header']);
     $table = $this->setFirstNode($div, 4, 'table');
     $this->removeChildren($table);
     $r=0;

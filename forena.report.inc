@@ -548,11 +548,12 @@ function forena_report_data_block_form($formid, &$form_state, $report_name, $act
   $id = isset($form_state['storage']['id']) ? $form_state['storage']['id'] : $id;
   $template_class = isset($form_state['values']['template_class']) ? $form_state['values']['template_class'] : 'FrxTable';
   if (isset($form_state['values']['config'])) {
-    $config = $form_state['values']['config'];
+    $config = array_merge($form_state['storage']['config'], $form_state['values']['config']);
   }
   elseif ($id) {
     $template_class = $r->scrapeBlockConfig($id, $config);
   }
+  $form_state['storage']['config'] = $config;
   //The default submit handler
   //If someone presses enter, this handler will execute
   $form['action'] = array(
@@ -630,6 +631,7 @@ function forena_report_data_block_form($formid, &$form_state, $report_name, $act
   $parms = $form_state['storage']['parms'];
   $r = Frx::Editor('__report_block_preview__');
   $r->setEditorParms($parms);
+  //$r->templateConfigFormValidate($template_class, $form_state['values']['config'], 'config][');
   $r->addBlock($block_name, $template_class, $config);
   $r->update();
   $preview = $r->preview($parms);
@@ -644,6 +646,15 @@ function forena_report_data_block_form($formid, &$form_state, $report_name, $act
   $r->cancel();
 
   return $form;
+}
+
+function forena_report_data_block_form_validate($form, &$form_state) {
+  $r = Frx::Editor($form_state['values']['report_name']);
+  $template_class = $form_state['values']['template_class'];
+  $errors = $r->templateConfigFormValidate($template_class, $form_state['values']['config'], 'template][config][');
+  if ($errors) foreach ($errors as $key => $message) {
+    form_set_error($key, $message);
+  }
 }
 
 /**
@@ -665,6 +676,7 @@ function forena_report_edit_template_submit($form, &$form_state){
   extract($form_state['values']);
   $r = Frx::Editor($report_name);
   $parms = $form_state['storage']['parms'];
+  $config = array_merge($form_state['storage']['config'], $config);
   $r = Frx::Editor($report_name);
   $r->setEditorParms($parms);
   $r->applyTemplate($id, $template_class, $config);
@@ -675,6 +687,7 @@ function forena_report_edit_template_submit($form, &$form_state){
 function forena_report_add_template_submit($form, &$form_state) {
   extract($form_state['values']);
   $parms = $form_state['storage']['parms'];
+  $config = array_merge($form_state['storage']['config'], $config);
   $r = Frx::Editor($report_name);
   $r->setEditorParms($parms);
   Frx::Editor($report_name)->addBlock($block_name, $template_class, (array)$config, $id);

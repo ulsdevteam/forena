@@ -5,6 +5,13 @@
  */
 class FrxTable extends FrxRenderer {
   public $templateName = 'Simple Table';
+
+  public function scrapeConfig() {
+    $config=array();
+    $this->extractTemplateHTML($this->reportDocDomNode, $config, array('table'));
+    return $config;
+  }
+
   public function generate($xml, $config) {
 
     $block = @$config['block'];
@@ -15,6 +22,11 @@ class FrxTable extends FrxRenderer {
     }
     $config['class'] = @$config['class'] ? $config['class'] . ' FrxTable' : 'FrxTable';
     $div = $this->blockDiv($config);
+
+    // PUt on the header
+    $this->removeChildrenExcept($div, array('table'));
+    $this->addFragment($div, $config['header']);
+
     $columns = $this->columns($xml);
 
     $attrs = array('foreach' => '*');

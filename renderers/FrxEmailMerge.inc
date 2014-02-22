@@ -5,8 +5,26 @@
  */
 class FrxEmailMerge extends FrxRenderer {
   public $templateName = 'Mail Merge';
+  public $email_input_format;
+
+  public function __construct() {
+    $this->email_input_format = variable_get('forena_email_input_format', 'full_text');
+  }
+
+  public function scrapeConfig() {
+    $config=array();
+   // $this->extractTemplateHTML($this->reportDocDomNode, $config, array('table'));
+    $config['from'] = $this->extractXPathInnerHTML("//*[@class='email-header-from']", $this->reportDocDomNode);
+    $config['to'] = $this->extractXPathInnerHTML("//*[@class='email-header-to']", $this->reportDocDomNode);
+    $config['cc'] = $this->extractXPathInnerHTML("//*[@class='email-header-cc']", $this->reportDocDomNode);
+    $config['bcc'] = $this->extractXPathInnerHTML("//*[@class='email-header-bcc']", $this->reportDocDomNode);
+    $config['subject'] =  $this->extractXPathInnerHTML("//*[@class='email-header-sbuject']", $this->reportDocDomNode);
+    $config['body'] =  $this->extractXPathInnerHTML("//*[@class='email-body']", $this->reportDocDomNode);
+    return $config;
+  }
 
   public function configForm($config, $xml='') {
+
     $form_ctl['from'] = array(
       '#type' => 'textfield',
       '#title' => t('From'),
@@ -26,12 +44,18 @@ class FrxEmailMerge extends FrxRenderer {
     );
 
     $form_ctl['body'] = array(
-      '#type' => 'textarea',
+      '#type' => 'text_format',
       '#title' => t('Message'),
       '#default_value' => @$config['body'],
     );
 
+
+
     return $form_ctl;
+  }
+
+  public function configValidate(&$config) {
+    $this->validateTextFormats($config, array('body'));
   }
 
   public function generate($xml, $config) {

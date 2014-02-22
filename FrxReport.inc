@@ -37,6 +37,7 @@ class FrxReport {
   public $dom;
   public $format;
   public $link_mode = '';
+  public $xpathQuery;
   public $preview_mode = FALSE;    // This will make the report renderer put in editing controls when TRUE
 
 
@@ -60,7 +61,7 @@ class FrxReport {
         return;
       }
       if (!$success) return;
-      $this->setReport($dom);
+      $this->setReport($dom, $this->xpathQuery);
     }
 
 
@@ -81,9 +82,10 @@ class FrxReport {
    * Sets the report.
    * @param DOMDocument $dom
    */
-  public function setReport(DOMDocument $dom) {
+  public function setReport(DOMDocument $dom, DOMXPath $xpq) {
     $this->dom = $dom;
     $dom->formatOutput = TRUE;
+    $this->xpathQuery = $xpq;
     $rpt_xml = $this->rpt_xml = simplexml_import_dom($this->dom->documentElement);
     $this->missing_parms = FALSE;
 

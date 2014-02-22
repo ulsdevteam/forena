@@ -24,7 +24,7 @@
     <p>This report links back to the sample report 2. You can begin
       to see the possibilities for inter-connecting reports</p>
   </div>
-  <div frx:block="sampledb/users_by_state" id="forena-1">
+  <div frx:block="sampledb/users_by_state" id="forena-1" class="FrxSVGGraph">
     <svg id="state-chart"
       frx:renderer="FrxSVGGraph" frx:type="bargraph"
       frx:xpath="*[total&gt;10000]"

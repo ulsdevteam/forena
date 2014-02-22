@@ -28,7 +28,7 @@ class FrxEditor {
     ]>';
   public $xmlns = 'urn:FrxReports';
   private $field_ids;
-  private $xpq;
+  public $xpq;
 
 
 
@@ -45,7 +45,7 @@ class FrxEditor {
     $dom->preserveWhiteSpace = TRUE;
     $this->load($report_name);
     $this->frxReport = new FrxReport();
-    $this->frxReport->setReport($this->dom);
+    $this->frxReport->setReport($this->dom, $this->xpq);
     $cache = forena_load_cache($this->frxReport->rpt_xml);
     if (isset($cache['access'])) $this->access = forena_check_all_access($cache['access']);
   }
@@ -112,6 +112,7 @@ class FrxEditor {
     libxml_use_internal_errors();
     try {
       @$dom->loadXML($r_text);
+      $this->xpq = new DOMXPath($dom);
     }
     catch (Exception $e) {
       forena_error('Invalid or malformed report document', '<pre>' .
@@ -124,6 +125,8 @@ class FrxEditor {
     $this->document_root = $dom->documentElement;
     $this->simplexml = simplexml_import_dom($dom);
     $dom->formatOutput = TRUE;
+    // Try to make sure garbage collection happens.
+    unset($this->xpq);
     $this->xpq = new DOMXPath($dom);
     $this->xpq->registerNamespace('frx', $this->xmlns);
     return $r_text;
@@ -689,9 +692,9 @@ class FrxEditor {
     }
     if ($template_class) {
       $c = Frx::Template($template_class);
-      if ($c && method_exists($c, 'getConfig')) {
-        $c->initReportNode($node, $$this->frxReport);
-        $config = array_merge($config,$c->getConfig());
+      if ($c && method_exists($c, 'scrapeConfig')) {
+        $c->initReportNode($node, $this->frxReport);
+        $config = array_merge($config,$c->scrapeConfig());
       }
     }
     return $template_class;
@@ -763,7 +766,7 @@ class FrxEditor {
     $b = Frx::BlockEditor($block_name, $this->frxReport->block_edit_mode);
     $data= $b->data($this->parms);
     $this->addParameters($b->tokens());
-    $this->frxReport->setReport($this->dom);
+    $this->frxReport->setReport($this->dom, $this->xpq);
     $c = Frx::Template($template_class);
     if ($c) {
       $c->initReportNode($node, $this->frxReport);
@@ -802,7 +805,7 @@ class FrxEditor {
     $b = Frx::BlockEditor($block_name, $this->frxReport->block_edit_mode);
     $data= $b->data($this->parms);
     $this->addParameters($b->tokens());
-    $this->frxReport->setReport($this->dom);
+    $this->frxReport->setReport($this->dom, $this->xpq);
     $c = Frx::Template($template_class);
     if ($c) {
       $c->initReportNode($node, $this->frxReport);
@@ -992,6 +995,15 @@ class FrxEditor {
       $form = $c->configForm($config);
     }
     return $form;
+  }
+
+  public function templateConfigFormValidate($class, &$config) {
+    $c = Frx::Template($class);
+    $errors = array();
+    if ($c && method_exists($c, 'configValidate')) {
+      $errors = $c->configValidate($config);
+    }
+    return $errors;
   }
 
   /**

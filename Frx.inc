@@ -21,6 +21,23 @@ class Frx {
   }
 
   /**
+   * Temporary dom object used for for fragment importing and manipulation.
+   * We use a singleton here to reduce the memory footprint.
+   * @return DOMDocument
+   */
+  public static function tempDOM() {
+    static $o = '';
+    if (!$o) {
+      $o= new DOMDocument('1.0', 'UTF-8');
+      $o->load('<?xml version="1.0" encoding="UTF-8"?>
+         <!DOCTYPE root [
+         <!ENTITY nbsp "&#160;">
+         ]>');
+    }
+    return $o;
+  }
+
+  /**
    * Skin Factory
    * @return FrxSkin
    */

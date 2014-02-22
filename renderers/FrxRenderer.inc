@@ -19,6 +19,8 @@ class FrxRenderer {
   public $columns;
   public $numeric_columns;
   public $xmlns = 'urn:FrxReports';
+  public $dom;   // Reports root document node.
+  public $xpathQuery;
 
 
   public function initReportNode(DOMElement $domNode, FrxReport $frxReport) {
@@ -31,16 +33,15 @@ class FrxRenderer {
     $this->format = $this->frxReport->format;
     $skin = Frx::Data()->getContext('skin');
     $this->settings = isset($skin['FrxReport']) ? $skin['FrxReport'] : array();
-    $this->reportDocNode->getName();
     $this->htmlAttributes = $node->attributes();
     $this->id = (string)$this->htmlAttributes['id'];
     $this->frxAttributes = $node->attributes(FRX_NS);
+    $this->xpathQuery = $this->frxReport->xpathQuery;
   }
 
   public function replaceTokens($text, $raw_mode=FALSE) {
     return $this->teng->replace($text, $raw_mode);
   }
-
 
   /**
    * Returns true if a node has no children, no attributes (or empty values
@@ -379,12 +380,20 @@ class FrxRenderer {
    * Standard php array containing merged attributes
    * Enter description here ...
    */
-  public function mergedAttributes() {
+  public function mergedAttributes($node = NULL) {
+    if ($node) {
+      $frx_attributes = $node->attributes($this->xmlns);
+      $html_attributes = $node->attributes();
+    }
+    else {
+      $frx_attributes = $this->frxAttributes;
+      $html_attributes = $this->htmlAttributes;
+    }
     $attributes = array();
-    if (isset($this->frxAttributes)) foreach ($this->frxAttributes as $key => $data) {
+    if ($frx_attributes) foreach ($frx_attributes as $key => $data) {
       FrxRenderer::addAttributes($attributes, $key, $data);
     }
-    if (isset($this->htmlAttributes)) foreach ($this->htmlAttributes as $key => $data) {
+    if ($html_attributes) foreach ($html_attributes as $key => $data) {
       FrxRenderer::addAttributes($attributes, $key, $data);
     }
     $skin_data = Frx::Data()->getContext('skin');
@@ -444,22 +453,43 @@ class FrxRenderer {
    */
   public function configForm($config, $xml='') {
     $form_ctl = array();
-
-    $form_ctl['heading'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Heading'),
-        '#default_value' => @$config['heading'],
-    );
-
-    $form_ctl['description'] = array(
-        '#type' => 'textarea',
-        '#title' => t('Description'),
-        '#rows' => 2,
-        '#default_value' => @$config['description'],
-        '#ajax' => $this->configAjax('blur')
+    $form_ctl['header'] = array(
+        '#type' => 'text_format',
+        '#title' => t('Header'),
+        '#rows' => 5,
+        '#default_value' => @$config['header'],
+       // '#ajax' => $this->configAjax('blur')
     );
 
     return $form_ctl;
+  }
+
+  public function configValidate(&$config) {
+    return $this->validateTextFormats($config, array('header', 'footer'));
+  }
+
+  public function validateTextFormats(&$config, $elements) {
+     $dom = Frx::tempDOM();
+     $frag = $dom->createDocumentFragment();
+     $errors = array();
+     foreach ($elements as $element) if (isset($config[$element])) {
+        $config[$element] = $config[$element]['value'];
+        if ($config[$element]) {
+          @$frag->appendXML($config[$element]);
+          if (!isset($frag->firstChild)) {
+            $errors[$element] = t('Invalid XHTML in %s', array('%s' => $element));
+          }
+          else {
+            $this->removeChildren($frag);
+          }
+        }
+     }
+     return $errors;
+  }
+
+  public function scrapeConfig() {
+    $content = array();
+    $this->extractTemplateHTML($this->reportDocDomNode, $content);
   }
 
   public function configAjax($event='') {
@@ -486,6 +516,26 @@ class FrxRenderer {
     $this->setAttributes($node, $attributes, $frx_attributes);
     $cur_node->appendChild($this->dom->createTextNode(""));
     return $node;
+  }
+
+
+  function addFragment(DOMNode $node, $xml_string, $ctl_name = 'Header') {
+    if ($xml_string) {
+      $frag = $this->dom->createDocumentFragment();
+      try {
+        @$frag->appendXML($xml_string);
+      }
+      catch (Exception $e) {
+        return;
+      }
+      if (isset($frag->firstChild)) {
+        $node->appendChild($frag);
+      }
+      else {
+        drupal_set_message(t('Invalid XHTML in %s.', array('%s' => $ctl_name)), 'error', FALSE);
+      }
+
+    }
   }
 
   public function columns($xml, $path='/*/*') {
@@ -686,5 +736,81 @@ class FrxRenderer {
     }
     return $values;
   }
+
+  public function removeChildrenExcept(DOMNode $node, $tags = array('table')) {
+    foreach ($node->childNodes as $child) {
+      if ($child->nodeType != XML_ELEMENT_NODE || array_search($child->tagName, $tags)===FALSE) {
+        $this->removeChildren($child);
+        $node->removeChild($child);
+      }
+    }
+  }
+
+
+  /**
+   * Get the textual representations of html for the configuration engine.
+   */
+  public function extractTemplateHTML(DOMNode $node, &$content, $tags = array()) {
+    $cur_section = 'header';
+    if (!$content) $content = array('header' => '', 'content' => '', 'footer' => '');
+    if (!$tags) $cur_section = 'content';
+    foreach ($node->childNodes as $child) {
+      switch ($child->nodeType) {
+      	case XML_ELEMENT_NODE:
+      	  if (array_search($child->tagName, $tags)!==FALSE) {
+      	    $cur_section = 'content';
+      	  }
+      	  elseif ($tags && $cur_section == 'content') {
+      	    $cur_section = 'footer';
+      	  }
+      	  $content[$cur_section] .= $this->dom->saveXML($child);
+      	  break;
+      	case XML_TEXT_NODE:
+      	case XML_ENTITY_REF_NODE:
+      	case XML_ENTITY_NODE:
+      	  $content[$cur_section] .= $child->textContent;
+      	  break;
+      	case XML_COMMENT_NODE:
+      	  $content[$cur_section] .= '<!--' . $child->data . '-->';
+          break;
+      }
+    }
+  }
+
+  public function extractXPathInnerHTML($query, DOMNode $context) {
+    $result = $this->xpathQuery->query($query, $context);
+    $length = $result->length;
+    $content = array('content' => '');
+    for ($i=0; $i<$length; $i++) {
+      $this->extractTemplateHTML($result->item($i), $content, array());
+    }
+    return $content['content'];
+  }
+
+  /**
+   * Puts attributes back in array format prior to rendering.
+   * @param unknown $attributes
+   */
+  public function arrayAttributes($attributes) {
+    $remove_attrs = array();
+    foreach ($attributes as $key => $value) {
+      if (is_array($value)) {
+        $i=0;
+        foreach($value as $idx => $v) {
+          $i++;
+          $new_key = $key . '_' . trim($i);
+          $attributes[$new_key] = (string)$v;
+        }
+        $remove_attrs [] = $key;
+      }
+    }
+
+    foreach ($remove_attrs as $key) {
+      unset($attributes[$key]);
+
+    }
+    return $attributes;
+  }
+
 
 }
