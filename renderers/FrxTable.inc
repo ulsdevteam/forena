@@ -25,7 +25,7 @@ class FrxTable extends FrxRenderer {
 
     // PUt on the header
     $this->removeChildrenExcept($div, array('table'));
-    $this->addFragment($div, $config['header']);
+    if (isset($config['header']['value'])) $this->addFragment($div, $config['header']['value']);
 
     $columns = $this->columns($xml);
 
@@ -45,5 +45,7 @@ class FrxTable extends FrxRenderer {
       $this->addNode($throw, 10, 'th', $label);
       $this->addNode($tdrow, 10, 'td', '{' . $col . '}');
     }
+
+    if (isset($config['footer']['value'])) $this->addFragment($div, $config['footer']['value']);
   }
 }

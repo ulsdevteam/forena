@@ -29,7 +29,7 @@ class Frx {
     static $o = '';
     if (!$o) {
       $o= new DOMDocument('1.0', 'UTF-8');
-      $o->load('<?xml version="1.0" encoding="UTF-8"?>
+      @$o->load('<?xml version="1.0" encoding="UTF-8"?>
          <!DOCTYPE root [
          <!ENTITY nbsp "&#160;">
          ]>');

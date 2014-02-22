@@ -19,7 +19,7 @@ class FrxEmailMerge extends FrxRenderer {
     $config['cc'] = $this->extractXPathInnerHTML("//*[@class='email-header-cc']", $this->reportDocDomNode);
     $config['bcc'] = $this->extractXPathInnerHTML("//*[@class='email-header-bcc']", $this->reportDocDomNode);
     $config['subject'] =  $this->extractXPathInnerHTML("//*[@class='email-header-sbuject']", $this->reportDocDomNode);
-    $config['body'] =  $this->extractXPathInnerHTML("//*[@class='email-body']", $this->reportDocDomNode);
+    $config['body']['value'] =  $this->extractXPathInnerHTML("//*[@class='email-body']", $this->reportDocDomNode);
     return $config;
   }
 
@@ -46,7 +46,7 @@ class FrxEmailMerge extends FrxRenderer {
     $form_ctl['body'] = array(
       '#type' => 'text_format',
       '#title' => t('Message'),
-      '#default_value' => @$config['body'],
+      '#default_value' => @$config['body']['value'],
     );
 
 
@@ -63,6 +63,7 @@ class FrxEmailMerge extends FrxRenderer {
     $to = $this->extract('to', $config);
     $subject = $this->extract('subject', $config);
     $body = $this->extract('body', $config);
+    $body = $body['value'];
     $config['foreach'] = "*";
     $div = $this->blockDiv($config);
     $doc = $this->addNode($div, 4, 'div', NULL, array('class' => 'email-document'));

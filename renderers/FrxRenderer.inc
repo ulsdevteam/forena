@@ -36,7 +36,8 @@ class FrxRenderer {
     $this->htmlAttributes = $node->attributes();
     $this->id = (string)$this->htmlAttributes['id'];
     $this->frxAttributes = $node->attributes(FRX_NS);
-    $this->xpathQuery = $this->frxReport->xpathQuery;
+    unset($this->xpathQuery);
+    $this->xpathQuery = new DOMXPath($this->dom);
   }
 
   public function replaceTokens($text, $raw_mode=FALSE) {
@@ -124,7 +125,6 @@ class FrxRenderer {
     if (!is_object($node)) {
       return '';
     }
-
     $frx = $node->attributes(FRX_NS);
     $include_root = !isset($frx['skip_root']) || !$frx['skip_root'];
     $elements = $dom_node->childNodes->length;
@@ -136,11 +136,11 @@ class FrxRenderer {
     }
 
     // Test to see if we have any nodes that contain data url
-    if ($node->xpath('*//@frx:*') || $frx) {
+    if ($node->xpath('*//@frx:*') || $frx!==NULL) {
       $attrs = $node->attributes();
       $id = (string)$attrs['id'];
-      $frx = $node->attributes(FRX_NS);
       $tag = $node->getName();
+
 
       if ($this->frxReport->preview_mode) $o .= Frx::Editor()->blockLinks($frx, $id, $context);
 
@@ -173,6 +173,7 @@ class FrxRenderer {
       // Determine if we have a custom renderer
       $renderer = (string)$frx['renderer'];
       // if we have a foreach in this node, we need to iterate the children
+
       if ((string)$frx['foreach'] ) {
         // Save xml
         $path = $this->teng->replace((string)$frx['foreach'], TRUE);
@@ -457,7 +458,7 @@ class FrxRenderer {
         '#type' => 'text_format',
         '#title' => t('Header'),
         '#rows' => 5,
-        '#default_value' => @$config['header'],
+        '#default_value' => @$config['header']['value'],
        // '#ajax' => $this->configAjax('blur')
     );
 
@@ -519,23 +520,35 @@ class FrxRenderer {
   }
 
 
+  /**
+   * Append a textual XHTML fragment to the dom.
+   * We do not use the DOMDocumentFragment optioin because they don't properly import namespaces. .
+   * @param DOMNode $node
+   * @param unknown $xml_string
+   * @param string $ctl_name
+   */
   function addFragment(DOMNode $node, $xml_string, $ctl_name = 'Header') {
     if (is_array($xml_string) && isset($xml_string['value'])) {
       $xml_string = $xml_string['value'];
     }
     if ($xml_string && !is_array($xml_string)) {
-      $frag = $this->dom->createDocumentFragment();
-      try {
-        @$frag->appendXML($xml_string);
+      $temp_dom = Frx::tempDOM();
+      $body_xml = '<?xml version="1.0" encoding="UTF-8"?>
+         <!DOCTYPE root [
+         <!ENTITY nbsp "&#160;">
+         ]><html xmlns:frx="' . $this->xmlns . '"><body>' . $xml_string . '</body></html>';
+       try {
+        $temp_dom->loadXML($body_xml);
       }
       catch (Exception $e) {
-        return;
+
+        forena_error('Malformed report body', '<pre>' . $e->getMessage() .
+        $e->getTraceAsString() . '</pre>');
       }
-      if (isset($frag->firstChild)) {
-        $node->appendChild($frag);
-      }
-      else {
-        drupal_set_message(t('Invalid XHTML in %s.', array('%s' => $ctl_name)), 'error', FALSE);
+      $body = $temp_dom->getElementsByTagName('body')->item(0);
+      foreach($body->childNodes as $sub) {
+        $new_node = $this->dom->importNode($sub, TRUE);
+        $node->appendChild($new_node);
       }
 
     }
@@ -766,15 +779,15 @@ class FrxRenderer {
       	  elseif ($tags && $cur_section == 'content') {
       	    $cur_section = 'footer';
       	  }
-      	  $content[$cur_section] .= $this->dom->saveXML($child);
+      	  $content[$cur_section]['value'] .= $this->dom->saveXML($child);
       	  break;
       	case XML_TEXT_NODE:
       	case XML_ENTITY_REF_NODE:
       	case XML_ENTITY_NODE:
-      	  $content[$cur_section] .= $child->textContent;
+      	  $content[$cur_section]['value'] .= $child->textContent;
       	  break;
       	case XML_COMMENT_NODE:
-      	  $content[$cur_section] .= '<!--' . $child->data . '-->';
+      	  $content[$cur_section]['value'] .= '<!--' . $child->data . '-->';
           break;
       }
     }
