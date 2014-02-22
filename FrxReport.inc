@@ -179,8 +179,8 @@ class FrxReport {
   public function collapseParameters() {
     if (is_array($this->parameters_form) && $this->parameters_form) {
       $form = $this->parameters_form;
-      if (isset($form['params']) && @$forms['params']['#collapsible'])  {
-        $this->parameters_form['params']['#collapsed'] = !$this->blocks_loaded;
+      if (isset($form['params']) && @$form['params']['#collapsible'])  {
+        $this->parameters_form['params']['#collapsed'] = $this->blocks_loaded;
       }
     }
   }
@@ -193,6 +193,7 @@ class FrxReport {
     if (!$format) $format = 'web';
     // Only push the parameter conte
     Frx::Data()->push($this->parms, 'parm');
+    $this->parameters_form = array();
 
     // Find the Body of the report.
     $this->format = $format;
@@ -201,11 +202,12 @@ class FrxReport {
 
     // Render the rport.
     $o='';
-    $this->parametersForm(array('collapsible' => TRUE));
     $c = Frx::Controls('FrxRenderer');
     $c->initReportNode($body, $this);
     if (!$this->missing_parms) $o .= $c->renderChildren($body);
-    $this->collapseParameters();
+
+    //$this->collapseParameters();
+    if (!$this->parameters_form) $this->parametersForm(array('collapsible' => TRUE, 'collapsed' => $this->blocks_loaded));
     $this->html = $o;
 
     // Default in dynamic title from head.
@@ -568,7 +570,6 @@ class FrxReport {
       }
     }
     $this->parms = $parms;
-    //$this->parameters_form = $this->parametersForm(array('collapsible' => TRUE));
     return $this->missing_parms;
   }
 
