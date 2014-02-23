@@ -8,17 +8,17 @@ class FrxEmailMerge extends FrxRenderer {
   public $email_input_format;
 
   public function __construct() {
-    $this->email_input_format = variable_get('forena_email_input_format', 'full_text');
+    parent::__construct();
+    $this->email_input_format = variable_get('forena_email_input_format', filter_default_format());
   }
 
   public function scrapeConfig() {
     $config=array();
-   // $this->extractTemplateHTML($this->reportDocDomNode, $config, array('table'));
     $config['from'] = $this->extractXPathInnerHTML("//*[@class='email-header-from']", $this->reportDocDomNode);
-    $config['to'] = $this->extractXPathInnerHTML("//*[@class='email-header-to']", $this->reportDocDomNode);
+    $config['to']= $this->extractXPathInnerHTML("//*[@class='email-header-to']", $this->reportDocDomNode);
     $config['cc'] = $this->extractXPathInnerHTML("//*[@class='email-header-cc']", $this->reportDocDomNode);
     $config['bcc'] = $this->extractXPathInnerHTML("//*[@class='email-header-bcc']", $this->reportDocDomNode);
-    $config['subject'] =  $this->extractXPathInnerHTML("//*[@class='email-header-sbuject']", $this->reportDocDomNode);
+    $config['subject'] =  $this->extractXPathInnerHTML("//*[@class='email-header-subject']", $this->reportDocDomNode);
     $config['body']['value'] =  $this->extractXPathInnerHTML("//*[@class='email-body']", $this->reportDocDomNode);
     return $config;
   }
@@ -46,11 +46,9 @@ class FrxEmailMerge extends FrxRenderer {
     $form_ctl['body'] = array(
       '#type' => 'text_format',
       '#title' => t('Message'),
+      "#format" => $this->email_input_format,
       '#default_value' => @$config['body']['value'],
     );
-
-
-
     return $form_ctl;
   }
 
@@ -66,6 +64,7 @@ class FrxEmailMerge extends FrxRenderer {
     $body = $body['value'];
     $config['foreach'] = "*";
     $div = $this->blockDiv($config);
+    $this->removeChildren($div);
     $doc = $this->addNode($div, 4, 'div', NULL, array('class' => 'email-document'));
     $header = $this->addNode($doc, 6, 'div', NULL, array('class' => 'email-header'));
     $table = $this->addNode($header, 8, 'table');
@@ -79,6 +78,6 @@ class FrxEmailMerge extends FrxRenderer {
     $td = $this->addNode($tr, 12, 'th', 'Subject');
     $td = $this->addNode($tr, 12, 'td', $subject, array('class' => 'email-header-subject'));
     $email_body = $this->addNode($doc, 6, 'div', NULL, array('class' => 'email-body'));
-    $p = $this->addNode($email_body, 8, 'p', $body);
+    $p = $this->addFragment($email_body, $body);
   }
 }

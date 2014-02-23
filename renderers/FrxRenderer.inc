@@ -23,6 +23,9 @@ class FrxRenderer {
   public $xpathQuery;
   public $input_format = 'full_html';
 
+  public function __construct() {
+    $this->input_format = variable_get('forena_input_format', filter_default_format());
+  }
 
   /**
    * This function is called to give the renderer the current conetxt in report rendering.
@@ -520,8 +523,7 @@ class FrxRenderer {
      $frag = $dom->createDocumentFragment();
      $errors = array();
      foreach ($elements as $element) if (isset($config[$element])) {
-        if (isset($config[$element]['value'])) $config[$element] = $config[$element]['value'];
-        if ($config[$element]) {
+         if ($config[$element]) {
           @$frag->appendXML($config[$element]);
           if (!isset($frag->firstChild)) {
             $errors[$element] = t('Invalid XHTML in %s', array('%s' => $element));
@@ -699,6 +701,7 @@ class FrxRenderer {
       $id = $this->idFromBlock($block);
     }
     $class = $this->extract('class', $config);
+    if (!$class) $class = get_class($this);
     $frx_attributes = array(
         'block' => $block,
     );
@@ -849,6 +852,29 @@ class FrxRenderer {
   /**
    * Get the textual representations of html for the configuration engine.
    */
+  public function extractSource(DOMNode $node) {
+    $content = '';
+    foreach ($node->childNodes as $child) {
+      switch ($child->nodeType) {
+      	case XML_ELEMENT_NODE:
+      	  $content .= $this->dom->saveXML($child);
+      	  break;
+      	case XML_TEXT_NODE:
+      	case XML_ENTITY_REF_NODE:
+      	case XML_ENTITY_NODE:
+      	  $content .= $child->textContent;
+      	  break;
+      	case XML_COMMENT_NODE:
+      	  $content .= '<!--' . $child->data . '-->';
+      	  break;
+      }
+    }
+    return $content;
+  }
+
+  /**
+   * Get the textual representations of html for the configuration engine.
+   */
   public function extractTemplateHTML(DOMNode $node, &$content, $tags = array()) {
     $cur_section = 'header';
     if (!$content) $content = array('header' => '', 'content' => '', 'footer' => '');
@@ -880,16 +906,18 @@ class FrxRenderer {
    * Extracts the inner html of all nodes that match a particular xpath expression.
    * @param $query string xpath query expression
    * @param DOMNode $context Dom node to use as source
+   * @param $concat boolean Set to false to return an array with the source for each element matching the path.
    * @return String XHTML source
    */
-  public function extractXPathInnerHTML($query, DOMNode $context) {
+  public function extractXPathInnerHTML($query, DOMNode $context, $concat = TRUE) {
     $result = $this->xpathQuery->query($query, $context);
     $length = $result->length;
-    $content = array('content' => '');
+    $content = array();
     for ($i=0; $i<$length; $i++) {
-      $this->extractTemplateHTML($result->item($i), $content, array());
+      $content[] = $this->extractSource($result->item($i));
     }
-    return $content['content'];
+    if ($concat) $content = implode('', $content);
+    return $content;
   }
 
   /**

@@ -13,6 +13,7 @@ class FrxSVGGraph extends FrxRenderer {
   public $xy_data = FALSE;
 
   public function __construct() {
+    parent::__construct();
     $library = forena_library_file('SVGGraph');
     require_once $library;
   }
