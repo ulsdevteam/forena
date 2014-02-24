@@ -23,7 +23,7 @@ class FrxEmailMerge extends FrxRenderer {
     return $config;
   }
 
-  public function configForm($config, $xml='') {
+  public function configForm($config) {
 
     $form_ctl['from'] = array(
       '#type' => 'textfield',
@@ -56,7 +56,7 @@ class FrxEmailMerge extends FrxRenderer {
     $this->validateTextFormats($config, array('body'));
   }
 
-  public function generate($xml, $config) {
+  public function generate($xml, &$config) {
     $from = $this->extract('from', $config);
     $to = $this->extract('to', $config);
     $subject = $this->extract('subject', $config);

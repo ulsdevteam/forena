@@ -623,17 +623,19 @@ function forena_report_data_block_form($formid, &$form_state, $report_name, $act
       "#tree" => TRUE,
   );
 
-  $form['template']['config'] = array_merge($form['template']['config'], $r->templateConfigForm($template_class, $config));
-  $form['preview'] = array('#type' => 'button', '#value' => t('Preview'));
-
-
-  // Generate a preview
+  // Generate Data block with preview
   $parms = $form_state['storage']['parms'];
   $r = Frx::Editor('__report_block_preview__');
   $r->setEditorParms($parms);
   $r->addBlock($block_name, $template_class, $config);
+  $form['template']['config'] = array_merge($form['template']['config'], $r->templateConfigForm($template_class, $config));
   $r->update();
   $preview = $r->preview($parms);
+
+  $form['template']['preview_button'] = array('#type' => 'button', '#value' => t('Preview'));
+
+
+
   if (!$preview['#has_data']) {
     $path = "reports/$report_name/edit/preview-data/$action/$block_name";
     if ($id) $path .= "/$id";
@@ -1366,6 +1368,38 @@ function theme_forena_report_parameters_form($variables) {
   // Render the rest of the children.
   $output .= drupal_render_children($form);
   drupal_add_tabledrag('forena-parameters', 'order', 'group', 'parameters-weight');
+  return $output;
+}
+
+function __forena_element_theme(&$element) {
+
+}
+
+function theme_forena_element_draggable($variables) {
+  $output = '';
+  $element = $variables['element'];
+  $id = $element['#draggable_id'];
+  $headers = array();
+  $rows = array();
+  foreach (element_children($element) as $e_key) {
+    $element[$e_key]['weight']['#attributes']['class'] = array($id . '-weight');
+    $row = array();
+    foreach (element_children($element[$e_key]) as $ctl) {
+      if (isset($element[$e_key][$ctl]['#title'])) {
+        $headers[$ctl] = $element[$e_key][$ctl]['#title'];
+        $element[$e_key][$ctl]['#title_display'] = 'invisible';
+      }
+
+      $e = drupal_render($element[$e_key][$ctl]);
+
+      $row[] = $e;
+
+    }
+    $rows[] = array('data' => $row, 'class' => array('draggable'));
+  }
+  $output = theme('table', array('header' => $headers, 'rows' => $rows, 'attributes' => array('id' => $id)));
+  drupal_add_tabledrag($id, 'order', 'group', $id . '-weight');
+  //$output .= drupal_render_children($element);
   return $output;
 }
 

@@ -5,7 +5,7 @@
  */
 class FrxFieldTable extends FrxRenderer {
   public $templateName = 'Table of Fields';
-  public function generate($xml, $config) {
+  public function generate($xml, &$config) {
     $config['foreach'] = '*';
     $config['class'] = 'FrxFieldTable';
     $div = $this->blockDiv($config);

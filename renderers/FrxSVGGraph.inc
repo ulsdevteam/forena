@@ -203,7 +203,7 @@ class FrxSVGGraph extends FrxRenderer {
     return $output;
   }
 
-  public function configForm($config, $xml='') {
+  public function configForm($config) {
     $form_ctl = array();
 
     $graph_types = array(
@@ -304,7 +304,7 @@ class FrxSVGGraph extends FrxRenderer {
     return $form_ctl;
   }
 
-  public function generate($xml, $config) {
+  public function generate($xml, &$config) {
     $config['class'] = get_class($this);
     $media = 'FrxSVGGraph';
     $div = $this->blockDiv($config);

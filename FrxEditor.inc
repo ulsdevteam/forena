@@ -748,7 +748,7 @@ class FrxEditor {
    * @param unknown $id
    * @return FrxEditor
    */
-  public function addBlock($block_name, $template_class='FrxTable', $config=array(),  $id='') {
+  public function addBlock($block_name, $template_class, &$config,  $id='') {
     $block_name = str_replace('.', '/', $block_name);
     if ($id) {
       $node = $this->dom->getElementById($id);

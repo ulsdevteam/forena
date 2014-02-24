@@ -490,7 +490,7 @@ class FrxRenderer {
    * Returns the section
    * Enter description here ...
    */
-  public function configForm($config, $xml='') {
+  public function configForm($config) {
     $form_ctl = array();
     $form_ctl['header'] = array(
         '#type' => 'text_format',
@@ -524,7 +524,7 @@ class FrxRenderer {
      $errors = array();
      foreach ($elements as $element) if (isset($config[$element])) {
          if ($config[$element]) {
-          @$frag->appendXML($config[$element]);
+          @$frag->appendXML($config[$element]['value']);
           if (!isset($frag->firstChild)) {
             $errors[$element] = t('Invalid XHTML in %s', array('%s' => $element));
           }
@@ -732,11 +732,8 @@ class FrxRenderer {
    * @param SimpleXMLElement $xml
    * @param array $config
    */
-  public function generate($xml , $config) {
-
-
+  public function generate($xml , &$config) {
     if (!@$config['foreach']) $config['foreach']='*';
-
 
     $columns = $this->columns($xml);
     $text = '';
@@ -888,15 +885,15 @@ class FrxRenderer {
       	  elseif ($tags && $cur_section == 'content') {
       	    $cur_section = 'footer';
       	  }
-      	  $content[$cur_section]['value'] .= $this->dom->saveXML($child);
+      	  @$content[$cur_section]['value'] .= $this->dom->saveXML($child);
       	  break;
       	case XML_TEXT_NODE:
       	case XML_ENTITY_REF_NODE:
       	case XML_ENTITY_NODE:
-      	  $content[$cur_section]['value'] .= $child->textContent;
+      	  @$content[$cur_section]['value'] .= $child->textContent;
       	  break;
       	case XML_COMMENT_NODE:
-      	  $content[$cur_section]['value'] .= '<!--' . $child->data . '-->';
+      	  @$content[$cur_section]['value'] .= '<!--' . $child->data . '-->';
           break;
       }
     }
@@ -943,5 +940,19 @@ class FrxRenderer {
 
     }
     return $attributes;
+  }
+
+  // Helper sort functoin for sorting config by weight.
+  public static function weight_sort_comp($a, $b) {
+    if ($a['weight'] == $b['weight']) return 0;
+    return $a['weight'] < $b['weight'] ? -1 : 1;
+  }
+
+  /**
+   * Sort a column list by weight.
+   * @param unknown $columns
+   */
+  public function weight_sort(&$entries) {
+    uasort($entries, 'FrxRenderer::weight_sort_comp');
   }
 }

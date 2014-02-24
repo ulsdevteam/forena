@@ -77,7 +77,7 @@ class FrxInclude extends FrxRenderer {
    * Implement template generator.
    * @see FrxRenderer::generate()
    */
-  public function generate($xml, $config) {
+  public function generate($xml, &$config) {
     $src = $this->extract('src', $key);
     $div = $this->blockDiv($config);
     $frx = array('src' => $src, 'renderer' => 'FrxInclude');

@@ -1462,6 +1462,10 @@ function forena_theme() {
     	'file' => 'forena.report.inc',
       'render element' => 'form',
     ),
+    'forena_element_draggable' => array(
+    	'file' => 'forena.report.inc',
+      'render element' => 'element',
+    ),
   );
 }
 

@@ -6,13 +6,30 @@
 class FrxTable extends FrxRenderer {
   public $templateName = 'Simple Table';
 
+  /**
+   * Extract table configuration from the HTML
+   * @see FrxRenderer::scrapeConfig()
+   */
   public function scrapeConfig() {
     $config=array();
     $this->extractTemplateHTML($this->reportDocDomNode, $config, array('table'));
+    $tds = $this->extractXPathInnerHTML('//td', $this->reportDocDomNode, FALSE);
+    $ths = $this->extractXPathInnerHTML('//th', $this->reportDocDomNode, FALSE);
+    $columns = array_combine($ths, $tds);
+    foreach($columns as $label=>$token) {
+      $key = trim($token, '{}');
+      $config['columns'][$key] = array(
+      	'contents' => $token,
+        'label' => $label,
+        'include' => 1,
+        'weight' => '0',
+      );
+    }
     return $config;
   }
 
-  public function generate($xml, $config) {
+  public function generate($xml, &$config) {
+
     $config['class'] = get_class($this);
     $block = @$config['block'];
     $id = @$config['id'];
@@ -27,13 +44,30 @@ class FrxTable extends FrxRenderer {
     $this->removeChildrenExcept($div, array('table'));
     if (isset($config['header']['value'])) $this->addFragment($div, $config['header']['value']);
 
-    $columns = $this->columns($xml);
-
-    $attrs = array('foreach' => '*');
-    if (!$columns) {
-      $columns = $this->columns($xml, '/*');
+    // Decide to inlcude columns
+    $found_columns = $this->columns($xml);
+    if (!$found_columns) {
+      $found_columns = $this->columns($xml, '/*');
       $attrs = array();
     }
+    $include_column = 0;
+    if (!@$config['columns']) {
+      $include_column = 1;
+    }
+
+    foreach ($found_columns as $column) {
+      $token = '{' . $column . '}';
+      if (!isset($config['columns'][$column])) {
+        $config['columns'][$column] = array(
+          'contents' => $token,
+        	'include' => $include_column,
+          'label' => str_replace('_', ' ', $column),
+          'weight' => 1,
+        );
+      }
+    }
+
+    $attrs = array('foreach' => '*');
     $table = $this->setFirstNode($div, 4, 'table');
     $thead = $this->setFirstNode($table, 6, 'thead');
     $throw = $this->setFirstNode($thead, 8, 'tr');
@@ -41,11 +75,56 @@ class FrxTable extends FrxRenderer {
     $tdrow = $this->setFirstNode($tbody, 8, 'tr', NULL, array('id' => $id),$attrs);
     $this->removeChildren($tdrow);
     $this->removeChildren($throw);
-    if ($columns) foreach ($columns as $col => $label) {
-      $this->addNode($throw, 10, 'th', $label);
-      $this->addNode($tdrow, 10, 'td', '{' . $col . '}');
+    if ($config['columns']) foreach ($config['columns'] as $key => $col) if ($col['include']) {
+      $this->addNode($throw, 10, 'th', $col['label']);
+      $this->addNode($tdrow, 10, 'td', $col['contents']);
     }
 
     if (isset($config['footer']['value'])) $this->addFragment($div, $config['footer']['value']);
   }
+
+  public function configForm($config) {
+    // Load header informationi from parent config.
+    $form = parent::configForm($config);
+    $this->weight_sort($config['columns']);
+    $form['columns'] = array('#theme' => 'forena_element_draggable',   '#draggable_id' => 'FrxTable-columns');
+    foreach ($config['columns'] as $key => $col) {
+      $ctl = array();
+      $ctl['label'] = array(
+      	'#type' => 'textfield',
+        '#size' => 30,
+        '#title' => t('Label'),
+        '#default_value' => $col['label'],
+      );
+
+      $ctl['contents'] = array(
+      	'#type' => 'textfield',
+        '#size' => '30',
+        '#title' => t('Data'),
+        '#default_value' => $col['contents'],
+      );
+
+      $ctl['include'] = array(
+      	'#type' => 'checkbox',
+        '#title' => t('Include'),
+        '#default_value' => $col['include'],
+        '#ajax' => $this->configAjax()
+      );
+
+      $ctl['weight'] = array(
+         "#type" => 'weight',
+          '#title' => t('Weight'),
+          '#default_value' => $col['weight'],
+      );
+
+      $form['columns'][$key] = $ctl;
+    }
+    return $form;
+  }
+
+  public function configValidate(&$config) {
+    parent::configValidate($config);
+    $this->weight_sort($config['columns']);
+  }
+
 }

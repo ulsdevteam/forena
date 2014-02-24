@@ -6,7 +6,7 @@ class FrxMergeDocument extends FrxRenderer {
    * Returns the section
    * Enter description here ...
    */
-  public function configForm($config, $xml='') {
+  public function configForm($config) {
     $form_ctl = array();
     $form_ctl['content'] = array(
         '#type' => 'text_format',
@@ -29,7 +29,7 @@ class FrxMergeDocument extends FrxRenderer {
     return $config;
   }
 
-  public function generate($xml, $config) {
+  public function generate($xml, &$config) {
     $config['class'] = get_class($this);
     $div = $this->blockDiv($config);
     // $config['foreach'] = '*';
