@@ -1,4 +1,7 @@
 <?xml version="1.0"?>
+<!DOCTYPE root [
+<!ENTITY nbsp "&#160;">
+]>
 <html xmlns:frx="urn:FrxReports">
 <head>
 <title>4. Master detail with nested blocks</title>

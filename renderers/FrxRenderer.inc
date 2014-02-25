@@ -496,6 +496,7 @@ class FrxRenderer {
         '#type' => 'text_format',
         '#title' => t('Header'),
         '#rows' => 5,
+        '#format' => $this->input_format,
         '#default_value' => @$config['header']['value'],
        // '#ajax' => $this->configAjax('blur')
     );

@@ -29,7 +29,6 @@ class FrxTable extends FrxRenderer {
   }
 
   public function generate($xml, &$config) {
-
     $config['class'] = get_class($this);
     $block = @$config['block'];
     $id = @$config['id'];
@@ -41,7 +40,7 @@ class FrxTable extends FrxRenderer {
     $div = $this->blockDiv($config);
 
     // PUt on the header
-    $this->removeChildrenExcept($div, array('table'));
+    $this->removeChildren($div);
     if (isset($config['header']['value'])) $this->addFragment($div, $config['header']['value']);
 
     // Decide to inlcude columns
@@ -73,8 +72,6 @@ class FrxTable extends FrxRenderer {
     $throw = $this->setFirstNode($thead, 8, 'tr');
     $tbody = $this->setFirstNode($table, 6, 'tbody');
     $tdrow = $this->setFirstNode($tbody, 8, 'tr', NULL, array('id' => $id),$attrs);
-    $this->removeChildren($tdrow);
-    $this->removeChildren($throw);
     if ($config['columns']) foreach ($config['columns'] as $key => $col) if ($col['include']) {
       $this->addNode($throw, 10, 'th', $col['label']);
       $this->addNode($tdrow, 10, 'td', $col['contents']);

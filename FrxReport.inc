@@ -390,7 +390,7 @@ class FrxReport {
   public function asXML() {
     $dom =  $this->dom;
     $dom->formatOutput = TRUE;
-    return $dom->saveXML();
+    return  $this->doc_prefix . $this->dom->saveXML($this->dom->documentElement);
   }
   /**
    * Make sure all xml elements have ids

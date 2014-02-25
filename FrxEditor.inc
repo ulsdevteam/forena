@@ -55,9 +55,8 @@ class FrxEditor {
    * Enter description here ...
    */
   public function asXML() {
-    $dom =  $this->dom;
-    $dom->formatOutput = TRUE;
-    return $dom->saveXML();
+    $this->dom->formatOutput = TRUE;
+    return  $this->doc_prefix . $this->dom->saveXML($this->dom->documentElement);
   }
 
   // Renames session storage.
@@ -73,7 +72,8 @@ class FrxEditor {
    * Save data away in the session state.
    */
   public function update() {
-    $_SESSION['forena_report_editor'][$this->report_name] = $this->asXML();
+    $_SESSION['forena_report_editor'][$this->report_name] =
+      $this->doc_prefix . $this->dom->saveXML($this->dom->documentElement);
   }
 
   public function cancel() {
@@ -109,9 +109,9 @@ class FrxEditor {
       $r_text = file_get_contents($m_path . '/default.frx');
     }
 
-    libxml_use_internal_errors();
+    //libxml_use_internal_errors(TRUE);
     try {
-      @$dom->loadXML($r_text);
+      $dom->loadXML($r_text);
       $this->xpq = new DOMXPath($dom);
     }
     catch (Exception $e) {
