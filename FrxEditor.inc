@@ -642,7 +642,7 @@ class FrxEditor {
   public function save_attributes_by_id($attributes) {
     $rpt_xml = $this->simplexml;
     if ($attributes) foreach ($attributes as $id => $att_list) {
-      $id_search_path = '//*[@id="' . $id . '"]';
+      $id_search_path = 'body//*[@id="' . $id . '"]';
       $fnd = $rpt_xml->xpath($id_search_path);
       if ($fnd) {
         $node = $fnd[0];
@@ -669,7 +669,7 @@ class FrxEditor {
    * @return unknown_type
    */
   public function deleteNode($id) {
-    $path = '//*[@id="' . $id . '"]';
+    $path = 'body//*[@id="' . $id . '"]';
     $dom = $this->dom;
     $nodes = $this->simplexml->xpath($path);
     if ($nodes) {
@@ -687,8 +687,8 @@ class FrxEditor {
    * getConfig method on the block.
    */
   public function scrapeBlockConfig($id, &$config) {
-    $template_class = "FrxTable";
-    $path = "//*[@id='$id']";
+    $template_class = "FrxMergeDocument";
+    $path = "body//*[@id='$id']";
     $nodes = $this->simplexml->xpath($path);
     if ($nodes)  {
       $node = dom_import_simplexml($nodes[0]);
@@ -726,7 +726,7 @@ class FrxEditor {
    * @param unknown $config
    */
   public function applyTemplate($id, $template_class, $config=array()) {
-    $path = "//*[@id='$id']";
+    $path = "body//*[@id='$id']";
     $nodes = $this->simplexml->xpath($path);
     if ($nodes) {
        $node = dom_import_simplexml($nodes[0]);
@@ -805,7 +805,7 @@ class FrxEditor {
    */
   public function prependBlock($block_name, $template_class='FrxTable', $config=array(),  $id) {
     $block_name = str_replace('.', '/', $block_name);
-    $path = "//*[@id='$id']";
+    $path = "body//*[@id='$id']";
     $nodes = $this->simplexml->xpath($path);
     if ($nodes) {
        $target = dom_import_simplexml($nodes[0]);

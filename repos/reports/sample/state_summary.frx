@@ -24,7 +24,7 @@
     <p>This report links back to the sample report 2. You can begin
       to see the possibilities for inter-connecting reports</p>
   </div>
-  <div frx:block="sampledb/users_by_state" id="forena-1" class="FrxSVGGraph">
+  <div frx:block="sampledb/users_by_state" id="users_by_state-block" class="FrxSVGGraph">
     <svg id="state-chart"
       frx:renderer="FrxSVGGraph" frx:type="bargraph"
       frx:xpath="*[total&gt;10000]"
@@ -40,7 +40,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr frx:foreach="*" id="forena-2">
+        <tr frx:foreach="*" id="users_by_state">
           <td>{state} - {name}</td>
           <td>{total}</td>
         </tr>

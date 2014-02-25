@@ -12,6 +12,7 @@ class FrxMergeDocument extends FrxRenderer {
         '#type' => 'text_format',
         '#title' => t('Document'),
         '#rows' => 5,
+        '#format' => $this->input_format,
         '#default_value' => @$config['content']['value'],
        // '#ajax' => $this->configAjax('blur')
     );
@@ -26,14 +27,15 @@ class FrxMergeDocument extends FrxRenderer {
   public function scrapeConfig() {
     $config = array();
     $this->extractTemplateHTML($this->reportDocDomNode, $config);
+    dpm($this->dom->saveXML($this->reportDocDomNode));
     return $config;
   }
 
   public function generate($xml, &$config) {
     $config['class'] = get_class($this);
+    $config['foreach'] = '*';
     $div = $this->blockDiv($config);
-    // $config['foreach'] = '*';
-    $this->addFragment($div, $config['content']);
+    $this->addFragment($div, $config['content']['value']);
 
   }
 }
