@@ -109,14 +109,18 @@ class FrxEditor {
       $r_text = file_get_contents($m_path . '/default.frx');
     }
 
-    //libxml_use_internal_errors(TRUE);
+    libxml_use_internal_errors();
     try {
-      $dom->loadXML($r_text);
+      @$dom->loadXML($r_text);
       $this->xpq = new DOMXPath($dom);
     }
     catch (Exception $e) {
       forena_error('Invalid or malformed report document', '<pre>' .
         $e->getMessage() . $e->getTraceAsString() . '</pre>');
+    }
+    if (!$this->dom->documentElement) {
+      forena_error(t('Invalid or malformed report document'));
+      return;
     }
 
     $this->verifyHeaderElements();
