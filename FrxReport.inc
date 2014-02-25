@@ -373,7 +373,7 @@ class FrxReport {
    * @return unknown_type
    */
   public function deleteNode($id) {
-    $path = '//*[@id="' . $id . '"]';
+    $path = 'body//*[@id="' . $id . '"]';
     $nodes = $this->rpt_xml->xpath($path);
     if ($nodes) {
       $node = $nodes[0];
@@ -465,7 +465,7 @@ class FrxReport {
     $attributes = $this->frx_attributes;
     $rpt_xml = $this->rpt_xml;
     if ($attributes) foreach ($attributes as $id => $att_list) {
-      $id_search_path = '//*[@id="' . $id . '"]';
+      $id_search_path = 'body//*[@id="' . $id . '"]';
       $fnd = $rpt_xml->xpath($id_search_path);
       if ($fnd) {
         $node = $fnd[0];
