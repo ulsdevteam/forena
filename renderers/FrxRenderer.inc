@@ -617,6 +617,13 @@ class FrxRenderer {
         $new_node = $this->dom->importNode($sub, TRUE);
         $node->appendChild($new_node);
       }
+      if ($node->nodeType == XML_ELEMENT_NODE) {
+        $xmlnode = simplexml_import_dom($node);
+        $frx_nodes = $xmlnode->xpath('//*[@frx:*]');
+        if (!$frx_nodes) {
+          $this->frxReportsave_attributes_by_id();
+        }
+      }
 
     }
   }
@@ -845,11 +852,33 @@ class FrxRenderer {
     }
   }
 
-
   /**
    * Get the textual representations of html for the configuration engine.
    */
   public function extractSource(DOMNode $node) {
+    $content = '';
+    switch ($$node->nodeType) {
+      	case XML_ELEMENT_NODE:
+      	  $content = $this->dom->saveXML($node);
+      	  break;
+      	case XML_TEXT_NODE:
+      	case XML_ENTITY_REF_NODE:
+      	case XML_ENTITY_NODE:
+      	case XML_ATTRIBUTE_NODE:
+      	  $content = $child->textContent;
+      	  break;
+      	case XML_COMMENT_NODE:
+      	  $content = '<!--' . $node->data . '-->';
+      	  break;
+    }
+    return $content;
+  }
+
+
+  /**
+   * Get the textual representations of html for the configuration engine.
+   */
+  public function extractChildSource(DOMNode $node) {
     $content = '';
     foreach ($node->childNodes as $child) {
       switch ($child->nodeType) {
@@ -873,6 +902,7 @@ class FrxRenderer {
    * Get the textual representations of html for the configuration engine.
    */
   public function extractTemplateHTML(DOMNode $node, &$content, $tags = array()) {
+    $this->frxReport->get_attributes_by_id();
     $cur_section = 'header';
     if (!$content) $content = array('header' => '', 'content' => '', 'footer' => '');
     if (!$tags) $cur_section = 'content';
@@ -907,6 +937,24 @@ class FrxRenderer {
    * @return String XHTML source
    */
   public function extractXPathInnerHTML($query, DOMNode $context, $concat = TRUE) {
+    $result = $this->xpathQuery->query($query, $context);
+    $length = $result->length;
+    $content = array();
+    for ($i=0; $i<$length; $i++) {
+      $content[] = $this->extractChildSource($result->item($i));
+    }
+    if ($concat) $content = implode('', $content);
+    return $content;
+  }
+
+  /**
+   * Extracts the inner html of all nodes that match a particular xpath expression.
+   * @param $query string xpath query expression
+   * @param DOMNode $context Dom node to use as source
+   * @param $concat boolean Set to false to return an array with the source for each element matching the path.
+   * @return String XHTML source
+   */
+  public function extractXPath($query, DOMNode $context, $concat = TRUE) {
     $result = $this->xpathQuery->query($query, $context);
     $length = $result->length;
     $content = array();
@@ -953,6 +1001,6 @@ class FrxRenderer {
    * @param unknown $columns
    */
   public function weight_sort(&$entries) {
-    uasort($entries, 'FrxRenderer::weight_sort_comp');
+    if ($entries) uasort($entries, 'FrxRenderer::weight_sort_comp');
   }
 }

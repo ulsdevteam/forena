@@ -215,6 +215,11 @@ class FrxEditor {
       forena_error('Malformed report body', '<pre>' . $e->getMessage() .
       $e->getTraceAsString() . '</pre>');
     }
+    // If there are no frx attributes in the body then replace them with the old values.
+    $frx_nodes = $this->frxReport->rpt_xml->xpath('body//*[@frx:*]');
+    if (!$frx_nodes) {
+      $this->frxReport->save_attributes_by_id();
+    }
   }
   /**
    * Makes sure that the normal header elements for a report are there.
@@ -229,7 +234,15 @@ class FrxEditor {
       'docgen',
     );
     $dom = $this->dom;
+    if (!$this->dom->documentElement) {
+      drupal_set_message('error', 'error'); return;
+    }
+
     $head = $dom->getElementsByTagName('head')->item(0);
+    if (!$head)  {
+      $head = $dom->createElement('head');
+       $dom->documentElement->appendChild($head);
+    }
     // Make sure the report title exists.
     if ($dom->getElementsByTagName('title')->length==0) {
       $n = $dom->createElement('title');

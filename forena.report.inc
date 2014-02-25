@@ -1412,7 +1412,7 @@ function forena_report_layout_form($form, &$form_state, $report_name) {
   // Need to get all option attributes
   $frx_options = $r->getOptions();
   $report_form = @$frx_options['form'];
-  $attributes = $r->get_attributes_by_id();
+
   $body = $r->simplexml->body->asXML();
   $css = @(string)$r->simplexml->head->style;
 
@@ -1422,11 +1422,6 @@ function forena_report_layout_form($form, &$form_state, $report_name) {
   $form['report_name'] = array(
       '#type' => 'value',
       '#value' => $report_name,
-  );
-
-  $form['attributes'] = array(
-      '#type' => 'value',
-      '#value' => $attributes,
   );
 
 
@@ -1501,12 +1496,6 @@ function forena_report_layout_form_submit($form, &$form_state) {
   $r->setBody($values['body']['value']);
   // CSS
   $r->setStyle($values['css']);
-  // If there are no frx attributes in the body then replace them with the old values.
-  $frx_nodes = $r->simplexml->xpath('body//*[@frx:*]');
-  if (!$frx_nodes) {
-    $r->save_attributes_by_id($values['attributes']);
-  }
-
   $r->update();
   // If we changed the menu we need to rebuild it.
   $form_state['redirect'] = array("$r_link/edit", array('query' => Frx::parms()));

@@ -38,6 +38,7 @@ class FrxReport {
   public $format;
   public $link_mode = '';
   public $xpathQuery;
+  public $frx_attributes = array(); // Saved attributes from prior call.
   public $preview_mode = FALSE;    // This will make the report renderer put in editing controls when TRUE
 
 
@@ -144,7 +145,7 @@ class FrxReport {
         	  break;
         }
       }
-
+      $this->get_attributes_by_id();
       $this->skin = isset($this->options['skin']) ? $this->options['skin'] : @$this->options['form'];
     }
   }
@@ -460,7 +461,8 @@ class FrxReport {
    * array( element_id => array( key1 => value1, key2 => value2)
    * The function restores the attributes based on the element id.
    */
-  public function save_attributes_by_id($attributes) {
+  public function save_attributes_by_id() {
+    $attributes = $this->frx_attributes;
     $rpt_xml = $this->rpt_xml;
     if ($attributes) foreach ($attributes as $id => $att_list) {
       $id_search_path = '//*[@id="' . $id . '"]';
