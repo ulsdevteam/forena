@@ -35,6 +35,7 @@ class FrxMergeDocument extends FrxRenderer {
     $config['class'] = get_class($this);
     $config['foreach'] = '*';
     $div = $this->blockDiv($config);
+    $this->removeChildren($div);
     $this->addFragment($div, $config['content']['value']);
 
   }

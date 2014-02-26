@@ -7,7 +7,9 @@ class FrxCrossTab extends FrxRenderer {
   private $dim_headers = array();
   private $group_headers = array();
 
-
+  /**
+   * Render the crosstab
+   */
   public function render() {
     $variables = $this->mergedAttributes();
     $path = isset($variables['path']) ? $variables['path'] : '*';
@@ -106,6 +108,9 @@ class FrxCrossTab extends FrxRenderer {
     return $output;
   }
 
+  /**
+   * Generate default headers from Embedded xml.
+   */
   private function defaultHeaders() {
     $node = $this->reportDocNode;
     if ($node->thead && $node->thead->tr) {
@@ -137,4 +142,124 @@ class FrxCrossTab extends FrxRenderer {
     		}
     }
   }
+
+  /**
+   * Crosstab configuration form.
+   */
+  public function configForm($config) {
+    // Load header informationi from parent config.
+    $form = parent::configForm($config);
+    $this->weight_sort($config['columns']);
+    $types = array('heading' => t('Heading'), 'crosstab' => t('Crosstab'), 'value' => 'Value', 'ignore' => t('Ignore'));
+    $form['columns'] = array('#theme' => 'forena_element_draggable',   '#draggable_id' => 'FrxTable-columns');
+    foreach ($config['columns'] as $key => $col) {
+      $ctl = array();
+      $ctl['label'] = array(
+          '#type' => 'textfield',
+          '#size' => 30,
+          '#title' => t('Label'),
+          '#default_value' => $col['label'],
+      );
+
+      $ctl['contents'] = array(
+          '#type' => 'textfield',
+          '#size' => '30',
+          '#title' => t('Data'),
+          '#default_value' => $col['contents'],
+      );
+
+      $ctl['type'] = array(
+          '#type' => 'radios',
+          '#title' => t('Type'),
+          '#default_value' => $col['type'],
+          '#options' => $types,
+          '#ajax' => $this->configAjax()
+      );
+
+      $ctl['weight'] = array(
+          "#type" => 'weight',
+          '#title' => t('Weight'),
+          '#default_value' => $col['weight'],
+      );
+
+      $form['columns'][$key] = $ctl;
+    }
+    return $form;
+  }
+
+  public function generate($xml, &$config) {
+    $config['class'] = get_class($this);
+    $block = @$config['block'];
+    $id = @$config['id'];
+    if ($block) {
+      $id = $this->idFromBlock($block);
+      $config['id'] = $id . '_block';
+    }
+    $config['class'] = @$config['class'] ? $config['class'] . ' FrxCrosstab' : 'FrxCrosstab';
+    $div = $this->blockDiv($config);
+
+    // PUt on the header
+    $this->removeChildren($div);
+    if (isset($config['header']['value'])) $this->addFragment($div, $config['header']['value']);
+
+    // Decide to inlcude columns
+    $found_columns = $this->columns($xml);
+    if (!$found_columns) {
+      $found_columns = $this->columns($xml, '/*');
+      $attrs = array();
+    }
+    $include_column = 0;
+    if (!@$config['columns']) {
+      $include_column = 1;
+    }
+
+    $numeric_columns = $this->numeric_columns;
+    $new_columns = @$config['columns'] ? FALSE : TRUE;
+
+    foreach ($found_columns as $column) {
+      $token = '{' . $column . '}';
+      if ($new_columns) {
+        $type = array_search($column, $this->numeric_columns)!==FALSE ? 'header' : 'value';
+      } else {
+        $type = 'ignore';
+      }
+      if (!isset($config['columns'][$column])) {
+        $config['columns'][$column] = array(
+            'contents' => $token,
+            'type' => $type,
+            'label' => str_replace('_', ' ', $column),
+            'weight' => 1,
+        );
+      }
+    }
+
+    // Generate the grouping row
+    $group = '';
+    foreach($config['columns'] as $col) {
+      if ($col['type'] == 'heading') $group .= $col['contents'];
+    }
+    $r_id = $id . '-renderer';
+    $frx['renderer'] = 'FrxCrosstab';
+    $attrs[$id] = $r_id;
+    $attrs = array('foreach' => '*');
+    $table = $this->setFirstNode($div, 4, 'table');
+    $thead = $this->setFirstNode($table, 6, 'thead');
+    $throw = $this->setFirstNode($thead, 8, 'tr');
+    $tbody = $this->setFirstNode($table, 6, 'tbody');
+    $tdrow = $this->setFirstNode($tbody, 8, 'tr', NULL, array('id' => $id),$attrs);
+    if ($config['columns']) foreach ($config['columns'] as $key => $col) if ($col['type']!=='ignore') {
+      if ($col['type']=='heading') {
+        $tag = 'th';
+      }
+      else {
+        $tag = 'td';
+      }
+      $this->addNode($throw, 10, $tag, $col['label']);
+      $this->addNode($tdrow, 10, $tag, $col['contents']);
+    }
+
+    if (isset($config['footer']['value'])) $this->addFragment($div, $config['footer']['value']);
+  }
+
+
 }
