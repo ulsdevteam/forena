@@ -55,7 +55,9 @@ class FrxTable extends FrxRenderer {
     $weight = 0;
     if (!@$config['columns']) {
       $include_column = 1;
-      $weight = count($columns);
+    }
+    else {
+      $weight = count($config['columns']);
     }
 
     foreach ($found_columns as $column) {
