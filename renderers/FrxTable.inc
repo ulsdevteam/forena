@@ -16,13 +16,15 @@ class FrxTable extends FrxRenderer {
     $tds = $this->extractXPathInnerHTML('//td', $this->reportDocDomNode, FALSE);
     $ths = $this->extractXPathInnerHTML('//th', $this->reportDocDomNode, FALSE);
     $columns = array_combine($ths, $tds);
+    $weight = 0;
     foreach($columns as $label=>$token) {
       $key = trim($token, '{}');
+      $weight++;
       $config['columns'][$key] = array(
       	'contents' => $token,
         'label' => $label,
         'include' => 1,
-        'weight' => '0',
+        'weight' => $weight,
       );
     }
     return $config;
@@ -50,18 +52,21 @@ class FrxTable extends FrxRenderer {
       $attrs = array();
     }
     $include_column = 0;
+    $weight = 0;
     if (!@$config['columns']) {
       $include_column = 1;
+      $weight = count($columns);
     }
 
     foreach ($found_columns as $column) {
       $token = '{' . $column . '}';
       if (!isset($config['columns'][$column])) {
+        $weight++;
         $config['columns'][$column] = array(
           'contents' => $token,
         	'include' => $include_column,
           'label' => str_replace('_', ' ', $column),
-          'weight' => 1,
+          'weight' => $weight,
         );
       }
     }
@@ -123,5 +128,6 @@ class FrxTable extends FrxRenderer {
     parent::configValidate($config);
     $this->weight_sort($config['columns']);
   }
+
 
 }

@@ -20,6 +20,10 @@ ul.forena-doclinks {
 	background-color : #eee	; 
 }
 
+#FrxCrosstab-columns div { 
+	display: inline; 
+	margin-right: 1em; 
+}
 
 .paging_full_numbers {
 	width: 400px;

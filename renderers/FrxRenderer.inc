@@ -523,8 +523,8 @@ class FrxRenderer {
      $dom = Frx::tempDOM();
      $frag = $dom->createDocumentFragment();
      $errors = array();
-     foreach ($elements as $element) if (isset($config[$element])) {
-         if ($config[$element]) {
+     foreach ($elements as $element) if (isset($config[$element]['value'])) {
+         if ($config[$element]['value']) {
           @$frag->appendXML($config[$element]['value']);
           if (!isset($frag->firstChild)) {
             $errors[$element] = t('Invalid XHTML in %s', array('%s' => $element));

@@ -62,6 +62,8 @@ class FrxReport {
         return;
       }
       if (!$success) return;
+
+      $this->xpathQuery = new DOMXPath($dom);
       $this->setReport($dom, $this->xpathQuery);
     }
 
@@ -685,10 +687,11 @@ class FrxReport {
    */
   public function group($data,  $group='') {
     $rows = array();
+    $group = (string)$group;
     if (is_array($data) || is_object($data)) {
       foreach ($data as $row) {
         Frx::Data()->push($row, '_group');
-        $gval = $this->teng->replace($group);
+        $gval = $this->teng->replace($group, TRUE);
         Frx::Data()->pop();
         $rows[$gval][] = $row;
       }

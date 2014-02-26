@@ -691,7 +691,7 @@ function forena_report_add_template_submit($form, &$form_state) {
   $config = array_merge($form_state['storage']['config'], $config);
   $r = Frx::Editor($report_name);
   $r->setEditorParms($parms);
-  Frx::Editor($report_name)->addBlock($block_name, $template_class, (array)$config, $id);
+  Frx::Editor($report_name)->addBlock($block_name, $template_class, $config, $id);
   Frx::Editor() ->update();
   $form_state['redirect'] = array("reports/$report_name/edit", array('query' => Frx::parms()));
   }
