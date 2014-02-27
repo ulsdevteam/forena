@@ -520,18 +520,19 @@ class FrxRenderer {
    * @return multitype:Ambigous <The, string, A, Optional>
    */
   public function validateTextFormats(&$config, $elements) {
-     $dom = Frx::tempDOM();
-     $frag = $dom->createDocumentFragment();
+      $temp_dom = Frx::tempDOM();
+
      $errors = array();
      foreach ($elements as $element) if (isset($config[$element]['value'])) {
          if ($config[$element]['value']) {
-          @$frag->appendXML($config[$element]['value']);
-          if (!isset($frag->firstChild)) {
-            $errors[$element] = t('Invalid XHTML in %s', array('%s' => $element));
-          }
-          else {
-            $this->removeChildren($frag);
-          }
+             $body_xml = '<?xml version="1.0" encoding="UTF-8"?>
+           <!DOCTYPE root [
+           <!ENTITY nbsp "&#160;">
+           ]><html xmlns:frx="' . $this->xmlns . '"><body>' . $config[$element]['value'] . '</body></html>';
+           @$temp_dom->loadXML($body_xml);
+           if (!$temp_dom->documentElement) {
+             $errors[$element] = t('Invalid XHTML in %s', array('%s' => $element));
+           }
         }
      }
      return $errors;
