@@ -57,6 +57,35 @@ class FrxFieldTable extends FrxRenderer {
       $th = $this->addNode($tr, 10, 'th', $col['label']);
       $td = $this->addNode($tr, 10, 'td', $col['contents']);
     }
+
+    // Decide to inlcude columns
+    $found_columns = $this->columns($xml);
+    if (!$found_columns) {
+      $found_columns = $this->columns($xml, '/*');
+      $attrs = array();
+    }
+
+    $include_column = 0;
+    $weight = 0;
+    if (!@$config['columns']) {
+      $include_column = 1;
+    }
+    else {
+      $weight = count($config['columns']);
+    }
+
+    foreach ($found_columns as $column => $label) {
+      $token = '{' . $column . '}';
+      if (!isset($config['columns'][$column])) {
+        $weight++;
+        $config['columns'][$column] = array(
+            'contents' => $token,
+            'include' => $include_column,
+            'label' => $label,
+            'weight' => $weight,
+        );
+      }
+    }
   }
 
   /**
