@@ -90,7 +90,18 @@ class FrxPostgres extends FrxDataSource {
     $db = $this->db;
     //$rs->debugDumpParams();
     $fsql = 'select query_to_xml($1,true,false,$2);';
-    $rs = pg_query_params($db, $fsql, array($sql, ''));
+    $rs = @pg_query_params($db, $fsql, array($sql, ''));
+    $e = pg_last_error();
+    if ($e) {
+      $text = $e;
+      if (!$this->block_name) {
+        $short = t('%e', array('%e' => $text));
+      } else {
+        $short = t('SQL Error in %b.sql', array('%b' => $this.block_name));
+      }
+      $this->error($short, $text);
+      return;
+    }
     $xml_text='';
     if ($rs) {
       $row = pg_fetch_row($rs);
@@ -112,7 +123,17 @@ class FrxPostgres extends FrxDataSource {
   private function php_xml($sql) {
     $db = $this->db;
     $xml = new SimpleXMLElement('<table/>');
-    $rs = pg_query($sql);
+    $rs = @pg_query($sql);
+    $e = pg_last_error();
+    if ($e) {
+      $text = $e;
+      if (!$this->block_name) {
+        $short = t('%e', array('%e' => $text));
+      } else {
+        $short = t('SQL Error in %b.sql', array('%b' => $this.block_name));
+      }
+      $this->error($short, $text);
+    }
     $rownum = 0;
     if ($rs) while ($row = pg_fetch_assoc($rs)) {
       $rownum++;

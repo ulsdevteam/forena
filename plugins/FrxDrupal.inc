@@ -48,11 +48,15 @@ class FrxDrupal extends FrxDataSource {
     }
     catch (PDOException $e) {
       watchdog_exception('error',$e);
+      $line = $e->getLine();
       $text = $e->getMessage();
       //if (user_access('build forena sql blocks')) {
-        $text .= ' in :<pre>' . $sql. '</pre>';
-      //}
-     drupal_set_message('Database Error:' . $text, 'error');
+      if (!$this->block_name) {
+        $short = t('%e', array('%e' => $text, '%l' => $line));
+      } else {
+        $short = t('SQL Error in %b.sql', array('%b' => $this.block_name));
+      }
+     drupal_set_message($short, 'error', FALSE);
      return;
 
     }

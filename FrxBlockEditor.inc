@@ -61,7 +61,7 @@ class FrxBlockEditor {
       // Make sure we don't put any invalid values
       $block = array_intersect_key($block, $this->block);
       $block = array_merge($this->block, $block);
-      $same = $block['file']== $this->block['file'] && $block['access']==$this->block['access'];
+      $same = $block['file']== $this->block['file'] && @$block['access'] == @$this->block['access'];
       // UPdate the block;
       if (!$same) {
         $this->block = $block;

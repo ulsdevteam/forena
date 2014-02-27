@@ -247,7 +247,7 @@ class FrxDataSource{
 
   public function error($msg='', $log='') {
     if ($msg) {
-      drupal_set_message(check_markup($msg), 'error');
+      drupal_set_message($msg, 'error', FALSE);
     }
     if ($log) {
       watchdog('forena', $log, NULL, WATCHDOG_ERROR);

@@ -83,12 +83,32 @@ class FrxPDO extends FrxDataSource {
 
     if ($sql && $db) {
       $sql = $this->te->replace($sql);
-      $rs = $db->query($sql);
+      try {
+        $rs = $db->query($sql);
+
+      }
+      catch (PDOException $e) {
+        watchdog_exception('error',$e);
+        $line = $e->getLine();
+        $text = $e->getMessage();
+       drupal_set_message($short, 'error', FALSE);
+       return;
+
+      }
       $xml = new SimpleXMLElement('<table/>');
       $e = $db->errorCode();
+
       if ($e != '00000') {
         $i = $db->errorInfo();
-        FrxReportGenerator::instance()->error($i[2] . ':' . $sql, $i[2]);
+        $text =  $i[0] . ':' . $i[2];
+        //if (user_access('build forena sql blocks')) {
+        if (!$this->block_name) {
+          $short = t('%e', array('%e' => $text));
+        } else {
+          $short = t('SQL Error in %b.sql', array('%b' => $this.block_name));
+        }
+        $this->error($short, $text);
+
       }
       else if ($rs && $rs->columnCount()) {
 

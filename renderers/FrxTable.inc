@@ -79,7 +79,7 @@ class FrxTable extends FrxRenderer {
     $throw = $this->setFirstNode($thead, 8, 'tr');
     $tbody = $this->setFirstNode($table, 6, 'tbody');
     $tdrow = $this->setFirstNode($tbody, 8, 'tr', NULL, array('id' => $id),$attrs);
-    if ($config['columns']) foreach ($config['columns'] as $key => $col) if ($col['include']) {
+    if (isset($config['columns'])) foreach ($config['columns'] as $key => $col) if ($col['include']) {
       $this->addNode($throw, 10, 'th', $col['label']);
       $this->addNode($tdrow, 10, 'td', $col['contents']);
     }

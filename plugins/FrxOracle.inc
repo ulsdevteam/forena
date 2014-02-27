@@ -116,7 +116,6 @@ class FrxOracle extends FrxDataSource {
     $r = oci_execute($stmt, OCI_DEFAULT);
     // Report errors
     if (!$r) {
-      $e = oci_error($stmt);  // For oci_execute errors pass the statement handle
       $msg .=  htmlentities($e['message']);
       $msg .= "\n<pre>\n";
       $msg .= htmlentities($e['sqltext']);
@@ -130,8 +129,15 @@ class FrxOracle extends FrxDataSource {
     if ($xml_text) {
       $xml = new SimpleXMLElement($xml_text);
       if ($xml->getName() == 'error') {
+        if (!$this->block_name) {
+          $short = t('%e.', array('%e' => (string)$xml));
+
+        }
+        else {
+          $short = t('%e in %b.sql', array('%e' => (string)$xml, '%b' => $this->block_name));
+        }
         $msg = (string)$xml . ' in ' . $this->block_name . '.sql. ';
-        $this->error($msg . 'See logs for more info', $msg . ' in <pre> ' . $sql . '</pre>');
+        $this->error($short, $msg . ' in <pre> ' . $sql . '</pre>');
       }
     }
     oci_free_statement($stmt);
@@ -141,10 +147,31 @@ class FrxOracle extends FrxDataSource {
   private function php_xml($sql) {
     $db = $this->db;
     $xml = new SimpleXMLElement('<table/>');
-
     //$rs->debugDumpParams();
     $stmt = oci_parse($db, $sql);
-    oci_execute($stmt);
+    @oci_execute($stmt);
+
+
+    $e = oci_error($stmt);  // For oci_execute errors pass the statement handle
+    //drupal_set_message(e_display_array($e));
+    if ($e) {
+      if ($e['code'] != '1403') {
+        if (!$this->block_name) {
+          $short = t('%e at offset %o', array('%e' => $e['message'], '%o' => $e['offset']));
+
+        }
+        else {
+          $short = t('%e in %b.sql line %o', array('%e' => $e['message'], '%b' => $this->block_name, '%o' => $e['offset']));
+        }
+        $msg =  htmlentities($e['message']);
+        $msg .= "\n<pre>\n";
+        $msg .= htmlentities($e['sqltext']);
+        $msg .= "\n</pre>\n";
+        $this->error($short, $msg);
+        return '';
+      }
+    }
+
     $rownum=0;
 
     while ($row = oci_fetch_array($stmt, OCI_ASSOC + OCI_RETURN_NULLS + OCI_RETURN_LOBS)) {
@@ -235,21 +262,35 @@ class FrxOracle extends FrxDataSource {
           $e = oci_error($stmt);  // For oci_execute errors pass the statement handle
           //drupal_set_message(e_display_array($e));
           if ($e['code'] != '1403') {
+            if (!$this->block_name) {
+              $short = t('%e at offset %o', array('%e' => $e['message'], '%o' => $e['offset']));
+
+            }
+            else {
+              $short = t('%e in %b.sql line %o', array('%e' => $e['message'], '%b' => $this->block_name, '%o' => $e['offset']));
+            }
             $msg =  htmlentities($e['message']);
             $msg .= "\n<pre>\n";
             $msg .= htmlentities($e['sqltext']);
             $msg .= "\n</pre>\n";
-            $this->error('', $msg);
+            $this->error($short, $msg);
           }
         }
       }
       catch (Exception $e) {
+        if (!$this->block_name) {
+          $short = t('%e at offset %o', array('%e' => $e['message'], '%o' => $e['offset']));
+
+        }
+        else {
+          $short = t('%e in %b.sql line %o', array('%e' => $e['message'], '%b' => $this->block_name, '%o' => $e['offset']));
+        }
         $msg .=  htmlentities($e['message']);
         $msg .= "\n<pre>\n";
         $msg .= htmlentities($e['sqltext']);
         //printf("\n%".($e['offset']+1)."s", "^");
         $msg .= "\n</pre>\n";
-        $this->error('Database error, see logs for info', $msg);
+        $this->error($short, $msg);
       }
 
       // Retrieve any clob data.
