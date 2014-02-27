@@ -60,14 +60,14 @@ class FrxTable extends FrxRenderer {
       $weight = count($config['columns']);
     }
 
-    foreach ($found_columns as $column) {
+    foreach ($found_columns as $column => $label) {
       $token = '{' . $column . '}';
       if (!isset($config['columns'][$column])) {
         $weight++;
         $config['columns'][$column] = array(
           'contents' => $token,
         	'include' => $include_column,
-          'label' => str_replace('_', ' ', $column),
+          'label' => $label,
           'weight' => $weight,
         );
       }
