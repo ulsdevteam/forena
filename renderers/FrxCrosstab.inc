@@ -212,13 +212,13 @@ class FrxCrosstab extends FrxRenderer {
       $attrs = array();
     }
 
-    $numeric_columns = $this->numeric_columns ? array_keys($this->numeric_columns) : array();
+    $numeric_columns = $this->numeric_columns;
     $new_columns = @$config['crosstab_columns'] ? FALSE : TRUE;
 
     foreach ($found_columns as $column => $label) {
       $token = '{' . $column . '}';
       if ($new_columns) {
-        $type = array_search($column, $numeric_columns)!==FALSE ? 'value' : 'heading';
+        $type = isset($numeric_columns[$column]) ? 'value' : 'heading';
       } else {
         $type = 'ignore';
       }
