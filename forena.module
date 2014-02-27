@@ -1,5 +1,5 @@
 <?php
-
+require_once 'forena.data.inc';
 require_once 'Frx.inc';
 
 /**
@@ -83,6 +83,22 @@ function forena_menu() {
     'file' => 'forena.admin.inc',
   );
 
+
+  $items['admin/structure/forena/data'] = array(
+      'type' => MENU_LOCAL_TASK,
+      'title' => 'Data',
+      'access arguments' => array('design any report'),
+      'page callback' => 'forena_display_blocks',
+      'file' => 'forena.data.inc',
+  );
+
+  $items['forena/data'] = array(
+      'page callback' => 'forena_data_preview',
+      'access arguments' => array('design any report'),
+      'file' => 'forena.data.inc',
+      'type' => MENU_CALLBACK,
+  );
+
   $items['reports/%'] = array(
     'page callback' => 'forena_report',
     'page arguments' => array(1),
@@ -111,12 +127,12 @@ function forena_menu() {
 
   $items['reports/%/edit'] = array(
      'title' => 'Edit',
-     'page callback' => 'drupal_get_form',
-     'page arguments' => array( 'forena_general_form',1),
+     'page callback' => 'forena_report_preview',
+     'page arguments' => array(1),
      'access arguments' => array('design any report'),
      'description' => 'Edit the layout of your report',
      'type' => MENU_LOCAL_TASK,
-     'file' => 'forena.admin.inc',
+     'file' => 'forena.report.inc',
   );
 
   if (module_exists('locale')) {
@@ -124,24 +140,33 @@ function forena_menu() {
        'page callback' => 'forena_report_translations',
        'page arguments' => array(1),
        'title' => 'Translate',
-       'file' => 'forena.admin.inc',
+       'file' => 'forena.report.inc',
        'access arguments' => array('design any report'),
        'type' => MENU_LOCAL_TASK,
     );
   }
-  $items['reports/%/edit/params'] = array(
+  $items['reports/%/edit/parameters'] = array(
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('forena_admin_params_form', 1),
+    'page arguments' => array('forena_report_parameters_form', 1),
     'title' => 'Parameters',
-    'file' => 'forena.admin.inc',
+    'file' => 'forena.report.inc',
     'access arguments' => array('design any report'),
     'type' => MENU_LOCAL_TASK,
   );
 
-  $items['reports/%/edit/params/add'] = array(
+  $items['reports/%/edit/edit-parameter'] = array(
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('forena_report_parameter_config_form', 1),
+      'title' => 'Edit Parameter',
+      'file' => 'forena.report.inc',
+      'access arguments' => array('design any report'),
+      'type' => MENU_CALLBACK,
+  );
+
+  $items['reports/%/edit/add-parameter'] = array(
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('forena_add_param_form', 1),
-    'file' => 'forena.admin.inc',
+    'page arguments' => array('forena_report_add_parameter_form', 1),
+    'file' => 'forena.report.inc',
     'title' => 'Parameters',
     'access arguments' => array('design any report'),
     'type' => MENU_CALLBACK,
@@ -150,62 +175,132 @@ function forena_menu() {
   $items['reports/%/edit/general'] = array(
     'title' => 'General',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('forena_general_form',1),
+    'page arguments' => array('forena_report_general_form',1),
     'access arguments' => array('design any report'),
     'description' => 'General Report Properties',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'type' => MENU_LOCAL_TASK,
     'weight' => -1,
-    'file' => 'forena.admin.inc',
+    'file' => 'forena.report.inc',
   );
 
   $items['reports/%/edit/layout'] = array(
-     'title' => 'Layout',
-     'page callback' => 'drupal_get_form',
-     'page arguments' => array('forena_layout_form',1),
-     'access arguments' => array('design any report'),
-     'description' => 'Edit the layout of your report',
-     'type' => MENU_LOCAL_TASK,
-     'weight' => 1,
-     'file' => 'forena.admin.inc',
+    'title' => 'Layout',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('forena_report_layout_form',1),
+    'access arguments' => array('design any report'),
+    'description' => 'Edit the layout of your report',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1,
+    'file' => 'forena.report.inc',
   );
 
-  $items['reports/%/edit/data'] = array(
-     'title' => 'Data',
-     'page callback' => 'drupal_get_form',
-     'page arguments' => array('forena_data_block_form', 1),
-     'access arguments' => array('design any report'),
-     'description' => 'Add a data block to your report',
-     'file' => 'forena.admin.inc',
-     'type' => MENU_LOCAL_TASK,
-
+  $items['reports/%/edit/edit-data/%/%'] = array(
+   'title' => 'Edit Block',
+   'file' => 'forena.report.inc',
+   'page callback' => 'drupal_get_form',
+   'page arguments' => array('forena_report_data_block_form', 1, 3, 4, 5, 'edit-data'),
+   'access arguments' => array('design any report'),
+   'description' => 'Add a data block to your report',
+   'type' => MENU_CALLBACK,
   );
 
-  $items['reports/%/edit/data/add'] = array(
-     'title' => 'Data',
-     'file' => 'forena.admin.inc',
-     'page callback' => 'drupal_get_form',
-     'page arguments' => array('forena_add_data_block_form', 1),
-     'access arguments' => array('design any report'),
-     'description' => 'Add a data block to your report',
-     'type' => MENU_CALLBACK,
-
+  $items['reports/%/edit/edit-field/%'] = array(
+      'title' => 'Edit Block',
+      'file' => 'forena.report.inc',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('forena_report_field_form', 1, 4),
+      'access arguments' => array('design any report'),
+      'description' => 'Add a data block to your report',
+      'type' => MENU_CALLBACK,
   );
-  $items['reports/%/edit/fields'] = array(
-     'title' => 'Fields',
-     'page callback' => 'drupal_get_form',
-     'page arguments' => array('forena_fields_form',1),
-     'access arguments' => array('design any report'),
-     'description' => 'Edit the fields of your report',
-     'file' => 'forena.admin.inc',
-     'type' => MENU_LOCAL_TASK,
+
+  $items['reports/%/edit/select-data/%'] = array(
+    'title' => 'Select Data Block',
+    'file' => 'forena.report.inc',
+    'page callback' => 'forena_select_block_list',
+    'page arguments' => array(1, 4),
+    'access arguments' => array('design any report'),
+    'description' => 'Select the data blcok to add',
+    'type' => MENU_CALLBACK,
+  );
+
+
+  $items['reports/%/edit/select-data/%/%'] = array(
+    'title' => 'Select Data Block',
+    'file' => 'forena.report.inc',
+    'page callback' => 'forena_select_block_list',
+    'page arguments' => array(1, 4, 5),
+    'access arguments' => array('design any report'),
+    'description' => 'Select the data blcok to add',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['reports/%/edit/preview-data/%/%'] = array(
+    'title' => 'Preview Data Block',
+    'file' => 'forena.report.inc',
+    'page callback' => 'forena_report_block_preview',
+    'page arguments' => array(1, 4, 5),
+    'access arguments' => array('design any report'),
+    'description' => 'Select the data block to add',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['reports/%/edit/preview-data/%/%/%'] = array(
+    'title' => 'Preview Data Block',
+    'file' => 'forena.report.inc',
+    'page callback' => 'forena_report_block_preview',
+    'page arguments' => array(1, 4, 5, 6),
+    'access arguments' => array('design any report'),
+    'description' => 'Select the data block to add',
+    'type' => MENU_CALLBACK,
+);
+
+  $items['reports/%/edit/add-data/%'] = array(
+    'title' => 'Data',
+    'file' => 'forena.report.inc',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('forena_report_data_block_form', 1, 3, 4),
+    'access arguments' => array('design any report'),
+    'description' => 'Edit a data block on the report. ',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['reports/%/edit/add-data/%/%'] = array(
+    'title' => 'Add Data',
+    'file' => 'forena.report.inc',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('forena_report_data_block_form', 1, 3, 4, 5),
+    'access arguments' => array('design any report'),
+    'description' => 'Edit a data block on the report. ',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['reports/%/edit/prepend-data/%/%'] = array(
+    'title' => 'Add Data',
+    'file' => 'forena.report.inc',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('forena_report_data_block_form', 1, 3, 4, 5),
+    'access arguments' => array('design any report'),
+    'description' => 'Edit a data block on the report. ',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['reports/%/edit/delete-data/%'] = array(
+  	'title' => 'Delete Data',
+    'file' => 'forena.report.inc',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('forena_report_delete_confirm', 1, 4),
+    'access arguments' => array('design any report'),
+    'description' => 'Delete this form',
+    'type' => MENU_CALLBACK,
   );
 
   $items['reports/%/edit/format'] = array(
      'title' => 'Format',
      'page callback' => 'drupal_get_form',
-     'page arguments' => array('forena_format_form', 1),
+     'page arguments' => array('forena_report_format_form', 1),
      'access arguments' => array('design any report'),
-     'file' => 'forena.admin.inc',
+     'file' => 'forena.report.inc',
      'description' => 'Style and document options',
      'type' => MENU_LOCAL_TASK,
   );
@@ -213,10 +308,10 @@ function forena_menu() {
   $items['reports/%/delete'] = array(
      'title' => 'Remove Custom Report',
      'page callback' => 'drupal_get_form',
-     'page arguments' => array('forena_delete_form', 1),
+     'page arguments' => array('forena_report_delete_form', 1),
      'access arguments' => array('delete report'),
-     'type' => MENU_NORMAL_ITEM,
-     'file' => 'forena.admin.inc',
+     'type' => MENU_CALLBACK,
+     'file' => 'forena.report.inc',
   );
 
   $items['reports/add'] = array(
@@ -225,9 +320,10 @@ function forena_menu() {
      'page arguments' => array('forena_add_report_form'),
      'access arguments' => array('create any report'),
      'description' => 'Create a new report',
-     'file' => 'forena.admin.inc',
-     'type' => MENU_NORMAL_ITEM,
+     'file' => 'forena.report.inc',
+     'type' => MENU_SUGGESTED_ITEM,
   );
+
   $items['reports/%/add'] = array(
      'title' => 'Create Report',
      'page callback' => 'drupal_get_form',
@@ -264,6 +360,7 @@ function forena_menu() {
    	'type' => MENU_CALLBACK,
   );
 
+
   $items['forena/fields/format/autocomplete'] = array(
      'page callback' => 'forena_fields_format_autocomplete',
      'access callback' => TRUE,
@@ -298,6 +395,7 @@ function forena_menu() {
 function forena_admin_paths_alter(&$paths) {
   $paths['reports/*/*'] = TRUE;
   $paths['reports/*/view'] = FALSE;
+  $paths['reports/*/edit'] = FALSE;
   $paths['reports/add'] = TRUE;
 
 }
@@ -464,7 +562,7 @@ function forena_parameter_form($formid, &$form_state, $parameters, $attributes= 
   if ($menu_parms) $form_state['storage']['menu-parms'] = $menu_parms;
   // Set Descriptors
   $desc = FrxData::instance()->getContext('report');
-  if ($desc) $form_state['storage']['desc'] = $desc;
+  $form_state['storage']['desc'] = $desc;
   $desc = $form_state['storage']['desc'];
   $report_name = @$desc['name'];
 
@@ -808,7 +906,7 @@ function forena_include_data_tables() {
  *
  * @return unknown
  */
-function forena_report($name_in, $parms = array(), $print = TRUE) {
+function forena_report($name_in, $parms = NULL, $print = TRUE) {
   require_once('forena.common.inc');
   $desc = Frx::Menu()->parseURL($name_in);
   $time = @new DateTime($value);
@@ -823,18 +921,18 @@ function forena_report($name_in, $parms = array(), $print = TRUE) {
   $report_name = $desc['name'];
   // Load dataTable plugin if possible.
   //forena_include_data_tables();
-  $output = FrxReportGenerator::instance()->report($name_in, $parms, $print);
+  $content = Frx::Editor($name_in, FALSE)->report($parms, $print, FALSE);
+
   $m_path = drupal_get_path('module', 'forena');
-  if ($output) {
+  if ($content) {
     // This has been deprecated, but we'll eave it in for now.
     if ($print) drupal_add_js($m_path . '/forena.js');
     $forena_js = array();
     $forena_js['form'] = preg_replace('/[^\w\-]+/u', '_', Frx::Skin()->name);
     $forena_js['report'] = preg_replace('/[^\w\-]+/u', '_', $name_in);
     if ($print) drupal_add_js(array('forena' => $forena_js), 'setting');
-    if (!$print && is_array($output)) $output = drupal_render($output);
-    return $output;
   }
+  return $content;
 
 
 }
@@ -1075,8 +1173,33 @@ function forena_forena_controls() {
   );
 
   $controls[] = array(
+  	'file' => 'renderers/FrxCrosstab.inc',
+    'class' => 'FrxCrosstab',
+  );
+
+  $controls[] = array(
+      'file' => 'renderers/FrxEmailMerge.inc',
+      'class' => 'FrxEmailMerge',
+  );
+
+  $controls[] = array(
+      'file' => 'renderers/FrxFieldTable.inc',
+      'class' => 'FrxFieldTable',
+  );
+
+  $controls[] = array(
   	'file' => 'renderers/FrxRenderer.inc',
     'class' => 'FrxRenderer',
+  );
+
+  $controls[] = array(
+  	'file' => 'renderers/FrxTable.inc',
+    'class' => 'FrxTable',
+  );
+
+  $controls[] = array(
+      'file' => 'renderers/FrxMergeDocument.inc',
+      'class' => 'FrxMergeDocument',
   );
 
   $controls[] = array(
@@ -1109,14 +1232,7 @@ function forena_forena_controls() {
     'class' => 'FrxTitle',
   );
 
-  $controls[] = array(
-  	'file' => 'renderers/FrxCrosstab.inc',
-    'class' => 'FrxCrosstab',
-  );
-
-  $library_dir = FrxReportGenerator::instance()->configuration('library_path');
-  $library = rtrim($library_dir,'/') . '/SVGGraph/SVGGraph.php';
-  if (file_exists($library)) {
+  if (forena_library_file('SVGGraph')) {
     $controls[] = array(
       'file' => 'renderers/FrxSVGGraph.inc',
       'class' => 'FrxSVGGraph'
@@ -1325,24 +1441,31 @@ function forena_theme() {
   return array(
     'forena_web_report' => array(
       'variables' => array('doc_types' => NULL, 'parameters' => NULL, 'content' => NULL),
-  ),
+     ),
     'forena_inline_form_element' => array(
       'render element' => 'element',
       'file' => 'forena.common.inc',
-  ),
+     ),
     'forena_inline_field' => array(
       'render element' => 'field',
       'file' => 'forena.common.inc',
-  ),
+    ),
     'forena_fieldset_template' => array(
       'render element' => 'fieldset',
       'file' => 'forena.common.inc',
-  ),
+    ),
     'forena_data_table' => array(
     	'file' => 'forena.common.inc',
       'variables' => array('header' => NULL, 'data' => NULL),
-    )
-
+      ),
+    'forena_report_parameters_form' => array(
+    	'file' => 'forena.report.inc',
+      'render element' => 'form',
+    ),
+    'forena_element_draggable' => array(
+    	'file' => 'forena.report.inc',
+      'render element' => 'element',
+    ),
   );
 }
 

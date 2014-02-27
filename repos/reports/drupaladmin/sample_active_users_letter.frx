@@ -20,7 +20,7 @@
 </frx:fields>
 </head>
 <body>
-  <div frx:block="drupal/active_users" id="forena-1" frx:foreach="*">
+  <div frx:block="drupal/active_users" id="forena-1" frx:foreach="*" class="FrxEmailMerge">
     <div class="email-document">
       <div>
         <table>

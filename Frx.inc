@@ -10,6 +10,32 @@ define('FRX_SQL_TOKEN', '/(?<!(:|[a-zA-Z]|[0-9]|[_\.])):[a-zA-Z]([a-zA-Z]|[0-9]|
 
 class Frx {
 
+  /**
+   * Helper method to return current url parameters.
+   * @return unknown
+   */
+  public static function parms() {
+    $parms = $_GET;
+    unset($parms['q']);
+    return $parms;
+  }
+
+  /**
+   * Temporary dom object used for for fragment importing and manipulation.
+   * We use a singleton here to reduce the memory footprint.
+   * @return DOMDocument
+   */
+  public static function tempDOM() {
+    static $o = '';
+    if (!$o) {
+      $o= new DOMDocument('1.0', 'UTF-8');
+      @$o->load('<?xml version="1.0" encoding="UTF-8"?>
+         <!DOCTYPE root [
+         <!ENTITY nbsp "&#160;">
+         ]>');
+    }
+    return $o;
+  }
 
   /**
    * Skin Factory
@@ -167,16 +193,14 @@ class Frx {
     return $instances;
   }
 
+
   /**
    * Returns an object of the template class
    * that has a method named templates.
-   * @return FrxTemplate
+   * @return FrxRenderer
    */
   public static function Template($class) {
-    FrxReportGenerator::instance()->supported_templates();
-    if (class_exists($class)) {
-      return new $class();
-    }
+    return Frx::Controls($class);
   }
 
   /**
@@ -349,14 +373,14 @@ class Frx {
    * @param  $report_name
    * @return FrxEditor <string, FrxEditor>
    */
-  static public function Editor($report_name = '') {
+  static public function Editor($report_name = '', $edit=TRUE) {
     static $o='';
     require_once('FrxEditor.inc');
     if (!$o) {
-      $o = new FrxEditor($report_name);
+      $o = new FrxEditor($report_name, $edit);
     }
     else {
-      if ($report_name) $o->load($report_name) ;
+      if ($report_name) $o->load($report_name, $edit) ;
     }
     return $o;
   }
@@ -366,17 +390,18 @@ class Frx {
    * @param $block_name
    * @return FrxBlockEditor
    */
-  static public function BlockEditor($block_name = '') {
+  static public function BlockEditor($block_name = '', $edit=TRUE) {
     static $o='';
     require_once('FrxBlockEditor.inc');
     if (!$o) {
-      $o = new FrxBlockEditor($block_name);
+      $o = new FrxBlockEditor($block_name, $edit);
     }
     else {
-      if ($block_name && $o->block_name != $block_name) $o->load($block_name);
+      if ($block_name) $o->load($block_name, $edit);
     }
     return $o;
   }
+
 
 
 }

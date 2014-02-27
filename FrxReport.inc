@@ -9,6 +9,7 @@ require_once('FrxSyntaxEngine.inc');
 require_once('renderers/FrxRenderer.inc');
 
 class FrxReport {
+  public $block_edit_mode = false;
   public $blocks_loaded;
   public $rpt_xml;
   public $fields;
@@ -36,15 +37,18 @@ class FrxReport {
   public $dom;
   public $format;
   public $link_mode = '';
+  public $xpathQuery;
+  public $frx_attributes = array(); // Saved attributes from prior call.
+  public $preview_mode = FALSE;    // This will make the report renderer put in editing controls when TRUE
 
 
-  public function __construct($xhtml, $data=array()) {
+  public function __construct($xhtml='', $data=array()) {
     $this->access = array();
     $this->parameters = array();
     $this->options = array();
-    $this->parms = $data;
-    if ($data) $this->data_passed = TRUE;
     $this->teng = new FrxSyntaxEngine(FRX_TOKEN_EXP, '{}', $this);
+    $this->setParameters($data);
+
     if ($xhtml) {
       $dom = $this->dom = new DOMDocument('1.0', 'UTF-8');
       // Old assumption is an ojbect is a simplexml one
@@ -59,69 +63,11 @@ class FrxReport {
       }
       if (!$success) return;
 
-      $dom->formatOutput = TRUE;
-      $rpt_xml = $this->rpt_xml = simplexml_import_dom($dom);
-
-
-      // Load header data
-      $this->body = $rpt_xml->body;
-      if ($rpt_xml->head) {
-        $this->title = (string)$rpt_xml->head->title;
-        $nodes = $rpt_xml->xpath('//frx:docgen/frx:doc');
-        $this->formats = array();
-        if ($nodes) foreach ($nodes as $value) {
-          $arr = $value->attributes();
-          $this->formats[] = (string)$arr['type'];
-        }
-
-
-        foreach ($rpt_xml->head->children(FRX_NS) as $name => $node) {
-          switch ($name) {
-            case 'fields':
-              $this->fields = $node;
-              break;
-            case 'category':
-              $this->category = (string)$node;
-              break;
-            case 'descriptor':
-              $this->descriptor = (string)$node;
-              break;
-            case 'options':
-              foreach ($node->attributes() as $key => $value) {
-                $this->options[$key] = (string)$value;
-              }
-              break;
-            case 'cache':
-              foreach ($node->attributes() as $key => $value) {
-                $this->cache[$key] = (string)$value;
-              }
-            case 'title':
-              $this->frx_title = (string)$node;
-              break;
-            case 'form':
-              $this->form = (string) $value;
-              break;
-            case 'parameters':
-              foreach ($node->children(FRX_NS) as $key => $node) {
-                $parm = array();
-                foreach ($node->attributes() as $akey => $attr) {
-                  $parm[$akey] = (string)$attr;
-                }
-                $id = $parm['id'];
-                $val = isset($parm['value']) ? $parm['value'] : '';
-                $parm['value']= ((string)$node) ? (string)$node : $val;
-                $this->parameters[$id] = $parm;
-              }
-              break;
-            case 'doctypes':
-              $this->doctypes = $value;
-              break;
-          }
-        }
-
-        $this->skin = isset($this->options['skin']) ? $this->options['skin'] : @$this->options['form'];
-      }
+      $this->xpathQuery = new DOMXPath($dom);
+      $this->setReport($dom, $this->xpathQuery);
     }
+
+
   }
 
   function __destruct() {
@@ -130,6 +76,81 @@ class FrxReport {
     }
   }
 
+  public function setParameters($parms) {
+    $this->data = $parms;
+    if ($parms) $this->data_passed = TRUE;
+  }
+
+  /**
+   * Sets the report.
+   * @param DOMDocument $dom
+   */
+  public function setReport(DOMDocument $dom, DOMXPath $xpq) {
+    $this->dom = $dom;
+    $dom->formatOutput = TRUE;
+    $this->xpathQuery = $xpq;
+    $rpt_xml = $this->rpt_xml = simplexml_import_dom($this->dom->documentElement);
+    $this->missing_parms = FALSE;
+
+    // Load header data
+    $this->body = $rpt_xml->body;
+    if ($rpt_xml->head) {
+      $this->title = (string)$rpt_xml->head->title;
+      $nodes = $rpt_xml->xpath('//frx:docgen/frx:doc');
+      $this->formats = array();
+      if ($nodes) foreach ($nodes as $value) {
+        $arr = $value->attributes();
+        $this->formats[] = (string)$arr['type'];
+      }
+
+
+      foreach ($rpt_xml->head->children(FRX_NS) as $name => $node) {
+        switch ($name) {
+        	case 'fields':
+        	  $this->fields = $node;
+        	  break;
+        	case 'category':
+        	  $this->category = (string)$node;
+        	  break;
+        	case 'descriptor':
+        	  $this->descriptor = (string)$node;
+        	  break;
+        	case 'options':
+        	  foreach ($node->attributes() as $key => $value) {
+        	    $this->options[$key] = (string)$value;
+        	  }
+        	  break;
+        	case 'cache':
+        	  foreach ($node->attributes() as $key => $value) {
+        	    $this->cache[$key] = (string)$value;
+        	  }
+        	case 'title':
+        	  $this->frx_title = (string)$node;
+        	  break;
+        	case 'form':
+        	  $this->form = (string) $value;
+        	  break;
+        	case 'parameters':
+        	  foreach ($node->children(FRX_NS) as $key => $node) {
+        	    $parm = array();
+        	    foreach ($node->attributes() as $akey => $attr) {
+        	      $parm[$akey] = (string)$attr;
+        	    }
+        	    $id = $parm['id'];
+        	    $val = isset($parm['value']) ? $parm['value'] : '';
+        	    $parm['value']= ((string)$node) ? (string)$node : $val;
+        	    $this->parameters[$id] = $parm;
+        	  }
+        	  break;
+        	case 'doctypes':
+        	  $this->doctypes = $value;
+        	  break;
+        }
+      }
+      $this->get_attributes_by_id();
+      $this->skin = isset($this->options['skin']) ? $this->options['skin'] : @$this->options['form'];
+    }
+  }
 
   /**
    * Get the data block
@@ -137,19 +158,16 @@ class FrxReport {
    * @return unknown_type
    */
   public function getData($block, $clause='', $id='', $data_uri='') {
+    $data = array();
     if ($data_uri) {
       parse_str($data_uri, $data);
       if (is_array($data)) foreach ($data as $key => $value) {
         $data[$key] = $this->teng->replace($value, TRUE);
       }
-
-      // Merge in current_context
-      $data = array_merge(Frx::Data()->currentContextArray(), $data);
-      $id .= '-parm';
-      Frx::Data()->push($data, $id);
     }
 
-    $xml = Frx::RepoMan()->data($block, NULL);
+    $xml = Frx::BlockEditor($block, $this->block_edit_mode)->data($data);
+    //$xml = Frx::RepoMan()->data($block, NULL);
     if ($data_uri) Frx::Data()->pop();
 
     if ($xml) {
@@ -158,6 +176,17 @@ class FrxReport {
     return $xml;
   }
 
+  /**
+   * Collapse the parameters if the data is loaded.
+   */
+  public function collapseParameters() {
+    if (is_array($this->parameters_form) && $this->parameters_form) {
+      $form = $this->parameters_form;
+      if (isset($form['params']) && @$form['params']['#collapsible'])  {
+        $this->parameters_form['params']['#collapsed'] = $this->blocks_loaded;
+      }
+    }
+  }
 
   /**
    * Render the report
@@ -167,38 +196,30 @@ class FrxReport {
     if (!$format) $format = 'web';
     // Only push the parameter conte
     Frx::Data()->push($this->parms, 'parm');
+    $this->parameters_form = array();
 
+    // Find the Body of the report.
     $this->format = $format;
     $dom = $this->dom;
     $body = $dom->getElementsByTagName('body')->item(0);
 
+    // Render the rport.
     $o='';
-    if (!$this->missing_parms || $this->rpt_xml->xpath('//*[@frx:renderer="FrxParameterForm"]'))  {
-      if ($cache_data && $cache_data['content']) {
-        $o .= $cache_data['content'];
-      }
-      else {
-        $c = Frx::Controls('FrxRenderer');
-        $c->initReportNode($body, $this);
-        $o .= $c->renderChildren($body);
-      }
-    }
+    $c = Frx::Controls('FrxRenderer');
+    $c->initReportNode($body, $this);
+    if (!$this->missing_parms) $o .= $c->renderChildren($body);
 
+    //$this->collapseParameters();
+    if (!$this->parameters_form) $this->parametersForm(array('collapsible' => TRUE, 'collapsed' => $this->blocks_loaded));
     $this->html = $o;
+
     // Default in dynamic title from head.
     if ($this->frx_title) {
       $title = check_plain($this->teng->replace($this->frx_title));
       if ($title) $title = $this->title = $title;
     }
 
-    if ($render_form && !$this->rpt_xml->xpath('//*[@frx:renderer="FrxParameterForm"]') && $format=='web') {
-      $variables = array('collapsed' => $this->blocks_loaded);
-      $this->parameters_form = $form = $this->parametersForm($variables);
-    }
     Frx::Data()->pop();
-    if ($this->cache) {
-      $this->cache['content'] = $this->html;
-    }
     return $this->html;
   }
 
@@ -238,6 +259,29 @@ class FrxReport {
       $l = l($title, $path, $options);
     }
     return $l;
+  }
+
+
+  public function getField($id) {
+    $field = array_fill_keys(array('default', 'link', 'add-query', 'class', 'rel', 'format', 'format-string', 'target'), '');
+    if ($this->fields) {
+      $path = 'frx:field[@id="' . $id . '"]';
+      $formatters = $this->fields->xpath($path);
+      if ($formatters) {
+        $formatter = $formatters[0];
+        //@TODO: Replace the default extraction with something that will get sub elements of the string
+        $field['default'] = (string)$formatter;
+        $field['link'] = (string)$formatter['link'];
+        $field['add-query'] = (string)$formatter['add-query'];
+        $field['class'] = (string)$formatter['class'];
+        $field['rel'] = (string)$formatter['rel'];
+        $field['format'] = (string) $formatter['format'];
+        $field['format-string'] = (string) $formatter['format-string'];
+        $field['target'] = (string) $formatter['target'];
+      }
+    }
+
+    return $field;
   }
 
   /*
@@ -321,6 +365,7 @@ class FrxReport {
         array('fragment' => $fragment, 'query' => $data, 'attributes' => $attributes, 'absolute' => TRUE)
       );
     }
+    if ($this->preview_mode) $value .= Frx::Editor()->fieldLink($key, $value);
     return $value;
   }
 
@@ -330,7 +375,7 @@ class FrxReport {
    * @return unknown_type
    */
   public function deleteNode($id) {
-    $path = '//*[@id="' . $id . '"]';
+    $path = 'body//*[@id="' . $id . '"]';
     $nodes = $this->rpt_xml->xpath($path);
     if ($nodes) {
       $node = $nodes[0];
@@ -345,12 +390,9 @@ class FrxReport {
    * @return unknown
    */
   public function asXML() {
-    if ($this->rpt_xml) {
-      return $this->rpt_xml->asXML();
-    }
-    else {
-      return '';
-    }
+    $dom =  $this->dom;
+    $dom->formatOutput = TRUE;
+    return  $this->doc_prefix . $this->dom->saveXML($this->dom->documentElement);
   }
   /**
    * Make sure all xml elements have ids
@@ -421,10 +463,11 @@ class FrxReport {
    * array( element_id => array( key1 => value1, key2 => value2)
    * The function restores the attributes based on the element id.
    */
-  public function save_attributes_by_id($attributes) {
+  public function save_attributes_by_id() {
+    $attributes = $this->frx_attributes;
     $rpt_xml = $this->rpt_xml;
     if ($attributes) foreach ($attributes as $id => $att_list) {
-      $id_search_path = '//*[@id="' . $id . '"]';
+      $id_search_path = 'body//*[@id="' . $id . '"]';
       $fnd = $rpt_xml->xpath($id_search_path);
       if ($fnd) {
         $node = $fnd[0];
@@ -485,8 +528,13 @@ class FrxReport {
    * @param $parms Array of parameters.
    * @return boolean indicating whether the required parameters are present.
    */
-  public function processParameters() {
-    $parms = $this->parms;
+  public function processParameters($parms=NULL) {
+    if ($parms==NULL) {
+      $parms = $this->parms;
+    }
+    else {
+      $this->parms = $parms;
+    }
     $missing_parms = FALSE;
 
     foreach ($this->parameters as $key => $parm) {
@@ -526,8 +574,7 @@ class FrxReport {
       }
     }
     $this->parms = $parms;
-    $this->missing_parms = $missing_parms;
-    return $missing_parms;
+    return $this->missing_parms;
   }
 
   public function parametersArray() {
@@ -552,7 +599,8 @@ class FrxReport {
 
   public function parametersForm($variables = array()) {
     $parms = $this->parametersArray();
-    return drupal_get_form('forena_parameter_form', $parms, $variables);
+    $form =  drupal_get_form('forena_parameter_form', $parms, $variables);
+    $this->parameters_form = $form;
   }
 
   public function setSort($sort, $compare_type='') {
@@ -639,10 +687,11 @@ class FrxReport {
    */
   public function group($data,  $group='') {
     $rows = array();
+    $group = (string)$group;
     if (is_array($data) || is_object($data)) {
       foreach ($data as $row) {
         Frx::Data()->push($row, '_group');
-        $gval = $this->teng->replace($group);
+        $gval = $this->teng->replace($group, TRUE);
         Frx::Data()->pop();
         $rows[$gval][] = $row;
       }

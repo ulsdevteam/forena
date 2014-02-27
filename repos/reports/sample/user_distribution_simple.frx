@@ -21,10 +21,10 @@
 <body>
 
 
-  <div frx:block="sampledb/state" id="state">
-    <h3>{row/name}</h3>
+  <div frx:block="sampledb/state" id="state" frx:foreach="*">
+    <h2>{name}</h2>
   </div>
-  <div frx:block="sampledb/distribution" id="forena-2">
+  <div frx:block="sampledb/distribution" id="distribution_block" class="FrxTable">
     <p>This report lists all users in cities assigned to a state
       code = {parm.state}. Note that the city/state combinations for
       sample data were randomly generated, so don't be surprised if it
@@ -38,7 +38,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr frx:foreach="*" id="forena-3">
+        <tr frx:foreach="*" id="distribution">
           <td>{city}</td>
           <td>{users}</td>
         </tr>

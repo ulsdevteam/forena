@@ -1,4 +1,7 @@
 <?xml version="1.0"?>
+<!DOCTYPE root [
+<!ENTITY nbsp "&#160;">
+]>
 <html xmlns:frx="urn:FrxReports">
 <head>
 <title>4. Master detail with nested blocks</title>
@@ -17,7 +20,7 @@
       the detail report. In this case state. You can override these by
       passing in a where clause in the query.</p>
   </div>
-  <div frx:block="sampledb/users_by_state" id="forena-1"
+  <div frx:block="sampledb/users_by_state" id="forena-1" class="FrxSVGGraph"
     frx:clause="order by name">
     <div frx:foreach="*" id="state">
       <h3>{name}</h3>

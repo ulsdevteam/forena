@@ -279,7 +279,7 @@ function forena_save_report($report_name, $report, $save_file = FALSE, $altered 
       $report = new SimpleXMLElement($report);
     }
     catch (Exception $e) {
-      FrxReportGenerator::instance()->app->error(t('Could not save %s because XML was malformed', htmlspecialchars($report_name)),
+      Frx::error(t('Could not save %s because XML was malformed', htmlspecialchars($report_name)),
         "<p>Invalid XML</p><pre>XML:" . htmlspecialchars($report) . "\n" . $e->getMessage() . "</pre>");
       return;
     }
@@ -384,6 +384,7 @@ function _forena_render_form_template($fields, $template) {
 
   return $build;
 }
+
 
 function _forena_set_inline_theme(&$elements) {
   foreach ($elements as $key => $value) if (strpos($key, '#')===FALSE) {
@@ -512,6 +513,7 @@ function theme_forena_data_table($variables) {
   $output = theme('table', $variables);
   return $output;
 }
+
 
 
 

@@ -42,18 +42,21 @@ class FrxData extends FrxContext {
       return $data;
     }
 
-    $parms = array();
+    $ret = array();
     if (is_object($data)) {
       // Get attributes
-      $data = get_object_vars($data);
+      $ret = get_object_vars($data);
       if (method_exists($data, 'attributes')) {
         foreach ($data->attributes() as $key => $value) {
-          $data[$key] = (string)$value;
+          $ret[$key] = (string)$value;
         }
       }
 
-      return $data;
     }
+    else {
+      $ret = (array)$data;
+    }
+    return $ret;
 
   }
 

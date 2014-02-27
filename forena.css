@@ -1,10 +1,13 @@
-div.doclinks {
-	float: right;
+ul.forena-doclinks li {
+  display: inline; 
+  margin-right: 0.5em; 
+  padding-left: 0; 
 }
 
-a.doclinks {
-	padding-left: 10px;
+ul.forena-doclinks { 
+	margin-left: 0; 
 }
+
 
 .paging_full_numbers a.paginate_button,
  	.paging_full_numbers a.paginate_active {
@@ -17,6 +20,10 @@ a.doclinks {
 	background-color : #eee	; 
 }
 
+#FrxCrosstab-columns div { 
+	display: inline; 
+	margin-right: 1em; 
+}
 
 .paging_full_numbers {
 	width: 400px;

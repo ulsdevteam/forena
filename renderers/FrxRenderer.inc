@@ -16,9 +16,26 @@ class FrxRenderer {
   public $id;
   public $format;
   public $frxReport;  // The report object being used.
+  public $columns;
+  public $numeric_columns;
+  public $xmlns = 'urn:FrxReports';
+  public $dom;   // Reports root document node.
+  public $xpathQuery;
+  public $input_format = 'full_html';
 
-  public function initReportNode(DOMNode $domNode, FrxReport $frxReport) {
+  public function __construct() {
+    $this->input_format = variable_get('forena_input_format', filter_default_format());
+  }
+
+  /**
+   * This function is called to give the renderer the current conetxt in report rendering.
+   * It makes sure the renderer has the current DOM nodes dom documnent, and other attributes.
+   * @param DOMElement $domNode
+   * @param FrxReport $frxReport
+   */
+  public function initReportNode(DOMElement $domNode, FrxReport $frxReport) {
     $this->reportDocDomNode = $domNode;
+    $this->dom = $domNode->ownerDocument;
     $this->dataProvider = Frx::Data();
     $this->reportDocNode = $node = simplexml_import_dom($domNode);
     $this->teng = $frxReport->teng;
@@ -26,12 +43,20 @@ class FrxRenderer {
     $this->format = $this->frxReport->format;
     $skin = Frx::Data()->getContext('skin');
     $this->settings = isset($skin['FrxReport']) ? $skin['FrxReport'] : array();
-    $this->reportDocNode->getName();
     $this->htmlAttributes = $node->attributes();
     $this->id = (string)$this->htmlAttributes['id'];
     $this->frxAttributes = $node->attributes(FRX_NS);
+    unset($this->xpathQuery);
+    $this->xpathQuery = new DOMXPath($this->dom);
   }
 
+  /**
+   * A helper function to allow replacement of tokens from inside a renderer wihout
+   * needing to understand the object
+   * @param unknown $text
+   * @param string $raw_mode Field
+   * @return Ambigous <unknown_type, text, mixed, string, unknown>
+   */
   public function replaceTokens($text, $raw_mode=FALSE) {
     return $this->teng->replace($text, $raw_mode);
   }
@@ -81,6 +106,7 @@ class FrxRenderer {
     $o = '';
     $node_type = $dom_node->nodeType;
     $settings = $this->settings;
+    $context = Frx::Data()->currentContextArray();
 
     // Shortcut process a text node
     if ($node_type == XML_TEXT_NODE|| $node_type == XML_ENTITY_REF_NODE || $node_type == XML_ENTITY_NODE)
@@ -89,7 +115,6 @@ class FrxRenderer {
       $o .= $this->teng->replace($text);
       return $o;
     }
-
 
     //Handle comment nodes
     if ($node_type == XML_COMMENT_NODE) {
@@ -117,7 +142,6 @@ class FrxRenderer {
     if (!is_object($node)) {
       return '';
     }
-
     $frx = $node->attributes(FRX_NS);
     $include_root = !isset($frx['skip_root']) || !$frx['skip_root'];
     $elements = $dom_node->childNodes->length;
@@ -129,11 +153,14 @@ class FrxRenderer {
     }
 
     // Test to see if we have any nodes that contain data url
-    if ($node->xpath('*//@frx:*') || $frx) {
+    if ($node->xpath('*//@frx:*') || $frx!==NULL) {
       $attrs = $node->attributes();
       $id = (string)$attrs['id'];
-      $frx = $node->attributes(FRX_NS);
       $tag = $node->getName();
+
+
+      if ($this->frxReport->preview_mode) $o .= Frx::Editor()->blockLinks($frx, $id, $context);
+
 
       if ((string)$frx['block']) {
         $is_data_block = TRUE;
@@ -142,7 +169,7 @@ class FrxRenderer {
           Frx::Data()->push($xml, $id);
         }
         else {
-          return '';
+          return $o;
         }
       }
 
@@ -163,6 +190,7 @@ class FrxRenderer {
       // Determine if we have a custom renderer
       $renderer = (string)$frx['renderer'];
       // if we have a foreach in this node, we need to iterate the children
+
       if ((string)$frx['foreach'] ) {
         // Save xml
         $path = $this->teng->replace((string)$frx['foreach'], TRUE);
@@ -196,7 +224,6 @@ class FrxRenderer {
         $i=0;
 
         //$tmp_attrs = (array)$attrs;
-
         if ($nodes) foreach ($nodes as $x) {
           if ($group) {
             Frx::Data()->setContext('group', $x[0]);
@@ -206,7 +233,6 @@ class FrxRenderer {
           $odd = $i & 1;
           $row_class = $odd ? 'odd' : 'even';
           $r_attr_text = '';
-
           if (isset($attrs['id'])) {
             if (strpos($attrs['id'],'{')!== FALSE) {
               $id = $this->teng->replace($attrs['id']);
@@ -229,7 +255,7 @@ class FrxRenderer {
             $r_attr_text .=  ' ' . $key . '="' . (string)$value . '"';
           }
 
-          if ($include_root) $o .= $this->teng->replace('<' . $tag . $r_attr_text . '>');
+          if ($include_root) $o .= $this->teng->replace('<' . $tag . $r_attr_text . '>', TRUE);
           foreach ($dom_node->childNodes as $child) {
             $o .= $this->renderDomNode($child);
           }
@@ -248,7 +274,7 @@ class FrxRenderer {
           }
         }
         else {
-          if ($include_root) $o .= $this->teng->replace('<' . $tag . $attr_text . '>');
+          if ($include_root) $o .= $this->teng->replace('<' . $tag . $attr_text . '>', TRUE);
 
           // None found, so render children
           foreach ($dom_node->childNodes as $child) {
@@ -265,6 +291,7 @@ class FrxRenderer {
       // We can render so lets do it.
       $text = $node->asXML();
       $node_xml = $this->teng->replace($text);
+
       // Strip out empty leaf nodes if report is configured to
       if (!empty($settings['stripEmptyElements'])) {
         $node_updated = new SimpleXMLElement($node_xml);
@@ -272,8 +299,7 @@ class FrxRenderer {
           return '';
         }
       }
-
-      $o .= $this->teng->replace($text);
+      $o .= $node_xml;
     }
 
     // Restore link processing.
@@ -292,10 +318,22 @@ class FrxRenderer {
     return $o;
   }
 
+  /**
+   * Default Render action, which simply does normal forena rendering.
+   * You can use renderDomNode at any time to generate the default forena
+   * rendering methods.
+   * @return Ambigous <string, unknown, unknown_type, text, mixed>
+   */
   public function render() {
     return $this->renderDomNode($this->reportDocDomNode);
   }
 
+  /**
+   * Helper function for convergint methods to a standard associated array.
+   * @param unknown $attributes
+   * @param unknown $key
+   * @param unknown $value
+   */
   public static function addAttributes(&$attributes, $key, $value) {
     $parts = explode('_', $key);
     $suff = '';
@@ -314,15 +352,83 @@ class FrxRenderer {
   }
 
   /**
+   * Starting at the current report node, this function removes all child nodes.  It aso
+   * removes any FRX attributes on the current as well.
+   * @return Ambigous <DOMElement, unknown>
+   */
+  public function resetTemplate() {
+     $node = $this->reportDocDomNode;
+     $this->removeChildren($node);
+     $tag = $node->tagName;
+     $new_node = $this->dom->createElement($tag);
+     $this->frxAttributes = array();
+     $parent = $node->parentNode;
+     $parent->replaceChild($new_node, $node);
+     $this->reportDocDomNode = $new_node;
+     $this->initReportNode($new_node, $this->frxReport);
+     return $node;
+  }
+
+
+
+  /**
+   * Set FRX attributes.
+   * @param DOMNode $node
+   * @param unknown $attributes
+   * @param unknown $frxattributes
+   */
+  public function setAttributes(DOMElement $node, $attributes, $frx_attributes) {
+    if ($attributes) foreach ($attributes as $key => $value) {
+
+      $node->setAttribute($key, $value);
+
+    }
+
+    // Iterate the value
+    if ($frx_attributes) foreach ($frx_attributes as $key => $value) {
+
+      // If the value is an array create multiple attributes
+      // that are of the form key_1, key_2 .... etc.
+      if (is_array($value)) {
+        $i=0;
+        $done=FALSE;
+        while(!$done) {
+          $v = '';
+          if ($value) $v = array_shift($value);
+          $i++;
+          $k = $key . '_' . trim((string)$i);
+          $node->setAttribute($k,$v);
+          if (!$v) {
+            $done = TRUE;
+          }
+        }
+      }
+      // A normal value.
+      else {
+        if ($value) $node->setAttributeNS($this->xmlns, $key, $value);
+      }
+    }
+
+  }
+
+  /**
    * Standard php array containing merged attributes
    * Enter description here ...
    */
-  public function mergedAttributes() {
+  public function mergedAttributes($node = NULL) {
+    if ($node) {
+      $frx_attributes = $node->attributes($this->xmlns);
+      $html_attributes = $node->attributes();
+    }
+    else {
+      $frx_attributes = $this->frxAttributes;
+      $html_attributes = $this->htmlAttributes;
+    }
     $attributes = array();
-    if (isset($this->frxAttributes)) foreach ($this->frxAttributes as $key => $data) {
+    if ($frx_attributes) foreach ($frx_attributes as $key => $data) {
       FrxRenderer::addAttributes($attributes, $key, $data);
     }
-    if (isset($this->htmlAttributes)) foreach ($this->htmlAttributes as $key => $data) {
+    if ($html_attributes) foreach ($html_attributes as $key => $data) {
       FrxRenderer::addAttributes($attributes, $key, $data);
     }
     $skin_data = Frx::Data()->getContext('skin');
@@ -341,6 +447,10 @@ class FrxRenderer {
     return $attributes;
   }
 
+  /**
+   * Gives the token replaced attributes of a node.
+   * @return multitype:NULL Ambigous <unknown_type, text, mixed, string, unknown>
+   */
   public function replacedAttributes() {
     $attributes = array();
     if (isset($this->frxAttributes)) foreach ($this->frxAttributes as $key => $data) {
@@ -376,5 +486,523 @@ class FrxRenderer {
     return $output;
   }
 
+  /**
+   * Returns the section
+   * Enter description here ...
+   */
+  public function configForm($config) {
+    $form_ctl = array();
+    $form_ctl['header'] = array(
+        '#type' => 'text_format',
+        '#title' => t('Header'),
+        '#rows' => 5,
+        '#format' => $this->input_format,
+        '#default_value' => @$config['header']['value'],
+       // '#ajax' => $this->configAjax('blur')
+    );
 
+    return $form_ctl;
+  }
+
+  /**
+   * Default configuration validator. Simply validates header and footer attributes.
+   * @param unknown $config
+   * @return multitype:Ambigous <The, string, A, Optional>
+   */
+  public function configValidate(&$config) {
+    return $this->validateTextFormats($config, array('header', 'footer'));
+  }
+
+  /**
+   * Helper funciton for validating text_format type controls.
+   * @param unknown $config
+   * @param unknown $elements
+   * @return multitype:Ambigous <The, string, A, Optional>
+   */
+  public function validateTextFormats(&$config, $elements) {
+      $temp_dom = Frx::tempDOM();
+
+     $errors = array();
+     foreach ($elements as $element) if (isset($config[$element]['value'])) {
+         if ($config[$element]['value']) {
+             $body_xml = '<?xml version="1.0" encoding="UTF-8"?>
+           <!DOCTYPE root [
+           <!ENTITY nbsp "&#160;">
+           ]><html xmlns:frx="' . $this->xmlns . '"><body>' . $config[$element]['value'] . '</body></html>';
+           @$temp_dom->loadXML($body_xml);
+           if (!$temp_dom->documentElement) {
+             $errors[$element] = t('Invalid XHTML in %s', array('%s' => $element));
+           }
+        }
+     }
+     return $errors;
+  }
+
+  /**
+   * Default method for extracting configuration information from the template.
+   * This just scrapes teh current child html as the template.
+   */
+  public function scrapeConfig() {
+    $content = array();
+    $this->extractTemplateHTML($this->reportDocDomNode, $content);
+  }
+
+  /**
+   * Generate ajax configuration attributes for use in template configurtion forms.
+   * @param string $event
+   * @return multitype:string
+   */
+  public function configAjax($event='') {
+    $ajax = array(
+        'callback' => 'forena_template_callback',
+        'wrapper' => 'forena-template-wrapper',
+      );
+    if ($event) $ajax['event'] = $event;
+    return $ajax;
+  }
+
+  /**
+   * Add a node to the existing dom element with attributes
+   * @param $cur_node DOMNode Parent node
+   * @param $indent Integer Text indentation.
+   * @param $tag String Tag name
+   * @param $value String text value of the element
+   * @param $attributes array Html attributes to add
+   * @param $frx_attributes array FRX attributes.
+   * @return void|unknown
+   */
+  function addNode($cur_node, $indent, $tag='div', $value='', $attributes=array(), $frx_attributes=array()) {
+    $dom = $this->dom;
+    if (!$cur_node) {
+      return;
+    }
+
+    if ($indent) {
+      $tnode = $dom->createTextNode("\n" . str_repeat(' ', $indent));
+      $cur_node->appendChild($tnode);
+    }
+    $node = $this->dom->createElement($tag, $value);
+    $cur_node->appendChild($node);
+    $this->setAttributes($node, $attributes, $frx_attributes);
+    $cur_node->appendChild($this->dom->createTextNode(""));
+    return $node;
+  }
+
+
+  /**
+   * Append a textual XHTML fragment to the dom.
+   * We do not use the DOMDocumentFragment optioin because they don't properly import namespaces. .
+   * @param DOMNode $node
+   * @param unknown $xml_string
+   * @param string $ctl_name
+   */
+  function addFragment(DOMNode $node, $xml_string, $ctl_name = 'Header') {
+    if (is_array($xml_string) && isset($xml_string['value'])) {
+      $xml_string = $xml_string['value'];
+    }
+    if ($xml_string && !is_array($xml_string)) {
+      $temp_dom = Frx::tempDOM();
+      $body_xml = '<?xml version="1.0" encoding="UTF-8"?>
+         <!DOCTYPE root [
+         <!ENTITY nbsp "&#160;">
+         ]><html xmlns:frx="' . $this->xmlns . '"><body>' . $xml_string . '</body></html>';
+       try {
+        $temp_dom->loadXML($body_xml);
+      }
+      catch (Exception $e) {
+
+        forena_error('Malformed report body', '<pre>' . $e->getMessage() .
+        $e->getTraceAsString() . '</pre>');
+      }
+      $body = $temp_dom->getElementsByTagName('body')->item(0);
+      foreach($body->childNodes as $sub) {
+        $new_node = $this->dom->importNode($sub, TRUE);
+        $node->appendChild($new_node);
+      }
+      if ($node->nodeType == XML_ELEMENT_NODE) {
+        $xmlnode = simplexml_import_dom($node);
+        $frx_nodes = $xmlnode->xpath('//*[@frx:*]');
+        if (!$frx_nodes) {
+          $this->frxReportsave_attributes_by_id();
+        }
+      }
+
+    }
+  }
+
+  /**
+   * Extract a list of columns from the data context.
+   * @param $xml SimpleXMLElement The xml data
+   * @param string $path
+   * @return multitype:|multitype:string mixed
+   */
+  public function columns($xml, $path='/*/*') {
+    //create an array of columns
+    if (!is_object($xml)) return array();
+    $rows = $xml->xpath($path);
+    $column_array = array();
+    $numeric_columns = array();
+    foreach ($rows as $columns) {
+      foreach ($columns as $name => $value) {
+        $label = str_replace('_', ' ', $name);
+        $column_array[$name] = $label;
+        if (is_numeric((string)$value)) {
+          $numeric_columns[$name] = $label;
+        }
+        else {
+          if (isset($numeric_columns[$name])) unset($numeric_columns[$name]);
+        }
+      }
+      if (is_object($xml) && method_exists($xml, 'attributes')) {
+        foreach ($xml->attributes() as $name => $value) {
+          $column_array['@' . $name] = '@' . $name;
+        }
+      }
+    }
+    $this->columns = $column_array;
+    $this->numeric_columns = $numeric_columns;
+    return $column_array;
+  }
+
+  /**
+   * Add a text node to the current dom node.
+   * @param unknown $cur_node
+   * @param unknown $text
+   * @return unknown
+   */
+  function addText($cur_node, $text) {
+    $dom = $this->dom;
+    $tnode = $dom->createTextNode($text);
+    $cur_node->appendChild($tnode);
+    return $tnode;
+  }
+
+  /**
+   *
+   * Extract a configuration var removing it from the array
+   * @param string $key attribute key for the data being extracted.
+   * @param array $config
+   */
+  public function extract($key, &$config) {
+    $value = '';
+    if (isset($config[$key])) {
+      $value = $config[$key];
+      unset($config[$key]);
+    }
+    return $value;
+  }
+
+  /**
+   *
+   * Generate generic div tag.
+   * @param unknown_type $config
+   * @param unknown_type $text
+   */
+  public function blockDiv(&$config, $text='') {
+    $node = $this->reportDocDomNode;
+    $heading = $this->extract('heading', $config);
+    $descr = $this->extract('description', $config);
+    $include = $this->extract('include', $config);
+    $block = $this->extract('block', $config);
+    $foreach = $this->extract('foreach', $config);
+    $id = $this->extract('id', $config);
+    if (!$id) {
+      $id = $this->idFromBlock($block);
+    }
+    $class = $this->extract('class', $config);
+    if (!$class) $class = get_class($this);
+    $frx_attributes = array(
+        'block' => $block,
+    );
+    if ($foreach) $frx_attributes['foreach'] = $foreach;
+    $attributes = array(
+        'id' => $id,
+        'class' => $class,
+    );
+
+    $this->setAttributes($node, $attributes, $frx_attributes);
+    if ($heading) {
+      $this->addNode($node, 4, 'h2', $heading);
+    }
+    if ($descr) {
+      $this->addNode($node, 4, 'p', $descr);
+    }
+    if ($include) {
+      $src = 'reports/' . str_replace('/', '.', $include);
+      $this->addNode($node, 4, 'div', NULL, NULL, array('renderer' => get_class($this), 'src' => $src));
+    }
+
+    return $node;
+  }
+
+  /**
+   * Generate the template from the configuration.
+   * @param string $data_block
+   * @param SimpleXMLElement $xml
+   * @param array $config
+   */
+  public function generate($xml , &$config) {
+    if (!@$config['foreach']) $config['foreach']='*';
+
+    $columns = $this->columns($xml);
+    $text = '';
+    if ($columns) foreach ($columns as $col => $label) {
+      $text .= ' {' . $col . '}';
+    }
+    $this->blockDiv($config, $text);
+
+  }
+
+  /**
+   * Simple function to get id from node.
+   * @param unknown $block
+   * @return mixed
+   */
+  public function idFromBlock($block) {
+    $parts = explode('/', $block);
+    $id = str_replace('.', '_', array_pop($parts));
+    return $id;
+  }
+
+  /**
+   * Sets the first child element to a node and returns it.
+   * IF the node
+   * @param DOMNode $node
+   * @param unknown $tag
+   * @param unknown $indent
+   * @return Ambigous <string, void, DOMElement>
+   */
+  public function setFirstNode(DOMElement $parent_node,  $indent=0, $tag='div',  $value='', $attributes=array(), $frx_attributes=array()) {
+    $dom = $this->dom;
+    if (!$parent_node) {
+      return;
+    }
+    $nodes = $parent_node->getElementsByTagName($tag);
+    if ($nodes->length) {
+      $node = $nodes->item(0);
+      $this->setAttributes($node, $attributes, $frx_attributes);
+    }
+    else {
+      $node = $this->addNode($parent_node, $indent, $tag, $value, $attributes, $frx_attributes);
+    }
+    return $node;
+  }
+
+  /**
+   * Rmove all the children of a dom node in the current report.
+   * @param DOMNode $node
+   */
+  public function removeChildren(DOMNode $node) {
+    while (isset($node->firstChild) && $node->firstChild->nodeType < 9) {
+      $this->removeChildren($node->firstChild);
+      $node->removeChild($node->firstChild);
+    }
+  }
+
+  /**
+   * Convert XML to key value pairs.
+   * This is used in support of graping to get specific key/value pairs in
+   * an array format suitable for passing off to php libraries.
+   * @param unknown $path
+   * @param unknown $data_path
+   * @param string $label_path
+   * @param string $pairs
+   * @return multitype:multitype:number  Ambigous <unknown_type, text, mixed, string, unknown>
+   */
+  public function xmlToValues($path, $data_path, $label_path='', $pairs = FALSE) {
+    $do = Frx::Data();
+    $data = $do->currentContext();
+    $values = array();
+    if (is_object($data)) {
+      $nodes = $data->xpath($path);
+      if ($nodes) foreach ($nodes as $i => $node) {
+        $do->push($node, $this->id);
+
+        $val = $this->teng->replace($data_path, TRUE);
+        if ($label_path) {
+          $key = strip_tags($this->teng->replace($label_path, FALSE));
+        }
+        else {
+          $key = $i;
+        }
+        if ($pairs && $label_path) {
+          $values[] = array(floatval($key), floatval($val));
+        }
+        else {
+          $values[$key] = $val;
+        }
+
+
+        $do->pop();
+      }
+    }
+    return $values;
+  }
+
+  /**
+   * Removes all chidren from the dome node expect those with a tagname specified by the
+   * the $tags argurment
+   * @param $node Parent node to remove from
+   * @param $tags array Tags to eingore
+   */
+  public function removeChildrenExcept(DOMNode $node, $tags = array('table')) {
+    foreach ($node->childNodes as $child) {
+      if ($child->nodeType != XML_ELEMENT_NODE || array_search($child->tagName, $tags)===FALSE) {
+        $this->removeChildren($child);
+        $node->removeChild($child);
+      }
+    }
+  }
+
+  /**
+   * Get the textual representations of html for the configuration engine.
+   */
+  public function extractSource(DOMNode $node) {
+    $content = '';
+    switch ($$node->nodeType) {
+      	case XML_ELEMENT_NODE:
+      	  $content = $this->dom->saveXML($node);
+      	  break;
+      	case XML_TEXT_NODE:
+      	case XML_ENTITY_REF_NODE:
+      	case XML_ENTITY_NODE:
+      	case XML_ATTRIBUTE_NODE:
+      	  $content = $child->textContent;
+      	  break;
+      	case XML_COMMENT_NODE:
+      	  $content = '<!--' . $node->data . '-->';
+      	  break;
+    }
+    return $content;
+  }
+
+
+  /**
+   * Get the textual representations of html for the configuration engine.
+   */
+  public function extractChildSource(DOMNode $node) {
+    $content = '';
+    foreach ($node->childNodes as $child) {
+      switch ($child->nodeType) {
+      	case XML_ELEMENT_NODE:
+      	  $content .= $this->dom->saveXML($child);
+      	  break;
+      	case XML_TEXT_NODE:
+      	case XML_ENTITY_REF_NODE:
+      	case XML_ENTITY_NODE:
+      	  $content .= $child->textContent;
+      	  break;
+      	case XML_COMMENT_NODE:
+      	  $content .= '<!--' . $child->data . '-->';
+      	  break;
+      }
+    }
+    return $content;
+  }
+
+  /**
+   * Get the textual representations of html for the configuration engine.
+   */
+  public function extractTemplateHTML(DOMNode $node, &$content, $tags = array()) {
+    $this->frxReport->get_attributes_by_id();
+    $cur_section = 'header';
+    if (!$content) $content = array('header' => '', 'content' => '', 'footer' => '');
+    if (!$tags) $cur_section = 'content';
+    foreach ($node->childNodes as $child) {
+      switch ($child->nodeType) {
+      	case XML_ELEMENT_NODE:
+      	  if (array_search($child->tagName, $tags)!==FALSE) {
+      	    $cur_section = 'content';
+      	  }
+      	  elseif ($tags && $cur_section == 'content') {
+      	    $cur_section = 'footer';
+      	  }
+      	  @$content[$cur_section]['value'] .= $this->dom->saveXML($child);
+      	  break;
+      	case XML_TEXT_NODE:
+      	case XML_ENTITY_REF_NODE:
+      	case XML_ENTITY_NODE:
+      	  @$content[$cur_section]['value'] .= $child->textContent;
+      	  break;
+      	case XML_COMMENT_NODE:
+      	  @$content[$cur_section]['value'] .= '<!--' . $child->data . '-->';
+          break;
+      }
+    }
+  }
+
+  /**
+   * Extracts the inner html of all nodes that match a particular xpath expression.
+   * @param $query string xpath query expression
+   * @param DOMNode $context Dom node to use as source
+   * @param $concat boolean Set to false to return an array with the source for each element matching the path.
+   * @return String XHTML source
+   */
+  public function extractXPathInnerHTML($query, DOMNode $context, $concat = TRUE) {
+    $result = $this->xpathQuery->query($query, $context);
+    $length = $result->length;
+    $content = array();
+    for ($i=0; $i<$length; $i++) {
+      $content[] = $this->extractChildSource($result->item($i));
+    }
+    if ($concat) $content = implode('', $content);
+    return $content;
+  }
+
+  /**
+   * Extracts the inner html of all nodes that match a particular xpath expression.
+   * @param $query string xpath query expression
+   * @param DOMNode $context Dom node to use as source
+   * @param $concat boolean Set to false to return an array with the source for each element matching the path.
+   * @return String XHTML source
+   */
+  public function extractXPath($query, DOMNode $context, $concat = TRUE) {
+    $result = $this->xpathQuery->query($query, $context);
+    $length = $result->length;
+    $content = array();
+    for ($i=0; $i<$length; $i++) {
+      $content[] = $this->extractSource($result->item($i));
+    }
+    if ($concat) $content = implode('', $content);
+    return $content;
+  }
+
+  /**
+   * Puts attributes back in array format prior to rendering.
+   * @param unknown $attributes
+   */
+  public function arrayAttributes($attributes) {
+    $remove_attrs = array();
+    foreach ($attributes as $key => $value) {
+      if (is_array($value)) {
+        $i=0;
+        foreach($value as $idx => $v) {
+          $i++;
+          $new_key = $key . '_' . trim($i);
+          $attributes[$new_key] = (string)$v;
+        }
+        $remove_attrs [] = $key;
+      }
+    }
+
+    foreach ($remove_attrs as $key) {
+      unset($attributes[$key]);
+
+    }
+    return $attributes;
+  }
+
+  // Helper sort functoin for sorting config by weight.
+  public static function weight_sort_comp($a, $b) {
+    if ($a['weight'] == $b['weight']) return 0;
+    return $a['weight'] < $b['weight'] ? -1 : 1;
+  }
+
+  /**
+   * Sort a column list by weight.
+   * @param unknown $columns
+   */
+  public function weight_sort(&$entries) {
+    if ($entries) uasort($entries, 'FrxRenderer::weight_sort_comp');
+  }
 }
