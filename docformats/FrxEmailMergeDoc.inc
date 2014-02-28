@@ -14,6 +14,7 @@ class FrxEmailMergeDoc extends FrxDocument {
     $doc->loadHTML($body);
     libxml_clear_errors();
     $xml = simplexml_import_dom($doc);
+    if (!$xml) return $content;
     $docs = $xml->xpath('.//*[@class="email-document"]');
     $prompt_subject = TRUE;
     $prompt_body = TRUE;

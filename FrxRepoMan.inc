@@ -383,7 +383,9 @@ class FrxRepoMan {
     $r = array();
 
     foreach ($this->repositories as $k=>$repos) {
-      $r[$k] = $repos['title'];
+      if (user_access("access $k data")) {
+        $r[$k] = $repos['title'];
+      }
     }
     asort($r);
     return $r;
