@@ -928,7 +928,7 @@ class FrxEditor {
     );
     $o =  Frx::Document($format);
     if ($o) {
-      $output = $o->render($r, $format,  array());
+      $output = $o->render($r, $format,  $content);
       if ($print) {
         $printed = $o->output($output);
       }
@@ -936,8 +936,11 @@ class FrxEditor {
         $printed = FALSE;
       }
       if (!$printed) {
-        return  $content;
+        return  $output;
       }
+    }
+    else {
+      return $content;
     }
 
     Frx::Data()->pop();

@@ -6,7 +6,7 @@
  *
  */
 class FrxEmailMergeDoc extends FrxDocument {
-  public function render($r, $format, $options = array()) {
+  public function render($r, $format, $content = array()) {
     $body = $r->html;
     $doc = new DOMDocument('1.0', 'UTF-8');
     $doc->strictErrorChecking = FALSE;
@@ -46,8 +46,12 @@ class FrxEmailMergeDoc extends FrxDocument {
       drupal_set_message(t('No mail merge information in report. Displaying report instead.'), 'error');
       $output = $body;
     }
-    return $output;
+    $content = array(
+        'content' => array('#markup' => $output),
+    );
+    return $content;
   }
+
 
 
 }

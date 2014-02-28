@@ -7,7 +7,7 @@
  */
 class FrxWebDoc extends FrxDocument {
   private $title;
-  public function render($r, $format, $options=array()) {
+  public function render($r, $format, $content=array()) {
     // Set title based on report.
     if ($r->title) {
       $this->title = $r->title;
@@ -39,42 +39,8 @@ class FrxWebDoc extends FrxDocument {
       drupal_add_js($script);
     }
 
-
-    // @TODO: Refactor to support theming of document links.
-    // Build Links for document.
-
-    $formats = '';
-    if ($r->html) {
-      //Building the document links
-      $supported_doctypes = Frx::documentTypes();
-      $default_doctypes = variable_get('forena_doc_defaults', array());
-      $m = Frx::Menu();
-      $link = str_replace('/', '.' , $m->base_name);
-      if ($m->name) {
-        $formats = '<div class="doclinks">';
-        if (!$r->formats) {
-          $doc_types = $m->doc_defaults;
-        }
-        else {
-          //There were nodes. show the prefered doc types
-          $doc_types = array_intersect($m->doc_formats, $r->formats);
-        }
-        if ($doc_types) foreach ($doc_types as $value) {
-          $formats .= @l(strtoupper($value) . ' ', 'report_doc/' . $link . '.' . $value, array('query' => $r->parms, 'class' => 'doclinks'));
-        }
-        $formats .= '</div>';
-      }
-    }
-
-    // Use a theme function to make sure the report gets themed.
-    $variables = array(
-      'parameters' => $r->parameters_form,
-      'doc_links' => array('#markup' => $formats),
-      'content' => array('#markup' => $this->check_markup($r->html)),
-    );
-
     //$output = theme('forena_web_report', $variables);
-    return $variables;
+    return $content;
   }
 
   public function output($output) {
