@@ -836,7 +836,6 @@ class FrxEditor {
 
 
   public function preview($parms = array()) {
-
     $r = $this->frxReport;
     if(strpos($this->report_name, '__') !== 0) $r->preview_mode = TRUE;
     return $this->report($parms, TRUE, TRUE);
@@ -921,7 +920,6 @@ class FrxEditor {
       unset($parms['q']);
       $links = $this->l_icon("reports/$r_link/edit/select-data/add-data", 'doc-option-add.png', 'Add Data', $parms);
     }
-    Frx::Data()->pop();
     $content = array(
       '#has_data' => $r->blocks_loaded,
       'parameter_form' => $r->parameters_form,
@@ -942,6 +940,7 @@ class FrxEditor {
       }
     }
 
+    Frx::Data()->pop();
   }
 
   public function fieldLink($id, $value) {

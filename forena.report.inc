@@ -1161,11 +1161,11 @@ function forena_report_parameter_config_form_submit($formid, &$form_state) {
   $r = Frx::Editor($form_state['values']['report_name']);
   $parameters = $r->frxReport->parametersArray();
   $id = $form_state['values']['parm']['id'];
-  $paramaters[$id] = array_merge($parameters[$id], $form_state['values']['parm']);
-  $r->setParameters($paramaters);
+  $parameters[$id] = array_merge($parameters[$id], $form_state['values']['parm']);
+  $r->setParameters($parameters);
   $r->update();
   $r_link = $r->report_link;
-  $form_state['redirect'] = array("$r_link/edit", array('query' => Frx::parms()));
+  $form_state['redirect'] = array("$r_link/edit/parameters", array('query' => Frx::parms()));
 }
 
 

@@ -118,13 +118,10 @@ class FrxBlockEditor {
    * @return Ambigous <unknown, string, NULL>
    */
   public function data($parms = array()) {
-
-    if ($parms) {
-      // Merge in current_context
-      $parms = array_merge(Frx::Data()->currentContextArray(), $parms);
-      $id = str_replace('/', '-', $this->block_name) . '-parm';
-      Frx::Data()->push($parms, $id);
-    }
+    // Merge in current_context
+    $parms = array_merge(Frx::Data()->currentContextArray(), $parms);
+    $id = str_replace('/', '-', $this->block_name) . '-parm';
+    Frx::Data()->push($parms, $id);
     if ($this->edit) {
       $xml = Frx::RepoMan()->sqlData($this->provider,  $this->block['file'], $parms);
     }

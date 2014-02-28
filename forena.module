@@ -1576,5 +1576,3 @@ function forena_requirements($phase) {
   }
   return $requirements;
 }
-
-
