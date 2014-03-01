@@ -1576,3 +1576,65 @@ function forena_requirements($phase) {
   }
   return $requirements;
 }
+
+/**
+ * Custom override of machine_name validate that does not include
+ * @param unknown $element
+ * @param unknown $form_state
+ */
+function forena_machine_name_validate($element, &$form_state) {
+
+  // Verify that the machine name not only consists of replacement tokens.
+  if (preg_match('@^' . $element['#machine_name']['replace'] . '+$@', $element['#value'])) {
+    form_error($element, t('The machine-readable name must contain unique characters.'));
+  }
+
+  // Verify that the machine name contains no disallowed characters.
+  if (preg_match('@' . $element['#machine_name']['replace_pattern'] . '@', $element['#value'])) {
+    if (!isset($element['#machine_name']['error'])) {
+      // Since a hyphen is the most common alternative replacement character,
+      // a corresponding validation error message is supported here.
+      if ($element['#machine_name']['replace'] == '-') {
+        form_error($element, t('The machine-readable name must contain only letters, numbers, and hyphens.'));
+      }
+      // Otherwise, we assume the default (underscore).
+      else {
+        form_error($element, t('The machine-readable name must contain only letters, numbers, and underscores.'));
+      }
+    }
+    else {
+      form_error($element, $element['#machine_name']['error']);
+    }
+  }
+
+}
+
+function forena_process_machine_name($element, &$form_state) {
+  $element['#machine_name']['replace_pattern'] = '[^A-Za-z0-9_\.\/]+';
+  return $element;
+}
+
+
+/**
+ * Create a derivative to the machine name field with relaxed restrictions.
+ * @return multitype:boolean string NULL number multitype:string
+ */
+function forena_element_info() {
+  $types['forena_machine_name'] = array(
+    '#input' => TRUE,
+    '#element_validate' => array('forena_machine_name_validate'),
+    '#default_value' => NULL,
+    '#size' => 60,
+    '#maxlength' => 64,
+    '#required' => TRUE,
+    '#autocomplete_path' => FALSE,
+    '#process' => array(
+  	  'form_process_machine_name',
+      'forena_process_machine_name',
+      'ajax_process_form',
+     ),
+    '#theme_wrappers' => array('form_element'),
+    '#theme' => 'textfield',
+  );
+  return $types;
+}

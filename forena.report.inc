@@ -44,16 +44,6 @@ function forena_add_report_form($formid, $form_state, $report_name='') {
   //list of supported document formats
   $doclist = variable_get('forena_doc_formats', array());
 
-  $form['report_name'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Report Name'),
-      '#description' => t('Enter only letters, numbers, and special characters:  - _ /
-                         <br/>White space is not permitted.
-                         Create a directory using the format: (directory name) / (report name). Save multiple reports to the same directory
-                         by referencing the same name.'),
-      '#required' => TRUE,
-  );
-
 
   $form['title'] = array(
       '#type' => 'textfield',
@@ -61,6 +51,17 @@ function forena_add_report_form($formid, $form_state, $report_name='') {
       '#default_value' => $title,
       '#required' => TRUE,
   );
+  $form['report_name'] = array(
+      '#type' => 'forena_machine_name',
+      '#title' => t('Report Name'),
+      '#description' => t('Enter only letters, numbers, and special characters:  - _ /
+                         <br/>White space is not permitted.
+                         Create a directory using the format: (directory name) / (report name). Save multiple reports to the same directory
+                         by referencing the same name.'),
+      '#required' => TRUE,
+      '#machine_name' => array('source' => array('report_name'), 'label' => 'Report_name'),
+  );
+
 
   $form['category'] = array(
       '#type' => 'textfield',
@@ -1069,6 +1070,13 @@ function forena_report_parameter_config_form($formid, $form_state, $report_name,
       '#value' => $id,
   );
 
+  $form['parm']['id_label'] = array(
+  	'#type' => 'item',
+    '#title' => t('Name'),
+    '#markup' => $id,
+    '#description' => t('The machine friendly name of the parameter as used in the query or report.  ')
+  );
+
   $form['parm']['label'] = array(
     '#type' => 'textfield',
     '#title' => t('label'),
@@ -1308,13 +1316,19 @@ function forena_report_add_parameter_form($form, &$form_state, $report_name) {
   );
 
   $form['parameters'] = array('#tree' => TRUE);
+  $form['parameters']['label'] = array(
+  	'#type' => 'textfield',
+    '#title' => t("Label"),
+    '#description' => t('The Label to display to the user. ')
+  );
 
   $form['parameters']['id'] = array(
-      '#type' => 'textfield',
+      '#type' => 'forena_machine_name',
       '#title' => t('id'),
       '#required' => TRUE,
-      '#description' => t('The name of the parameter to be filtered against.')
+      '#description' => t('The machine friendly name of the as used in queries or reports.')
   );
+
 
   $form['add'] = array(
       '#type' => 'submit',

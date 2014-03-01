@@ -24,7 +24,7 @@ function forena_query_create_block_form($form, &$form_state, $provider='') {
   );
 
   $form['block_name'] = array(
-  	'#type' => 'textfield',
+  	'#type' => 'forena_machine_name',
     '#required' => TRUE,
     '#title' => t('Block to create'),
   );
@@ -77,6 +77,12 @@ function forena_query_sql_editor($form, &$form_state, $block_name='') {
   $block_name = $form_state['storage']['block_name'];
   $o = Frx::BlockEditor($block_name);
   $block = $o->block;
+  $form['block_label'] = array(
+    '#type' => 'item',
+    '#title' => t('Query (data block) name'),
+    '#markup' => str_replace('.', '/', $block_name),
+
+  );
 
   $form['access'] = array(
       '#title' => t('Data Security'),
