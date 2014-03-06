@@ -26,6 +26,7 @@ class FrxMergeDocument extends FrxRenderer {
 
   public function scrapeConfig() {
     $config = array();
+    $config['class'] = get_class($this);
     $this->extractTemplateHTML($this->reportDocDomNode, $config);
     return $config;
   }

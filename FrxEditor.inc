@@ -701,6 +701,7 @@ class FrxEditor {
     $block_name = $node->getAttributeNS($this->xmlns, 'block');
     $class = $node->getAttribute("class");
     $templates = $this->templateOptions();
+    $config['id'] = $id;
     foreach ($templates as $tclass => $desc) {
       if (strpos($class, $tclass)!==FALSE) {
         $template_class = $tclass;
@@ -709,6 +710,7 @@ class FrxEditor {
     }
     if ($template_class) {
       $c = Frx::Template($template_class);
+      $config['class'] = $template_class;
       if ($c && method_exists($c, 'scrapeConfig')) {
         $c->initReportNode($node, $this->frxReport);
         $config = array_merge($config,$c->scrapeConfig());
@@ -1036,6 +1038,7 @@ class FrxEditor {
          $templates[get_class($control)] = $control->templateName;
        }
      }
+     asort($templates);
      return $templates;
   }
 

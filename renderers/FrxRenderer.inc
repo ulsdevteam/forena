@@ -153,7 +153,7 @@ class FrxRenderer {
     }
 
     // Test to see if we have any nodes that contain data url
-    if ($node->xpath('*//@frx:*') || $frx!==NULL) {
+    if ($node->xpath('*//@frx:*') || $frx!==NULL || $node->xpath('*//@class')) {
       $attrs = $node->attributes();
       $id = (string)$attrs['id'];
       $tag = $node->getName();
@@ -545,6 +545,7 @@ class FrxRenderer {
   public function scrapeConfig() {
     $content = array();
     $this->extractTemplateHTML($this->reportDocDomNode, $content);
+    return $content;
   }
 
   /**

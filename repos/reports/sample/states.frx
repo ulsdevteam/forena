@@ -14,7 +14,7 @@
 
 </head>
 <body>
-  <div frx:block="sampledb/states" id="state-block">
+  <div frx:block="sampledb/states" id="state-block" class="FrxTable">
     <table>
       <thead>
         <tr>
