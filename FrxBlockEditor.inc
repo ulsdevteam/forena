@@ -122,7 +122,7 @@ class FrxBlockEditor {
     $parms = array_merge(Frx::Data()->currentContextArray(), $parms);
     $id = str_replace('/', '-', $this->block_name) . '-parm';
     Frx::Data()->push($parms, $id);
-    if ($this->edit) {
+    if ($this->edit && $this->provider) {
       $xml = Frx::RepoMan()->sqlData($this->provider,  $this->block['file'], $parms);
     }
     else {

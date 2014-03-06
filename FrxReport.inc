@@ -157,7 +157,7 @@ class FrxReport {
    * @param $block
    * @return unknown_type
    */
-  public function getData($block, $clause='', $id='', $data_uri='') {
+  public function getData($block, $id='', $data_uri='') {
     $data = array();
     if ($data_uri) {
       parse_str($data_uri, $data);

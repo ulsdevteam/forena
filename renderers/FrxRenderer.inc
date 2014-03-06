@@ -12,6 +12,8 @@ class FrxRenderer {
   public $frxAttributes;  // Frx Attributes of the node we are rendering.
   public $htmlAttributes;  // Html attributes of the node that we are rendering
   public $dataProvider;   // An FrxData instance that provides the data assiated with the report.
+  public $blockName;      // The current data block in context
+  public $blockParms;     // The parameters going into the block.
   public $name;
   public $id;
   public $format;
@@ -107,7 +109,7 @@ class FrxRenderer {
     $node_type = $dom_node->nodeType;
     $settings = $this->settings;
     $context = Frx::Data()->currentContextArray();
-
+    $last_block = $this->blockName;
     // Shortcut process a text node
     if ($node_type == XML_TEXT_NODE|| $node_type == XML_ENTITY_REF_NODE || $node_type == XML_ENTITY_NODE)
     {
@@ -158,13 +160,15 @@ class FrxRenderer {
       $id = (string)$attrs['id'];
       $tag = $node->getName();
 
-
-      if ($this->frxReport->preview_mode) $o .= Frx::Editor()->blockLinks($frx, $id, $context);
-
+      if ((string)$frx['block']) {
+        $this->blockName = (string)$frx['block'];
+        $this->blockParms = $context;
+      }
+      if ($this->frxReport->preview_mode) $o .= Frx::Editor()->blockLinks($this->blockName, $frx, $attrs, $id, $this->blockParms);
 
       if ((string)$frx['block']) {
         $is_data_block = TRUE;
-        $xml = $this->frxReport->getData((string)$frx['block'], (string)$frx['clause'], $id, (string)$frx['parameters']);
+        $xml = $this->frxReport->getData((string)$frx['block'], $id, (string)$frx['parameters']);
         if ($xml) {
           Frx::Data()->push($xml, $id);
         }
@@ -172,6 +176,9 @@ class FrxRenderer {
           return $o;
         }
       }
+
+
+
 
       //Implment if then logic
       if ((string)$frx['if']) {
@@ -306,7 +313,7 @@ class FrxRenderer {
     if (@(string)$frx['invalid_link']) {
       $this->frxReport->link_mode = $old_link_mode;
     }
-
+    $this->blockName = $last_block;
     return $o;
   }
 
