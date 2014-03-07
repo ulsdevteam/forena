@@ -98,6 +98,10 @@ class FrxOracle extends FrxDataSource {
 
   }
 
+  public function query($sql, $options=array()) {
+
+  }
+
   /**
    * Generate xml from sql using the provided f_forena
    *
@@ -144,7 +148,7 @@ class FrxOracle extends FrxDataSource {
     return $xml;
   }
 
-  private function php_xml($sql) {
+  private function php_xml($sql, $options=array()) {
     $db = $this->db;
     $xml = new SimpleXMLElement('<table/>');
     //$rs->debugDumpParams();
@@ -171,10 +175,10 @@ class FrxOracle extends FrxDataSource {
         return '';
       }
     }
-
+    $use_limit = isset($options['limit']);
+    if ($use_limit) $limit = $options['limit'];
     $rownum=0;
-
-    while ($row = oci_fetch_array($stmt, OCI_ASSOC + OCI_RETURN_NULLS + OCI_RETURN_LOBS)) {
+    while ($row = oci_fetch_array($stmt, OCI_ASSOC + OCI_RETURN_NULLS + OCI_RETURN_LOBS) && (!$use_limit || $row < $limit) ) {
       $rownum++;
       $row_node = $xml->addChild('row');
       $row_node['num'] = $rownum;

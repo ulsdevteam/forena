@@ -51,7 +51,7 @@ class FrxQueryBuilder {
    * @param $config
    * @param $form_state
    */
-  public function validateConfig(&$config, &$form_state) {
+  public function validateConfig(&$config) {
 
   }
 
