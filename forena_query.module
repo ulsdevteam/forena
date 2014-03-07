@@ -96,9 +96,10 @@ function forena_query_requirements($phase) {
 }
 
 function forena_query_forena_query_builders() {
-  require_once 'builders/FrxQueryBuilder.inc';
+
   return array(
-  	'FrxQueryBuilder' => array('class' => 'FrxQueryBuilder'),
+  	'FrxQueryBuilder' => array('class' => 'FrxQueryBuilder',
+       'file' => 'builders/FrxQueryBuilder.inc'),
   );
 }
 
