@@ -28,7 +28,7 @@ class FrxWordDoc extends FrxDocument {
   }
 
   public function output($output) {
-    parent::output($this->convertCharset($output));
+    parent::output($this->convertCharset($output, 'windows-1252'));
     return TRUE;
   }
 }

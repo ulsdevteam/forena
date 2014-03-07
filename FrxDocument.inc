@@ -8,6 +8,7 @@
 class FrxDocument {
   public $format;
   public $content_type='';
+  public $charset = 'UTF-8';
 
 
   public function loadCSSFiles($format) {
@@ -63,8 +64,7 @@ class FrxDocument {
 
   public function output($output) {
     if ($this->content_type) {
-
-      header('Content-Type: ' . $this->content_type);
+      header('Content-Type: ' . $this->content_type . ' ;charset=' . $this->charset);
       header('Cache-Control:');
       header('Pragma:');
       $file_name = basename($_GET['q']);
@@ -86,13 +86,20 @@ class FrxDocument {
     return check_markup($output, variable_get('forena_input_format', filter_default_format()));
   }
 
-  public function convertCharset($data) {
+  public function convertCharset($data, $default_encoding='UTF-8') {
+
     if (isset($_SERVER['HTTP_ACCEPT_CHARSET'])) {
       $parts = @explode(';', $_SERVER['HTTP_ACCEPT_CHARSET']);
       $parts = @explode(',', $parts[0]);
       $to_encoding=@$parts[0];
-      if ($to_encoding) $data = mb_convert_encoding($data, $to_encoding, 'UTF-8');
+    }
+    else {
+      $to_encoding = $default_encoding;
+    }
+    if ($to_encoding!='UTF-8')  {
+      $this->charset = $to_encoding;
+      $data = mb_convert_encoding($data, $to_encoding, 'UTF-8');
     }
     return $data;
   }
-}
+  }
