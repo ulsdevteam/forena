@@ -402,6 +402,4 @@ class Frx {
     return $o;
   }
 
-
-
 }

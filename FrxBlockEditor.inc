@@ -7,6 +7,7 @@ class FrxBlockEditor {
   public $cache = FALSE;    // Turn on caching of parameter to facilitate block caching.
   private $teng;
   public $edit;
+  private $builders;
   private $new_block = array(
     'type' => 'sql',
     'file' => '',
@@ -23,6 +24,7 @@ class FrxBlockEditor {
     }
     $this->teng = Frx::SyntaxEngine(FRX_SQL_TOKEN, ':');
   }
+
 
   /**
    * Block loader method.
@@ -207,6 +209,30 @@ class FrxBlockEditor {
   public function saveParms() {
     $parms = Frx::Data()->getContext('parm');
     $_SESSION['forena_data_block_parms'][$this->block_name] = $parms;
+  }
+
+  public function builderList() {
+    if (!$this->builders) {
+      $this->builders = array();
+      $builders = module_invoke_all('forena_query_builders');
+      foreach ($builders as $builder) {
+        if ($builder['file']) @include_once $builder['file'];
+        if (class_exists($builder['class'])) {
+          $b = new $builder['class'];
+          $this->builders[$builder['class']] = $b;
+        }
+      }
+    }
+    $r = Frx::RepoMan()->repository($this->provider);
+    $plugin = get_class($r);
+    $list = array();
+    foreach ($this->builders as $class => $b) {
+      if (array_search($plugin, $b->supportedPlugins) && $b->name && $b->type == $this->block['type']) {
+        $list[$class] = $b->name;
+      }
+    }
+    asort($list);
+    return $list;
   }
 
 }
