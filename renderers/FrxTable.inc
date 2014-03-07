@@ -111,7 +111,7 @@ class FrxTable extends FrxRenderer {
       	'#type' => 'checkbox',
         '#title' => t('Include'),
         '#default_value' => $col['include'],
-        '#ajax' => $this->configAjax()
+  //      '#ajax' => $this->configAjax()
       );
 
       $ctl['weight'] = array(
