@@ -1173,6 +1173,11 @@ function forena_forena_controls() {
   );
 
   $controls[] = array(
+    'file' => 'renderers/FrxSection.inc',
+    'class' => 'FrxSection',
+  );
+
+  $controls[] = array(
   	'file' => 'renderers/FrxCrosstab.inc',
     'class' => 'FrxCrosstab',
   );

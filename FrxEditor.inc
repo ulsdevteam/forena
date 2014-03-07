@@ -701,6 +701,7 @@ class FrxEditor {
     $block_name = $node->getAttributeNS($this->xmlns, 'block');
     $class = $node->getAttribute("class");
     $templates = $this->templateOptions();
+    $config['id'] = $id;
     foreach ($templates as $tclass => $desc) {
       if (strpos($class, $tclass)!==FALSE) {
         $template_class = $tclass;
@@ -709,6 +710,7 @@ class FrxEditor {
     }
     if ($template_class) {
       $c = Frx::Template($template_class);
+      $config['class'] = $template_class;
       if ($c && method_exists($c, 'scrapeConfig')) {
         $c->initReportNode($node, $this->frxReport);
         $config = array_merge($config,$c->scrapeConfig());
@@ -983,18 +985,40 @@ class FrxEditor {
   }
 
 
-  public function blockLinks($frx, $id='', $context = array()) {
+  public function blockLinks($block_name, $frx, $attrs, $id='', $context = array()) {
     $o = '';
-    if ($frx['block']) {
-      $block_name = (string)$frx['block'];
+    $class = @(string)$attrs['class'];
+    $frx_class = strpos($class, 'Frx') !== FALSE;
+    if ($frx_class) {
+      $frx_class = FALSE;
+      foreach ($this->templateOptions() as $key => $label) {
+        if(strpos($class, $key) !==FALSE) $frx_class = TRUE;
+      }
+    }
+
+
+    $block_tag = (string)$frx['block'];
+
+    if ($frx_class || $block_tag ) {
+
+      $block_label = (string)$frx['block'] ? $block_name : '#' . $id;
       $block_link = str_replace('/', '.', $block_name);
       $report_name = str_replace('/', '.' , $this->report_name);
       $b = Frx::RepoMan()->loadBlock($block_name);
       $options = array();
-      if ($context) $options['query'] = $context;
-      $o .= '<div class="forena-edit-links">' . $this->l_icon("reports/$report_name/edit/select-data/prepend-data/$id", 'doc-option-add.png', 'Add Data').  "</div>";
+      if ($context && !$block_tag) $options['query'] = $context;
+
+      // Add the prepend link.
+      if ($block_tag) {
+        // If we have a block tag we're going to prepend another data block?
+        $o .= '<div class="forena-edit-links">' . $this->l_icon("reports/$report_name/edit/select-data/prepend-data/$id", 'doc-option-add.png', 'Add Data').  "</div>";
+      }
+      else {
+        //$o .= '<div class="forena-edit-links">' . $this->l_icon("reports/$report_name/edit/prepend-section/$block_link/$id", 'doc-option-add.png', 'Add Data').  "</div>";
+      }
+      // Add the block or ID link
       $o .= '<div class="forena-edit-links">'
-         . l($block_name, "reports/$report_name/edit/edit-data/$block_link/$id", $options )
+         . l($block_label, "reports/$report_name/edit/edit-data/$block_link/$id", $options )
          . ' ' . $this->l_icon("reports/$report_name/edit/delete-data/$id", 'doc-option-remove.png', 'Remove Data',  $context)
          . "</div>";
     }
@@ -1036,6 +1060,7 @@ class FrxEditor {
          $templates[get_class($control)] = $control->templateName;
        }
      }
+     asort($templates);
      return $templates;
   }
 

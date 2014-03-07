@@ -653,7 +653,9 @@ function forena_report_data_block_form($formid, &$form_state, $report_name, $act
 function forena_report_data_block_form_validate($form, &$form_state) {
   $r = Frx::Editor($form_state['values']['report_name']);
   $template_class = $form_state['values']['template_class'];
-  $errors = $r->templateConfigFormValidate($template_class, $form_state['values']['config'], 'template][config][');
+  $config = array_merge($form_state['storage']['config'], $form_state['values']['config']);
+  $errors = $r->templateConfigFormValidate($template_class, $config, 'template][config][');
+  $form_state['storage']['config'] = $config;
   if ($errors) foreach ($errors as $key => $message) {
     form_set_error($key, $message);
   }
@@ -1402,11 +1404,11 @@ function theme_forena_element_draggable($variables) {
       if (isset($element[$e_key][$ctl]['#title'])) {
         $headers[$ctl] = $element[$e_key][$ctl]['#title'];
         $element[$e_key][$ctl]['#title_display'] = 'invisible';
+        $e = drupal_render($element[$e_key][$ctl]);
+        $row[] = $e;
       }
 
-      $e = drupal_render($element[$e_key][$ctl]);
 
-      $row[] = $e;
 
     }
     $rows[] = array('data' => $row, 'class' => array('draggable'));
