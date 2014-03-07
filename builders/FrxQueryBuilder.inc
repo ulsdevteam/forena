@@ -33,7 +33,7 @@ class FrxQueryBuilder {
         '#description' => t('Value depends on the security for the data block,
             but for drupal data, this is a right as defined by the module provided.  '),
         '#type' => 'textfield',
-        '#disabled' => !user_access('forena data security'),
+        '#access' => user_access('forena data security'),
         '#default_value' => @$block['access'],
     );
 

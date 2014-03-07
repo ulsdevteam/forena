@@ -211,7 +211,10 @@ class FrxBlockEditor {
     $_SESSION['forena_data_block_parms'][$this->block_name] = $parms;
   }
 
-  public function builderList() {
+  /**
+   * Instantiate the builders if necessary
+   */
+  public function getBuilders() {
     if (!$this->builders) {
       $this->builders = array();
       $builders = module_invoke_all('forena_query_builders');
@@ -223,6 +226,10 @@ class FrxBlockEditor {
         }
       }
     }
+  }
+
+  public function builderList() {
+    $this->getBuilders();
     $r = Frx::RepoMan()->repository($this->provider);
     $plugin = get_class($r);
     $list = array();
@@ -233,6 +240,60 @@ class FrxBlockEditor {
     }
     asort($list);
     return $list;
+  }
+
+  /**
+   * Use the classes configForm method to build the form.
+   * @param $builder
+   * @param $config
+   * @return multitype:
+   */
+  public function configForm($builder, &$config) {
+    $this->getBuilders();
+    $form = array();
+    if (isset($this->builders[$builder])) {
+      $b = $this->builders[$builder];
+      if (method_exists($b, 'configForm')) {
+        $form = $b->configForm($config);
+      }
+    }
+    return $form;
+  }
+
+  /**
+   * Use the classes generate method to generate the block.
+   * @param $builder
+   * @param $config
+   * @return multitype:
+   */
+  public function generate($builder, &$config) {
+    $this->getBuilders();
+    $form = array();
+    if (isset($this->builders[$builder])) {
+      $b = $this->builders[$builder];
+      if (method_exists($b, 'generate')) {
+        $form = $b->generate($config);
+      }
+    }
+    return $form;
+  }
+
+  /**
+   * Use the classes validate method to validate the block.
+   * @param $builder
+   * @param $config
+   * @return multitype:
+   */
+  public function configValidate($builder, &$config) {
+    $this->getBuilders();
+    $errors = array();
+    if (isset($this->builders[$builder])) {
+      $b = $this->builders[$builder];
+      if (method_exists($b, 'configValidate')) {
+        $errors = $b->configForm($config);
+      }
+    }
+    return $errors;
   }
 
 }

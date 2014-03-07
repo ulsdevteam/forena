@@ -26,7 +26,7 @@ function forena_query_menu() {
     'access callback' => 'forena_query_editor_access',
     'access arguments' => array(4, 'create'),
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('forena_query_sql_editor', 4),
+    'page arguments' => array('forena_query_editor', 4),
     'file' => 'forena_query.inc',
   );
 
@@ -93,6 +93,13 @@ function forena_query_requirements($phase) {
     	  ) ;
   	  }
   }
+}
+
+function forena_query_forena_query_builders() {
+  require_once 'builders/FrxQueryBuilder.inc';
+  return array(
+  	'FrxQueryBuilder' => array('class' => 'FrxQueryBuilder'),
+  );
 }
 
 
