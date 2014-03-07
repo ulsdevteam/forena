@@ -86,7 +86,7 @@ class FrxOracle extends FrxDataSource {
           $xml = $this->oracle_xml($sql, 'table');
         }
         else {
-          $xml = $this->php_xml($sql);
+          $xml = $this->php_xml($sql, $options);
         }
       }
       if ($this->debug) {
