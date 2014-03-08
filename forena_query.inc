@@ -80,29 +80,29 @@ function forena_query_create_block_form_submit($form, &$form_state) {
  * @return multitype:NULL
  */
 function forena_query_editor($form, &$form_state, $block_name='') {
+  $o = Frx::BlockEditor($block_name);
+  $block = $o->block;
   if (!isset($form_state['storage'])) {
     $form_state['storage']['block_name'] = $block_name;
     $form_state['storage']['parameters'] = array();
+    $form_state['storage']['block'] = $block;
   }
-  $block_name = $form_state['storage']['block_name'];
-  $o = Frx::BlockEditor($block_name);
-  $block = $o->block;
+  $block = $form_state['storage']['block'];
   $builder = isset($block['builder']) ? $block['builder'] : 'FrxQueryBuilder';
   $form['block_label'] = array(
     '#type' => 'item',
     '#title' => t('Query (data block) name'),
     '#markup' => str_replace('.', '/', $block_name),
-
   );
 
   $builders = $o->builderList();
-
   $form['builder'] = array(
     '#type' => 'select',
     '#title' => t('Template'),
+    '#options' => $builders,
     '#default_value' => $builder,
   );
-  $form['config'] = $o->configForm($builder, $config);
+  $form['config'] = $o->configForm($builder, $block);
   $form['config']['#tree'] = 'true';
   $form['config']['#prefix'] = "<div id='query-builder-config'>\n";
   $form['config']['#suffix'] = '</div>';
@@ -111,7 +111,7 @@ function forena_query_editor($form, &$form_state, $block_name='') {
   $form['save'] = array(
       '#type' => 'submit',
       '#value' => 'Save',
-      '#validate' => array('forena_query_validate_block'),
+      '#validate' => array('forena_query_editor_validate'),
       '#submit' => array('forena_query_editor_update', 'forena_query_save_block')
   );
   $form['cancel'] = array('#type' => 'submit', '#value' => t('Cancel'), '#submit' => array('forena_query_close'), '#limit_validation_errors' => array());
@@ -140,12 +140,12 @@ function forena_query_editor($form, &$form_state, $block_name='') {
   return $form;
 }
 
-function forena_query_validate_block($form, &$form_state) {
-   if (isset($form_state['values']['access'])) {
+function forena_query_editor_validate($form, &$form_state) {
+   if (isset($form_state['values']['config']['access'])) {
      $o = Frx::BlockEditor();
      $o->load($form_state['storage']['block_name']);
      $r = $o->repos();
-     $access = $r->access($form_state['values']['access']);
+     $access = $r->access($form_state['values']['config']['access']);
      if (!$access) {
        form_set_error('access', t('You must be granted access to use this right.'));
      }
@@ -153,6 +153,9 @@ function forena_query_validate_block($form, &$form_state) {
    if (!Frx::DataFile()->isWritable(Frx::BlockEditor()->block_name . '.sql')) {
      form_set_error('block', t('Insufficient Permission to save file'));
    }
+   $config = array_merge($form_state['storage']['block'], $form_state['values']['config']);
+   $o->configValidate($form_state['values']['builder'], $config);
+   $form_state['storage']['block'] = $config;
 
 
 }
@@ -208,7 +211,7 @@ function forena_query_delete_form($form, &$form_state, $block_name) {
 
 function forena_query_save_block($form, &$form_state) {
   $form_state['rebuild'] = FALSE;
-  Frx::BlockEditor()->update($form_state['values'])->save();
+  Frx::BlockEditor()->save();
 }
 
 function forena_query_delete_block($form, &$form_state) {
@@ -233,7 +236,8 @@ function forena_query_close($form, &$form_state) {
 function forena_query_editor_update($form, &$form_state) {
   // Instantiate form values
   $o = Frx::BlockEditor($form_state['storage']['block_name']);
-  Frx::BlockEditor()->update($form_state['values']);
+  $config = array_merge($form_state['storage']['block'], $form_state['values']['config']);
+  Frx::BlockEditor()->update($config);
   $form_state['rebuild'] = TRUE;
 }
 

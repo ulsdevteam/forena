@@ -16,7 +16,9 @@ class FrxQueryBuilder {
     'FrxPostgres',
   );
 
-  public $ext = 'sql';
+  public $name = 'SQL Statement';
+
+  public $type = 'sql';
 
   public function initBlock($block) {
 
@@ -34,15 +36,15 @@ class FrxQueryBuilder {
             but for drupal data, this is a right as defined by the module provided.  '),
         '#type' => 'textfield',
         '#access' => user_access('forena data security'),
-        '#default_value' => @$block['access'],
+        '#default_value' => @$config['access'],
     );
 
     $form['file'] = array(
         '#type' => 'textarea',
         '#title' => t('Source'),
-        '#default_value' => @$block['file'],
+        '#default_value' => @$config['file'],
     );
-
+    return $form;
   }
 
   /**
@@ -51,8 +53,7 @@ class FrxQueryBuilder {
    * @param $config
    * @param $form_state
    */
-  public function validateConfig(&$config) {
-
+  public function configValidate(&$config) {
   }
 
   public function generate($config) {

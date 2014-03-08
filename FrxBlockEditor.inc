@@ -219,7 +219,7 @@ class FrxBlockEditor {
       $this->builders = array();
       $builders = module_invoke_all('forena_query_builders');
       foreach ($builders as $builder) {
-        if ($builder['file']) @include_once $builder['file'];
+        if (isset($builder['file'])) @include_once $builder['file'];
         if (class_exists($builder['class'])) {
           $b = new $builder['class'];
           $this->builders[$builder['class']] = $b;
@@ -234,7 +234,7 @@ class FrxBlockEditor {
     $plugin = get_class($r);
     $list = array();
     foreach ($this->builders as $class => $b) {
-      if (array_search($plugin, $b->supportedPlugins) && $b->name && $b->type == $this->block['type']) {
+      if (array_search($plugin, $b->supportedPlugins)!==FALSE && $b->name && $b->type == $this->block['type']) {
         $list[$class] = $b->name;
       }
     }
@@ -290,7 +290,10 @@ class FrxBlockEditor {
     if (isset($this->builders[$builder])) {
       $b = $this->builders[$builder];
       if (method_exists($b, 'configValidate')) {
-        $errors = $b->configForm($config);
+        $errors = $b->configValidate($config);
+      }
+      if ($errors) foreach ($errors as $name => $error) {
+        form_set_error($name, $error);
       }
     }
     return $errors;
