@@ -376,6 +376,22 @@ class FrxOracle extends FrxDataSource {
     return $value;
   }
 
+  public function searchTables($str) {
+    $str = strtoupper($str) . '%';
+    $db = $this->db;
+    $sql = $this->searchTablesSQL();
+    $stmt = oci_parse($db, $sql);
+    oci_bind_by_name($stmt, ":str", $str);
+    oci_execute($stmt);
+    $data = array();
+    $tables = array();
+    oci_fetch_all($stmt, $data, 0, 100, OCI_NUM);
+    foreach($data[0] as $table) {
+      $tables[] = strtolower($table);
+    }
+    return $tables;
+  }
+
   /**
    * Destructor - Closes database connections.
    *

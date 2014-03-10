@@ -115,12 +115,20 @@ var forenaSQLEditor = new function() {
     var s = self.control.val().slice(0, self.position).lastIndexOf(self.term); 
     var end = self.control.val().slice(self.position); 
     var start = self.control.val().slice(0, s);
-    self.control.val(start + token + end);
-    self.setCaretPosition(s + token.length); 
+    self.control.get(0).value = start + token + end;
+    // Make sure to close the widget. 
+    self.control.autocomplete("close");
+    self.setCaretPosition(s + token.length);
+    
+    
   };
   
   this.selectHandler = function (event, ui) { 
     self.select(ui.item.value); 
+    if (event.keyCode == jQuery.ui.keyCode.TAB) { 
+      event.preventDefault(); 
+      self.control.get(0).focus(); 
+    }
     return false; 
   };
   
@@ -140,6 +148,7 @@ var forenaSQLEditor = new function() {
         var token = self.tokens[0]; 
         if (token) self.select(token); 
       }
+
     }
   };
   

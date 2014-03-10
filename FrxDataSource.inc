@@ -530,10 +530,11 @@ class FrxDataSource{
         break;
       CASE 'oracle':
       CASE 'oci':
-        $sql = 'SELECT owner || '.' || table FROM all_tables where table like :str order by owner,table';
+        $sql = "SELECT object_name FROM all_objects where object_type in ('TABLE','VIEW')
+          AND owner not in ('SYS') AND object_name LIKE :str";
         break;
       CASE 'mssql':
-        $sql = "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = ÔBASE TABLEÕ";
+        $sql = "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'";
         break;
       CASE 'sqlite':
         $sql = 'SELECT name FROM sqlite_master WHERE name like :str';
