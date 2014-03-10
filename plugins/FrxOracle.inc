@@ -23,6 +23,7 @@ class FrxOracle extends FrxDataSource {
   public function __construct($conf, $repos_path, $name) {
 
     parent::__construct($conf, $repos_path, $name);
+    $this->db_type = 'oracle';
     $this->use_oracle_xml = FALSE;
     $uri = $conf['uri'];
     $this->debug = $conf['debug'];

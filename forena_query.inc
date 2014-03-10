@@ -80,6 +80,16 @@ function forena_query_create_block_form_submit($form, &$form_state) {
  * @return multitype:NULL
  */
 function forena_query_editor($form, &$form_state, $block_name='') {
+  static $first=TRUE;
+
+  if ($first) {
+    drupal_add_library('system', 'ui.autocomplete');
+    $m_path = drupal_get_path('module', 'forena_query');
+    drupal_add_js("$m_path/forena_query.js");
+    @list($repos, $name) = explode('.', $block_name);
+    drupal_add_js(array('forenaSQLEditor' => array('repos' => $repos)), 'setting');
+    $first = FALSE;
+  }
   $o = Frx::BlockEditor($block_name);
   $block = $o->block;
   if (!isset($form_state['storage'])) {
@@ -240,6 +250,42 @@ function forena_query_editor_update($form, &$form_state) {
   Frx::BlockEditor()->update($config);
   $form_state['rebuild'] = TRUE;
 }
+
+/**
+ * Standard drupal autocomplete that searches for tables.
+ * @param string $repos
+ * @param string $str
+ */
+function forena_query_autocomplete($repos='', $str='') {
+  $tables = array();
+  if ($repos && $str) {
+    $r = Frx::RepoMan()->repository($repos);
+    if ($r && method_exists($r, 'searchTables')) {
+      $tables = $r->searchTables($str);
+      $tables = array_combine($tables,$tables);
+    }
+  }
+  print drupal_json_output($tables);
+}
+
+/**
+ * Standard drupal autocomplete that searches for tables.
+ * @param string $repos
+ * @param string $str
+ */
+function forena_query_autocomplete_simple() {
+  $repos = @$_GET['repos'];
+  $str = @$_GET['term'];
+  $tables = array();
+  if ($repos && $str) {
+    $r = Frx::RepoMan()->repository($repos);
+    if ($r && method_exists($r, 'searchTables')) {
+      $tables = $r->searchTables($str);
+    }
+  }
+  print drupal_json_output($tables);
+}
+
 
 
 

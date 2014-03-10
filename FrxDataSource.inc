@@ -16,8 +16,10 @@ class FrxDataSource{
   public $block_extensions;
   public $types;
   public $block_name;
+  public $db_type = 'mysql';
   protected $te;
   public $debug = FALSE;
+
   public function __construct($conf, $repos_path, $name) {
     $this->conf = $conf;
     $this->comment_prefix = '--';
@@ -499,6 +501,47 @@ class FrxDataSource{
       }
     }
     return $value;
+  }
+
+  /**
+   * Method to return an array of tables that start with the string
+   * indicated in $str
+   * @param $str Name of tables.
+   * @return multitype:
+   */
+  public function searchTables($str) {
+    return array();
+  }
+
+  public function searchTablesSQL() {
+
+    switch ($this->db_type) {
+      CASE 'mysql':
+        $sql = "SHOW TABLES LIKE :str";
+        break;
+      CASE 'postgres':
+      CASE 'postgresql':
+      CASE 'pgsql':
+        $sql = "SELECT tablename from (
+            SELECT schemaname, tablename FROM pg_catalog.pg_tables
+            UNION SELECT schemaname, viewname from pg_catalog.pg_views) v
+            where schemaname NOT IN ('pg_catalog', 'information_schema') and tablename like :str
+            order by 1";
+        break;
+      CASE 'oracle':
+      CASE 'oci':
+        $sql = 'SELECT owner || '.' || table FROM all_tables where table like :str order by owner,table';
+        break;
+      CASE 'mssql':
+        $sql = "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = ÔBASE TABLEÕ";
+        break;
+      CASE 'sqlite':
+        $sql = 'SELECT name FROM sqlite_master WHERE name like :str';
+        break;
+      default:
+        drupal_set_message(t('Unknown database type: %s', array('%s' => $this->db_type)),'error');
+    }
+    return $sql;
   }
 }
 

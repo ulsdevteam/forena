@@ -12,6 +12,7 @@ class FrxDrupal extends FrxDataSource {
 
   private $database = 'default';
 
+
   /**
    * Object constructor
    *
@@ -23,8 +24,16 @@ class FrxDrupal extends FrxDataSource {
     if (@$conf['database'] && @$conf['database'] != 'default')  {
       $this->database = $conf['database'];
     }
+    $target = $this->database ? $this->database : 'default';
+    $this->db_type = Database::getConnection($target)->databaseType();
     // Set up the stuff required to translate.
     $this->te = new FrxSyntaxEngine(FRX_SQL_TOKEN, ':', $this);
+  }
+
+  public function searchTables($str) {
+    $str .= '%';
+    $rs = db_query($this->searchTablesSQL(), array(':str' => $str));
+    if ($rs) return $rs->fetchCol();
   }
 
   public function query($sql, $options = array()) {

@@ -40,6 +40,20 @@ function forena_query_menu() {
       'file' => 'forena_query.inc',
   );
 
+  $items['forena-query/table_autocomplete'] = array(
+  	'type' => MENU_CALLBACK,
+    'access arguments' => array('build forena sql blocks'),
+    'page callback' => 'forena_query_autocomplete',
+    'file' => 'forena_query.inc'
+  );
+
+  $items['forena-query/table_autocomplete_simple'] = array(
+      'type' => MENU_CALLBACK,
+      'access arguments' => array('build forena sql blocks'),
+      'page callback' => 'forena_query_autocomplete_simple',
+      'file' => 'forena_query.inc',
+  );
+
   return $items;
 }
 

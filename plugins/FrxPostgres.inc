@@ -22,6 +22,7 @@ class FrxPostgres extends FrxDataSource {
     parent::__construct($conf, $repos_path, $name);
     $this->use_postgres_xml = FALSE;
     $uri = $conf['uri'];
+    $this->db_type = 'postgres';
     if (!empty($conf['password'])) $uri = trim($uri) . ' password=' . $conf['password'];
     $this->debug = @$conf['debug'];
     if (isset($conf['postgres_xml'])) $this->use_postgres_xml = $conf['postgres_xml'];
