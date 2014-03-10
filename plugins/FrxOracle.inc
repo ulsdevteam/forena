@@ -23,6 +23,7 @@ class FrxOracle extends FrxDataSource {
   public function __construct($conf, $repos_path, $name) {
 
     parent::__construct($conf, $repos_path, $name);
+    $this->db_type = 'oracle';
     $this->use_oracle_xml = FALSE;
     $uri = $conf['uri'];
     $this->debug = $conf['debug'];
@@ -86,7 +87,7 @@ class FrxOracle extends FrxDataSource {
           $xml = $this->oracle_xml($sql, 'table');
         }
         else {
-          $xml = $this->php_xml($sql);
+          $xml = $this->php_xml($sql, $options);
         }
       }
       if ($this->debug) {
@@ -95,6 +96,10 @@ class FrxOracle extends FrxDataSource {
       }
       return $xml;
     }
+
+  }
+
+  public function query($sql, $options=array()) {
 
   }
 
@@ -144,7 +149,7 @@ class FrxOracle extends FrxDataSource {
     return $xml;
   }
 
-  private function php_xml($sql) {
+  private function php_xml($sql, $options=array()) {
     $db = $this->db;
     $xml = new SimpleXMLElement('<table/>');
     //$rs->debugDumpParams();
@@ -171,10 +176,10 @@ class FrxOracle extends FrxDataSource {
         return '';
       }
     }
-
+    $use_limit = isset($options['limit']);
+    if ($use_limit) $limit = $options['limit'];
     $rownum=0;
-
-    while ($row = oci_fetch_array($stmt, OCI_ASSOC + OCI_RETURN_NULLS + OCI_RETURN_LOBS)) {
+    while ($row = oci_fetch_array($stmt, OCI_ASSOC + OCI_RETURN_NULLS + OCI_RETURN_LOBS) && (!$use_limit || $row < $limit) ) {
       $rownum++;
       $row_node = $xml->addChild('row');
       $row_node['num'] = $rownum;
@@ -369,6 +374,22 @@ class FrxOracle extends FrxDataSource {
     }
 
     return $value;
+  }
+
+  public function searchTables($str) {
+    $str = strtoupper($str) . '%';
+    $db = $this->db;
+    $sql = $this->searchTablesSQL();
+    $stmt = oci_parse($db, $sql);
+    oci_bind_by_name($stmt, ":str", $str);
+    oci_execute($stmt);
+    $data = array();
+    $tables = array();
+    oci_fetch_all($stmt, $data, 0, 100, OCI_NUM);
+    foreach($data[0] as $table) {
+      $tables[] = strtolower($table);
+    }
+    return $tables;
   }
 
   /**

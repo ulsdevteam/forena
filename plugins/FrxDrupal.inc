@@ -12,6 +12,7 @@ class FrxDrupal extends FrxDataSource {
 
   private $database = 'default';
 
+
   /**
    * Object constructor
    *
@@ -23,17 +24,19 @@ class FrxDrupal extends FrxDataSource {
     if (@$conf['database'] && @$conf['database'] != 'default')  {
       $this->database = $conf['database'];
     }
+    $target = $this->database ? $this->database : 'default';
+    $this->db_type = Database::getConnection($target)->databaseType();
     // Set up the stuff required to translate.
     $this->te = new FrxSyntaxEngine(FRX_SQL_TOKEN, ':', $this);
   }
-  /**
-   * Get data based on file data block in the repository.
-   *
-   * @param String $block_name
-   * @param Array $parm_data
-   * @param Query $subQuery
-   */
-  public function sqlData($sql, $options = array()) {
+
+  public function searchTables($str) {
+    $str .= '%';
+    $rs = db_query($this->searchTablesSQL(), array(':str' => $str));
+    if ($rs) return $rs->fetchCol();
+  }
+
+  public function query($sql, $options = array()) {
     if ($this->database != 'default') {
       db_set_active($this->database);
     }
@@ -44,7 +47,12 @@ class FrxDrupal extends FrxDataSource {
     $xml ='';
     $sql = $this->te->replace($sql);
     try {
-      $rs = db_query($sql);
+      if (@(int)$options['limit']) {
+        $rs = db_query_range($sql, 0, (int)$options['limit']);
+      }
+      else {
+        $rs = db_query($sql);
+      }
     }
     catch (PDOException $e) {
       watchdog_exception('error',$e);
@@ -56,13 +64,34 @@ class FrxDrupal extends FrxDataSource {
       } else {
         $short = t('SQL Error in %b.sql', array('%b' => $this.block_name));
       }
-     drupal_set_message($short, 'error', FALSE);
-     return;
+      drupal_set_message($short, 'error', FALSE);
+      if ($this->database != 'default') {
+        db_set_active();
+      }
+      return;
 
     }
+
+
+    if ($this->database != 'default') {
+      db_set_active();
+    }
+    return $rs;
+  }
+
+  /**
+   * Get data based on file data block in the repository.
+   *
+   * @param String $block_name
+   * @param Array $parm_data
+   * @param Query $subQuery
+   */
+  public function sqlData($sql, $options = array()) {
+    $rs = $this->query($sql, $options);
     $entity_map = array();
     $select_fields = array();
     $rownum = 0;
+    if (!$rs) return;
 
     $xml = new SimpleXMLElement('<table/>');
     if ($rs && $rs->columnCount()) foreach ($rs as $data) {
@@ -85,13 +114,8 @@ class FrxDrupal extends FrxDataSource {
           $select_fields[$id] = $data;
         }
       }
-
     }
 
-
-    if ($this->database != 'default') {
-      db_set_active();
-    }
     if ($entity_map) {
       $this->loadEntities($type, $entity_map, $select_fields);
     }

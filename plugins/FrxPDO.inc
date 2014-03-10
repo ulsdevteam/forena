@@ -25,7 +25,7 @@ class FrxPDO extends FrxDataSource {
     if ($uri) {
       // Test for PDO suport
       if (!class_exists('PDO')) {
-        FrxReportGenerator::instance()->error('PDO support not installed.', 'PDO support not installed.');
+        $this->error('PDO support not installed.', 'PDO support not installed.');
         return;
       }
 
@@ -39,9 +39,10 @@ class FrxPDO extends FrxDataSource {
       // Test for driver support
       @list($prot, $c) = explode(':', $uri, 2);
       $drivers = PDO::getAvailableDrivers();
+      $this->db_type = $prot;
       if ($drivers && (array_search($prot, $drivers)===FALSE)) {
         $msg = 'PDO driver support for ' . $prot . ' not installed';
-        FrxReportGenerator::instance()->error($msg, $msg);
+        $this->error($msg, $msg);
         return;
       }
       try {
@@ -53,15 +54,15 @@ class FrxPDO extends FrxDataSource {
         }
         $this->db = $db;
         if (!is_object($db)) {
-          FrxReportGenerator::instance()->error('Unknown error connecting to database ' . $uri);
+          $this->error('Unknown error connecting to database ' . $uri);
         }
       } catch (PDOException $e) {
-        FrxReportGenerator::instance()->error('Unable to connect to database', $e->getMessage());
+        $this->error('Unable to connect to database', $e->getMessage());
       }
 
     }
     else {
-      FrxReportGenerator::instance()->error('No database connection string specified');
+      $this->error('No database connection string specified');
     }
 
     // Set up the stuff required to translate.
@@ -194,6 +195,16 @@ class FrxPDO extends FrxDataSource {
       else  $value =  $this->quote($value);
     }
     return (string)$value;
+  }
+
+  public function searchTables($str) {
+    $str .= '%';
+    $sql = $this->searchTablesSQL();
+    if ($sql) {
+      $st = $this->db->prepare($sql);
+      if ($st) $st->execute(array(':str' => $str));
+      if ($st) return $st->fetchAll(PDO::FETCH_COLUMN, 0);
+    }
   }
 
 }
