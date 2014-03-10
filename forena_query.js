@@ -34,7 +34,7 @@ var forenaSQLEditor = new function() {
         select : self.selectHandler, 
       }
     ); 
-  }
+  };
   
   /**
    * Determine the caret position registered on keyup. 
@@ -52,7 +52,23 @@ var forenaSQLEditor = new function() {
         pos = Sel.text.length - SelLength;
     }
     self.position = pos; 
-  }
+  };
+  
+  /**
+   * Move the caret position to a specified place in the cursor. 
+   */
+  this.setCaretPosition = function(pos) { 
+    c = self.control.get(0); 
+    if (c.setSelectionRange) {
+      c.setSelectionRange(pos, pos);
+    } else if (c.createTextRange) {
+      var range = c.createTextRange();
+      range.collapse(true);
+      range.moveEnd('character', pos);
+      range.moveStart('character', pos);
+      range.select();
+    }
+  }; 
   
   //Determine the current term 
   this.currentTerm = function(request) { 
@@ -66,7 +82,7 @@ var forenaSQLEditor = new function() {
       self.term = ''; 
     }
     return self.term; 
-  }
+  };
   
   /**
    * New function for determining dropdown contents based on last term. 
@@ -81,7 +97,7 @@ var forenaSQLEditor = new function() {
       }, 
       self.jsonSuccess
     ); 
-  }
+  };
   
   /**
    * Ajax return handler 
@@ -90,27 +106,27 @@ var forenaSQLEditor = new function() {
   this.jsonSuccess = function(data) { 
     self.tokens = data; 
     self.reponse(data); 
-  }
+  };
   
   /**
    * Inserts the term into the specified location of the textarea. 
    */
   this.select = function(token) { 
     var s = self.control.val().slice(0, self.position).lastIndexOf(self.term); 
-    var l = self.control.val().length; 
-    var end = self.control.val().slice(self.position + self.term.length - 2); 
-    var start = self.control.val().slice(0, s); 
-    console.log(start + token + end); 
-  }
+    var end = self.control.val().slice(self.position); 
+    var start = self.control.val().slice(0, s);
+    self.control.val(start + token + end);
+    self.setCaretPosition(s + token.length); 
+  };
   
   this.selectHandler = function (event, ui) { 
     self.select(ui.item.value); 
     return false; 
-  }
+  };
   
   this.keyUpHandler = function (event) { 
     self.getCaretPosition(); 
-  }
+  };
   
   /*
    * Custom keyboard handler
@@ -125,16 +141,10 @@ var forenaSQLEditor = new function() {
         if (token) self.select(token); 
       }
     }
-  }
+  };
   
-  /**
-   * Ajax callback to search tables. 
-   */
-  this.searchTables = function () {
-    
-  }
-}
+};
 
 Drupal.behaviors.forena_query_sql_editor = { 
     attach : forenaSQLEditor.init
-}
+};
