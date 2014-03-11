@@ -884,7 +884,7 @@ class FrxEditor {
     // Set parameters
     Frx::Data()->push($parms, 'parm');
     // Check for cache data
-    if ($r->cache) {
+    if ($r->cache && !$r->preview_mode) {
       $cid = 'forena:report:' . $this->report_name . ':' . drupal_http_build_query($parms);
       if (@$r->cache['per_user'] && $user) $cid .= ':' . $user->uid;
       if (@$r->cache['per_doctype']) @$cid .= ':' . $format;
@@ -910,10 +910,9 @@ class FrxEditor {
         cache_set($cid, $r->cache, 'cache', $time);
       }
       else {
-        $r->html = $r->cache['content'];
-        $r->title = $r->cache['title'];
+        $r->html = $cache->data['content'];
+        $r->title = $cache->data['title'];
       }
-
     }
     else {
       $r->render($format);
