@@ -852,6 +852,7 @@ class FrxEditor {
    */
   function report($parms = array(), $print = FALSE, $no_cache=FALSE) {
     global $user;
+    global $language;
     $this->field_ids = array();
     $content = array();
     $format = $this->desc['format'];
@@ -884,7 +885,7 @@ class FrxEditor {
     Frx::Data()->push($parms, 'parm');
     // Check for cache data
     if ($r->cache) {
-      $cid = 'forena:report:' . $name . ':' . drupal_http_build_query($parms);
+      $cid = 'forena:report:' . $this->report_name . ':' . drupal_http_build_query($parms);
       if (@$r->cache['per_user'] && $user) $cid .= ':' . $user->uid;
       if (@$r->cache['per_doctype']) @$cid .= ':' . $format;
       $cache = cache_get($cid, 'cache');
@@ -905,10 +906,12 @@ class FrxEditor {
           $time = CACHE_PERMANENT;
         }
         $r->cache['content'] = $r->html;
+        $r->cache['title'] = $r->title;
         cache_set($cid, $r->cache, 'cache', $time);
       }
       else {
         $r->html = $r->cache['content'];
+        $r->title = $r->cache['title'];
       }
 
     }
