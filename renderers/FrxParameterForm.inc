@@ -12,7 +12,7 @@ class FrxParameterForm extends FrxRenderer {
     $variables = $this->replacedAttributes();
     $variables['template']  = $this->innerXML();
     $form = $this->frxReport->parametersForm($variables);
-    $this->frxReport->parameters_form = array('#markup' => drupalRender($form));
+    $this->frxReport->parameters_form = array('#markup' => drupal_render($form));
     return $output;
   }
 }
