@@ -601,6 +601,7 @@ class FrxReport {
     $parms = $this->parametersArray();
     $form =  drupal_get_form('forena_parameter_form', $parms, $variables);
     $this->parameters_form = $form;
+    return $form;
   }
 
   public function setSort($sort, $compare_type='') {
