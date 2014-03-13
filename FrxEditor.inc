@@ -997,6 +997,8 @@ class FrxEditor {
 
   public function blockLinks($block_name, $frx, $attrs, $id='', $context = array()) {
     $o = '';
+    $parms = Frx::Data()->getContext('parm');
+    if ($parms) $context = array_merge($parms, $context);
     $class = @(string)$attrs['class'];
     $frx_class = strpos($class, 'Frx') !== FALSE;
     if ($frx_class) {
@@ -1016,7 +1018,7 @@ class FrxEditor {
       $report_name = str_replace('/', '.' , $this->report_name);
       $b = Frx::RepoMan()->loadBlock($block_name);
       $options = array();
-      if ($context && !$block_tag) $options['query'] = $context;
+      if ($context) $options['query'] = $context;
 
       // Add the prepend link.
       if ($block_tag) {

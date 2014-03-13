@@ -122,6 +122,8 @@ class FrxBlockEditor {
   public function data($parms = array()) {
     // Merge in current_context
     $parms = array_merge(Frx::Data()->currentContextArray(), $parms);
+    $report_parms = Frx::Data()->getContext('parm');
+    if ($report_parms) $parms = array_merge($report_parms, $parms);
     $id = str_replace('/', '-', $this->block_name) . '-parm';
     Frx::Data()->push($parms, $id);
     if ($this->edit && $this->provider) {
