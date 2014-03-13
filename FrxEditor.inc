@@ -977,7 +977,7 @@ class FrxEditor {
     $path = $name=='configure.png' ? 'misc' : drupal_get_path('module', 'forena') . '/icons';
 
     $image = array(
-      'path' => url("$path/$name"),
+      'path' => file_create_url("$path/$name"),
     	'alt' => t($alt),
       'title' => t($alt),
     );
