@@ -144,6 +144,11 @@ class FrxEditor {
     forena_save_report($this->report_name, $this->asXML(), TRUE);
     drupal_set_message(t('Your report, %s has been saved.', array('%s' => $this->report_name)));
     drupal_get_messages('warning');
+    $cid = 'forena:report:' . $this->report_name . '%';
+    // Remove cache entries
+    db_delete('cache')
+      ->condition('cid', $cid, 'LIKE')
+      ->execute();
     menu_rebuild();
   }
 
@@ -881,15 +886,18 @@ class FrxEditor {
      * @param unknown_type $report_name
      * @param unknown_type $parms
      */
-    // Set parameters
+
     Frx::Data()->push($parms, 'parm');
     // Check for cache data
     if ($r->cache && !$r->preview_mode) {
+      // Get file modification time for determining if cache needs to be rebuilt.
+      $entry = @Frx::File()->getCacheEntry($this->desc['filename']);
       $cid = 'forena:report:' . $this->report_name . ':' . drupal_http_build_query($parms);
       if (@$r->cache['per_user'] && $user) $cid .= ':' . $user->uid;
       if (@$r->cache['per_doctype']) @$cid .= ':' . $format;
       $cache = cache_get($cid, 'cache');
-      if (!$cache || (isset($r->cache['duration']) && $cache->expire < time()) || $no_cache) {
+      if (!$cache || (isset($r->cache['duration']) && $cache->expire < time()) || $cache->created < $entry->mtime || $no_cache) {
+        dpm('rebuilding cached copy');
         $this->field_ids = array();
         $r->render($format);
         $time = null;
@@ -977,7 +985,7 @@ class FrxEditor {
     $path = $name=='configure.png' ? 'misc' : drupal_get_path('module', 'forena') . '/icons';
 
     $image = array(
-      'path' => url("$path/$name"),
+      'path' => file_create_url("$path/$name"),
     	'alt' => t($alt),
       'title' => t($alt),
     );
