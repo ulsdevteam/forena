@@ -17,13 +17,15 @@ class FrxFieldTable extends FrxRenderer {
     $tds = $this->extractXPathInnerHTML('//td', $this->reportDocDomNode, FALSE);
     $ths = $this->extractXPathInnerHTML('//th', $this->reportDocDomNode, FALSE);
     $columns = array_combine($ths, $tds);
+    $i=0;
     foreach($columns as $label=>$token) {
+      $i++;
       $key = trim($token, '{}');
       $config['columns'][$key] = array(
           'contents' => $token,
           'label' => $label,
           'include' => 1,
-          'weight' => '0',
+          'weight' => $i,
       );
     }
     return $config;
@@ -39,10 +41,6 @@ class FrxFieldTable extends FrxRenderer {
     $this->removeChildren($div);
     $this->addFragment($div, $config['header']);
     $table = $this->setFirstNode($div, 4, 'table');
-    if ($config['columns']) foreach ($config['columns'] as $key => $col) if ($col['include']) {
-      $this->addNode($throw, 10, 'th', $col['label']);
-      $this->addNode($tdrow, 10, 'td', $col['contents']);
-    }
 
     $r=0;
     if ($config['columns']) foreach ($config['columns'] as $key => $col) if ($col['include']) {
