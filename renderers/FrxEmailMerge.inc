@@ -15,12 +15,12 @@ class FrxEmailMerge extends FrxRenderer {
   public function scrapeConfig() {
     $config=array();
     $config['class'] = get_class($this);
-    $config['from'] = $this->extractXPathInnerHTML("//*[@class='email-header-from']", $this->reportDocDomNode);
-    $config['to']= $this->extractXPathInnerHTML("//*[@class='email-header-to']", $this->reportDocDomNode);
-    $config['cc'] = $this->extractXPathInnerHTML("//*[@class='email-header-cc']", $this->reportDocDomNode);
-    $config['bcc'] = $this->extractXPathInnerHTML("//*[@class='email-header-bcc']", $this->reportDocDomNode);
-    $config['subject'] =  $this->extractXPathInnerHTML("//*[@class='email-header-subject']", $this->reportDocDomNode);
-    $config['body']['value'] =  $this->extractXPathInnerHTML("//*[@class='email-body']", $this->reportDocDomNode);
+    $config['from'] = $this->extractXPathInnerHTML("*//*[@class='email-header-from']", $this->reportDocDomNode);
+    $config['to']= $this->extractXPathInnerHTML("*//*[@class='email-header-to']", $this->reportDocDomNode);
+    $config['cc'] = $this->extractXPathInnerHTML("*//*[@class='email-header-cc']", $this->reportDocDomNode);
+    $config['bcc'] = $this->extractXPathInnerHTML("*//*[@class='email-header-bcc']", $this->reportDocDomNode);
+    $config['subject'] =  $this->extractXPathInnerHTML("*//*[@class='email-header-subject']", $this->reportDocDomNode);
+    $config['body']['value'] =  $this->extractXPathInnerHTML("*//*[@class='email-body']", $this->reportDocDomNode);
     return $config;
   }
 

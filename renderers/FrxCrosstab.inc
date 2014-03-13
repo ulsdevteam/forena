@@ -304,10 +304,10 @@ class FrxCrosstab extends FrxRenderer {
     $config['group'] = $group = $attrs['group'];
     $config['dim']  = $dim = $attrs['dim'];
     $this->extractTemplateHTML($this->reportDocDomNode, $config, array('table'));
-    $head_ths = $this->extractXPathInnerHTML('//thead/tr/th', $this->reportDocDomNode, FALSE);
-    $head_tds = $this->extractXPathInnerHTML('//thead/tr/td', $this->reportDocDomNode, FALSE);
-    $body_ths = $this->extractXPathInnerHTML('//tbody/tr/th', $this->reportDocDomNode, FALSE);
-    $body_tds = $this->extractXPathInnerHTML('//tbody/tr/td', $this->reportDocDomNode, FALSE);
+    $head_ths = $this->extractXPathInnerHTML('*//thead/tr/th', $this->reportDocDomNode, FALSE);
+    $head_tds = $this->extractXPathInnerHTML('*//thead/tr/td', $this->reportDocDomNode, FALSE);
+    $body_ths = $this->extractXPathInnerHTML('*//tbody/tr/th', $this->reportDocDomNode, FALSE);
+    $body_tds = $this->extractXPathInnerHTML('*//tbody/tr/td', $this->reportDocDomNode, FALSE);
     $heading_cols = array_combine($head_ths, $body_ths);
     $data_cols = array_combine($head_tds, $body_tds);
     // Get the named headers
