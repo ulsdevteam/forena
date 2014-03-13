@@ -179,7 +179,7 @@ class FrxOracle extends FrxDataSource {
     $use_limit = isset($options['limit']);
     if ($use_limit) $limit = $options['limit'];
     $rownum=0;
-    while ($row = oci_fetch_array($stmt, OCI_ASSOC + OCI_RETURN_NULLS + OCI_RETURN_LOBS) && (!$use_limit || $row < $limit) ) {
+    while (($row = oci_fetch_array($stmt, OCI_ASSOC + OCI_RETURN_NULLS + OCI_RETURN_LOBS))  && (!$use_limit || $row < $limit)) {
       $rownum++;
       $row_node = $xml->addChild('row');
       $row_node['num'] = $rownum;
