@@ -40,6 +40,7 @@ class FrxPDO extends FrxDataSource {
       @list($prot, $c) = explode(':', $uri, 2);
       $drivers = PDO::getAvailableDrivers();
       $this->db_type = $prot;
+
       if ($drivers && (array_search($prot, $drivers)===FALSE)) {
         $msg = 'PDO driver support for ' . $prot . ' not installed';
         $this->error($msg, $msg);
@@ -68,6 +69,21 @@ class FrxPDO extends FrxDataSource {
     // Set up the stuff required to translate.
     $this->te = new FrxSyntaxEngine(FRX_SQL_TOKEN, ':', $this);
   }
+
+  public function parseConnectionStr() {
+    $uri = @$this->conf['uri'];
+    @list($prot, $conn) = explode(':', $uri, 2);
+    $conn = str_replace(';', ' ', $conn);
+    $info = array();
+    foreach(explode(' ', $conn) as $pairs) {
+      if (strpos($pairs, '=')!==FALSE) {
+        list($key, $value) = @explode('=', $pairs, 2);
+        $info[trim($key)] = trim($value);
+      }
+    }
+    return $info;
+  }
+
   /**
    * Get data based on file data block in the repository.
    *
@@ -207,4 +223,15 @@ class FrxPDO extends FrxDataSource {
     }
   }
 
+  public function searchTableColumns($table, $str) {
+    $str .= '%';
+    $sql = $this->searchTableColumnsSQL();
+    $info = $this->parseConnectionStr();
+    $database = isset($info['dbname']) ? $info['dbname'] : @$info['database'];
+    if ($sql) {
+      $st = $this->db->prepare($sql);
+      if ($st) $st->execute(array(':table' => $table, ':database' => $database, ':str' => $str));
+      if ($st) return $st->fetchAll(PDO::FETCH_COLUMN, 0);
+    }
+  }
 }

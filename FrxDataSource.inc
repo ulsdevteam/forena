@@ -513,6 +513,10 @@ class FrxDataSource{
     return array();
   }
 
+  public function searchTableColumns($table, $str) {
+    return array();
+  }
+
   public function searchTablesSQL() {
 
     switch ($this->db_type) {
@@ -538,6 +542,42 @@ class FrxDataSource{
         break;
       CASE 'sqlite':
         $sql = 'SELECT name FROM sqlite_master WHERE name like :str';
+        break;
+      default:
+        drupal_set_message(t('Unknown database type: %s', array('%s' => $this->db_type)),'error');
+    }
+    return $sql;
+  }
+
+  public function searchTableColumnsSQL() {
+
+    switch ($this->db_type) {
+      CASE 'mysql':
+        $sql = "select column_name from information_schema.COLUMNS where
+             table_schema = :database
+             AND table_name = :table AND column_name like :str";
+        break;
+      CASE 'postgres':
+      CASE 'postgresql':
+      CASE 'pgsql':
+        $sql = "SELECT column_name from
+            information_schema.columns
+            WHERE
+              table_catalog = :database
+              AND table_name = :table
+              AND column_name like :str
+            order by 1";
+        break;
+      CASE 'oracle':
+      CASE 'oci':
+        $sql = "SELECT object_name FROM all_objects where object_type in ('TABLE','VIEW')
+          AND owner not in ('SYS') AND object_name LIKE :str";
+        break;
+      CASE 'mssql':
+        $sql = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_TYPE = 'BASE TABLE'";
+        break;
+      CASE 'sqlite':
+        $sql = 'PRAGMA table_info(:table)';
         break;
       default:
         drupal_set_message(t('Unknown database type: %s', array('%s' => $this->db_type)),'error');

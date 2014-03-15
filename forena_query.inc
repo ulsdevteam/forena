@@ -269,21 +269,36 @@ function forena_query_autocomplete($repos='', $str='') {
 }
 
 /**
- * Standard drupal autocomplete that searches for tables.
+ * Standard drupal autocomplete that searches for tables or column values if a table is specified.
  * @param string $repos
  * @param string $str
  */
 function forena_query_autocomplete_simple() {
   $repos = @$_GET['repos'];
   $str = @$_GET['term'];
-  $tables = array();
-  if ($repos && $str) {
+  $table = @$_GET['table'];
+  $alias = @$_GET['alias'];
+  $values = array();
+  if ($repos) {
+    // If we have a table query the columns
     $r = Frx::RepoMan()->repository($repos);
-    if ($r && method_exists($r, 'searchTables')) {
-      $tables = $r->searchTables($str);
+    if ($table && $alias) {
+      if ($r && method_exists($r, 'searchTableColumns')) {
+        $cols = $r->searchTableColumns($table, $str);
+        if ($cols) foreach ($cols as $col) {
+          $values[] = $alias . '.' . $col;
+        }
+      }
+    }
+    else if ($str) {
+      // Otherwise query the table
+      if ($r && method_exists($r, 'searchTables')) {
+        $values = $r->searchTables($str);
+      }
     }
   }
-  print drupal_json_output($tables);
+
+  print drupal_json_output($values);
 }
 
 

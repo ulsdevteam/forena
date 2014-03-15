@@ -36,6 +36,22 @@ class FrxDrupal extends FrxDataSource {
     if ($rs) return $rs->fetchCol();
   }
 
+  /**
+   * Generate a list of columns for a table.
+   * @param unknown $table
+   * @param unknown $str
+   * @return An
+   */
+  public function searchTableColumns($table, $str) {
+    $str .= '%';
+    $table = trim($table, '{} ');
+    $key = $this->database ? $this->database : 'default';
+    $info = Database::getConnectionInfo($key);
+    $database = $info[$key]['database'];
+    $rs = db_query($this->searchTableColumnsSQL(), array(':str' => $str, ':database' => $database, ':table' => $table));
+    if ($rs) return $rs->fetchCol();
+  }
+
   public function query($sql, $options = array()) {
     if ($this->database != 'default') {
       db_set_active($this->database);

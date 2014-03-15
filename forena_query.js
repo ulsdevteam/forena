@@ -11,8 +11,93 @@ var forenaSQLEditor = new function() {
   this.position = 0; 
   this.autocompletePath = ''; 
   this.tokens = []; 
+  this.tables = []; 
+  this.reserved = ['select', 
+                   'from', 
+                   'inner', 
+                   'left', 
+                   'join', 
+                   'right', 
+                   'cross', 
+                   'where', 
+                   'having', 
+                   'order', 
+                   'group', 
+                   'by',
+                   'on',
+                   'in']; 
+  this.states = [
+                   'select', 
+                   'from', 
+                   'join', 
+                   'on', 
+                   'where', 
+                   'having', 
+                   'order', 
+                   'group'
+                   ]; 
   this.repos = ''; 
   var self = this; 
+  
+  /**
+   * Parse the list of tables/aliases from the sql. 
+   */ 
+  this.tableAliases = function() { 
+    // Split on commas
+    clause = self.parseTables(); 
+    var tables = {}; 
+    var parts = clause.split(","); 
+    for (var i=0; i< parts.length; i++) { 
+      if (parts[i].trim() && parts[i].search('--') == -1) { 
+        var p = parts[i].trim().split(/\s+/);
+        if (p.length > 1) {
+          tables[p[1]] = p[0];  
+        }
+        else { 
+          tables[p[0]] = p[0]
+        }
+      }
+    }
+    return tables; 
+  }
+  
+  /**
+   * Parse table aliases from the sql statement
+   */
+  this.parseTables = function () { 
+    sql = self.control.get(0).value; 
+    // Split array on words. 
+    var words = sql.split(/\s+/); // Break apart the sql statement by white space. 
+    var word=''; 
+    var state = '';
+    var table_clause = ''; // rough comma separated list of tables/aliases for further processing
+    var wcnt = 0; // Word count within the statement section
+    for( var i=0; i<words.length; i++) {
+      // Remove the parents as we don't need them for this level of parsing. 
+      word = words[i].toLowerCase().replace(/\(|\)/g,"");
+        
+      // Certain words mean we are in a different section of the sql. 
+      if (self.states.indexOf(word) != -1) {
+        state = word; 
+        wcnt = 0; 
+      }
+      
+      // non reserved words are candidates for table aliases. 
+      if (self.reserved.indexOf(word) == -1) {
+        wcnt++; 
+        switch (state) { 
+         case 'from': 
+         case 'join': 
+           if (wcnt == 1) {
+             table_clause = table_clause + ','; 
+           }
+           table_clause = table_clause + ' ' + word; 
+           break; 
+        }
+      }
+    }
+    return table_clause; 
+  }
   
   /**
    * Initialization function for setting up the editor. 
@@ -89,11 +174,28 @@ var forenaSQLEditor = new function() {
    */
   this.autocompleteSource = function(request, response) { 
     self.reponse = response; 
+    var t = self.currentTerm(); 
+    var table = ''; 
+    var alias = ''; 
+    table = '';
+    alias = ''; 
+    if (t.search('.') != -1) { 
+      aliases = self.tableAliases(); 
+      var a = t.substring(0, t.indexOf('.')); 
+      if (aliases[a]) { 
+        table = aliases[a];
+        alias = a; 
+        t = t.substring(t.indexOf('.')+1); 
+      }
+      
+    }
     jQuery.getJSON(
       self.autocompletePath, 
       {
-        term : self.currentTerm(),
-        repos : self.repos
+        term : t,
+        repos : self.repos, 
+        table : table,
+        alias : alias,
       }, 
       self.jsonSuccess
     ); 
@@ -104,6 +206,7 @@ var forenaSQLEditor = new function() {
    * saves away raw response and then chains autocomplete response. 
    */
   this.jsonSuccess = function(data) { 
+    console.log(data); 
     self.tokens = data; 
     self.reponse(data); 
   };
