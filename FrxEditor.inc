@@ -897,7 +897,6 @@ class FrxEditor {
       if (@$r->cache['per_doctype']) @$cid .= ':' . $format;
       $cache = cache_get($cid, 'cache');
       if (!$cache || (isset($r->cache['duration']) && $cache->expire < time()) || $cache->created < $entry->mtime || $no_cache) {
-        dpm('rebuilding cached copy');
         $this->field_ids = array();
         $r->render($format);
         $time = null;
