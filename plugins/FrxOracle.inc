@@ -393,6 +393,28 @@ class FrxOracle extends FrxDataSource {
   }
 
   /**
+   * Search table columns for match
+   * @see FrxDataSource::searchTableColumns()
+   */
+  public function searchTableColumns($table, $str) {
+    $str = strtoupper($str) . '%';
+    $db = $this->db;
+    $sql = $this->searchTableColumnsSQL();
+    $table = strtoupper($table);
+    $stmt = oci_parse($db, $sql);
+    oci_bind_by_name($stmt, ':table_name', $table);
+    oci_bind_by_name($stmt, ":str", $str);
+    oci_execute($stmt);
+    $data = array();
+    $columns = array();
+    oci_fetch_all($stmt, $data, 0, 100, OCI_NUM);
+    if ($data) foreach($data[0] as $column) {
+      $columns[] = strtolower($column);
+    }
+    return $columns;
+  }
+
+  /**
    * Destructor - Closes database connections.
    *
    */

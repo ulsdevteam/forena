@@ -570,8 +570,9 @@ class FrxDataSource{
         break;
       CASE 'oracle':
       CASE 'oci':
-        $sql = "SELECT object_name FROM all_objects where object_type in ('TABLE','VIEW')
-          AND owner not in ('SYS') AND object_name LIKE :str";
+        $sql = "SELECT column_name FROM all_tab_columns where
+          table_name = :table_name
+          AND column_name LIKE :str";
         break;
       CASE 'mssql':
         $sql = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_TYPE = 'BASE TABLE'";
