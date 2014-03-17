@@ -3,3 +3,8 @@
 #forena-query-builder-form .forena-filter div {
 	display: inline-block;
 }
+
+#forena-query-editor #ui-active-menuitem{ 
+	background-color: #eee; 
+}
+

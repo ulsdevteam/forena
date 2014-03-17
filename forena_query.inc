@@ -86,6 +86,7 @@ function forena_query_editor($form, &$form_state, $block_name='') {
     drupal_add_library('system', 'ui.autocomplete');
     $m_path = drupal_get_path('module', 'forena_query');
     drupal_add_js("$m_path/forena_query.js");
+    drupal_add_css("$m_path/forena_query.css");
     @list($repos, $name) = explode('.', $block_name);
     drupal_add_js(array('forenaSQLEditor' => array('repos' => $repos)), 'setting');
     $first = FALSE;
