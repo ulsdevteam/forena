@@ -154,7 +154,7 @@ class FrxMSSQL extends FrxDataSource {
       $tables[] = $row['column_name'];
     }
     if ($rs) mssql_free_result($rs);
-    return $xml;
+    return $tables;
 
   }
 
