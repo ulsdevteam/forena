@@ -138,6 +138,27 @@ class FrxMSSQL extends FrxDataSource {
   }
 
   /**
+   * Perform search of tables.
+   * @see FrxDataSource::searchTables()
+   */
+  public function searchTables($str) {
+    $str .= '%';
+    $db = $this->db;
+    $sql = $this->searchTablesSQL();
+    $str = "'" . str_replace("'", "''", $str) . "'";
+    $sql = str_replace(':sql', $str, $sql);
+    $rownum = 0;
+    $rs = mssql_query($sql, $db);
+    $tables = array();
+    while ($row = mssql_fetch_assoc($rs)) {
+      $tables[] = $row['column_name'];
+    }
+    if ($rs) mssql_free_result($rs);
+    return $xml;
+
+  }
+
+  /**
    * Implement custom SQL formatter to make sure that strings are properly escaped.
    * Ideally we'd replace this with something that handles prepared statements, but it
    * wouldn't work for

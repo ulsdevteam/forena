@@ -538,7 +538,8 @@ class FrxDataSource{
           AND owner not in ('SYS') AND object_name LIKE :str";
         break;
       CASE 'mssql':
-        $sql = "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'";
+        $sql = "SELECT table_name FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'
+             and table_name like :str";
         break;
       CASE 'sqlite':
         $sql = 'SELECT name FROM sqlite_master WHERE name like :str';
@@ -575,7 +576,8 @@ class FrxDataSource{
           AND column_name LIKE :str";
         break;
       CASE 'mssql':
-        $sql = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_TYPE = 'BASE TABLE'";
+        $sql = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS
+            WHERE TABLE_NAME = :table and column_name like :str";
         break;
       CASE 'sqlite':
         $sql = 'PRAGMA table_info(:table)';
