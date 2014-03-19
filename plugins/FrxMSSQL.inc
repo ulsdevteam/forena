@@ -146,7 +146,7 @@ class FrxMSSQL extends FrxDataSource {
     $db = $this->db;
     $sql = $this->searchTablesSQL();
     $str = "'" . str_replace("'", "''", $str) . "'";
-    $sql = str_replace(':sql', $str, $sql);
+    $sql = str_replace(':str', $str, $sql);
     $rownum = 0;
     $rs = mssql_query($sql, $db);
     $tables = array();
@@ -167,19 +167,19 @@ class FrxMSSQL extends FrxDataSource {
     $db = $this->db;
     $sql = $this->searchTableColumnsSQL();
     $str = "'" . str_replace("'", "''", $str) . "'";
-    $sql = str_replace(':sql', $str, $sql);
+    $sql = str_replace(':str', $str, $sql);
 
     $table = "'" . str_replace("'", "''", $table) . "'";
-    $sql = str_replace(':sql', $table, $sql);
+    $sql = str_replace(':table', $table, $sql);
     $rownum = 0;
 
     $rs = mssql_query($sql, $db);
-    $tables = array();
-    while ($row = mssql_fetch_assoc($rs)) {
-      $tables[] = $row['column_name'];
+    $columns = array();
+    if ($rs) while ($row = mssql_fetch_assoc($rs)) {
+      $columns[] = $row['COLUMN_NAME'];
     }
     if ($rs) mssql_free_result($rs);
-    return $tables;
+    return $columns;
 
   }
 
