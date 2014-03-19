@@ -151,6 +151,31 @@ class FrxMSSQL extends FrxDataSource {
     $rs = mssql_query($sql, $db);
     $tables = array();
     while ($row = mssql_fetch_assoc($rs)) {
+      $tables[] = $row['table_name'];
+    }
+    if ($rs) mssql_free_result($rs);
+    return $tables;
+
+  }
+
+  /**
+   * Perform search of tables.
+   * @see FrxDataSource::searchTables()
+   */
+  public function searchTableColumns($table, $str) {
+    $str .= '%';
+    $db = $this->db;
+    $sql = $this->searchTableColumnsSQL();
+    $str = "'" . str_replace("'", "''", $str) . "'";
+    $sql = str_replace(':sql', $str, $sql);
+
+    $table = "'" . str_replace("'", "''", $table) . "'";
+    $sql = str_replace(':sql', $table, $sql);
+    $rownum = 0;
+
+    $rs = mssql_query($sql, $db);
+    $tables = array();
+    while ($row = mssql_fetch_assoc($rs)) {
       $tables[] = $row['column_name'];
     }
     if ($rs) mssql_free_result($rs);
