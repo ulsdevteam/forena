@@ -197,6 +197,68 @@ class FrxPostgres extends FrxDataSource {
     return $value;
 
   }
+
+  public function searchTables($str) {
+    $str .= '%';
+    $db = $this->db;
+    $sql = $this->searchTablesSQL();
+    $str = pg_escape_string($str);
+    $str = "'$str'";
+    $sql = str_replace(':str', $str, $sql);
+
+    $rs = @pg_query($sql);
+    $rownum = 0;
+    $tables = array();
+    if ($rs) {
+      $tables = pg_fetch_all_columns($rs, 0);
+    }
+    if ($rs) pg_free_result($rs);
+    return $tables;
+  }
+
+
+  public function parseConnectionStr() {
+    $uri = @$this->conf['uri'];
+    $uri = str_replace(';', ' ', $uri);
+    $info = array();
+    foreach(explode(' ', $uri) as $pairs) {
+      if (strpos($pairs, '=')!==FALSE) {
+        list($key, $value) = @explode('=', $pairs, 2);
+        $info[trim($key)] = trim($value);
+      }
+    }
+    return $info;
+  }
+
+
+  public function searchTableColumns($table, $str) {
+    $str .= '%';
+    $db = $this->db;
+    $sql = $this->searchTableColumnsSQL();
+    $str = pg_escape_string($str);
+    $str = "'$str'";
+    $sql = str_replace(':str', $str, $sql);
+    $table = pg_escape_string($table);
+    $table = "'$table'";
+    $sql = str_replace(':table', $table, $sql);
+
+    $info = $this->parseConnectionStr();
+    $database = isset($info['dbname']) ? $info['dbname'] : @$info['database'];
+    $database = pg_escape_string($database);
+    $database = "'$database'";
+    $sql = str_replace(':database', $database, $sql);
+
+    $rs = @pg_query($sql);
+    $rownum = 0;
+    $tables = array();
+    if ($rs) {
+      $tables = pg_fetch_all_columns($rs, 0);
+    }
+    if ($rs) pg_free_result($rs);
+    return $tables;
+  }
+
+
   /**
    * Destructor - Closes database connections.
    *
@@ -207,4 +269,6 @@ class FrxPostgres extends FrxDataSource {
       pg_close($db);
     }
   }
+
+
 }
