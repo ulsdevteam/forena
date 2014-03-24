@@ -551,7 +551,7 @@ function forena_report_data_block_form($formid, &$form_state, $report_name, $act
   if (isset($form_state['values']['config'])) {
     $config = array_merge($form_state['storage']['config'], $form_state['values']['config']);
   }
-  elseif ($id) {
+  elseif ($id && $action != 'add-data') {
     $template_class = $r->scrapeBlockConfig($id, $config);
   }
   $form_state['storage']['config'] = $config;

@@ -266,6 +266,9 @@ class FrxRenderer {
           foreach ($dom_node->childNodes as $child) {
             $o .= $this->renderDomNode($child);
           }
+          if ($i == 1 && strtolower($tag) == 'div' && $this->frxReport->preview_mode) {
+            $o .= Frx::Editor()->foreachLinks($this->blockName, $attrs['id']);
+          }
           if ($include_root) $o .= '</' . $tag . '>';
           Frx::Data()->pop();
         }

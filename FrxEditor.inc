@@ -797,11 +797,20 @@ class FrxEditor {
    * @return FrxEditor
    */
   public function addBlock($block_name, $template_class, &$config,  $id='') {
+    if (!$template_class) $template_class = 'FrxTable';
     $block_name = str_replace('.', '/', $block_name);
     if ($id) {
-      $node = $this->dom->getElementById($id);
-      drupal_set_message(t('Could not find id: %s', array('%s' => $id)), 'error');
-      return;
+      $path = "body//*[@id='$id']";
+      $nodes = $this->simplexml->xpath($path);
+      if ($nodes) {
+        $pnode = dom_import_simplexml($nodes[0]);
+        $node = $this->dom->createElement('div');
+        $pnode->appendChild($node);
+      }
+      else {
+        drupal_set_message(t('Could not find %s in report', array('%s' => $id)), 'error');
+        return;
+      }
     }
     else {
       $nodes = $this->dom->getElementsByTagName('body');
@@ -810,7 +819,6 @@ class FrxEditor {
       $pnode->appendChild($node);
     }
     $this->frxReport->setReport($this->dom, $this->xpq);
-
     $config['block'] = $block_name;
     $b = Frx::BlockEditor($block_name, $this->frxReport->block_edit_mode);
     $data= $b->data($this->parms);
@@ -999,8 +1007,21 @@ class FrxEditor {
 
   }
 
-  public function foreachLinks($id='') {
-
+  /**
+   * Add foreach section links to blocks.
+   * @param unknown $block_name
+   * @param string $id
+   * @param string $context
+   * @return string
+   */
+  public function foreachLinks($block_name, $id='', $context='') {
+    $o = '';
+    $report_name = $this->report_name;
+    // Add the block or ID link
+    $o .= '<div class="forena-edit-links">'
+        . $this->l_icon("reports/$report_name/edit/select-data/add-data/$id", 'doc-option-add.png', 'Add Detail')
+        . "</div>";
+    return $o;
   }
 
 
@@ -1046,7 +1067,7 @@ class FrxEditor {
       // Add the prepend link.
       if ($block_tag) {
         // If we have a block tag we're going to prepend another data block?
-        $o .= '<div class="forena-edit-links">' . $this->l_icon("reports/$report_name/edit/select-data/prepend-data/$id", 'doc-option-add.png', 'Add Data').  "</div>";
+        $o .= '<div class="forena-edit-links">' . $this->l_icon("reports/$report_name/edit/select-data/prepend-data/$id", 'doc-option-add.png', 'Insert Data').  "</div>";
       }
       else {
         //$o .= '<div class="forena-edit-links">' . $this->l_icon("reports/$report_name/edit/prepend-section/$block_link/$id", 'doc-option-add.png', 'Add Data').  "</div>";
