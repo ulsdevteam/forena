@@ -4,7 +4,7 @@
 	display: inline-block;
 }
 
-#forena-query-editor #ui-active-menuitem{ 
+.ui-autocomplete #ui-active-menuitem{ 
 	background-color: #eee; 
 }
 
