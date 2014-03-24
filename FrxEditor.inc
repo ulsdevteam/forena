@@ -140,6 +140,7 @@ class FrxEditor {
    * Save report
    */
   public function save() {
+    $this->cleanup_ids();
     unset($_SESSION['forena_report_editor'][$this->report_name]);
     forena_save_report($this->report_name, $this->asXML(), TRUE);
     drupal_set_message(t('Your report, %s has been saved.', array('%s' => $this->report_name)));
@@ -619,6 +620,29 @@ class FrxEditor {
       }
 
       $this->frx_attributes = $frx_attributes;
+    }
+  }
+
+  /**
+   * Removes the attributes associated with forena-# that are added by forena.
+   * There is no real reason to persist them as they can be added on later and they
+   * are only created for wysiwyg compatibility.
+   */
+  private function cleanup_ids() {
+    if ($this->simplexml) {
+      $this->simplexml->registerXPathNamespace('frx', FRX_NS);
+      $frx_attributes = array();
+      $frx_nodes = $this->simplexml->xpath('body//*[@frx:*]');
+
+      if ($frx_nodes) foreach ($frx_nodes as $node) {
+        $attr_nodes = $node->attributes(FRX_NS);
+        if ($attr_nodes) {
+          if ((string)$node['id'] && strpos($node['id'], 'forena-')===0) {
+            unset($node['id']);
+
+          }
+        }
+      }
     }
   }
 
