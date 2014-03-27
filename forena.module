@@ -1335,7 +1335,7 @@ function _forena_filter_process($text='') {
 
       // Finally replace the parameters
       $find[]=$match[0][$idx];
-      $replace[]=$output;
+      $replace[]=$output['content']['#markup'];
     }
     return str_replace($find, $replace, $text);
   }
