@@ -211,7 +211,7 @@ class FrxReport {
 
     //$this->collapseParameters();
     if (!$this->parameters_form) $this->parametersForm(array('collapsible' => TRUE, 'collapsed' => $this->blocks_loaded));
-    $this->html = $o;
+    $this->html = check_markup($o, variable_get('forena_input_format', filter_default_format()));
 
     // Default in dynamic title from head.
     if ($this->frx_title) {
