@@ -19,23 +19,46 @@ class FrxEmailMergeDoc extends FrxDocument {
     $prompt_subject = TRUE;
     $prompt_body = TRUE;
     if ($docs) foreach ($docs as $doc) {
+
+      // From
       $from = $doc->xpath('.//*[@class="email-header-from"]');
-      $from = $from ? (string)$from[0] : '';
+      $from = $from ? html_entity_decode(strip_tags($from[0])) : '';
+
+      // Subject
       $subject = $doc->xpath('.//*[@class="email-header-subject"]');
       if ($subject) $prompt_subject = FALSE;
       $subject = $subject ? (string)$subject[0] : '';
+
+      // To
       $to = $doc->xpath('.//*[@class="email-header-to"]');
-      $to = $to ? (string)$to[0] : '';
+      $to = $to ? html_entity_decode(strip_tags($to[0]->asXML())) : '';
       if ($to) $prompt_to = FALSE;
       $body = $doc->xpath('.//*[@class="email-body"]');
       if ($body) $prompt_body = FALSE;
       $body = $body ? $body[0]->asXML() : $body;
+
+      // Assemble email
       $email = array(
         'to' => $to,
         'from' => $from,
-        'parms' => array('subject' => $subject,
-        'body' => $body),
+        'parms' => array(
+          'subject' => $subject,
+          'body' => $body,
+        ),
       );
+
+      // Check for cc
+      $cc = $doc->xpath('.//*[@class="email-header-cc"]');
+      if ($cc) {
+        $email['parms']['headers']['Cc'] = html_entity_decode(strip_tags($cc[0]->asXML()));
+
+      }
+
+      // Check for bcc
+      $bcc = $doc->xpath('.//*[@class="email-header-bcc"]');
+      if ($bcc) {
+        $email['parms']['headers']['Bcc'] = html_entity_decode(strip_tags($bcc[0]->asXML()));
+      }
       $emails [] = $email;
     }
     $count = count($docs);

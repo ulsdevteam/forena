@@ -114,7 +114,7 @@ class FrxRenderer {
     if ($node_type == XML_TEXT_NODE|| $node_type == XML_ENTITY_REF_NODE || $node_type == XML_ENTITY_NODE)
     {
       $text = $dom_node->textContent;
-      $o .= $this->teng->replace($text);
+      $o .= htmlspecialchars($this->teng->replace($text));
       return $o;
     }
 

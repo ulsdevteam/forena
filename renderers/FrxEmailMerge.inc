@@ -15,10 +15,10 @@ class FrxEmailMerge extends FrxRenderer {
   public function scrapeConfig() {
     $config=array();
     $config['class'] = get_class($this);
-    $config['from'] = $this->extractXPathInnerHTML("*//*[@class='email-header-from']", $this->reportDocDomNode);
-    $config['to']= $this->extractXPathInnerHTML("*//*[@class='email-header-to']", $this->reportDocDomNode);
-    $config['cc'] = $this->extractXPathInnerHTML("*//*[@class='email-header-cc']", $this->reportDocDomNode);
-    $config['bcc'] = $this->extractXPathInnerHTML("*//*[@class='email-header-bcc']", $this->reportDocDomNode);
+    $config['from'] = html_entity_decode($this->extractXPathInnerHTML("*//*[@class='email-header-from']", $this->reportDocDomNode));
+    $config['to']= html_entity_decode($this->extractXPathInnerHTML("*//*[@class='email-header-to']", $this->reportDocDomNode));
+    $config['cc'] = html_entity_decode($this->extractXPathInnerHTML("*//*[@class='email-header-cc']", $this->reportDocDomNode));
+    $config['bcc'] = html_entity_decode($this->extractXPathInnerHTML("*//*[@class='email-header-bcc']", $this->reportDocDomNode));
     $config['subject'] =  $this->extractXPathInnerHTML("*//*[@class='email-header-subject']", $this->reportDocDomNode);
     $config['body']['value'] =  $this->extractXPathInnerHTML("*//*[@class='email-body']", $this->reportDocDomNode);
     return $config;
@@ -36,6 +36,18 @@ class FrxEmailMerge extends FrxRenderer {
       '#type' => 'textfield',
       '#title' => t('To'),
       '#default_value' => @$config['to'],
+    );
+
+    $form_ctl['cc'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Cc'),
+      '#default_value' => @$config['cc'],
+    );
+
+    $form_ctl['bcc'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Bcc'),
+        '#default_value' => @$config['bcc'],
     );
 
     $form_ctl['subject'] = array(
@@ -58,10 +70,12 @@ class FrxEmailMerge extends FrxRenderer {
   }
 
   public function generate($xml, &$config) {
-    $from = $this->extract('from', $config);
-    $to = $this->extract('to', $config);
-    $subject = $this->extract('subject', $config);
-    $body = $this->extract('body', $config);
+    $from = @$config['from'];
+    $to = @$config['to'];
+    $cc = @$config['cc'];
+    $bcc = @$config['bcc'];
+    $subject = @$config['subject'];
+    $body = @$config['body'];
     $body = $body['value'];
     $config['foreach'] = "*";
     $div = $this->blockDiv($config);
@@ -71,10 +85,21 @@ class FrxEmailMerge extends FrxRenderer {
     $table = $this->addNode($header, 8, 'table');
     $tr = $this->addNode($table, 10, 'tr');
     $td = $this->addNode($tr, 12, 'th', 'From');
-    $td = $this->addNode($tr, 12, 'td', $from, array('class' => 'email-header-from'));
+    $td = $this->addNode($tr, 12, 'td', htmlentities($from), array('class' => 'email-header-from'));
     $tr = $this->addNode($table, 10, 'tr');
     $td = $this->addNode($tr, 12, 'th', 'To');
-    $td = $this->addNode($tr, 12, 'td', $to, array('class' => 'email-header-to'));
+    $td = $this->addNode($tr, 12, 'td', htmlentities($to), array('class' => 'email-header-to'));
+    if ($cc) {
+      $tr = $this->addNode($table, 10, 'tr');
+      $td = $this->addNode($tr, 12, 'th', 'Cc');
+      $td = $this->addNode($tr, 12, 'td', htmlentities($cc), array('class' => 'email-header-cc'));
+    }
+    if ($bcc) {
+      $tr = $this->addNode($table, 10, 'tr');
+      $td = $this->addNode($tr, 12, 'th', 'Bcc');
+      $td = $this->addNode($tr, 12, 'td', htmlentities($bcc), array('class' => 'email-header-bcc'));
+    }
+
     $tr = $this->addNode($table, 10, 'tr');
     $td = $this->addNode($tr, 12, 'th', 'Subject');
     $td = $this->addNode($tr, 12, 'td', $subject, array('class' => 'email-header-subject'));

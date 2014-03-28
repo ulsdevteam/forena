@@ -238,13 +238,19 @@ function forena_confirm_email_submit($form, &$form_state) {
   foreach ($form_state['storage']['docs'] as $doc) {
     $to = $test_send ? $user->mail : $doc['to'];
     $from = $doc['from'];
+    // Replace body
     if (isset($form_state['values']['body'])) {
       $doc['parms']['body'] = $body;
     }
+    // Replace subject
     if (isset($form_state['values']['subject'])) {
       $doc['parms']['subject'] = $form_state['values']['subject'];
     }
-    if ($test_send) $i++;
+    if ($test_send) {
+      $i++;
+      // Remove bcc and cc
+      unset($doc['parms']['headers']);
+    }
     if ($i <= $max) drupal_mail('forena', 'mailmerge', $to, language_default(), $doc['parms'], $from, TRUE);
   }
   $form_state['rebuild'] = TRUE;
