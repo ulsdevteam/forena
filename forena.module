@@ -900,6 +900,7 @@ function forena_include_data_tables() {
   }
 }
 
+
 /**
  * Load and render a report based on a drupal path.
  * In this function the arglist is used to get the full path to the report.
@@ -931,6 +932,9 @@ function forena_report($name_in, $parms = NULL, $print = TRUE) {
     $forena_js['form'] = preg_replace('/[^\w\-]+/u', '_', Frx::Skin()->name);
     $forena_js['report'] = preg_replace('/[^\w\-]+/u', '_', $name_in);
     if ($print) drupal_add_js(array('forena' => $forena_js), 'setting');
+  }
+  if (!$print) {
+    return drupal_render($content);
   }
   return $content;
 
@@ -1335,7 +1339,7 @@ function _forena_filter_process($text='') {
 
       // Finally replace the parameters
       $find[]=$match[0][$idx];
-      $replace[]=$output['content']['#markup'];
+      $replace[]=$output;
     }
     return str_replace($find, $replace, $text);
   }
