@@ -43,9 +43,8 @@ class FrxEditor {
     $dom = $this->dom;
     $dom->formatOutput = TRUE;
     $dom->preserveWhiteSpace = TRUE;
-    $this->load($report_name);
     $this->frxReport = new FrxReport();
-    $this->frxReport->setReport($this->dom, $this->xpq);
+    $this->load($report_name);
     $cache = forena_load_cache($this->frxReport->rpt_xml);
     if (isset($cache['access'])) $this->access = forena_check_all_access($cache['access']);
   }
@@ -133,6 +132,8 @@ class FrxEditor {
     unset($this->xpq);
     $this->xpq = new DOMXPath($dom);
     $this->xpq->registerNamespace('frx', $this->xmlns);
+    // Make sure document header is reparsed.
+    $this->frxReport->setReport($this->dom, $this->xpq);
     return $r_text;
   }
 
