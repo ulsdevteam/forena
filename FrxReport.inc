@@ -167,8 +167,6 @@ class FrxReport {
     }
 
     $xml = Frx::BlockEditor($block, $this->block_edit_mode)->data($data);
-    //$xml = Frx::RepoMan()->data($block, NULL);
-    if ($data_uri) Frx::Data()->pop();
 
     if ($xml) {
       $this->blocks_loaded = TRUE;
