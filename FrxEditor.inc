@@ -1125,8 +1125,9 @@ class FrxEditor {
     $doctypes = array_keys(Frx::documentTypes());
     $links = array();
     $r = $this->frxReport;
+    $formats = $r->formats ? $r->formats : array_filter(variable_get('forena_doc_defaults', array()));
     foreach ($doctypes as $ext) {
-      if (array_search($ext, $r->formats) !== FALSE) {
+      if (array_search($ext, $formats) !== FALSE) {
         $links[] = array('title' => strtoupper($ext), 'href' => $this->report_link . ".$ext");
       }
     }
