@@ -56,50 +56,6 @@ class FrxDataSource{
     return $access && $obj_access;
   }
 
-  protected function loadBlockFromDB($block_name) {
-    $block = array();
-    // IF load from the database if forena_query is there.
-    if (module_exists('forena_query')) {
-
-      // See if we have one in the database first
-      $sql = 'SELECT * FROM {forena_data_blocks} WHERE repository=:repos AND block_name = :block_name';
-      $rs = db_query(
-      $sql,
-      array(
-          ':repos' => $this->name,
-          ':block_name' => $block_name,
-      )
-      );
-
-      if ($b = $rs->fetchObject()) {
-        $block = array(
-          'repository' => $b->repository,
-          'block_name' => $b->block_name,
-          'type' => $b->block_type,
-          'file' => $b->src,
-          'builder' => $b->builder,
-          'access' => $b->access,
-          'title' => $b->title,
-          'locked' => $b->locked,
-          'modified' => $b->modified,
-        );
-        switch ($block['type']) {
-          case 'sql':
-            $block = array_merge($block, $this->parseSQLFile($block['file']));
-            break;
-          case 'xml':
-            $block = array_merge($block, $this->parseXMLFile($block['file']));
-            break;
-        }
-        if ($block['builder']) {
-          $block['builder'] = unserialize($block['builder']);
-        }
-
-      }
-    }
-    return $block;
-  }
-
   protected function loadBlockFromFile($block_name) {
     $base_file = $this->block_path . '/' . $block_name;
     $parts = @explode('.', $block_name);
@@ -150,10 +106,7 @@ class FrxDataSource{
    */
   function loadBlock($block_name, $include=FALSE) {
     if ($include) $this->block_name = $block_name;
-    // $block = $this->loadBlockFromDB($block_name);
-    //if (!$block) {
-      $block = $this->loadBlockFromFile($block_name);
-   //}
+    $block = $this->loadBlockFromFile($block_name);
     return $block;
   }
 
