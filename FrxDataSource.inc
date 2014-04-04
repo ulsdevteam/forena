@@ -50,7 +50,7 @@ class FrxDataSource{
         $block = @$this->conf['access block'];
         $path='';
         if (isset($this->conf['access path'])) $path = $this->conf['access path'];
-        $obj_access =  FrxReportGenerator::instance()->block_access($block, $path, $arg);
+        $obj_access =  Frx::RepoMan()->blockAccess($block, $path, $arg);
       }
     }
     return $access && $obj_access;

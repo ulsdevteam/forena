@@ -32,7 +32,7 @@ class FrxFile {
     // Scan the directory for files.
     $d = @dir($path);
     if ($d) while (false !== ($rpt_file = $d->read())) {
-      $src_file = trim($d->path, '/') . '/' . trim($rpt_file, '/');
+      $src_file = rtrim($d->path, '/') . '/' . trim($rpt_file, '/');
       if (is_file($src_file)) {
         @list($base_file, $ext) = explode('.', $rpt_file, 2);
         if (array_search($ext, $this->cached_extensions) !== FALSE) {
