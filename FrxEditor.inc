@@ -331,12 +331,7 @@ class FrxEditor {
    */
   public function setFields($fieldElements) {
     $dom = $this->dom;
-    $newFields = $dom->createElementNS($this->xmlns, 'fields');
     $this->verifyHeaderElements(array('fields'));
-    $fnode = $dom->getElementsByTagNameNS($this->xmlns, 'fields')->item(0);
-    $p = $fnode->parentNode;
-    $p->replaceChild($newFields, $fnode);
-
     $this->setFrxHeader('fields', 'field',
     $fieldElements,
     array('id', 'link', 'format', 'format-string', 'target', 'rel', 'class', 'add-query'),

@@ -1006,6 +1006,7 @@ function forena_report_field_form_submit($form, &$form_state) {
   $r = Frx::Editor($name);
   /*now build the fields*/
   $fields = $values['field'];
+
   $r->setFields(array($fields));
   $r->update();
   $parms = Frx::parms();
