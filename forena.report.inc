@@ -760,7 +760,7 @@ function forena_update_cancel($form, &$form_state) {
 function forena_report_save_cancel($form, &$form_state) {
   extract($form_state['values']);
   Frx::Editor($report_name)->cancel();
-  $form_state['redirect'] = 'forena';
+  $form_state['redirect'] = array("reports/$report_name", array('query' => Frx::parms()));
 }
 
 function forena_select_block_list($report_name, $action='add-data', $id='') {

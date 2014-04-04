@@ -44,7 +44,7 @@ class FrxEditor {
     $dom->formatOutput = TRUE;
     $dom->preserveWhiteSpace = TRUE;
     $this->frxReport = new FrxReport();
-    $this->load($report_name);
+    $this->load($report_name, $edit);
     $cache = forena_load_cache($this->frxReport->rpt_xml);
     if (isset($cache['access'])) $this->access = forena_check_all_access($cache['access']);
   }
