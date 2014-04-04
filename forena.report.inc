@@ -436,24 +436,12 @@ function forena_report_format_form($formid, $form_state, $report_name) {
 
   drupal_set_title($r->title);
   $form = array();
-  $frx_options = $r->getOptions();
-  $report_form = @$frx_options['form'];
 
   $doclist = Frx::Menu()->doc_formats;
-  $skins[''] = t('Use Default');
-  $skins = array_merge(variable_get('forena_skins', array()), $skins);
 
   $form['report_name'] = array(
       '#type' => 'value',
       '#value' => $report_name,
-  );
-
-  $form['form'] = array(
-      '#type' => 'select',
-      '#title' => t('Skin'),
-      '#options' => $skins,
-      '#default_value' => $report_form,
-      '#description' => t('The page style of your report.  The {skin}.skinfo file specifies css and js file in your report.')
   );
 
   //begin checking doc generation options
@@ -506,10 +494,7 @@ function forena_report_format_form_submit($form, &$form_state) {
 
   $r = Frx::Editor($report_name);
   $r_link = $r->report_link;
-  $options = array(
-      'form' => $values['form']
-  );
-  $r->setOptions($options);
+
 
 
   // Doc gen settings.
@@ -1442,6 +1427,20 @@ function forena_report_layout_form($form, &$form_state, $report_name) {
   );
 
 
+  // Skin control
+  $frx_options = $r->getOptions();
+  $report_form = @$frx_options['form'];
+  $skins[''] = t('Use Default');
+  $skins = array_merge(variable_get('forena_skins', array()), $skins);
+  $form['form'] = array(
+      '#type' => 'select',
+      '#title' => t('Skin'),
+      '#options' => $skins,
+      '#default_value' => $report_form,
+      '#description' => t('The page style of your report.  The {skin}.skinfo file specifies css and js file in your report.')
+  );
+
+
   $form['body'] = array(
       '#type' => 'text_format',
       '#title' => t('Body'),
@@ -1483,6 +1482,7 @@ function forena_report_layout_form($form, &$form_state, $report_name) {
 function forena_report_layout_form_validate($form, &$form_state) {
   $values = $form_state['values'];
   $body = $values['body']['value'];
+
   $doc_prefix = '<?xml version="1.0" encoding="UTF-8"?>
     <!DOCTYPE root [
     <!ENTITY nbsp "&#160;">
@@ -1508,6 +1508,11 @@ function forena_report_layout_form_submit($form, &$form_state) {
   $report_name = $values['report_name'];
   $r = Frx::Editor();
   $r_link = $r->report_link;
+
+  $options = array(
+      'form' => $values['form']
+  );
+  $r->setOptions($options);
 
   // Body
   $r->setBody($values['body']['value']);

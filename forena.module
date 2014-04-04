@@ -190,7 +190,6 @@ function forena_menu() {
     'access arguments' => array('design any report'),
     'description' => 'Edit the layout of your report',
     'type' => MENU_LOCAL_TASK,
-    'weight' => 1,
     'file' => 'forena.report.inc',
   );
 
@@ -296,12 +295,12 @@ function forena_menu() {
   );
 
   $items['reports/%/edit/format'] = array(
-     'title' => 'Format',
+     'title' => 'Document Types',
      'page callback' => 'drupal_get_form',
      'page arguments' => array('forena_report_format_form', 1),
      'access arguments' => array('design any report'),
      'file' => 'forena.report.inc',
-     'description' => 'Style and document options',
+     'description' => 'Document Options',
      'type' => MENU_LOCAL_TASK,
   );
 
