@@ -19,9 +19,10 @@
   <p>Forena is a report writing tool that is designed to help
     developers who are knowledgeable in writing SQL.</p>
   <p>Report definitions are stored as files on the file system in
-    .frx files. These files are basically extended XHTML template files.
+    .frx files. These files are basically XHTML template files extended with 
+    frx namespaced attributes and elements.
     Report authors need only to learn a few special attributes and tags
-    (e.g. frx:block frx:foreach) to create reports in virtually any
+    (e.g. frx:block, frx:foreach, frx:if) to create reports in virtually any
     layout. Frx report files are typically stored in a location writable
     by the web user, so that they can be authored using a WYSIWYG report
     editor. Report definitions can typically be modified by a group of

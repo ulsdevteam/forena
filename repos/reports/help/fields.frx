@@ -16,10 +16,10 @@
 </head>
 <body>
   <div id="forena-1" frx:block="forena_help/design_topics">
-    <p>In the fields tab, specify fomatting options for how you want
-      each field to display when it is used in the report. &nbsp;Fields
-      in the report are the tokens which are used to substitute data
-      into the report and are found between the curly braces.</p>
+    <p>Fields in the report are the tokens which are used to substitute data
+      into the report and are found between the curly braces.  When editing a 
+      report you click on the gear symbol next to the first use of a particular token
+      to configure field formatting for that token.</p>
     <h2>Formatting Field Output</h2>
     <p>Fields can be formatted a number of different ways depending
       on the format and format-string specified for each field. &nbsp;

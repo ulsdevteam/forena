@@ -17,13 +17,12 @@
 <body>
   <div id="forena-1" frx:block="forena_help/design_topics">
     <h2>Form</h2>
-    <p>Forena supports the concepts of report forms, allowING you to
+    <p>Forena supports the concepts of report skins, allowing you to
       leverage a common set of css and javascript libraries to make the
-      most out of your reports. &nbsp;For example, if you specified a
-      value of "standard_letter", then forena will include
-      standard_letter.css and standard_letter.js files in your report,
-      provided that they exist. &nbsp;&nbsp;</p>
-    <h2>Document Options</h2>
+      most out of your reports. &nbsp;Skins must be defined by creating .skinfo
+      files that define which css files and js files get included when using a
+      particular skin.</p>
+    <h2>Document Types</h2>
     <p>Forena supports conversion of html documents into several
       common document formats. &nbsp;The exact list of options that you
       will see here will be determined by the site administrator.

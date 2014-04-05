@@ -16,8 +16,8 @@
 </frx:fields>
 </head>
 <body>
-	<ul id="forena-1" frx:block="forena_help/design_topics">
-		<li id="forena-2" frx:foreach="*"><span>{title}</span></li>
+	<ul id="design_topics_block" frx:block="forena_help/design_topics">
+		<li id="design_topics" frx:foreach="*"><span>{title}</span></li>
 	</ul>
 	<h2 id="overview">Overview</h2>
 	<p>Forena reports are defined using the Forena Report Xml template

@@ -9,15 +9,16 @@
 <frx:options hidden="1" />
 <frx:fields>
   <frx:field id="title" link="reports/{name}" />
+  <frx:field id="admin_reports" link="admin/structure/forena">admin/structure/forena</frx:field>
 </frx:fields>
 <frx:parameters />
 <frx:docgen />
 </head>
 <body>
-  <div id="forena-1" frx:block="forena_help/design_topics">
-    <h2>Add Report</h2>
-    <p>To create a report, select the Add Report from your
-      Navigation menu. Site administrators can relocate this menu so
+  <div id="design_topics_block"  frx:block="forena_help/design_topics">
+    <h2>Create Report</h2>
+    <p>To create a report, visit the {admin_reports} 
+      page and select the . Site administrators can relocate this menu so
       contact your site administrator if you have trouble finding it.</p>
     <p>
       The <b>Report Name</b> is a unique name that is used as the base

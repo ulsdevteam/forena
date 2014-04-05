@@ -45,10 +45,11 @@
     core developers may use any string that they want in creating
     rights. There is unfortunately no easy way in drupal to list module
     permissions, but after the permission has been granted to a role,
-    you may use the {role_report} to determine</p>
+    you may use the {role_report} to determine a listing of rights that may be used
+    to identify permissons</p>
   <h3>Parameters</h3>
   <p>
-    The <strong>:role</strong> parameter in the example is named token
+    The <strong>:role</strong> parameter in the above example is named token
     that will be replaced in the SQL query with a parameter from the
     report. The parameter replacement is done by forena in a way that
     protects against SQL injection. Although these tokens are modeled
@@ -97,14 +98,14 @@
     complexity and don't get included unless needed. The following
     example illustrates this technique</p>
   <pre>
-  --ACCESS=access content
-  SELECT * from states
-  --IF=:state
-  WHERE code=:state
-  --ELSE
-  WHERE code='AL'
-  --END
-  ORDER BY NAME
+--ACCESS=access content
+SELECT * from states
+--IF=:state
+WHERE code=:state
+--ELSE
+WHERE code='AL'
+--END
+ORDER BY NAME
   </pre>
   <p>In the above example the Where clause is only added when there
     is a value specified for :state. If no value for :state is provided
