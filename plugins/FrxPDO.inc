@@ -122,7 +122,7 @@ class FrxPDO extends FrxDataSource {
         if (!$this->block_name) {
           $short = t('%e', array('%e' => $text));
         } else {
-          $short = t('SQL Error in %b.sql', array('%b' => $this.block_name));
+          $short = t('SQL Error in %b.sql', array('%b' => $this->block_name));
         }
         $this->error($short, $text);
 

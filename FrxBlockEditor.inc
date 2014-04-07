@@ -192,7 +192,9 @@ class FrxBlockEditor {
    * Return the tokens for the block.
    */
   public function tokens()  {
-    $tokens = $this->teng->tokens($this->block['file']);
+
+    $block = Frx::RepoMan()->sqlBlock($this->provider, $this->block['file']);
+    $tokens = @$block['tokens'];
     $c_idx = array_search('current_user', $tokens);
     if ($c_idx !==FALSE) unset($tokens[$c_idx]);
     return $tokens;

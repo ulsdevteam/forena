@@ -247,8 +247,11 @@ class FrxDataSource{
   public function getSQLInclude($block_name) {
     //@TODO: allow relative block includes
     $block = $this->loadBlock($block_name, TRUE);
-    if ($block['type'] == 'sql') {
+    if ($block && $block['type'] == 'sql') {
       return $block;
+    }
+    else {
+      drupal_set_message(t('Include %b.sql not found', array('%b' => $block_name)), 'error', FALSE);
     }
   }
 
