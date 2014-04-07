@@ -911,6 +911,7 @@ function forena_report($name_in, $parms = NULL, $print = TRUE) {
   $desc = Frx::Menu()->parseURL($name_in);
   $time = @new DateTime($value);
   $desc['time'] = date_format($time, 'Y-m-d H:i:s');
+  $desc['basepath'] = base_path();
   if (!$desc['exists']) {
     drupal_set_message(t('Report %s not found', array('%s' => $name_in)), 'error', FALSE);
     return '';
