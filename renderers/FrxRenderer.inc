@@ -155,7 +155,7 @@ class FrxRenderer {
     }
 
     // Test to see if we have any nodes that contain data url
-    if ($node->xpath('*//@frx:*') || $frx!==NULL || $node->xpath('*//@class')) {
+    if ($node->xpath('*//@frx:*') || $node->xpath('@frx:*') || $node->xpath('*//@class')) {
       $attrs = $node->attributes();
       $id = (string)$attrs['id'];
       $tag = $node->getName();
