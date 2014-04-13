@@ -409,7 +409,7 @@ class FrxReport {
           $i++;
           $id = 'forena-' . $i;
 
-          if (!(string)$node['id']) {
+          if (!isset($node['id'])) {
             $node->addAttribute('id', $id);
 
           }
