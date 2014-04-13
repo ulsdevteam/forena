@@ -70,7 +70,7 @@ class FrxReportFile extends FrxFile {
       $lang = $language->language;
       $name = "$lang/$name";
     }
-    return $data[$name];
+    return @$data[$name];
   }
 
   public function menuReports() {

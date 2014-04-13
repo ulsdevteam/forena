@@ -1027,7 +1027,9 @@ function forena_check_all_access($checks) {
 function forena_report_title_callback($report_name, $use_menu_title=TRUE) {
   $title = '';
   $info = Frx::File()->getReportCacheInfo($report_name);
-  $title = $use_menu_title && $info && isset($info->cache['menu']['title']) ? $info->cache['menu']['title']:  $info->cache['title'];
+  if ($info) {
+    $title = $use_menu_title && $info && isset($info->cache['menu']['title']) ? $info->cache['menu']['title']:  $info->cache['title'];
+  }
   return $title;
 }
 
