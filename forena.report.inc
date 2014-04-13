@@ -333,7 +333,7 @@ function forena_report_general_form($form, &$form_state, $report_name) {
   $menu_options = array(
       'normal-item' => t('Normal'),
       'local-task' => t('Tab'),
-      'default-local-taks' => t('Default Tab'),
+      'default-local-task' => t('Default Tab'),
       'callback' => t('Callback'),
   );
 
