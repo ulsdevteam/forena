@@ -865,7 +865,19 @@ function forena_xmlpp($xml, $html_output=FALSE) {
  */
 function forena_get_categories($string='') {
   $data = Frx::File()->reportsByCategory();
-  $categories = array_keys($data);
+  if ($string) {
+    $categories = array();
+    foreach (array_keys($data) as $cat) {
+      if (strpos(strtolower($cat), strtolower(trim($string))) === 0) {
+        $categories[] = $cat;
+      }
+    }
+
+  }
+  else {
+    $categories = array_keys($data);
+  }
+  $categories = array_combine($categories, $categories);
   return $categories;
 }
 
