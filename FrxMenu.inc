@@ -150,6 +150,8 @@ class FrxMenu {
         $path_args = @$menu['args'];
         $type = @$menu['type'];
         $title = isset($menu['title']) ? $menu['title']:  $row->cache['title'];
+        $weight = @$menu['weight'];
+        $parent_path = '';
 
         //Default type
         switch ($type) {
@@ -198,6 +200,11 @@ class FrxMenu {
              'page callback' => 'forena_report_menu_callback',
              'page arguments' => $page_args,
             );
+            if (isset($row->cache['menu']['menu_name'])) $items['parent_path']['menu_name'] = $row->cache['menu']['menu_name'];
+            if (isset($row->cache['menu']['tab_parent'])) $items['parent_path']['tab_parent'] = $row->cache['menu']['tab_parent'];
+            if (isset($row->cache['menu']['tab_root'])) $items['parent_path']['tab_root'] = $row->cache['menu']['tab_root'];
+            if (isset($row->cache['menu']['weight'])) $items['parent_path']['weight'] = $row->cache['menu']['weight'];
+            if (isset($row->cache['menu']['weight'])) $items['parent_path']['weight'] = $row->cache['menu']['weight'];
             if (module_exists('locale')) {
               $items[$parent_path]['title callback'] = 'forena_report_title_callback';
               $items[$parent_path]['title arguments'] = array($row->name, FALSE);
@@ -214,6 +221,14 @@ class FrxMenu {
           'page callback' => 'forena_report_menu_callback',
           'page arguments' => $page_args,
         );
+        //if ($parent) $items[$new_path]['parent'] = $parent;
+        if (isset($menu['weight'])) $items[$new_path]['weight'] = $menu['weight'];
+        if (!$parent_path) {
+          if (isset($menu['menu_name'])) $items[$new_path]['menu_name'] = $menu['menu_name'];
+          if (isset($menu['tab_parent'])) $items[$new_path]['tab_parent'] = $menu['tab_parent'];
+          if (isset($menu['tab_root'])) $items[$new_path]['tab_root'] = $menu['tab_root'];
+          if (isset($menu['plid'])) $items[$new_path]['plid'] = $menu['plid'];
+        }
         if (module_exists('locale')) {
           $items[$new_path]['title callback'] = 'forena_report_title_callback';
           $items[$new_path]['title arguments'] = array($row->name, TRUE);
