@@ -227,7 +227,7 @@ class FrxMenu {
           if (isset($menu['menu_name'])) $items[$new_path]['menu_name'] = $menu['menu_name'];
           if (isset($menu['tab_parent'])) $items[$new_path]['tab_parent'] = $menu['tab_parent'];
           if (isset($menu['tab_root'])) $items[$new_path]['tab_root'] = $menu['tab_root'];
-          if (isset($menu['plid'])) $items[$new_path]['plid'] = $menu['plid'];
+          if (isset($menu['plid'])) $items[$new_path]['plid'] = (int)$menu['plid'];
         }
         if (module_exists('locale')) {
           $items[$new_path]['title callback'] = 'forena_report_title_callback';

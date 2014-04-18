@@ -258,7 +258,12 @@ function forena_report_preview($report_name) {
 }
 
 function forena_report_general_form($form, &$form_state, $report_name) {
-  $name_in = $report_name;
+  if (!$report_name) {
+    $report_name = $form_state['storage']['report_name'];
+  }
+  else {
+    $form_state['storage']['report_name'] = $report_name;
+  }
 
   //set the name to empty string for new reports
   $r = Frx::Editor($report_name);
@@ -268,7 +273,14 @@ function forena_report_general_form($form, &$form_state, $report_name) {
   $hidden = @$frx_options['hidden']=='1' ? 1 : 0;
   $report_form = @$frx_options['form'];
   $category = $r->getCategory();
-  $menu = $r->getMenu();
+  if (isset($form_state['values']['menu'])) {
+    $menu = $form_state['values']['menu'];
+  }
+  else {
+    $menu = $r->getMenu();
+    $menu['enabled'] = @$menu['path'] ? 1 : 0;
+    if (!isset($menu['type'])) $menu['type'] = 'callback';
+  }
   $cache = $r->getCache();
   $form['report_name'] = array(
       '#type' => 'value',
@@ -307,12 +319,25 @@ function forena_report_general_form($form, &$form_state, $report_name) {
       '#tree' => TRUE,
       '#collapsible' => TRUE,
       '#collapsed' => empty($menu),
+      '#prefix' => '<div id="forena-menu-wrapper">',
+      '#suffix' => '</div>',
+  );
+
+  $form['menu']['enabled'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Provide a menu link'),
+      '#default_value' => @$menu['enabled'],
+      '#ajax' => array(
+         'callback' => 'forena_report_general_menu_ajax',
+         'wrapper' => 'forena-menu-wrapper',
+      ),
   );
 
   $form['menu']['path'] = array(
       '#type' => 'textfield',
       '#title' => t('Menu Path'),
-      '#description' => t('Indicate site reletive path to menu.  Parameters may be embedded in the url using a :parm syntax (e.g. states/:state)'),
+      '#access' => $menu['enabled'],
+      '#description' => t('Indicate site relative path to menu.  Parameters may be embedded in the url using a :parm syntax (e.g. states/:state)'),
       '#default_value' => @$menu['path'],
   );
 
@@ -320,14 +345,8 @@ function forena_report_general_form($form, &$form_state, $report_name) {
       '#type' => 'textfield',
       '#title' => t('Additional Arguments'),
       '#description' => t('Indicate additonal parameters that should be extracted after the menu path using a :parm syntax (e.g. :parma/:parmb)'),
+      '#access' => $menu['enabled'],
       '#default_value' => @$menu['args'],
-  );
-
-  $form['menu']['title'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Menu Title'),
-      '#description' => t('Title of menu item.  Leave blank to use the report title as the menu title.'),
-      '#default_value' => @$menu['title'],
   );
 
   $menu_options = array(
@@ -341,7 +360,46 @@ function forena_report_general_form($form, &$form_state, $report_name) {
       '#type' => 'select',
       '#title' => 'Type of menu to create',
       '#options' => $menu_options,
+      '#access' => $menu['enabled'],
       '#default_value' => @$menu['type'],
+      '#ajax' => array(
+        'callback' => 'forena_report_general_menu_ajax',
+  	    'wrapper' => 'forena-menu-wrapper'
+      ),
+  );
+
+  $form['menu']['title'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Menu Title'),
+      '#description' => t('Title of menu item.  Leave blank to use the report title as the menu title.'),
+      '#access' => $menu['enabled'] && $menu['type']!='callback',
+      '#default_value' => @$menu['title'],
+  );
+  $options = menu_parent_options(menu_get_menus(), @$menu['menu_name'] ? $menu : 0);
+  $default = (@$menu['mlid'] ? @$menu['menu_name'] . ':' . @$menu['plid'] : variable_get('forena_menu_parent', 'main-menu:0'));
+  // If the current parent menu item is not present in options, use the first
+  // available option as default value.
+  // @todo User should not be allowed to access menu link settings in such a
+  // case.
+  if (!isset($options[$default])) {
+    $array = array_keys($options);
+    $default = reset($array);
+  }
+  $form['menu']['parent'] = array(
+      '#type' => 'select',
+      '#title' => t('Parent item'),
+      '#default_value' => $default,
+      '#options' => $options,
+      '#access' => $menu['enabled'] && $menu['type'] == 'normal-item',
+      '#attributes' => array('class' => array('menu-parent-select')),
+  );
+  $form['menu']['weight'] = array(
+      '#type' => 'weight',
+      '#title' => t('Weight'),
+      '#delta' => 50,
+      '#access' => $menu['enabled']  && $menu['type']!= 'callback',
+      '#default_value' => isset($menu['weight']) ? $menu['weight'] : 0,
+      '#description' => t('Menu links with smaller weights are displayed before links with larger weights.'),
   );
 
   $form['cache'] = array(
@@ -386,6 +444,11 @@ function forena_report_general_form($form, &$form_state, $report_name) {
   return $form;
 }
 
+function forena_report_general_menu_ajax($form) {
+  return $form['menu'];
+}
+
+
 function forena_report_general_form_validate($form, &$form_state) {
   $values = $form_state['values'];
   if ($values['menu']['path']) {
@@ -406,7 +469,7 @@ function forena_report_general_form_validate($form, &$form_state) {
 function forena_report_general_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   $report_name = $values['report_name'];
-  $r = Frx::Editor();
+  $r = Frx::Editor($report_name);
   $r_link = $r->report_link;
 
   // Title and category
@@ -417,9 +480,28 @@ function forena_report_general_form_submit($form, &$form_state) {
       'hidden' => $values['hidden'],
   );
   $r->setOptions($options);
+
   $menu = $r->getMenu();
+  $menu['enabled'] = (int)(bool) @$menu['path'];
+  $new_menu = $form_state['values']['menu'];
+  $new_menu= $values['menu'];
+  // Preprocess the menu
+  if (!$values['menu']['enabled']) {
+    $new_menu = array_fill_keys(array_keys($new_menu), '');
+  }
+  elseif ($new_menu['type']!=='normal-item') {
+    $new_menu['plid'] = '';
+    $new_menu['menu_name'] = '';
+  }
+  else {
+    @list($new_menu['menu_name'], $new_menu['plid']) = explode(':', $new_menu['parent'], 2);
+    unset($new_menu['parent']);
+  }
+  unset($menu['enabled']);
+
+  // If the menu is different, save it.
   if ($values['menu']!= $menu) {
-    $r->setMenu($values['menu']);
+    $r->setMenu($new_menu);
   }
 
   $cache = $r->cache;
@@ -491,7 +573,6 @@ function forena_report_format_form($formid, $form_state, $report_name) {
 function forena_report_format_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   $report_name = $values['report_name'];
-
   $r = Frx::Editor($report_name);
   $r_link = $r->report_link;
 
