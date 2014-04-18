@@ -375,7 +375,7 @@ function forena_report_general_form($form, &$form_state, $report_name) {
       '#access' => $menu['enabled'] && $menu['type']!='callback',
       '#default_value' => @$menu['title'],
   );
-  $options = menu_parent_options(menu_get_menus(), @$menu['menu_name'] ? $menu : 0);
+  $options = menu_parent_options(menu_get_menus(), 0);
   $default = (@$menu['mlid'] ? @$menu['menu_name'] . ':' . @$menu['plid'] : variable_get('forena_menu_parent', 'main-menu:0'));
   // If the current parent menu item is not present in options, use the first
   // available option as default value.
