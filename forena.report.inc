@@ -376,20 +376,18 @@ function forena_report_general_form($form, &$form_state, $report_name) {
       '#default_value' => @$menu['title'],
   );
   $options = menu_parent_options(menu_get_menus(), 0);
-  $default = (@$menu['mlid'] ? @$menu['menu_name'] . ':' . @$menu['plid'] : variable_get('forena_menu_parent', 'main-menu:0'));
-  // If the current parent menu item is not present in options, use the first
-  // available option as default value.
-  // @todo User should not be allowed to access menu link settings in such a
-  // case.
-  if (!isset($options[$default])) {
-    $array = array_keys($options);
-    $default = reset($array);
+  $default = @$menu['menu_name'];
+  if ($default && @$menu['plid']) {
+    $default .= ':' . $menu['plid'];
   }
+
   $form['menu']['parent'] = array(
       '#type' => 'select',
       '#title' => t('Parent item'),
       '#default_value' => $default,
       '#options' => $options,
+      '#empty_option' => t('Not Specified'),
+      '#empty_value' => '',
       '#access' => $menu['enabled'] && $menu['type'] == 'normal-item',
       '#attributes' => array('class' => array('menu-parent-select')),
   );
@@ -398,7 +396,7 @@ function forena_report_general_form($form, &$form_state, $report_name) {
       '#title' => t('Weight'),
       '#delta' => 50,
       '#access' => $menu['enabled']  && $menu['type']!= 'callback',
-      '#default_value' => isset($menu['weight']) ? $menu['weight'] : 0,
+      '#default_value' => @$menu['weight'],
       '#description' => t('Menu links with smaller weights are displayed before links with larger weights.'),
   );
 
@@ -445,6 +443,7 @@ function forena_report_general_form($form, &$form_state, $report_name) {
 }
 
 function forena_report_general_menu_ajax($form) {
+  drupal_get_messages('warning');
   return $form['menu'];
 }
 
