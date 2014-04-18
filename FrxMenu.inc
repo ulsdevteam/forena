@@ -229,7 +229,6 @@ class FrxMenu {
           if (isset($menu['tab_root'])) $items[$new_path]['tab_root'] = $menu['tab_root'];
           if (isset($menu['plid'])) $items[$new_path]['plid'] = (int)$menu['plid'];
         }
-        dpm($items[$new_path]);
         if (module_exists('locale')) {
           $items[$new_path]['title callback'] = 'forena_report_title_callback';
           $items[$new_path]['title arguments'] = array($row->name, TRUE);
