@@ -96,6 +96,12 @@ class FrxSVGGraph extends FrxRenderer {
       $options['colors'] = $this->xmlToValues($path, $attributes['color']);
     }
 
+    // Deal with rare case where legend are supposed to come from data
+    if (@$attributes['legend_entry'] && !is_array($attributes['legend_entry']) && strpos($attributes['legend_entry'], '{') !==FALSE) {
+      $options['legend_entries'] = $this->xmlToValues($path, $attributes['legend_entry']);
+    }
+
+
     if ($data) {
 
       if (method_exists($this, 'renderChart')) {
