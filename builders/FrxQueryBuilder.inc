@@ -30,15 +30,6 @@ class FrxQueryBuilder {
 
   public function configForm($config) {
 
-    $form['access'] = array(
-        '#title' => t('Data Security'),
-        '#description' => t('Value depends on the security for the data block,
-            but for drupal data, this is a right as defined by the module provided.  '),
-        '#type' => 'textfield',
-        '#access' => user_access('forena data security'),
-        '#default_value' => @$config['access'],
-    );
-
     $form['file'] = array(
         '#type' => 'textarea',
         '#title' => t('Source'),
@@ -57,13 +48,5 @@ class FrxQueryBuilder {
   }
 
   public function generate($config) {
-    $file = '';
-    $access = trim(@$config['access']);
-    if ($access) {
-      $file .= "--ACCESS=$access\n";
-    }
-    if (isset($config['file'])) {
-      $file .= $file;
-    }
   }
 }

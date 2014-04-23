@@ -102,11 +102,27 @@ function forena_query_editor($form, &$form_state, $block_name='') {
   $block = $form_state['storage']['block'];
   $builder = isset($block['builder']) ? $block['builder'] : 'FrxQueryBuilder';
   $builders = $o->builderList();
-  $form['builder'] = array(
+  $form['advanced'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Advanced'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+  );
+
+  $form['advanced']['builder'] = array(
     '#type' => 'select',
     '#title' => t('Template'),
     '#options' => $builders,
     '#default_value' => $builder,
+  );
+
+  $form['advanced']['access'] = array(
+      '#title' => t('Data Security'),
+      '#description' => t('Value depends on the security for the data block,
+            but for drupal data, this is a right as defined by the module provided.  '),
+      '#type' => 'textfield',
+      '#access' => user_access('forena data security'),
+      '#default_value' => @$block['access'],
   );
   $form['config'] = $o->configForm($builder, $block);
   $form['config']['#tree'] = 'true';
@@ -121,11 +137,25 @@ function forena_query_editor($form, &$form_state, $block_name='') {
       '#submit' => array('forena_query_editor_update', 'forena_query_save_block')
   );
   $form['cancel'] = array('#type' => 'submit', '#value' => t('Cancel'), '#submit' => array('forena_query_close'), '#limit_validation_errors' => array());
+  $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Test Changes'),
+      '#submit' => array('forena_query_editor_update', 'forena_query_preview'),
+      '#ajax' => array(
+  	    'callback' => 'forena_query_preview_ajax',
+        'wrapper' => 'forena-query-preview',
+      ),
+
+  );
 
 
   $tokens = $o->tokens();
+  $form['preview'] = array(
+  	'#prefix' => '<div id="forena-query-preview">',
+    '#suffix' => '</div>',
+  );
   if ($tokens) {
-    $form['parameters'] = array(
+    $form['preview']['parameters'] = array(
         '#title' => 'Parameters',
         '#type' => 'fieldset',
         '#tree' => TRUE
@@ -137,21 +167,25 @@ function forena_query_editor($form, &$form_state, $block_name='') {
           '#title' => check_plain($name),
       );
 
-      $form['parameters'][$name] = $ctl;
+      $form['preview']['parameters'][$name] = $ctl;
     }
   }
 
-  $form['submit'] = array('#type' => 'submit', '#value' => t('Test Changes'), '#submit' => array('forena_query_editor_update', 'forena_query_preview'));
-  $form['preview'] = @$form_state['storage']['preview'];
+  $form['preview']['report'] = @$form_state['storage']['preview'];
   return $form;
 }
 
+function forena_query_preview_ajax($form) {
+  drupal_get_messages('warning');
+  return $form['preview'];
+}
+
 function forena_query_editor_validate($form, &$form_state) {
-   if (isset($form_state['values']['config']['access'])) {
-     $o = Frx::BlockEditor();
-     $o->load($form_state['storage']['block_name']);
+   $o = Frx::BlockEditor();
+   $o->load($form_state['storage']['block_name']);
+   if (user_access('forena data security')) {
      $r = $o->repos();
-     $access = $r->access($form_state['values']['config']['access']);
+     $access = $r->access($form_state['values']['access']);
      if (!$access) {
        form_set_error('access', t('You must be granted access to use this right.'));
      }
@@ -162,8 +196,6 @@ function forena_query_editor_validate($form, &$form_state) {
    $config = array_merge($form_state['storage']['block'], $form_state['values']['config']);
    $o->configValidate($form_state['values']['builder'], $config);
    $form_state['storage']['block'] = $config;
-
-
 }
 
 function forena_query_preview($form, &$form_state) {
@@ -241,6 +273,7 @@ function forena_query_close($form, &$form_state) {
  */
 function forena_query_editor_update($form, &$form_state) {
   // Instantiate form values
+  $form_state['values']['config']['access'] = $form_state['values']['access'];
   $o = Frx::BlockEditor($form_state['storage']['block_name']);
   $config = array_merge($form_state['storage']['block'], $form_state['values']['config']);
   Frx::BlockEditor()->update($config);
