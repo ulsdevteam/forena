@@ -98,14 +98,9 @@ function forena_query_editor($form, &$form_state, $block_name='') {
     $form_state['storage']['parameters'] = array();
     $form_state['storage']['block'] = $block;
   }
+  drupal_set_title(str_replace('.', '/', $block_name));
   $block = $form_state['storage']['block'];
   $builder = isset($block['builder']) ? $block['builder'] : 'FrxQueryBuilder';
-  $form['block_label'] = array(
-    '#type' => 'item',
-    '#title' => t('Query (data block) name'),
-    '#markup' => str_replace('.', '/', $block_name),
-  );
-
   $builders = $o->builderList();
   $form['builder'] = array(
     '#type' => 'select',
