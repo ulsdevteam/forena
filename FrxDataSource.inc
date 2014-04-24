@@ -343,8 +343,7 @@ class FrxDataSource{
     $options = drupal_parse_info_format($info_text);
 
     $block = array( 'source' => $data, 'file' => trim($file, " \n"),
-      'tokens' => $tokens, 'options' => $options);
-    if ($access) $block['access'] = $access;
+      'tokens' => $tokens, 'options' => $options, 'access' => $access);
     return $block;
   }
 

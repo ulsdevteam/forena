@@ -113,6 +113,7 @@ function forena_query_editor($form, &$form_state, $block_name='') {
     '#type' => 'select',
     '#title' => t('Template'),
     '#options' => $builders,
+    '#access' => FALSE,
     '#default_value' => $builder,
   );
 

@@ -144,7 +144,6 @@ class FrxRepoMan {
       $access = TRUE;
       $block = $o->loadBlock($block_name);
     }
-
     return $block;
   }
 
