@@ -182,6 +182,7 @@ class FrxCrosstab extends FrxRenderer {
       $ctl['weight'] = array(
           "#type" => 'weight',
           '#title' => t('Weight'),
+          '#delta' => 50,
           '#default_value' => $col['weight'],
       );
 
