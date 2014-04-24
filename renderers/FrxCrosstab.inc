@@ -15,8 +15,6 @@ class FrxCrosstab extends FrxRenderer {
     $variables = $this->mergedAttributes();
     $path = isset($variables['path']) ? $variables['path'] : '*';
     if (!$path) $path = "*";
-
-
     $group = $variables['group'];
     $dim = $variables['dim'];
     // Get the current context

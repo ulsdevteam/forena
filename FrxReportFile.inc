@@ -37,7 +37,7 @@ class FrxReportFile extends FrxFile {
     if ($data) foreach ($data as $base_name => $obj) {
       if ($obj->cache && $obj->cache['language'] == $language->language) {
         $obj->name = $base_name;
-        $reports[ $obj->cache['category'] . $obj->cache['title']] = $obj;
+        $reports[ $obj->cache['category'] . $base_name] = $obj;
       }
     }
     uasort($reports, 'FrxReportFile::reportCompare');
@@ -55,6 +55,11 @@ class FrxReportFile extends FrxFile {
     if (!$c) {
       $c = strnatcasecmp($a->cache['title'], $b->cache['title']);
     }
+    return $c;
+  }
+
+  static public function reportTitleCompare($a, $b) {
+    $c = strnatcasecmp($a['title'], $b['title']);
     return $c;
   }
   /**
@@ -123,8 +128,9 @@ class FrxReportFile extends FrxFile {
             }
           }
           if ($access) {
-            $reports[$cache['category']][$cache['title']] = array(
+            $reports[$cache['category']][] = array(
                 'title' => $cache['title'],
+                'category' => $cache['category'],
                 'report_name' => $base_name,
             );
           }
@@ -135,7 +141,7 @@ class FrxReportFile extends FrxFile {
     $sort = defined('SORT_NATURAL') ? SORT_NATURAL : SORT_REGULAR;
     // Sort the reports
     if ($reports) foreach ($reports as $category => $list) {
-      ksort($reports[$category], $sort);
+      uasort($reports[$category], 'FrxReportFile::reportTitleCompare');
     }
     ksort($reports, $sort);
 
