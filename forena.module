@@ -913,11 +913,11 @@ function forena_report($name_in, $parms = NULL, $print = TRUE) {
   $desc['time'] = date_format($time, 'Y-m-d H:i:s');
   $desc['basepath'] = base_path();
   if (!$desc['exists']) {
+    watchdog('error', 'Report %s not found', array('%s' => $name_in), WATCHDOG_ERROR);
     if($print) {
       drupal_not_found();
       exit;
     }
-    drupal_set_message(t('Report %s not found', array('%s' => $name_in)), 'error', FALSE);
     return '';
   }
 
