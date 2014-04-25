@@ -45,8 +45,6 @@ class FrxEditor {
     $dom->preserveWhiteSpace = TRUE;
     $this->frxReport = new FrxReport();
     $this->load($report_name, $edit);
-    $cache = forena_load_cache($this->frxReport->rpt_xml);
-    if (isset($cache['access'])) $this->access = forena_check_all_access($cache['access']);
   }
 
   /**
@@ -90,7 +88,7 @@ class FrxEditor {
     $r_text='';
     $dom = $this->dom;
     $this->report_name = $report_name = $this->desc['name'];
-    $this->report_link = 'reports/' . str_replace('/', '.', $report_name);
+    $this->report_link = 'reports/' . str_replace('/', '.', $this->desc['base_name']);
     // Load the latest copy of the report editor
     if ($report_name) {
       if (isset($_SESSION['forena_report_editor'][$report_name]) && $edit) {
@@ -102,7 +100,6 @@ class FrxEditor {
         $r_text = Frx::File()->contents($filename);
       }
     }
-
     if (!$r_text) {
       $m_path = drupal_get_path('module', 'forena');
       $r_text = file_get_contents($m_path . '/default.frx');
@@ -134,6 +131,9 @@ class FrxEditor {
     $this->xpq->registerNamespace('frx', $this->xmlns);
     // Make sure document header is reparsed.
     $this->frxReport->setReport($this->dom, $this->xpq);
+    $cache = forena_load_cache($this->frxReport->rpt_xml);
+    if (isset($cache['access'])) $this->access = forena_check_all_access($cache['access']);
+    if (!$edit) $this->cache = Frx::File()->getCacheEntry($report_name . '.frx');
     return $r_text;
   }
 
@@ -962,6 +962,7 @@ class FrxEditor {
     $content = array(
       '#has_data' => $r->blocks_loaded,
       'parameter_form' => $r->parameters_form,
+      'editorLinks' => array('#markup' => $this->editorLinks()),
       'links' => $this->documentLinks(),
       'content' => array('#markup' => $r->html . $links),
     );
@@ -1055,7 +1056,7 @@ class FrxEditor {
 
       $block_label = (string)$frx['block'] ? $block_name : '#' . $id;
       $block_link = str_replace('/', '.', $block_name);
-      $report_name = str_replace('/', '.' , $this->report_name);
+      $report_name = str_replace('/', '.' , $this->desc['base_name']);
       $b = Frx::RepoMan()->loadBlock($block_name);
       $options = array();
       if ($context) $options['query'] = $context;
@@ -1114,6 +1115,20 @@ class FrxEditor {
      }
      asort($templates);
      return $templates;
+  }
+
+  public function editorLinks() {
+    $o = '';
+    $report_link = $this->report_link;
+    if (!$this->edit && user_access('design any report')) {
+    // Add the block or ID link
+      $o .= '<div class="forena-editor-links">'
+          . $this->l_icon("$report_link/edit", 'doc-option-edit.png', 'Edit', Frx::Data()->getContext('parm'));
+      if (module_exists('locale')) $o .= $this->l_icon("$report_link/translations", 'doc-option-tab.png', 'Translations');
+      if (!$this->cache->include) $o .= $this->l_icon("$report_link/delete", 'doc-option-remove.png', 'Delete');
+      $o .= "</div>";
+    }
+    return $o;
   }
 
   public function documentLinks() {

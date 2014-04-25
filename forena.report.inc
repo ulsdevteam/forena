@@ -250,7 +250,7 @@ function forena_report_save_submit($form, &$form_state) {
 }
 
 function forena_report_preview($report_name) {
-  $r = Frx::Editor($report_name);
+  $r = Frx::Editor($report_name, TRUE);
   drupal_set_title($r->title);
   $content['save'] = drupal_get_form('forena_report_save_form', $report_name);
   $content['preview'] = $r->preview();
@@ -801,12 +801,12 @@ function forena_report_translations($name_in='') {
       $modified = format_date(filemtime(Frx::File()->path($i_name . '.frx')));
       $r = Frx::Editor($i_name);
       $title = $r->title;
-      $edit = l(t('Edit'), 'reports/' . str_replace('/', '.', $i_link) . '/edit', array('query' => array('language' => $key)));
+      $edit = '';// l(t('Edit'), 'reports/' . str_replace('/', '.', $i_link) . '/edit', array('query' => array('target_language' => $key)));
     }
     else {
       $modified = '';
       $title ='';
-      $edit = l(t('Add'), 'reports/' . $name_in . '/translate', array('query' => array('language' => $key)));
+      $edit = l(t('Add'), 'reports/' . $name_in . '/translate', array('query' => array('target_language' => $key)));
     }
     $data[] = array($language->native, $title, $modified, $edit);
 
@@ -1604,4 +1604,12 @@ function forena_report_layout_form_submit($form, &$form_state) {
 }
 
 
+/**
+ * Remove the report from the database and file system.
+ * @param string $report_name
+ */
+function forena_delete_report($report_name) {
 
+  $filepath = $report_name . '.frx';
+  $do = Frx::File()->delete($filepath);
+}

@@ -1,8 +1,27 @@
-ul.forena-doclinks li {
-  display: inline; 
-  margin-right: 0.5em; 
-  padding-left: 0; 
+ul.forena-doclinks { 
+  margin: 0 0.5em;
+  display: block; 
+  float: right; 
+  width: 10em;	
+  clear: right; 
+  text-align: right; 
 }
+
+ul.forena-doclinks li {
+  list-style: none; 
+  display: inline; 
+}
+
+.forena-editor-links {
+	diplay: block; 
+	float: right; 
+	width: 10em; 
+	clear: right; 
+	text-align: right;
+}
+
+.forena-editor-links a { text-decoration: none;  }
+
 
 ul.forena-doclinks { 
 	margin-left: 0; 

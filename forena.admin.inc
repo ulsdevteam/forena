@@ -56,15 +56,7 @@ function forena_admin_reports() {
   return $output;
 }
 
-/**
- * Remove the report from the database and file system.
- * @param string $report_name
- */
-function forena_delete_report($report_name) {
 
-  $filepath = $report_name . '.frx';
-  $do = Frx::File()->delete($filepath);
-}
 
 
 
@@ -276,18 +268,17 @@ function forena_create_trans_form($formid, $form_state, $report_name) {
   $filename = '';
   $format = '';
   $desc = Frx::Menu()->parseURL($report_name);
-  $name = $desc['name'];
-  $filename = $desc['filename'];
-  $base_name = $desc['base_name'];
-  $format = @$desc['format'];
+
+
   $form = array();
   global $language;
   $languages = language_list();
   //determine if this is an add new report request
 
-  $r = Frx::Editor($name);
+  $r = Frx::Editor($report_name, FALSE);
+  $base_name = $r->desc['base_name'];
   $title = (string)$r->title;
-  $lang = @$_GET['language'];
+  $lang = @$_GET['target_language'];
   if ($lang) {
     $language = $languages[$lang];
   }
@@ -333,18 +324,18 @@ function forena_create_trans_form($formid, $form_state, $report_name) {
 }
 
 function forena_create_trans_form_submit($form, &$form_state) {
+  global $language;
+  $language = language_default();
   $values = $form_state['values'];
   $base_name = $values['base_name'];
   $new_name = $values['save_report_language'] . '/' . $base_name;
+  $r = Frx::Editor($base_name, TRUE);
+  $link = $r->report_link;
 
+  // Determine new fielname
   $desc = Frx::Menu()->parseURL($new_name);
   $filename = $desc['filename'];
   $report_name = $desc['name'];
-
-  $r = Frx::Editor($base_name);
-
-  // Title and category
-  $r->setTitle($values['title']);
 
   //determine redirection.
 
@@ -353,9 +344,14 @@ function forena_create_trans_form_submit($form, &$form_state) {
     return;
   }
   else {
+    // Title and category
+    $r->setTitle($values['title']);
+    $r->update();
     $r->rename($new_name);
     drupal_set_message(t('Translation,  %s has been created. Switch languages to translate.', array('%s' => $values['title'])));
-    $form_state['redirect']= array( $desc['i_link'] . '/edit/layout');
+    //$r->cancel();
+    $r->save();
+    $form_state['redirect']= $link . '/edit';
   }
 
   //if this is a new report then redirect to data blocks
