@@ -117,21 +117,13 @@ function forena_menu() {
   );
 
 
-  $items['reports/%/view'] = array(
-    'title' => 'View',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -10,
-    'file' => 'forena.common.inc',
-    'access arguments' => array('design any report'),
-  );
-
   $items['reports/%/edit'] = array(
      'title' => 'Edit',
      'page callback' => 'forena_report_preview',
      'page arguments' => array(1),
      'access arguments' => array('design any report'),
      'description' => 'Edit the layout of your report',
-     'type' => MENU_LOCAL_TASK,
+     'type' => MENU_CALLBACK,
      'file' => 'forena.report.inc',
   );
 
@@ -142,7 +134,7 @@ function forena_menu() {
        'title' => 'Translate',
        'file' => 'forena.report.inc',
        'access arguments' => array('design any report'),
-       'type' => MENU_LOCAL_TASK,
+       'type' => MENU_CALLBACK,
     );
   }
   $items['reports/%/edit/parameters'] = array(
