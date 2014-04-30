@@ -898,7 +898,8 @@ class FrxEditor {
       $parms = array_merge($_GET, $_POST);
       unset($parms['q']);
     }
-    else $parms = (array)$parms;
+    // Removed this becuase we don't want it to nuke xml.
+    //else $parms = (array)$parms;
     // Allow other modules to alter paramters.
     $this->alterParameters($parms);
 
