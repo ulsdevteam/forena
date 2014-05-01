@@ -111,11 +111,11 @@ class FrxEditor {
       $this->xpq = new DOMXPath($dom);
     }
     catch (Exception $e) {
-      forena_error('Invalid or malformed report document', '<pre>' .
+      Frx::error('Invalid or malformed report document', '<pre>' .
         $e->getMessage() . $e->getTraceAsString() . '</pre>');
     }
     if (!$this->dom->documentElement) {
-      forena_error(t('Invalid or malformed report document'));
+      Frx::error(t('Invalid or malformed report document'));
       return;
     }
 
@@ -223,7 +223,7 @@ class FrxEditor {
     }
     catch (Exception $e) {
 
-      forena_error('Malformed report body', '<pre>' . $e->getMessage() .
+      Frx::error('Malformed report body', '<pre>' . $e->getMessage() .
       $e->getTraceAsString() . '</pre>');
     }
     // If there are no frx attributes in the body then replace them with the old values.
@@ -1124,7 +1124,7 @@ class FrxEditor {
     if (!$this->edit && user_access('design any report')) {
     // Add the block or ID link
       $o .= '<div class="forena-editor-links">'
-          . $this->l_icon("$report_link/edit", 'doc-option-edit.png', 'Edit', Frx::Data()->getContext('parm'));
+          . $this->l_icon("$report_link/edit", 'doc-option-edit.png', 'Edit', (array)Frx::Data()->getContext('parm'));
       if (module_exists('locale')) $o .= $this->l_icon("$report_link/translations", 'doc-option-tab.png', 'Translations');
       if (!$this->cache->include) $o .= $this->l_icon("$report_link/delete", 'doc-option-remove.png', 'Delete');
       $o .= "</div>";
