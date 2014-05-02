@@ -930,7 +930,8 @@ function forena_report($name_in, $parms = NULL, $print = TRUE) {
     if ($print) drupal_add_js(array('forena' => $forena_js), 'setting');
   }
   if (!$print) {
-    return drupal_render($content['content']);
+    $c = $content['content'];
+    return drupal_render($c);
   }
   return $content;
 
