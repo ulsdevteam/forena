@@ -78,7 +78,7 @@ class FrxDrupal extends FrxDataSource {
       if (!$this->block_name) {
         $short = t('%e', array('%e' => $text, '%l' => $line));
       } else {
-        $short = t('SQL Error in %b.sql', array('%b' => $this.block_name));
+        $short = t('SQL Error in %b.sql', array('%b' => $this->block_name));
       }
       drupal_set_message($short, 'error', FALSE);
       if ($this->database != 'default') {
