@@ -196,7 +196,7 @@ function forena_settings_validate($form, &$form_state) {
         mkdir($path);
 
       } catch (Exception $e) {
-        forena_error(t('Unable to create report directory'), $e->getMessage());
+        Frx::error(t('Unable to create report directory'), $e->getMessage());
       }
     }
   }
@@ -215,7 +215,7 @@ function forena_settings_validate($form, &$form_state) {
           }
 
         } catch (Exception $e) {
-          forena_error(t('Unable to create data directory'), $e->getMessage());
+          Frx::error(t('Unable to create data directory'), $e->getMessage());
         }
       }
     }

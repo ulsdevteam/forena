@@ -622,7 +622,7 @@ class FrxRenderer {
       }
       catch (Exception $e) {
 
-        forena_error('Malformed report body', '<pre>' . $e->getMessage() .
+        Frx::error('Malformed report body', '<pre>' . $e->getMessage() .
         $e->getTraceAsString() . '</pre>');
       }
       $body = $temp_dom->getElementsByTagName('body')->item(0);
