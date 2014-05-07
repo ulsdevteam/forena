@@ -929,6 +929,9 @@ function forena_report($name_in, $parms = NULL, $print = TRUE) {
     $forena_js['report'] = preg_replace('/[^\w\-]+/u', '_', $name_in);
     if ($print) drupal_add_js(array('forena' => $forena_js), 'setting');
   }
+  if (!$print && is_array($content)) {
+    return drupal_render($content['content']);
+  }
   return $content;
 
 
