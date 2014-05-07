@@ -77,14 +77,16 @@ class FrxDataFile extends FrxFile {
 
 
   public function scan($prefix = '') {
-    // Add the base report files.
-    $this->scanInclude($this->dir, '');
+    if ($this->needScan) {
+      // Add the base report files.
+      $this->scanInclude($this->dir, '');
 
-    // Now add the module provided ones.
-    if ($this->includes) foreach ($this->includes as $repos => $directory) {
-      $this->scanInclude($directory, $repos . '/');
+      // Now add the module provided ones.
+      if ($this->includes) foreach ($this->includes as $repos => $directory) {
+        $this->scanInclude($directory, $repos . '/');
+      }
+      $this->needScan = FALSE;
     }
-    $this->needScan = FALSE;
   }
   /**
    * Sort compare function for sorting data by category then title.

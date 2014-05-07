@@ -11,9 +11,9 @@ class FrxFile {
   public $use_includes;
   public $cached_extensions;
   protected $cache;
-  private $needSave = TRUE;
-  private $needScan = TRUE;
-  private $cacheKey = NULL;
+  protected $needSave = TRUE;
+  protected $needScan = TRUE;
+  protected $cacheKey = NULL;
 
   public function __construct($default_directory, $include_directories, $extentions = array(), $use_includes=TRUE) {
     // Check to see if directory is writable
@@ -112,11 +112,13 @@ class FrxFile {
 
   public function scan($prefix = '') {
     // Add the base report files.
-    $this->scanInclude($this->dir, $prefix);
+    if ($this->needScan) {
+      $this->scanInclude($this->dir, $prefix);
 
-    // Now add the module provided ones.
-    if ($this->includes) foreach ($this->includes as $directory) {
-      $this->scanInclude($directory, $prefix);
+      // Now add the module provided ones.
+      if ($this->includes) foreach ($this->includes as $directory) {
+        $this->scanInclude($directory, $prefix);
+      }
     }
     $this->needScan = FALSE;
   }
