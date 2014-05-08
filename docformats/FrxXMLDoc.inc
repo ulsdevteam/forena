@@ -24,7 +24,7 @@ class FrxXMLDoc extends FrxDocument {
 
   public function render($r, $format, $options = array()) {
     $body = $this->check_markup($r->html);
-    $output = '<?xml version="1.0"?>' . "\n";
+    $output = '';
     $opening_tag = $this->_build_opening_root_tag_contents();
     $ending_tag = $this->root_tag;
     $output .= "<$opening_tag>\n  $body\n</$ending_tag>";
