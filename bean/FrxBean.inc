@@ -32,19 +32,19 @@ class FrxBean extends BeanPlugin {
     );
 
     $form['settings']['include_url_parameters'] = array(
-      '#type' => 'checkbox', 
-      '#title' => t('Use menu parameters from url'), 
-      '#description' => t('If checked, parameters from url or in menu path will be used when rendering this report.'), 
-      '#default_value' => @$bean->settings['include_url_parameters'], 
-      '#multiple' => FALSE, 
+      '#type' => 'checkbox',
+      '#title' => t('Use menu parameters from url'),
+      '#description' => t('If checked, parameters from url or in menu path will be used when rendering this report.'),
+      '#default_value' => @$bean->settings['include_url_parameters'],
+      '#multiple' => FALSE,
     );
 
     $form['settings']['parms'] = array(
       '#type' => 'textfield',
-      '#title' => 'URL Parameters', 
-      '#description' => 'Specify parameters as they would appear on the url (e.g. state=wa&county=foo) ', 
-      '#default_value' => @$bean->settings['parms'], 
-      '#multiple' => FALSE, 
+      '#title' => 'URL Parameters',
+      '#description' => 'Specify parameters as they would appear on the url (e.g. state=wa&county=foo) ',
+      '#default_value' => @$bean->settings['parms'],
+      '#multiple' => FALSE,
     );
 
     return $form;
@@ -64,7 +64,7 @@ class FrxBean extends BeanPlugin {
       if (Frx::Data()->contextExists('parm')) $parms = array_merge($parms, Frx::Data()->getContext('parm'));
     }
 
-    $output = forena_report_include($report, $parms);
+    $output = forena_report($report, $parms, FALSE);
     return array('content' => array('#markup' => $output));
   }
 }
