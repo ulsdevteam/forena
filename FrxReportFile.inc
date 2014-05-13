@@ -37,7 +37,7 @@ class FrxReportFile extends FrxFile {
     if ($data) foreach ($data as $base_name => $obj) {
       if ($obj->cache && $obj->cache['language'] == $language->language) {
         $obj->name = $base_name;
-        $reports[ $obj->cache['category'] . $base_name] = $obj;
+        $reports[] = $obj;
       }
     }
     uasort($reports, 'FrxReportFile::reportCompare');
@@ -85,9 +85,18 @@ class FrxReportFile extends FrxFile {
 
     $reports = array();
     foreach ($data as $base_name => $obj) {
-      if ($obj->cache && $obj->cache['language'] == $language->language && isset($obj->cache['menu']['path'])) {
-        $obj->name = $base_name;
-        $reports[] = $obj;
+      if ($obj->cache && isset($obj->cache['menu']['path'])
+        && (
+            ($obj->cache['language'] == $language->language)
+        || ($obj->cache['language'] == 'en' && !isset($obj->cache['menu']['path'])
+        ))) {
+        if ($obj->cache['language'] != 'en') {
+          $obj->name = substr($base_name, 3);
+        }
+        else {
+          $obj->name = $base_name;
+        }
+        $reports[$obj->cache['menu']['path']] = $obj;
       }
     }
     return $reports;
