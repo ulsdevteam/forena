@@ -332,7 +332,10 @@ class FrxSVGGraph extends FrxRenderer {
         $style = $styles[0];
       }
       if ($style) $type = $style;
-      $frxattrs = $this->arrayAttributes($config);
+
+      // LImit the config
+      $frxattrs = $this->arrayAttributes(array_intersect_key($config, array_fill_keys(array('path', 'series', 'series_x', 'label', 'group', 'link'), 1 )));
+      $frxattrs = $this->arrayAttributes($frxattrs);
       $frxattrs['renderer'] = 'FrxSVGGraph';
       $frxattrs['type'] = $type;
 
