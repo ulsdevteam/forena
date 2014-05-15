@@ -120,7 +120,6 @@ class FrxFile {
         $this->scanInclude($directory, $prefix);
       }
     }
-    $this->needScan = FALSE;
   }
 
   /**
@@ -178,6 +177,7 @@ class FrxFile {
     if ($this->needSave) {
       cache_set($this->cacheKey, $this->cache, 'cache', CACHE_PERMANENT);
     }
+    //$this->needScan = FALSE;
   }
 
   public function getCache($ext) {
