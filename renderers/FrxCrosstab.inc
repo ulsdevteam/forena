@@ -12,6 +12,8 @@ class FrxCrosstab extends FrxRenderer {
    * Render the crosstab
    */
   public function render() {
+
+
     $variables = $this->mergedAttributes();
     $path = isset($variables['path']) ? $variables['path'] : '*';
     if (!$path) $path = "*";
@@ -35,8 +37,11 @@ class FrxCrosstab extends FrxRenderer {
 
     // Group the data.
     $data = $this->frxReport->group($nodes, $group);
-    $dim_headers = array();
-    $dim_rows = array();
+    $this->dim_headers = array();
+    $this->dim_rows = array();
+    $this->dim_columns = array();
+    $this->group_columns = array();
+    $this->group_headers = array();
     $dim_values = array();
     $rows = array();
     foreach ($data as $gk => $group_rows) {
