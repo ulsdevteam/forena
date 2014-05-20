@@ -106,13 +106,17 @@ class FrxData extends FrxContext {
         $retvar = $this->simplexml_evaluate($data, ltrim($key, '='));
       }
       else {
-
-        $rows = @$data->xpath($key);
-        if ($rows === FALSE) {
-          drupal_set_message(t('Invalid field: "%s"', array('%s' => $key)), 'error', FALSE);
+        if (isset($data->$key)) {
+          $x = $data->$key;
         }
-        $x ='';
-        if ($rows) $x = $rows[0];
+        elseif (method_exists($data, 'xpath')) {
+          $rows = @$data->xpath($key);
+          if ($rows === FALSE) {
+            drupal_set_message(t('Invalid field: "%s"', array('%s' => $key)), 'error', FALSE);
+          }
+          $x ='';
+          if ($rows) $x = $rows[0];
+        }
 
         if ($x) $retvar = $x->asXML();
         // Check to see if there are child nodes

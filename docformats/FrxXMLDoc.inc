@@ -23,7 +23,7 @@ class FrxXMLDoc extends FrxDocument {
   }
 
   public function render($r, $format, $options = array()) {
-    $body = $this->check_markup($r->html);
+    $body = $r->html;
     $output = '';
     $opening_tag = $this->_build_opening_root_tag_contents();
     $ending_tag = $this->root_tag;

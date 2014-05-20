@@ -202,14 +202,23 @@ class FrxReport {
     $body = $dom->getElementsByTagName('body')->item(0);
 
     // Render the rport.
-    $o='';
+    $this->html = '';
     $c = Frx::Controls('FrxRenderer');
     $c->initReportNode($body, $this);
-    if (!$this->missing_parms) $o .= $c->renderChildren($body);
+    if (!$this->missing_parms) $c->renderChildren($body, $this->html);
 
     //$this->collapseParameters();
     if (!$this->parameters_form) $this->parametersForm(array('collapsible' => TRUE, 'collapsed' => $this->blocks_loaded));
-    $this->html = check_markup($o, variable_get('forena_input_format', filter_default_format()));
+
+    // Determine the correct filter.
+    $filter = variable_get('forena_input_format', filter_default_format());
+    $skinfo = Frx::Data()->getContext('skin');
+    if (isset($skinfo['input_format'])) $filter = $skinfo['input_format'];
+    if (isset($this->options['input_format'])) $filter = $this->options['input_format'];
+    if ($filter && $filter != 'none') {
+      $this->html = check_markup($this->html, $filter);
+    }
+
 
     // Default in dynamic title from head.
     if ($this->frx_title) {
@@ -218,7 +227,6 @@ class FrxReport {
     }
 
     Frx::Data()->pop();
-    return $this->html;
   }
 
 

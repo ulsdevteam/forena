@@ -22,7 +22,7 @@ class FrxPrincePDF extends FrxDocument {
   public function render($r, $format, $options = array()) {
 
     $disable_links = variable_get('forena_pdf_disable_links', TRUE);
-    $html = $this->check_markup($r->html);
+    $html = $r->html;
     if ($disable_links) {
       $html = preg_replace('/<a href=\"(.*?)\">(.*?)<\/a>/', "\\2", $html);
     }

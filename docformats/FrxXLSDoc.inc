@@ -12,7 +12,7 @@ class FrxXLSDoc extends FrxDocument {
 
 
   public function render($r, $format, $options = array()) {
-    $body = $this->check_markup($r->html);
+    $body = $r->html;
     $output = '<?xml version="1.0"?>' . "\n";
     $output .= '<?mso-application progid="Excel.Sheet"?>' . "\n";
     $output .= '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"' . "\n";

@@ -14,7 +14,7 @@ class FrxSVGDoc extends FrxDocument {
   public function render($r, $format, $options = array()) {
     $output = '';
     $doc = new DomDocument();
-    $xml_body = '<html><body>' . $this->check_markup($r->html) . '</body></html>';
+    $xml_body = '<html><body>' . $r->html . '</body></html>';
     $doc->formatOutput=FALSE;
     $doc->strictErrorChecking = FALSE;
     $doc->loadXML($xml_body);

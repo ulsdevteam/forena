@@ -21,7 +21,7 @@ class FrxHtmlDoc extends FrxDocument {
       }
       $output .= '</style>';
     }
-    $output .= '<title>' . $r->title . '</title></head><body class="forena-report"><h1>' . $r->title . '</h1>' . $this->check_markup($r->html) . '</body></html>';
+    $output .= '<title>' . $r->title . '</title></head><body class="forena-report"><h1>' . $r->title . '</h1>' . $r->html . '</body></html>';
     return $output;
   }
 
