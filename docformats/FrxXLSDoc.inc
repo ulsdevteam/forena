@@ -80,8 +80,9 @@ class FrxXLSDoc extends FrxDocument {
     return $output;
   }
 
-  public function output($output) {
-    parent::output($this->convertCharset($output));
+  public function output(&$output) {
+    $output = $this->convertCharset($output);
+    parent::output($output);
     return TRUE;
   }
 

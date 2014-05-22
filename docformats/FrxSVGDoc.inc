@@ -34,7 +34,7 @@ class FrxSVGDoc extends FrxDocument {
   /**
    * Output SVG content type headers.
    */
-  public function output($output) {
+  public function output(&$output) {
     if ($this->content_type) {
 
       header('Content-Type: ' . $this->content_type);

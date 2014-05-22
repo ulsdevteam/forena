@@ -14,6 +14,7 @@ class FrxXMLDoc extends FrxDocument {
     $skin = Frx::Data()->getContext('skin');
     if (isset($skin['FrxXMLDoc']['rootElementName'])) {
       $this->root_tag = $skin['FrxXMLDoc']['rootElementName'];
+      if ($this->root_tag == 'none') $this->root_tag = '';
     }
     if (isset($skin['FrxXMLDoc']['rootElementAttributes'])) {
       if (is_array($skin['FrxXMLDoc']['rootElementAttributes'])) {
@@ -23,15 +24,14 @@ class FrxXMLDoc extends FrxDocument {
   }
 
   public function render($r, $format, $options = array()) {
-    $body = $r->html;
     $output = '';
     $opening_tag = $this->_build_opening_root_tag_contents();
     $ending_tag = $this->root_tag;
-    $output .= "<$opening_tag>\n  $body\n</$ending_tag>";
+    if ($this->root_tag) $output = "<$opening_tag>\n  $r->html\n</$ending_tag>";
     return $output;
   }
 
-  public function output($output) {
+  public function output(&$output) {
       header('Content-Type: ' . $this->content_type);
       header('Cache-Control:');
       header('Pragma:');

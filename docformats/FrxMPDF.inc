@@ -69,7 +69,7 @@ class FrxMPDF extends FrxDocument {
   }
 
 
-  public function output($pdf) {
+  public function output(&$pdf) {
 
     $http_headers = array(
       'Pragma' => 'no-cache',

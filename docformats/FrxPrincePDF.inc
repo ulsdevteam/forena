@@ -77,7 +77,7 @@ class FrxPrincePDF extends FrxDocument {
     }
   }
 
-  public function output($output) {
+  public function output(&$output) {
     if ($output) {
       header('Content-Type: ' . $this->content_type);
       header('Cache-Control:');

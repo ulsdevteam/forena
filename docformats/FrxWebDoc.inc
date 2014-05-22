@@ -43,7 +43,7 @@ class FrxWebDoc extends FrxDocument {
     return $content;
   }
 
-  public function output($output) {
+  public function output(&$output) {
     if ($this->title) {
       drupal_set_title(filter_xss($this->title), PASS_THROUGH);
     }
