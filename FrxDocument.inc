@@ -62,7 +62,7 @@ class FrxDocument {
 
   }
 
-  public function output($output) {
+  public function output(&$output) {
     if ($this->content_type) {
       header('Content-Type: ' . $this->content_type . ' ;charset=' . $this->charset);
       header('Cache-Control:');
