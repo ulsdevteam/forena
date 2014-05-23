@@ -45,7 +45,10 @@ function forena_display_blocks() {
     );
   }
   // Theme the table
-  $content['data_blocks'] = array('#markup' => theme('forena_data_table', array('header' => $header, 'rows' => $data)));
+  $output = "<div id='forena-data-block-list'>\n";
+  $output .= theme('forena_data_table', array('header' => $header, 'rows' => $data));
+  $output .= "</div>\n";
+  $content['data_blocks'] = array('#markup' => $output);
   return $content;
 }
 
