@@ -25,10 +25,17 @@ class FrxXMLDoc extends FrxDocument {
 
   public function render($r, $format, $options = array()) {
     $output = '';
+
     $opening_tag = $this->_build_opening_root_tag_contents();
     $ending_tag = $this->root_tag;
-    if ($this->root_tag) $output = "<$opening_tag>\n  $r->html\n</$ending_tag>";
-    return $output;
+    if ($this->root_tag) {
+      $output = "<$opening_tag>\n  $r->html\n</$ending_tag>";
+      return $output;
+    }
+    else {
+      return $r->html;
+    }
+
   }
 
   public function output(&$output) {
@@ -36,7 +43,7 @@ class FrxXMLDoc extends FrxDocument {
       header('Cache-Control:');
       header('Pragma:');
       header('Cache-Control: must-revalidate');
-      $output = '<?xml version="1.0"?>' . "\n" . $output;
+      print  '<?xml version="1.0"?>' . "\n";
       print  $output;
       return TRUE;
   }
