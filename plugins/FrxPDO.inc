@@ -127,15 +127,14 @@ class FrxPDO extends FrxDataSource {
         $this->error($short, $text);
 
       }
-      else if ($rs && $rs->columnCount()) {
+      else if ($rs && $rs->columnCount())  {
         if (@$options['return_type'] == 'raw') return $rs;
-        $data = $rs->fetchAll(PDO::FETCH_ASSOC);
         $rownum = 0;
-        if ($data) foreach ($data as $row) {
+        foreach ($rs as $data) {
           $rownum++;
           $row_node = $xml->addChild('row');
           $row_node['num'] = $rownum;
-          foreach ($row as $key => $value) {
+          foreach ($data as $key => $value) {
             $row_node->addChild($key, htmlspecialchars($value));
           }
         }
