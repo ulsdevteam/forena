@@ -166,5 +166,17 @@ ORDER BY NAME
   <ul id="forena-1" frx:block="forena_help/admin_topics">
     <li id="forena-2" frx:foreach="*"><span>{title}</span></li>
   </ul>
+  <h3>Raw Mode Queries</h3>
+  <p>In some cases where forena is being used to export data, memory consumption can be reduced by specificying a return_type option 
+  of raw in the data block.  Currently this option is only supported in the Drupal and PDO drivers.  The one drawback for using raw mode is
+  that all of the xpath features are disabled for that data query as forena will not prerender the result set into XML.  This means that your iterators can only use an frx:foreach attribute of * 
+  and only column names may be used as token replacements in the query.  You also will be unable to use xpath evaluation expressions 
+  in your reports that use this feature.  The following example illustrates raw mode used in a drupal query.</p>
+  <pre>
+  SELECT nid, type, title, uid, sticky, promote from node
+  --INFO
+  ; Use raw mode 
+  return_type = raw
+  </pre>
 </body>
 </html>
