@@ -45,6 +45,8 @@ function drush_forena_report($report_uri, $filename='') {
   $parms = array();
   $query = '';
   $report_name = $report_uri;
+  $m1 = memory_get_usage();
+  $t1 = time();
   @list($report_name, $query) = explode('?', $report_uri);
   if ($query) {
     parse_str($query, $parms);
@@ -57,4 +59,11 @@ function drush_forena_report($report_uri, $filename='') {
     drupal_set_message(t('Generating report %s.', array('%s' => $report_name)));
     print forena_report($report_name, $parms, FALSE);
   }
+  $t2 = time();
+  $m2 = memory_get_usage();
+  $p = memory_get_peak_usage();
+  $dur = $t2 - $t1;
+  $mem = $m2 - $m1;
+  drupal_set_message(t('Finished Report ( %s seconds, %b bytes, peak %p)', array('%s' => $dur, '%b' => $mem, '%p' => $p)));
+
 }

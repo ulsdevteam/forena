@@ -118,19 +118,24 @@ class FrxData extends FrxContext {
           if ($rows) $x = $rows[0];
         }
 
-        if ($x) $retvar = $x->asXML();
-        // Check to see if there are child nodes
-        // If so use asXML otherwise string cast.
-        if ($retvar && strpos($retvar, '<')!==FALSE) {
-          // Find the end of the first tag.
-          $p = strpos($retvar, '>');
-          $retvar = substr_replace($retvar, '', 0, $p+1);
-          $p = strrpos($retvar, '<', -1);
-          $retvar = substr_replace($retvar, '', $p, strlen($retvar) - $p);
+        if ($x && is_object($x) && method_exists($x, 'asXML')) {
+          $retvar = $x->asXML();
+          // Check to see if there are child nodes
+          // If so use asXML otherwise string cast.
+          if ($retvar && strpos($retvar, '<')!==FALSE) {
+            // Find the end of the first tag.
+            $p = strpos($retvar, '>');
+            $retvar = substr_replace($retvar, '', 0, $p+1);
+            $p = strrpos($retvar, '<', -1);
+            $retvar = substr_replace($retvar, '', $p, strlen($retvar) - $p);
 
+          }
+          else {
+            $retvar = (string)$x;
+          }
         }
         else {
-          $retvar = (string)$x;
+          $retvar = &$x;
         }
       }
     }

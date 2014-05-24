@@ -35,6 +35,7 @@ class FrxCSVDoc extends FrxDocument {
     if (!empty($xml)) {
       $rows = $xml->xpath('//tr');
     }
+    $r->html = '';
     $rowspans = array();
     if ($rows) foreach ($rows as $row) {
       $c = 0;
@@ -45,7 +46,7 @@ class FrxCSVDoc extends FrxDocument {
           $cont = TRUE;
           while ($rowspans[$c] && $cont) {
             $rowspans[$c]--;
-            $output .= ',';
+            $r->html .= ',';
             $c++;
           }
         }
@@ -70,9 +71,9 @@ class FrxCSVDoc extends FrxDocument {
       }
       // Trim off the last comma so we don't put in an extra null column
       $line = substr($line,0,-1);
-      $output .= "$line\n";
+      $r->html .= "$line\n";
     }
-    return $output;
+    return $r->html;
   }
 
 

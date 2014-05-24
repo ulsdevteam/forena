@@ -108,7 +108,7 @@ class FrxDrupal extends FrxDataSource {
     $select_fields = array();
     $rownum = 0;
     if (!$rs) return;
-
+    if (@$options['return_type'] == 'raw') return $rs;
     $xml = new SimpleXMLElement('<table/>');
     if ($rs && $rs->columnCount()) foreach ($rs as $data) {
       $rownum++;

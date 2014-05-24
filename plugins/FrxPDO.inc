@@ -128,7 +128,7 @@ class FrxPDO extends FrxDataSource {
 
       }
       else if ($rs && $rs->columnCount()) {
-
+        if (@$options['return_type'] == 'raw') return $rs;
         $data = $rs->fetchAll(PDO::FETCH_ASSOC);
         $rownum = 0;
         if ($data) foreach ($data as $row) {
