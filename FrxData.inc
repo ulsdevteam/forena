@@ -71,6 +71,7 @@ class FrxData extends FrxContext {
    * @return unknown_type
    */
   protected function simplexml_evaluate($xml, $path) {
+    if (!method_exists($xml, 'xpath')) return '';
     $dom_node = dom_import_simplexml($xml);
     $dom_doc = new DOMDocument('');
     $dom_node = $dom_doc->importNode($dom_node, TRUE);
