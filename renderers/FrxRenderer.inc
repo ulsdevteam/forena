@@ -64,41 +64,6 @@ class FrxRenderer {
   }
 
   /**
-   * Returns true if a node has no children, no attributes (or empty values
-   * in it's attributes), and no text content
-   */
-  protected function _check_xml_node_empty($node) {
-    if (!count($node->children())) {
-      $empty_attributes = false;
-      if (count($node->attributes()) > 0) {
-        foreach ($node->attributes() as $attr => $attr_val) {
-          $num_total_attr = 0;
-          $num_empty_attr = 0;
-          $attr_val = (string)$attr_val;
-          if ($attr_val == "") {
-            ++$num_empty_attr;
-            //return '';
-          }
-          ++$num_total_attr;
-        }
-        if ($num_total_attr == $num_empty_attr) {
-          $empty_attributes = true;
-        }
-      } else {
-        $empty_attributes = true;
-      }
-      if ($empty_attributes) {
-        $node_text = dom_import_simplexml($node)->textContent;
-        if ($node_text == "") {
-          // empty xml element
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  /**
    * Recursive report renderer
    * Walks the nodes rendering the report.
    */
@@ -144,6 +109,8 @@ class FrxRenderer {
     if (!is_object($node)) {
       return;
     }
+
+
     $frx = $node->attributes(FRX_NS);
     $include_root = !isset($frx['skip_root']) || !$frx['skip_root'];
     $elements = $dom_node->childNodes->length;
@@ -158,6 +125,16 @@ class FrxRenderer {
     $attrs = $node->attributes();
     $id = (string)$attrs['id'];
     $tag = $node->getName();
+
+    // Preprocessing for detecting blank nodes
+    if (@$settings['stripEmptyElements']) {
+      $has_children = count($node->children()) > 0;
+      $has_attributes = count($attrs) > 0 || count($frx) > 0;
+      if (!$has_children && !$has_attributes) {
+        $has_text = trim($this->teng->replace((string)$dom_node->textContent));
+        if (!$has_text) return '';
+      }
+    }
 
     if ((string)$frx['block']) {
       $this->blockName = (string)$frx['block'];
