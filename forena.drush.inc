@@ -53,7 +53,7 @@ function drush_forena_report($report_uri, $filename='') {
   }
   if ($filename) {
     drupal_set_message(t('Writing report %s  to %f.', array('%s' => $report_name, '%f' => $filename)));
-    file_put_contents($filename, forena_report($report_name, $parms, FALSE));
+    forena_report($report_name, $parms, FALSE, $filename);
   }
   else {
     drupal_set_message(t('Generating report %s.', array('%s' => $report_name)));

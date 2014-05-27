@@ -898,7 +898,7 @@ function forena_include_data_tables() {
  *
  * @return unknown
  */
-function forena_report($name_in, $parms = NULL, $print = TRUE) {
+function forena_report($name_in, $parms = NULL, $print = TRUE, $filename='') {
   require_once('forena.common.inc');
   $desc = Frx::Menu()->parseURL($name_in);
   $time = @new DateTime($value);
@@ -918,7 +918,7 @@ function forena_report($name_in, $parms = NULL, $print = TRUE) {
   $report_name = $desc['name'];
   // Load dataTable plugin if possible.
   //forena_include_data_tables();
-  $content = Frx::Editor($name_in, FALSE)->report($parms, $print, FALSE);
+  $content = Frx::Editor($name_in, FALSE)->report($parms, $print, FALSE, $filename);
 
   $m_path = drupal_get_path('module', 'forena');
   if ($content) {

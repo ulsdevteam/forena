@@ -68,6 +68,8 @@ class FrxRenderer {
    * Walks the nodes rendering the report.
    */
   public function renderDomNode(DOMNode $dom_node, &$o) {
+    // Write out buffer if we've gotten too big
+    if ( $this->frxReport->allowDirectWrite && strlen($this->frxReport->html) > 100000) $this->frxReport->writeBuffer();
     $continue = TRUE;
     $is_data_block = FALSE;
     //$o = '';

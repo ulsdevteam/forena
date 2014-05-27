@@ -883,7 +883,7 @@ class FrxEditor {
    *
    * @return unknown
    */
-  function report($parms = array(), $print = FALSE, $no_cache=FALSE) {
+  function report($parms = array(), $print = FALSE, $no_cache=FALSE, $filename='') {
     global $user;
     global $language;
     $this->field_ids = array();
@@ -909,6 +909,12 @@ class FrxEditor {
     Frx::Skin()->loadSkinFiles($this->report_name);
     $cached_data = FALSE;
     $cache = array();
+
+    $o =  Frx::Document($format);
+    $this->frxReport->allowDirectWrite = $o->allowDirectOutput;
+    if ($this->frxReport->allowDirectWrite && $filename) {
+      $this->frxReport->file = fopen($filename, 'w');
+    }
 
     /**
      * Allow modules to alter the parameters of a report.
@@ -967,9 +973,19 @@ class FrxEditor {
       'links' => $this->documentLinks(),
       'content' => array('#markup' => $r->html . $links),
     );
-    $o =  Frx::Document($format);
+
+    if ($this->frxReport->file) {
+      $this->frxReport->writeBuffer();
+      fclose($this->frxReport->file);
+      return '';
+    }
+
     if ($o) {
       $output = $o->render($r, $format,  $content);
+      if ($filename) {
+        file_put_contents($filename, $output);
+        return '';
+      }
       if ($print) {
         $printed = $o->output($output);
       }

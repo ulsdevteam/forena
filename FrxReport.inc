@@ -39,6 +39,8 @@ class FrxReport {
   public $link_mode = '';
   public $xpathQuery;
   public $frx_attributes = array(); // Saved attributes from prior call.
+  public $file; // File handle for the forena code
+  public $allowDirectWrite = FALSE; //Determine whether we can output directly.
   public $preview_mode = FALSE;    // This will make the report renderer put in editing controls when TRUE
 
 
@@ -704,6 +706,15 @@ class FrxReport {
       }
     }
     return $rows;
+  }
+
+  public function writeBuffer() {
+    if ($this->allowDirectWrite) {
+      if ($this->file) {
+        fwrite($this->file, $this->html);
+        $this->html = '';
+      }
+    }
   }
 
 }

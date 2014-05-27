@@ -10,6 +10,7 @@ class FrxXMLDoc extends FrxDocument {
   public $root_attributes = array();
 
   public function __construct() {
+    $this->allowDirectOutput = TRUE;
     $this->content_type = 'application/xml';
     $skin = Frx::Data()->getContext('skin');
     if (isset($skin['FrxXMLDoc']['rootElementName'])) {

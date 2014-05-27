@@ -9,6 +9,7 @@ class FrxDocument {
   public $format;
   public $content_type='';
   public $charset = 'UTF-8';
+  public $allowDirectOutput = FALSE;
 
 
   public function loadCSSFiles($format) {
