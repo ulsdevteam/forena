@@ -106,6 +106,7 @@ class FrxData extends FrxContext {
         $retvar = $this->simplexml_evaluate($data, ltrim($key, '='));
       }
       else {
+        $x ='';
         if (isset($data->$key)) {
           $x = $data->$key;
         }
@@ -114,7 +115,7 @@ class FrxData extends FrxContext {
           if ($rows === FALSE) {
             drupal_set_message(t('Invalid field: "%s"', array('%s' => $key)), 'error', FALSE);
           }
-          $x ='';
+
           if ($rows) $x = $rows[0];
         }
 

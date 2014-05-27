@@ -21,7 +21,13 @@ class FeedsForenaXMLParser extends FeedsParser {
 
     if ($raw) {
       $xml = new SimpleXMLElement($raw);
-      $nodes = $xml->xpath($xpath);
+      // Treat * as normal iterator to improve performance.
+      if ($xpath == '*') {
+        $nodes = $xml;
+      }
+      else {
+        $nodes = $xml->xpath($xpath);
+      }
       foreach($nodes as $node) {
         Frx::Data()->push($node, 'row');
         $item = array();

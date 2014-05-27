@@ -366,8 +366,8 @@ class FrxRepoMan {
 
 
       //walk through the $xml.
-      $rows = $xml->xpath('*');
-      if ($rows) foreach ($rows as $row) {
+      //$rows = $xml->xpath('*');
+      if ($rows) foreach ($xml as $row) {
         $value = $row->xpath($path);
         $label_field = $row->xpath($label_path);
         $label_value =  $label_field ? (string)$label_field[0] : (string)$value[0];
