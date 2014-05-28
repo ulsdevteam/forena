@@ -131,7 +131,12 @@ class FrxRenderer {
     // Preprocessing for detecting blank nodes
     if (@$settings['stripEmptyElements']) {
       $has_children = count($node->children()) > 0;
-      $has_attributes = count($attrs) > 0 || count($frx) > 0;
+      $has_attributes = FALSE;
+      foreach($attrs as $attr) {
+        if (trim($this->teng->replace((string)$attr))) {
+          $has_attributes = TRUE;
+        }
+      }
       if (!$has_children && !$has_attributes) {
         $has_text = trim($this->teng->replace((string)$dom_node->textContent));
         if (!$has_text) return '';
