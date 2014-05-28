@@ -17,7 +17,9 @@ class FrxSVGDoc extends FrxDocument {
     $xml_body = '<html><body>' . $r->html . '</body></html>';
     $doc->formatOutput=FALSE;
     $doc->strictErrorChecking = FALSE;
+    libxml_use_internal_errors(true);
     $doc->loadXML($xml_body);
+    libxml_clear_errors();
     //print($xml_body);
     $xml = simplexml_import_dom($doc);
     $xml->registerXPathNamespace('__empty_ns', 'http://www.w3.org/2000/svg');

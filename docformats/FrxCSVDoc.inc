@@ -28,8 +28,11 @@ class FrxCSVDoc extends FrxDocument {
     $dom = new DOMDocument();
     $dom->strictErrorChecking = FALSE;
     $xmlBody = '<?xml version="1.0" encoding="UTF-8"?>' . $doc;
+    libxml_use_internal_errors(TRUE);
     @$dom->loadHTML($xmlBody);
+    libxml_clear_errors();
     $xml = simplexml_import_dom($dom);
+
     $output = '';
     $rows = array();
     if (!empty($xml)) {

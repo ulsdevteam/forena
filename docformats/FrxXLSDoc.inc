@@ -32,7 +32,9 @@ class FrxXLSDoc extends FrxDocument {
     $output .= '</Styles>' . "\n";
     $doc = new DOMDocument();
     $doc->strictErrorChecking = FALSE;
-    $doc->loadHTML($body);
+    libxml_use_internal_errors(true);
+    @$doc->loadHTML($body);
+    libxml_clear_errors();
     $xml = simplexml_import_dom($doc);
 
     $tables = $xml->xpath('//table');
