@@ -112,12 +112,11 @@ class FrxControls {
   }
 
   public function number($value, $format_str, $data='') {
-
-    $dec= 2;
-    $dec_sep='.';
-    $th_sep = ',';
-    if ($format_str && !trim($format_str, '9.,$')) {
-      //Determine the decimal places.
+    // Determine number nubmer formatter from the string.
+    $chars = str_replace(array('9', '0', '$'), '', $format_str);
+    if (strlen($chars) > 1) {
+      $th_sep = substr($chars, 0, 1);
+      $dec_sep = substr($chars, 1, 1);
       $dec_pos = strrpos($format_str, $dec_sep);
       if ($dec_pos) {
         $dec = strlen($format_str) - $dec_pos -1;
@@ -127,8 +126,19 @@ class FrxControls {
         $dec_sep = '';
       }
     }
+    elseif (strlen($chars) == 1) {
+      $th_sep = substr($chars, 0, 1);
+      $dec_sep = '';
+      $dec = 0;
+    }
+    else {
+      $dec_sep='';
+      $th_sep = '';
+      $dec = 0;
+    }
 
-    if ($value && $this->is_number($value)) $value = number_format($value, $dec, $dec_sep, $th_sep);
+
+    if ($value && $this->is_number($value))  $value = number_format($value, $dec, $dec_sep, $th_sep);
     return $value;
   }
 
