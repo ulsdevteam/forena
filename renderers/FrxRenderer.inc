@@ -220,7 +220,7 @@ class FrxRenderer {
         $odd = $i & 1;
         $row_class = $odd ? 'odd' : 'even';
         $r_attr_text = '';
-        if (isset($attrs['id'])) {
+        if (trim($id)) {
           if (strpos($attrs['id'],'{')!== FALSE) {
             $id = $this->teng->replace($attrs['id']);
           }
@@ -233,6 +233,7 @@ class FrxRenderer {
           }
           $tmp_attrs['id'] =  $id_attr;
         }
+
 
         if (@!$settings['noHelperClasses']) {
           $tmp_attrs['class'] = trim($attrs['class'] . ' ' . $row_class);

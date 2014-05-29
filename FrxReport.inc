@@ -44,7 +44,7 @@ class FrxReport {
   public $preview_mode = FALSE;    // This will make the report renderer put in editing controls when TRUE
 
 
-  public function __construct($xhtml='', $data=array()) {
+  public function __construct($xhtml='', $data=array(), $edit = FALSE) {
     $this->access = array();
     $this->parameters = array();
     $this->options = array();
@@ -87,7 +87,7 @@ class FrxReport {
    * Sets the report.
    * @param DOMDocument $dom
    */
-  public function setReport(DOMDocument $dom, DOMXPath $xpq) {
+  public function setReport(DOMDocument $dom, DOMXPath $xpq, $edit = FALSE) {
     $this->dom = $dom;
     $dom->formatOutput = TRUE;
     $this->xpathQuery = $xpq;
@@ -149,7 +149,7 @@ class FrxReport {
         	  break;
         }
       }
-      $this->get_attributes_by_id();
+      if ($edit) $this->get_attributes_by_id();
       $this->skin = isset($this->options['skin']) ? $this->options['skin'] : @$this->options['form'];
     }
   }

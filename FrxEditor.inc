@@ -130,7 +130,7 @@ class FrxEditor {
     $this->xpq = new DOMXPath($dom);
     $this->xpq->registerNamespace('frx', $this->xmlns);
     // Make sure document header is reparsed.
-    $this->frxReport->setReport($this->dom, $this->xpq);
+    $this->frxReport->setReport($this->dom, $this->xpq, $this->edit);
     $cache = forena_load_cache($this->frxReport->rpt_xml);
     if (isset($cache['access'])) $this->access = forena_check_all_access($cache['access']);
     if (!$edit) $this->cache = Frx::File()->getCacheEntry($report_name . '.frx');
@@ -814,7 +814,7 @@ class FrxEditor {
       $node = $this->dom->createElement('div');
       $pnode->appendChild($node);
     }
-    $this->frxReport->setReport($this->dom, $this->xpq);
+    $this->frxReport->setReport($this->dom, $this->xpq, $this->edit);
     $config['block'] = $block_name;
     $b = Frx::BlockEditor($block_name, $this->frxReport->block_edit_mode);
     $data= $b->data($this->parms);
@@ -857,7 +857,7 @@ class FrxEditor {
     $b = Frx::BlockEditor($block_name, $this->frxReport->block_edit_mode);
     $data= $b->data($this->parms);
     $this->addParameters($b->tokens());
-    $this->frxReport->setReport($this->dom, $this->xpq);
+    $this->frxReport->setReport($this->dom, $this->xpq, $this->edit);
     $c = Frx::Template($template_class);
     if ($c) {
       $c->initReportNode($node, $this->frxReport);
