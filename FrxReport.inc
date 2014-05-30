@@ -204,7 +204,6 @@ class FrxReport {
     $body = $dom->getElementsByTagName('body')->item(0);
 
     // Render the rport.
-    $this->html = '';
     $c = Frx::Controls('FrxRenderer');
     $c->initReportNode($body, $this);
     if (!$this->missing_parms) $c->renderChildren($body, $this->html);

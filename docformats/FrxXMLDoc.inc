@@ -24,6 +24,16 @@ class FrxXMLDoc extends FrxDocument {
     }
   }
 
+  public function header($r, $print = TRUE) {
+    if ($print) {
+      header('Content-Type: ' . $this->content_type);
+      header('Cache-Control:');
+      header('Pragma:');
+      header('Cache-Control: must-revalidate');
+    }
+    $r->html =  '<?xml version="1.0"?>' . "\n";
+  }
+
   public function render($r, $format, $options = array()) {
     $output = '';
 
@@ -37,16 +47,6 @@ class FrxXMLDoc extends FrxDocument {
       return $r->html;
     }
 
-  }
-
-  public function output(&$output) {
-      header('Content-Type: ' . $this->content_type);
-      header('Cache-Control:');
-      header('Pragma:');
-      header('Cache-Control: must-revalidate');
-      print  '<?xml version="1.0"?>' . "\n";
-      print  $output;
-      return TRUE;
   }
 
   private function _build_opening_root_tag_contents() {

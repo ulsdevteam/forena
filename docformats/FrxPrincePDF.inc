@@ -77,14 +77,13 @@ class FrxPrincePDF extends FrxDocument {
     }
   }
 
-  public function output(&$output) {
-    if ($output) {
+  public function header($r, $print = FALSE) {
+    $r->html = '';
+    if ($print) {
       header('Content-Type: ' . $this->content_type);
       header('Cache-Control:');
       header('Pragma:');
       header('Cache-Control: must-revalidate');
-      print $output;
-      return TRUE;
     }
   }
 }

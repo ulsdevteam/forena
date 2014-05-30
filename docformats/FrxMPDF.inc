@@ -17,6 +17,10 @@ class FrxMPDF extends FrxDocument {
 
   }
 
+  public function header($r, $print = TRUE) {
+    $r->html = '';
+  }
+
 
   public function render($r, $format, $options = array()) {
     // To Do

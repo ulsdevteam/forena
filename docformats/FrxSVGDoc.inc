@@ -11,6 +11,16 @@ class FrxSVGDoc extends FrxDocument {
     $this->content_type = 'image/svg+xml';
   }
 
+  public function header($r, $print = TRUE) {
+    $r->html = '';
+    if ($print && $$this->content_type) {
+      header('Content-Type: ' . $this->content_type);
+      header('Cache-Control:');
+      header('Pragma:');
+      header('Cache-Control: must-revalidate');
+    }
+  }
+
   public function render($r, $format, $options = array()) {
     $output = '';
     $doc = new DomDocument();
@@ -38,11 +48,6 @@ class FrxSVGDoc extends FrxDocument {
    */
   public function output(&$output) {
     if ($this->content_type) {
-
-      header('Content-Type: ' . $this->content_type);
-      header('Cache-Control:');
-      header('Pragma:');
-      header('Cache-Control: must-revalidate');
       print  $output;
       return TRUE;
     }

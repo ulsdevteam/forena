@@ -24,9 +24,4 @@ class FrxHtmlDoc extends FrxDocument {
     $output .= '<title>' . $r->title . '</title></head><body class="forena-report"><h1>' . $r->title . '</h1>' . $r->html . '</body></html>';
     return $output;
   }
-
-  public function output(&$output) {
-    print $output;
-    return TRUE;
-  }
 }

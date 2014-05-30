@@ -911,6 +911,7 @@ class FrxEditor {
     $cache = array();
 
     $o =  Frx::Document($format);
+    $o->header($this->frxReport, $print);
     $this->frxReport->allowDirectWrite = $o->allowDirectOutput;
     if ($this->frxReport->allowDirectWrite && $filename) {
       $this->frxReport->file = fopen($filename, 'w');

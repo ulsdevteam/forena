@@ -11,6 +11,17 @@ class FrxDocument {
   public $charset = 'UTF-8';
   public $allowDirectOutput = FALSE;
 
+  public function header($r, $print = TRUE) {
+    $r->html = '';
+    if ($this->content_type) {
+      header('Content-Type: ' . $this->content_type . ' ;charset=' . $this->charset);
+      header('Cache-Control:');
+      header('Pragma:');
+      $file_name = basename($_GET['q']);
+      header('Content-Disposition: attachment; filename="' . $file_name . '"');
+      header('Cache-Control: must-revalidate');
+    }
+  }
 
   public function loadCSSFiles($format) {
     // Add css files
@@ -64,19 +75,8 @@ class FrxDocument {
   }
 
   public function output(&$output) {
-    if ($this->content_type) {
-      header('Content-Type: ' . $this->content_type . ' ;charset=' . $this->charset);
-      header('Cache-Control:');
-      header('Pragma:');
-      $file_name = basename($_GET['q']);
-      header('Content-Disposition: attachment; filename="' . $file_name . '"');
-      header('Cache-Control: must-revalidate');
       print  $output;
       return TRUE;
-    }
-    else {
-      return FALSE;
-    }
   }
 
   /**
