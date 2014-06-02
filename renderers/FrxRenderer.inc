@@ -81,7 +81,12 @@ class FrxRenderer {
     if ($node_type == XML_TEXT_NODE|| $node_type == XML_ENTITY_REF_NODE || $node_type == XML_ENTITY_NODE)
     {
       $text = $dom_node->textContent;
-      $o .= $this->teng->replace(htmlspecialchars($text));
+      if (!empty($settings['stripWhiteSpace'])) {
+       $o .= trim( $this->teng->replace(htmlspecialchars($text)));
+      }
+      else {
+        $o .= $this->teng->replace(htmlspecialchars($text));
+      }
       return;
     }
 
@@ -260,7 +265,12 @@ class FrxRenderer {
         $co = Frx::Controls($renderer);
         if ($co) {
           $co->initReportNode($dom_node, $this->frxReport);
-          $o .= $co->render();
+          if (!empty($settings['stripWhiteSpace'])) {
+            $o .= trim($co->render());
+          }
+          else {
+            $o .= $co->render();
+          }
 
         }
       }
