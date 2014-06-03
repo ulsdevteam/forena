@@ -143,7 +143,7 @@ class FrxRenderer {
         }
       }
       if (!$has_children && !$has_attributes) {
-        $has_text = trim($this->teng->replace((string)$dom_node->textContent));
+        $has_text = trim($this->teng->replace((string)$dom_node->textContent)) !== '';
         if (!$has_text) return '';
       }
     }
