@@ -579,13 +579,7 @@ function forena_report_format_form_submit($form, &$form_state) {
 
   // Doc gen settings.
   if (isset($form['docgen'])) {
-    $docgen = array();
-    if ($selected = array_filter(@$values['docgen']['docs'])) {
-      if ($selected) foreach ($selected as $key => $value) {
-        if ($value) $docgen[] = array('type' => $key);
-      }
-    }
-    $r->setDocgen($docgen);
+    $r->setDocgen($values['docgen']['docs']);
   }
 
   $r->update();

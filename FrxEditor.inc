@@ -339,14 +339,55 @@ class FrxEditor {
 
   }
 
+  /**
+   * Makes sure specific document types are asserted.
+   */
+  public function ensureDocGen($types) {
+    $types = array_combine($types, $types);
+    $doctypes = $this->getDocgen();
+    $doctypes = array_merge($types, $doctypes);
+    $this->setDocgen($doctypes);
+  }
 
+
+  /**
+   * Gets the array of selected document types or default if they are present.
+   * @return array
+   */
+  public function getDocgen() {
+
+    //build the options and default list
+    $nodes = $this->simplexml->head->xpath('//frx:doc');
+    if ($nodes)  {
+      $doctypes = array();
+      foreach($nodes as $doc) {
+        $doctypes[] = (string) $doc['type'];
+      }
+    }
+    else {
+        $doctypes = variable_get('forena_doc_formats', array());
+    }
+
+    // Verify that they are not disabled
+    $supported_types = array_keys(Frx::documentTypes());
+    $doctypes = array_intersect($doctypes, $supported_types);
+    $doctypes = array_combine($doctypes, $doctypes);
+    return $doctypes;
+  }
 
   /**
    * Set document generation types that apply to this report.
    * Enter description here ...
    * @param unknown_type $docgenElements
    */
-  public function setDocgen($docgenElements) {
+  public function setDocgen($doctypes) {
+    $docgenElements = array();
+    if ($selected = array_filter($doctypes)) {
+      if ($selected) foreach ($selected as $key => $value) {
+        if ($value) $docgenElements[] = array('type' => $key);
+      }
+    }
+
     $dom = $this->dom;
     $newDocs = $dom->createElementNS($this->xmlns, 'docgen');
     $this->verifyHeaderElements(array('docgen'));
@@ -354,9 +395,9 @@ class FrxEditor {
     $p = $dnode->parentNode;
     $p->replaceChild($newDocs, $dnode);
     $this->setFrxHeader('docgen', 'doc',
-    $docgenElements,
-    array('type'),
-    NULL,
+      $docgenElements,
+      array('type'),
+      NULL,
       'type'
       );
   }

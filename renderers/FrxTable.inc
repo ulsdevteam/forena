@@ -13,7 +13,6 @@ class FrxTable extends FrxRenderer {
   public function scrapeConfig() {
     $config=array();
     $caption = $this->extractXPath('*//caption', $this->reportDocDomNode);
-    dpm($caption, 'caption');
     $this->extractTemplateHTML($this->reportDocDomNode, $config, array('table'));
     $tds = $this->extractXPathInnerHTML('*//td', $this->reportDocDomNode, FALSE);
     $ths = $this->extractXPathInnerHTML('*//th', $this->reportDocDomNode, FALSE);

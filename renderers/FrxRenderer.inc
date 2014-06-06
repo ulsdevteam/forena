@@ -24,6 +24,7 @@ class FrxRenderer {
   public $dom;   // Reports root document node.
   public $xpathQuery;
   public $input_format = 'full_html';
+  public $doc_types = array();    // Specify the required document types to use this format.
 
   public function __construct() {
     $this->input_format = variable_get('forena_input_format', filter_default_format());
