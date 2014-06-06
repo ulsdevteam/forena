@@ -40,7 +40,14 @@ class FrxXLSDoc extends FrxDocument {
     $tables = $xml->xpath('//table');
     $count = 1;
     if ($tables) foreach ($tables as $table) {
-      $output .= '<Worksheet ss:Name="sheet' . ' ' . $count . '">' . "\n";
+      $sheet_name = @(string)$table['data-caption'];
+      if(!$sheet_name && @(string)$table->caption){
+        $sheet_name = (string) $table->caption;
+      }
+      if (!$sheet_name) {
+        $sheet_name = 'sheet' . ' ' . $count;
+      }
+      $output .= '<Worksheet ss:Name="' . $sheet_name . '">' . "\n";
       $count ++;
       $output .= '  <Table>' . "\n";
 
