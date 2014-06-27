@@ -640,7 +640,13 @@ class FrxRenderer {
   public function columns($xml, $path='/*/*') {
     //create an array of columns
     if (!is_object($xml)) return array();
-    $rows = $xml->xpath($path);
+    // Use xpath if possible otherwise iterate.
+    if (method_exists($xml, 'xpath')) {
+      $rows = $xml->xpath($path);
+    }
+    else {
+      $rows = $xml;
+    }
     $column_array = array();
     $numeric_columns = array();
     foreach ($rows as $columns) {
