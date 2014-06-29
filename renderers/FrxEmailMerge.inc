@@ -10,6 +10,7 @@ class FrxEmailMerge extends FrxRenderer {
   public function __construct() {
     parent::__construct();
     $this->email_input_format = variable_get('forena_email_input_format', filter_default_format());
+    $this->doc_types = array('email');
   }
 
   public function scrapeConfig() {

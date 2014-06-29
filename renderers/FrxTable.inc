@@ -12,6 +12,7 @@ class FrxTable extends FrxRenderer {
    */
   public function scrapeConfig() {
     $config=array();
+    $caption = $this->extractXPath('*//caption', $this->reportDocDomNode);
     $this->extractTemplateHTML($this->reportDocDomNode, $config, array('table'));
     $tds = $this->extractXPathInnerHTML('*//td', $this->reportDocDomNode, FALSE);
     $ths = $this->extractXPathInnerHTML('*//th', $this->reportDocDomNode, FALSE);
@@ -74,6 +75,10 @@ class FrxTable extends FrxRenderer {
 
     $attrs = array('foreach' => '*');
     $table = $this->setFirstNode($div, 4, 'table');
+    if (@$config['caption']) {
+      $this->setFirstNode($table, 6, 'caption', $config['caption']);
+    }
+
     $thead = $this->setFirstNode($table, 6, 'thead');
     $throw = $this->setFirstNode($thead, 8, 'tr');
     $tbody = $this->setFirstNode($table, 6, 'tbody');
@@ -91,6 +96,7 @@ class FrxTable extends FrxRenderer {
     $form = parent::configForm($config);
     $this->weight_sort($config['columns']);
     $form['columns'] = array('#theme' => 'forena_element_draggable',   '#draggable_id' => 'FrxTable-columns');
+    $form['caption'] = array('#type' => 'textfield', '#title' => t('Caption'), '#default_value' => @$config['caption']);
     foreach ($config['columns'] as $key => $col) {
       $ctl = array();
       $ctl['label'] = array(

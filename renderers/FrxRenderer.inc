@@ -24,6 +24,7 @@ class FrxRenderer {
   public $dom;   // Reports root document node.
   public $xpathQuery;
   public $input_format = 'full_html';
+  public $doc_types = array();    // Specify the required document types to use this format.
 
   public function __construct() {
     $this->input_format = variable_get('forena_input_format', filter_default_format());
@@ -132,7 +133,7 @@ class FrxRenderer {
     $attrs = $node->attributes();
     $id = (string)$attrs['id'];
     $tag = $node->getName();
-
+    $has_children = TRUE;
     // Preprocessing for detecting blank nodes
     if (@$settings['stripEmptyElements']) {
       $has_children = count($node->children()) > 0;
@@ -144,8 +145,16 @@ class FrxRenderer {
       }
       if (!$has_children && !$has_attributes) {
         $has_text = trim($this->teng->replace((string)$dom_node->textContent)) !== '';
-        if (!$has_text) return '';
+        if (!$has_text) {
+          return;
+        }
+        else {
+          $has_children = TRUE;
+        }
       }
+    }
+    else {
+      $has_children = count($node->children()) > 0 ||  trim($dom_node->textContent) !== '';
     }
 
     if ((string)$frx['block']) {
@@ -275,13 +284,18 @@ class FrxRenderer {
         }
       }
       else {
-        if ($include_root) $o .= $this->teng->replace('<' . $tag . $attr_text . '>', TRUE);
+        if ($has_children) {
+          if ($include_root) $o .= $this->teng->replace('<' . $tag . $attr_text . '>', TRUE);
 
-        // None found, so render children
-        foreach ($dom_node->childNodes as $child) {
-          $this->renderDomNode($child, $o);
+          // None found, so render children
+          foreach ($dom_node->childNodes as $child) {
+            $this->renderDomNode($child, $o);
+          }
+          if ($include_root) $o .= '</' . $tag . '>';
         }
-        if ($include_root) $o .= '</' . $tag . '>';
+        else {
+          $o .= $this->teng->replace('<' . $tag . $attr_text . '/>', TRUE);
+        }
       }
     }
     if ($is_data_block && $continue) {
@@ -626,7 +640,13 @@ class FrxRenderer {
   public function columns($xml, $path='/*/*') {
     //create an array of columns
     if (!is_object($xml)) return array();
-    $rows = $xml->xpath($path);
+    // Use xpath if possible otherwise iterate.
+    if (method_exists($xml, 'xpath')) {
+      $rows = $xml->xpath($path);
+    }
+    else {
+      $rows = $xml;
+    }
     $column_array = array();
     $numeric_columns = array();
     foreach ($rows as $columns) {
