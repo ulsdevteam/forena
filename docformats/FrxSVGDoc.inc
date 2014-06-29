@@ -13,7 +13,7 @@ class FrxSVGDoc extends FrxDocument {
 
   public function header($r, $print = TRUE) {
     $r->html = '';
-    if ($print && $$this->content_type) {
+    if ($print && $this->content_type) {
       header('Content-Type: ' . $this->content_type);
       header('Cache-Control:');
       header('Pragma:');
