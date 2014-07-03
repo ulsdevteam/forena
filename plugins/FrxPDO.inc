@@ -112,6 +112,7 @@ class FrxPDO extends FrxDataSource {
        return;
 
       }
+      if (@$options['return_type'] == 'raw') return $rs;
       $xml = new SimpleXMLElement('<table/>');
       $e = $db->errorCode();
 

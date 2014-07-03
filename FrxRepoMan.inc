@@ -186,7 +186,7 @@ class FrxRepoMan {
    * @param $data_block String name ob block to load
    * @return unknown
    */
-  function data($data_block) {
+  function data($data_block, $raw_mode=FALSE) {
     list($provider, $block_name) = explode('/', $data_block, 2);
     //Intstantiate the provider
     $o = $this->repository($provider);
@@ -210,6 +210,7 @@ class FrxRepoMan {
       $block = $this->loadBlock($data_block);
       $right = @$block['access'];
       if ($block && $o->access($right)) {
+        if ($raw_mode) $block['options']['return_type'] = 'raw';
         switch ($block['type'])  {
           case 'sql':
             $xml = $o->sqlData($block['source'], @$block['options']);
