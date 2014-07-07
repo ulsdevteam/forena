@@ -25,10 +25,10 @@ class FrxOracle extends FrxDataSource {
     parent::__construct($conf, $repos_path, $name);
     $this->db_type = 'oracle';
     $this->use_oracle_xml = FALSE;
-    $uri = $conf['uri'];
-    $this->debug = $conf['debug'];
+    $uri = @$conf['uri'];
+    $this->debug = @$conf['debug'];
     if (isset($conf['schema'])) $this->schema = $conf['schema'];
-    if ($conf['oracle_xml']) $this->use_oracle_xml = TRUE;
+    if (@$conf['oracle_xml']) $this->use_oracle_xml = TRUE;
     if ($uri) {
       // Test for postgres suport
       if (!is_callable('oci_connect')) {
