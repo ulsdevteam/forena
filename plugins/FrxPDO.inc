@@ -112,7 +112,9 @@ class FrxPDO extends FrxDataSource {
        return;
 
       }
-      if (@$options['return_type'] == 'raw') return $rs;
+      if (@$options['return_type'] == 'raw') {
+        return $rs->fetchAll(PDO::FETCH_OBJ);
+      }
       $xml = new SimpleXMLElement('<table/>');
       $e = $db->errorCode();
 
@@ -142,8 +144,10 @@ class FrxPDO extends FrxDataSource {
       }
 
       if ($this->debug) {
-        if ($xml) $d = htmlspecialchars($xml->asXML);
-        FrxReportGenerator::instance()->debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "/n</pre>");
+        if ($xml)  {
+          $d = htmlspecialchars($xml->asXML);
+        }
+        $this->debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "/n</pre>");
       }
       return $xml;
     }
