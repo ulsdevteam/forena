@@ -11,26 +11,73 @@ class FrxSVGGraph extends FrxRenderer {
   private $links;
   public $templateName = 'SVG Graph';
   public $xy_data = FALSE;
+  private $headers = array();
+  private $dim_columns = array();
+  private $group_columns = array();
+  private $dim_headers = array();
+  private $group_headers = array();
+  private $weight;
 
   public function __construct() {
     parent::__construct();
     $library = forena_library_file('SVGGraph');
     require_once $library;
   }
-
+  private function addColumn($type, $token, $label,  &$config) {
+    $key = trim($token, '{}');
+    $this->weight++;
+    $config['crosstab_columns'][$key] = array(
+        'contents' => $token,
+        'label' => $label,
+        'type' => $type,
+        'weight' => $this->weight,
+    );
+  }
   public function scrapeConfig() {
-    $nodes = $this->reportDocDomNode->getElementsByTagName('svg');
-    if ($nodes->length) {
-      $svg = $nodes->item(0);
-      $svg = simplexml_import_dom($svg);
-
+    $this->weight = 0;
+    $attrs = array();
+    $svg = '';
+    $nodes =  $this->reportDocNode->xpath('//svg');
+    if ($nodes) {
+      $svg = $nodes[0];
       $config = $this->mergedAttributes($svg);
-      $graph_type = isset($config['type']) ? strtolower($config['type']) : 'bargraph';
-      $types = $this->graphTypes();
-      $types = array_change_key_case($types);
-      $config['type'] = $types[$graph_type]['type'];
-      $config['style'] = $types[$graph_type]['style'];
     }
+    $graph_type =  isset($config['type']) ? strtolower($config['type']) : 'bargraph';
+    $types = $this->graphTypes();
+    $types = array_change_key_case($types);
+    $config['type'] = $types[$graph_type]['type'];
+    $config['style'] = $types[$graph_type]['style'];
+
+    // Get child table attributes for xml configuration.
+    $nodes =  $this->reportDocNode->xpath('//table');
+    if ($nodes) {
+      $table = $nodes[0];
+      $attrs = $this->mergedAttributes($table);
+    }
+    $config['group'] = $group = $attrs['group'];
+    $config['dim']  = $dim = $attrs['dim'];
+    $this->extractTemplateHTML($this->reportDocDomNode, $config, array('table'));
+    $head_ths = $this->extractXPathInnerHTML('*//thead/tr/th', $this->reportDocDomNode, FALSE);
+    $head_tds = $this->extractXPathInnerHTML('*//thead/tr/td', $this->reportDocDomNode, FALSE);
+    $body_ths = $this->extractXPathInnerHTML('*//tbody/tr/th', $this->reportDocDomNode, FALSE);
+    $body_tds = $this->extractXPathInnerHTML('*//tbody/tr/td', $this->reportDocDomNode, FALSE);
+    $heading_cols = array_combine($head_ths, $body_ths);
+    $data_cols = array_combine($head_tds, $body_tds);
+    // Get the named headers
+    foreach($heading_cols as $label=>$token) {
+      $this->addColumn('heading', $token, $label, $config);
+    }
+    // Get the data cells
+    if ($dim) {
+      $dims = (array)$dim;
+      foreach($dims as $dim) {
+        $this->addColumn('crosstab', $dim, trim($dim, '{}'), $config);
+      }
+    }
+    foreach($data_cols as $label=>$token) {
+      $this->addColumn('value', $token, $label, $config);
+    }
+
     return $config;
   }
 
@@ -209,8 +256,32 @@ class FrxSVGGraph extends FrxRenderer {
     return $output;
   }
 
+  /**
+   * Generate series from crosstab.
+   * @param unknown $config
+   */
+  private function seriesFromColumns(&$config) {
+    $series = array();
+    foreach ($config['crosstab_columns'] as $key => $col) {
+      if ($col['type'] == 'value') {
+        $series[] = '{' . $key . '}';
+      }
+    }
+    $config['series'] = $series;
+  }
+
+  private function labelFromColumns(&$config) {
+    $label = '';
+    foreach ($config['crosstab_columns'] as $key => $col) {
+      if ($col['type'] == 'heading') {
+        $label = trim($label . ' {' . $key . '}');
+      }
+    }
+    $config['label'] = $label;
+  }
+
   public function configForm($config) {
-    $form_ctl = array();
+    $form = array();
 
     $graph_types = array(
         'bargraph' => 'Bar Graph',
@@ -222,6 +293,7 @@ class FrxSVGGraph extends FrxRenderer {
         'scatterplot' => 'Scatter Plot',
     );
 
+
     $type = isset($config['type']) ? $config['type'] : 'Bar Graph';
     $style = isset($config['style']) ? $config['style'] : 'BarGraph';
     $graph_options = FrxSVGGraph::graphOptions();
@@ -230,13 +302,16 @@ class FrxSVGGraph extends FrxRenderer {
     $xvalues = @$graph_types[$type]['xaxis'];
     $num_series = isset($graph_types[$style]['series']) ? $graph_types[$style]['series'] : 1;
     $types = $graph_options['types'];
-    $form_ctl['xpath'] = array(
+
+    $form = parent::configForm($config);
+
+    $form['xpath'] = array(
       '#type' => 'textfield',
       '#title' => ('xpath'),
       '#default_value' => @$config['xpath'],
     );
 
-    $form_ctl['type'] = array(
+    $form['type'] = array(
         '#type' => 'select',
         '#title' => t('Graph Type'),
         '#options' => $graph_options['types'],
@@ -244,7 +319,7 @@ class FrxSVGGraph extends FrxRenderer {
         '#ajax' => $this->configAjax(),
     );
 
-    $form_ctl['style'] = array(
+    $form['style'] = array(
         '#type' => 'select',
         '#title' => t('Style'),
         '#options' => $styles,
@@ -252,71 +327,105 @@ class FrxSVGGraph extends FrxRenderer {
         '#ajax' => $this->configAjax(),
     );
 
-    $form_ctl['gen_table'] = array(
+    $form['gen_table'] = array(
         '#type' => 'checkbox',
         '#title' => t('Include data table with graph'),
         '#default_value' => @$config['gen_table'],
         '#ajax' => $this->configAjax(),
     );
 
-    $form_ctl['label'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Label'),
-        '#default_value' => @$config['label'],
-        '#ajax' => $this->configAjax('blur'),
-    );
 
-
-    $form_ctl['series'] = array(
-        '#type' => 'fieldset',
-        '#title' => t('Series'),
-        '#ajax' => $this->configAjax('blur'),
-    );
-    if ($xvalues) {
-      $form_ctl['seriesx'] = array(
-          '#type' => 'fieldset',
-          '#title' => t('Series X'),
-          '#description' => t('Forena token expression to get the X value (.e.g. {years}'),
-          '#ajax' => $this->configAjax('blur'),
-      );
-      $form_ctl['series']['#title'] = t('Series Y');
-    }
-
-
-    for ($i=0; $i <= $num_series -1; $i++) {
-      if ($xvalues) {
-        $form_ctl['seriesx'][$i] = array(
-            '#type' => 'textfield',
-            '#title' => check_plain((string)($i + 1)),
-            '#default_value' => $config['seriesx'][$i],
-            '#description' => t('Forena token expressioin for series %s x value. (e.g. {total} )', array('%s' => $i+1)),
-        );
-      }
-      $form_ctl['series'][$i] = array(
+    $this->weight_sort($config['crosstab_columns']);
+    $types = array('heading' => t('Label'), 'crosstab' => t('Crosstab'), 'value' => 'Value', 'ignore' => t('Ignore'));
+    $form['crosstab_columns'] = array('#theme' => 'forena_element_draggable',   '#draggable_id' => 'FrxCrosstab-columns');
+    foreach ($config['crosstab_columns'] as $key => $col) {
+      $ctl = array();
+      $ctl['label'] = array(
           '#type' => 'textfield',
-          '#title' => check_plain((string)($i + 1)),
-          '#default_value' => @$config['series'][$i],
-          '#description' => t('Forena token expressioin for series %s. (e.g. {total} )', array('%s' => $i+1)),
+          '#size' => 30,
+          '#title' => t('Label'),
+          '#default_value' => $col['label'],
       );
 
+      $ctl['contents'] = array(
+          '#type' => 'textfield',
+          '#size' => '30',
+          '#title' => t('Data'),
+          '#default_value' => $col['contents'],
+      );
+
+      $ctl['type'] = array(
+          '#type' => 'radios',
+          '#title' => t('Type'),
+          '#default_value' => $col['type'],
+          '#options' => $types,
+          '#ajax' => $this->configAjax()
+      );
+
+      $ctl['weight'] = array(
+          "#type" => 'weight',
+          '#title' => t('Weight'),
+          '#delta' => 50,
+          '#default_value' => $col['weight'],
+      );
+
+      $form['crosstab_columns'][$key] = $ctl;
     }
 
-    $form_ctl['link'] = array(
+
+    $form['link'] = array(
         '#type' => 'textfield',
         '#title' => 'link',
         '#default_value' => @$config['link'],
     );
 
-    return $form_ctl;
+    return $form;
   }
 
   public function generate($xml, &$config) {
     $config['class'] = get_class($this);
     $media = 'FrxSVGGraph';
     $div = $this->blockDiv($config);
+    $attrs  = array();
+
+    // Determine columns and make sure we represent them all
+    $found_columns = $this->columns($xml);
+    if (!$found_columns) {
+      $found_columns = $this->columns($xml, '/*');
+    }
+
+    $numeric_columns = $this->numeric_columns;
+    $new_columns = @$config['crosstab_columns'] ? FALSE : TRUE;
+    foreach ($found_columns as $column => $label) {
+      $token = '{' . $column . '}';
+      if ($new_columns) {
+        $type = isset($numeric_columns[$column]) ? 'value' : 'heading';
+      } else {
+        $type = 'ignore';
+      }
+      if (!isset($config['crosstab_columns'][$column])) {
+        $this->addColumn($type, '{' . $column . '}', $column, $config);
+      }
+    }
+
+    // Generate the grouping row
+    $group = '';
+    $dim = array();
+    foreach($config['crosstab_columns'] as $col) {
+      if ($col['type'] == 'heading') $group .= $col['contents'];
+      if ($col['type'] == 'crosstab') $dim = $col['contents'];
+    }
+
+    // PUt on the header
+    $this->removeChildren($div);
+    if (isset($config['header']['value'])) $this->addFragment($div, $config['header']['value']);
+
+
     if ($config) {
-      // Clean series
-      foreach ($config['series'] as $i => $series) if (!$series) unset($config['series'][$i]);
+      $this->seriesFromColumns($config);
+      $this->labelFromColumns($config);
+
+
       // Clean colors
       if (isset($config['colors'])) foreach ($config['colors'] as $i => $color) if (!$color) unset($color[$i]);
 
@@ -341,20 +450,30 @@ class FrxSVGGraph extends FrxRenderer {
 
 
       $svg = $this->setFirstNode($div, 2, 'svg',  NULL, NULL,  $frxattrs);
-      if ($gen_table) {
-        $columns = $this->columns($xml);
-        $table = $this->addNode($div, 4, 'table');
-        $thead = $this->addNode($table, 6, 'thead');
-        $throw = $this->addNode($thead, 8, 'tr');
-        $tbody = $this->addNode($table, 6, 'tbody');
-        $tdrow = $this->addNode($tbody, 8, 'tr', NULL, NULL, array('foreach' => '*'));
-        if ($columns) foreach ($columns as $col=>$label) {
-          $this->addNode($throw, 10, 'th', $label);
-          $this->addNode($tdrow, 10, 'td', '{' . $col . '}');
-        }
-      }
 
     }
+
+    $table_frx['renderer'] = 'FrxCrosstab';
+    $table_frx['group'] = $group;
+    $table_frx['dim'] = $dim;
+    $table = $this->setFirstNode($div, 4, 'table', NULL, $attrs, $table_frx);
+    $thead = $this->setFirstNode($table, 6, 'thead');
+    $throw = $this->setFirstNode($thead, 8, 'tr');
+    $tbody = $this->setFirstNode($table, 6, 'tbody');
+    $tdrow = $this->setFirstNode($tbody, 8, 'tr', NULL, NULL, $attrs);
+    if ($config['crosstab_columns']) foreach ($config['crosstab_columns'] as $key => $col) if ($col['type']!=='ignore') {
+      if ($col['type']=='heading') {
+        $tag = 'th';
+      }
+      else {
+        $tag = 'td';
+      }
+      if ($col['type'] != 'crosstab') {
+        $this->addNode($throw, 10, $tag, $col['label']);
+        $this->addNode($tdrow, 10, $tag, $col['contents']);
+      }
+    }
+    if (isset($config['footer']['value'])) $this->addFragment($div, $config['footer']['value']);
   }
 
 
