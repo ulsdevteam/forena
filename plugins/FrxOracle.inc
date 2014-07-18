@@ -25,10 +25,10 @@ class FrxOracle extends FrxDataSource {
     parent::__construct($conf, $repos_path, $name);
     $this->db_type = 'oracle';
     $this->use_oracle_xml = FALSE;
-    $uri = $conf['uri'];
-    $this->debug = $conf['debug'];
+    $uri = @$conf['uri'];
+    $this->debug = @$conf['debug'];
     if (isset($conf['schema'])) $this->schema = $conf['schema'];
-    if ($conf['oracle_xml']) $this->use_oracle_xml = TRUE;
+    if (@$conf['oracle_xml']) $this->use_oracle_xml = TRUE;
     if ($uri) {
       // Test for postgres suport
       if (!is_callable('oci_connect')) {
@@ -83,7 +83,7 @@ class FrxOracle extends FrxDataSource {
       else {
         $sql = $this->te->replace($sql);
 
-        if ($this->use_oracle_xml) {
+        if ($this->use_oracle_xml && @$options['return_type'] != 'raw') {
           $xml = $this->oracle_xml($sql, 'table');
         }
         else {
@@ -151,11 +151,12 @@ class FrxOracle extends FrxDataSource {
 
   private function php_xml($sql, $options=array()) {
     $db = $this->db;
+    $raw_rows = array();
     $xml = new SimpleXMLElement('<table/>');
     //$rs->debugDumpParams();
     $stmt = oci_parse($db, $sql);
     @oci_execute($stmt);
-
+    $raw = @$options['return_type'] == 'raw';
 
     $e = oci_error($stmt);  // For oci_execute errors pass the statement handle
     //drupal_set_message(e_display_array($e));
@@ -181,13 +182,22 @@ class FrxOracle extends FrxDataSource {
     $rownum=0;
     while (($row = oci_fetch_array($stmt, OCI_ASSOC + OCI_RETURN_NULLS + OCI_RETURN_LOBS))  && (!$use_limit || $row < $limit)) {
       $rownum++;
-      $row_node = $xml->addChild('row');
-      $row_node['num'] = $rownum;
-      foreach ($row as $key => $value) {
-        $row_node->addChild(strtolower($key), @htmlspecialchars($value));
+      if ($raw) {
+        $raw_rows[] = (object)array_change_key_case($row);
       }
+      else {
+        $row_node = $xml->addChild('row');
+        $row_node['num'] = $rownum;
+        foreach ($row as $key => $value) {
+          $row_node->addChild(strtolower($key), @htmlspecialchars($value));
+        }
+      }
+
     }
     oci_free_statement($stmt);
+    if ($raw) {
+      return $raw_rows;
+    }
     return $xml;
   }
 

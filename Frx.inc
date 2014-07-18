@@ -226,7 +226,7 @@ class Frx {
    */
   public static function error($short_message='', $log='') {
     if ($short_message) {
-      drupal_set_message(check_markup($short_message), 'error');
+      drupal_set_message(check_markup($short_message), 'error', FALSE);
     }
     if ($log) {
       watchdog('forena', $log, NULL, WATCHDOG_ERROR);

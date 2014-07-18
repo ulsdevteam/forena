@@ -599,7 +599,6 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
     '#descripton' => t('Connection string: see appropriate php documentation for more details.'),
     '#default_value' => @$config['uri'],
     '#required' => TRUE,
-    '#disabled' => $locked,
   );
 
   $user = array(
@@ -661,7 +660,7 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
         '#title' => t('Oracle native XML'),
         '#disabled' => $locked,
         '#description' => t('Use the function provided with Forena to generate XML.  Requires installing a function into the database'),
-        '#default_value' => $config['oracle_xml'],
+        '#default_value' => @$config['oracle_xml'],
       );
       break;
     case 'FrxPDO':

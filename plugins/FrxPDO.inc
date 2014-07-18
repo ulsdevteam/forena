@@ -60,6 +60,7 @@ class FrxPDO extends FrxDataSource {
       } catch (PDOException $e) {
         $this->error('Unable to connect to database', $e->getMessage());
       }
+      $this->db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_OBJ);
 
     }
     else {
@@ -112,6 +113,9 @@ class FrxPDO extends FrxDataSource {
        return;
 
       }
+      if (@$options['return_type'] == 'raw') {
+        return $rs;
+      }
       $xml = new SimpleXMLElement('<table/>');
       $e = $db->errorCode();
 
@@ -141,8 +145,11 @@ class FrxPDO extends FrxDataSource {
       }
 
       if ($this->debug) {
-        if ($xml) $d = htmlspecialchars($xml->asXML);
-        FrxReportGenerator::instance()->debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "/n</pre>");
+        $d = '';
+        if ($xml)  {
+          $d = htmlspecialchars($xml->asXML());
+        }
+        $this->debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "/n</pre>");
       }
       return $xml;
     }

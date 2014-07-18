@@ -40,6 +40,9 @@ class FrxRepoMan {
       'title' => 'Sample DB Repository'
       );
 
+
+      drupal_alter('forena_repos',  $repos);
+
       // Retrieve the repositories defined in the database;
       $results = db_query('SELECT * FROM {forena_repositories}');
       foreach ($results as $r) {
@@ -61,8 +64,6 @@ class FrxRepoMan {
 
         $repos[$r_name] = $new_r;
       }
-
-      drupal_alter('forena_repos',  $repos);
 
       if ($_forena_repositories) {
         array_merge($repos, $_forena_repositories);
@@ -186,7 +187,7 @@ class FrxRepoMan {
    * @param $data_block String name ob block to load
    * @return unknown
    */
-  function data($data_block) {
+  function data($data_block, $raw_mode=FALSE) {
     list($provider, $block_name) = explode('/', $data_block, 2);
     //Intstantiate the provider
     $o = $this->repository($provider);
@@ -210,6 +211,7 @@ class FrxRepoMan {
       $block = $this->loadBlock($data_block);
       $right = @$block['access'];
       if ($block && $o->access($right)) {
+        if ($raw_mode) $block['options']['return_type'] = 'raw';
         switch ($block['type'])  {
           case 'sql':
             $xml = $o->sqlData($block['source'], @$block['options']);
