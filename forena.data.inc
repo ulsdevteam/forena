@@ -56,6 +56,7 @@ function forena_display_blocks() {
 function forena_data_block_preview($block_name, $parms = array(), $edit=FALSE) {
   $o = Frx::Editor('__forena_block_preview__');
   $o->frxReport->block_edit_mode = $edit;
+  $o->alterParameters($parms);
   $o->setEditorParms($parms);
   $config = array();
   $o->addBlock($block_name, 'FrxTable', $config);
