@@ -698,7 +698,7 @@ function forena_parameter_form($formid, &$form_state, $parameters, $attributes= 
             $list = array();
         }
 
-        if (isset($menu_parms[$id]) && $type=='textfield') {
+        if (isset($menu_parms[$id]) && $type!='hidden') {
           $disabled = TRUE;
         }
 
