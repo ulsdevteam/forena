@@ -6,11 +6,22 @@
  * @author davidmetzler
  *
  */
+include_once('FrxCrosstab.inc');
+include_once('FrxTable.inc');
 class FrxSVGGraph extends FrxRenderer {
   private $graph;
   private $links;
-  public $templateName = 'SVG Graph';
+  public $templateName = 'Graph (svg)';
   public $xy_data = FALSE;
+  private $point_attributes;
+  private $headers = array();
+  private $weight;
+  private $graphData;
+  private $graphOptions;
+  private $colors;
+
+  // Place to indicate which fields are sourced from the data.
+  private $field_sources = array();
 
   public function __construct() {
     parent::__construct();
@@ -18,118 +29,305 @@ class FrxSVGGraph extends FrxRenderer {
     require_once $library;
   }
 
-  public function scrapeConfig() {
-    $nodes = $this->reportDocDomNode->getElementsByTagName('svg');
-    if ($nodes->length) {
-      $svg = $nodes->item(0);
-      $svg = simplexml_import_dom($svg);
+  /**
+   * Re-architect the data into something that the graphing engine can work with
+   */
+  public function generateGraphData(&$data, $series, $key) {
 
-      $config = $this->mergedAttributes($svg);
-      $graph_type = isset($config['type']) ? strtolower($config['type']) : 'bargraph';
-      $types = $this->graphTypes();
-      $types = array_change_key_case($types);
-      $config['type'] = $types[$graph_type]['type'];
-      $config['style'] = $types[$graph_type]['style'];
+    // Default controling attributes
+    $dim_headers = array($key);
+
+    $this->graphOptions['structure']['value'] = array();
+    foreach($series as $dk) {
+      foreach($series as $col) {
+        $this->graphOptions['structure']['value'][] = trim("$col", '{}');
+      }
     }
+
+    $this->graphData = array();
+    foreach ($data as $row) {
+      Frx::Data()->push($row, '_row');
+      $trow = array();
+      // Base group
+      $trow['key'] =  $this->teng->replace($key);;
+      // Dimensions
+      foreach($series as $col) {
+          $val = $this->teng->replace($col, TRUE);
+          if(!$val) $val = 0;
+          $trow[trim("$col", '{}')] = $val;
+      }
+      foreach($this->field_sources as $k => $src) {
+        $trow[$k] = $this->teng->replace($src);
+      }
+      Frx::Data()->pop();
+      $this->graphData[] = $trow;
+    }
+  }
+
+
+   /**
+   * Re-architect the data into something that the graphing engine can work with
+   */
+  public function generateGroupGraphData(&$block_data, $group, $series, $key, $dim) {
+    $dim_headers = array();
+    $dim_rows = array();
+    $dim_columns = array();
+    $group_headers = array();
+    $dim_values = array();
+    $rows = array();
+    $data = $this->frxReport->group($block_data, $group);
+
+    foreach ($data as $gk => $group_rows) {
+      $row_copy = array_values($group_rows);
+      $dims = $this->frxReport->group($group_rows, $dim);
+      $rows[$gk] = $group_rows[0];
+      foreach($dims as $dk=>$r) {
+        $dims = array_values($r);
+        $dim_values[$dk] = $dk;
+        $dim_rows[$gk][$dk] = $r[0];
+      }
+    }
+
+    // Default controling attributes
+    $dim_headers = array($key);
+    $dim_columns = $series;
+
+    // Add the dimension headers.
+    foreach ($dim_values as $dk) {
+      foreach ($dim_headers as $i => $col) {
+        $cell = '';
+        if (count($dim_columns) > 1) {
+          $cell = $i ? $col : $dk . ' ' . $col;
+        }
+        $hrow []  = $cell;
+      }
+    }
+
+    $this->graphOptions['structure']['value'] = array();
+    foreach($dim_values as $dk) {
+      foreach($dim_columns as $col) {
+        $this->graphOptions['structure']['value'][] = $dk . ' ' . trim("$col", '{}');
+      }
+    }
+
+    $this->graphData = array();
+    $gkey = '';
+    foreach ($rows as $k=>$row) {
+      Frx::Data()->push($row, '_group');
+      $trow = array();
+      // Base group
+
+      $gkey = $this->teng->replace($group);
+      $trow['key'] = $gkey;
+      foreach($this->field_sources as $fk => $src) {
+        $trow[$fk] = $this->teng->replace($src);
+      }
+      Frx::Data()->pop();
+      // Dimensions
+      $dim_data = $dim_rows[$k];
+      foreach($dim_values as $dk) {
+        $dim_row = isset($dim_data[$dk]) ? $dim_data[$dk] : array();
+        frx::Data()->push($dim_row, '_dim');
+        foreach($dim_columns as $col) {
+          $cell = $col;
+          $val = $this->teng->replace($col, TRUE);
+          if(!$val) $val = 0;
+          $trow[$dk . ' ' . trim("$col", '{}')] = $val;
+        }
+        frx::Data()->pop();
+      }
+      $this->graphData[] = $trow;
+
+    }
+
+    return $this->graphData;
+  }
+
+  /**
+   * Add column for cross tabs.
+   */
+  private function addColumn($type, $token, $label,  &$config) {
+    $key = trim($token, '{}');
+    $this->weight++;
+    $config['crosstab_columns'][$key] = array(
+        'contents' => $token,
+        'label' => $label,
+        'type' => $type,
+        'weight' => $this->weight,
+    );
+  }
+
+  /**
+   * Derive config variables from graph.
+   */
+  public function scrapeConfig() {
+    $this->weight = 0;
+    $attrs = array();
+    $svg = '';
+    $nodes =  $this->reportDocNode->xpath('//svg');
+    if ($nodes) {
+      $svg = $nodes[0];
+      $config = $this->mergedAttributes($svg);
+    }
+
+    // Determine graph type
+    $graph_type =  isset($config['type']) ? $config['type'] : 'BarGraph';
+    $types = $this->graphTypes();
+    $types = array_change_key_case($types);
+    $config['base_type'] = $types[strtolower($graph_type)]['type'];
+
+    $this->extractTemplateHTML($this->reportDocDomNode, $config, array('svg'));
+    if (!isset($config['key'])) $config['key'] =  @$config['label'];
+    if (!isset($config['key'])) $config['key'] = @$config['seriesx'];
+    $key = $config['key'];
+    $dim = @$config['dim'];
+    $series = @(array)$config['series'];
+
+    if ($key) {
+      $keys = explode(' ', $key);
+      foreach ($keys as $k) {
+        $this->addColumn('heading', $k, trim($k, '{}'), $config);
+      }
+    }
+    if ($series) foreach ($series as $col) {
+      $this->addColumn('value',$col , trim($col, '{}'), $config);
+    }
+
+    // Get the data cells
+    if ($dim) {
+      $dims = (array)$dim;
+      foreach($dims as $dim) {
+        $this->addColumn('crosstab', $dim, trim($dim, '{}'), $config);
+      }
+    }
+
     return $config;
   }
 
+  /**
+   * Render the graph.
+   * @return Ambigous <string, mixed>
+   */
   public function render() {
-
     // Get data from source
     $output = '';
     $options = array();
     $series = array();
-    $seriesx = array();
-    $data = array();
-    $attributes = $this->mergedAttributes();
-    $path = isset($attributes['xpath']) ? $attributes['xpath'] :  '*';
     $label = '';
     $links = '';
-    $type = $attributes['type'];
-    $link = @$attributes['link'];
+    $dim='';
+    $seriesx = array();
+    $attributes = $this->mergedAttributes();
+    // Default in xpath for backward compatibility
     // Legacy options.  New charts should be generated using Frx:attribute syntax
     if (isset($attributes['options'])) {
       parse_str($attributes['options'], $options);
       unset($attributes['options']);
+      foreach ($options as $key => $value) {
+        $options[$key] = $this->teng->replace($value, TRUE);
+      }
       $options  = array_merge($attributes, $options);
     }
     else {
       $options = $attributes;
     }
 
-    $series = @$options['series'];
-    if (isset($options['seriesx']))  {
-      $seriesx = $options['seriesx'];
-      unset($options['seriesx']);
+    // Main Graphing options
+    $path = $this->extract('path', $options);
+    if (!$path) $path = $this->extract('xpath', $options); //Deprecated
+    if (!$path) $path = '*';
+    $group = $this->extract('group', $options);
+    $series = @$attributes['series'];
+    $label = @$attributes['label'];
+    $key = @$attributes['key'];
+    if (!$key) $key = @$attributes['label']; //Backward compatibility for old graphs.
+    $options['key'] = $key;
+    $dim = $this->extract('dim', $options);
+    $type = $this->extract('type', $options);
+    if (!$key) $key = @$options['seriesx']; // Deprecated
+
+    // Determine basic data to iterate.
+    $data = Frx::Data()->currentContext();
+    if (is_object($data)) {
+      if (method_exists($data, 'xpath')) {
+        $nodes = $data->xpath($path);
+      }
+      else {
+        $nodes = $data;
+      }
     }
-    if (isset($options['label'])) {
-      $label =  $options['label'];
-      unset($options['label']);
-    }
-    foreach ($options as $key => $value) {
-      $options[$key] = $this->teng->replace($value, TRUE);
+    else {
+      $nodes = (array)$data;
     }
 
+    // Force structured data
+    $options['structured_data'] = TRUE;
+    $options['structure'] = array('key' => 'key');
+
+    // Default in american colour;
+    $this->field_sources = array();
+    if (isset($options['color'])) $options['colour'] = $options['color'];
+
+    // Find out data that is designed to be sepecif to series.
+    $this->field_sources = array();
+    foreach ($options as $fk => $opt) {
+      if ($fk != 'value' && $fk != 'key' && $opt && !is_array($opt) && strpos($options[$fk], '{')!==FALSE) {
+        $this->field_sources[$fk] = $opt;
+        $options['structure'][$fk] = $fk;
+      }
+    }
     if (isset($attributes['height'])) $options['height'] = $this->teng->replace($attributes['height']);
     if (isset($attributes['width'])) $options['width'] = $this->teng->replace($attributes['width']);
-
-    // Extract chart series data from xml.
-    if ($series) {
-      foreach ((array)$series as $i => $d) {
-        if ($seriesx) {
-          $this->xy_data = TRUE;
-          $data[] = $this->xmlToValues($path, $d, $seriesx[$i], TRUE);
-        }
-        else {
-          $data[] = $this->xmlToValues($path, $d, $label, FALSE);
-        }
-      }
+    if (isset($options['legend_entries']) && !isset($options['label']) && !isset($options['show_labels'])) {
+      $options['show_labels'] = FALSE;
     }
 
-    if ($link) {
-      $links = $this->xmlToValues($path, $link, $label);
+
+    $this->graphOptions = $options;
+
+    if ($group && $dim) {
+      $this->generateGroupGraphData($nodes, $group, $series, $key, $dim);
+    }
+    else {
+      $this->generateGraphData($nodes, $series, $key);
     }
 
-    // Deal with rare case where attributes are supposed to come from data
-    if (@$attributes['color'] && !is_array($attributes['color']) && strpos($attributes['color'], '{') !==FALSE) {
-      $options['colors'] = $this->xmlToValues($path, $attributes['color']);
-    }
 
     // Deal with rare case where legend are supposed to come from data
-    if (@$attributes['legend_entry'] && !is_array($attributes['legend_entry']) && strpos($attributes['legend_entry'], '{') !==FALSE) {
-      $options['legend_entries'] = $this->xmlToValues($path, $attributes['legend_entry']);
-    }
-
-
-    if ($data) {
-
-      if (method_exists($this, 'renderChart')) {
-        $output = $this->renderChart($type, $data, $options, $links);
+    if (isset($this->field_sources['legend_entries'])) {
+      $legend = array();
+      foreach($this->graphData as $row) {
+        $legend[] = $row['legend_entries'];
       }
-
+      $this->graphOptions['legend_entries'] = $legend;
+    }
+    if (isset($this->graphOptions['legend_entries']) && !is_array($this->graphOptions['legend_entries'])) {
+      $options['legend_entries'] = explode('|', $this->graphOptions['legend_entries']);
+    }
+    if ($data) {
+      $output = $this->renderChart($type, $data, $options, $links);
     }
     return $output;
   }
 
   static function graphTypes() {
     return array(
-      'BarGraph' => array('type' => 'Bar Graph', 'style' => 'Simple', 'series' => 1),
-      'Bar3DGraph' => array('type' => 'Bar Graph', 'style' => '3D', 'series' => 1),
-      'StackedBarGraph' => array('type' => 'Bar Graph', 'style' => 'Stacked', 'series' => 4),
-      'GroupedBarGraph' => array('type' => 'Bar Graph', 'style' => 'Grouped', 'series' => 4),
-      'CylinderGraph' => array('type' => 'Bar Graph', 'style' => 'Cylinder', 'series' => 1),
-      'StackedCylinderGraph' => array('type' => 'Bar Graph', 'style' => 'Stacked Cylinder', 'series' => 4),
-      'GroupedCylinderGraph' =>  array('type' => 'Bar Graph', 'style' => 'Grouped Cylinder', 'series' => 1),
-      'PieGraph' => array('type' => 'Pie Chart', 'style' => 'Simple', 'series' => 1),
-      'Pie3DGraph' => array('type' => 'Pie Chart', 'style' => '3D', 'series' => 1),
-      'HorizontalBarGraph' => array('type' => 'Bar Graph', 'style' => 'Horizontal', 'series' => 1),
-      'LineGraph' =>array('type' => 'Line Graph', 'style' => 'Simple', 'series' => 1),
-      'MultiLineGraph' => array('type' => 'Line Graph', 'style' => 'Multi', 'series' => 4),
-      'ScatterGraph' => array('type' => 'Scatter Plot', 'style' => 'Simple', 'series' => 1, 'xaxis' => TRUE),
-      'MultiScatterGraph' => array('type' => 'Scatter Plot', 'style' => '3D', 'series' => 4, 'xaxis' => TRUE),
-      'RadarGraph' => array('type' => 'Radar Graph', 'style' => 'Simple', 'series' => 1),
-      'MultiRadarGraph' => array('type' => 'Radar Graph', 'style' => 'Multi', 'series' => 4),
+      'BarGraph' => array('type' => 'Bar Graph', 'style' => 'Simple' ),
+      'Bar3DGraph' => array('type' => 'Bar Graph', 'style' => '3D' ),
+      'StackedBarGraph' => array('type' => 'Bar Graph', 'style' => 'Stacked'),
+      'GroupedBarGraph' => array('type' => 'Bar Graph', 'style' => 'Grouped'),
+      'CylinderGraph' => array('type' => 'Bar Graph', 'style' => 'Cylinder'),
+      'StackedCylinderGraph' => array('type' => 'Bar Graph', 'style' => 'Stacked Cylinder'),
+      'GroupedCylinderGraph' =>  array('type' => 'Bar Graph', 'style' => 'Grouped Cylinder'),
+      'PieGraph' => array('type' => 'Pie Chart', 'style' => 'Simple'),
+      'Pie3DGraph' => array('type' => 'Pie Chart', 'style' => '3D'),
+      'HorizontalBarGraph' => array('type' => 'Bar Graph', 'style' => 'Horizontal'),
+      'LineGraph' =>array('type' => 'Line Graph', 'style' => 'Simple'),
+      'MultiLineGraph' => array('type' => 'Line Graph', 'style' => 'Multi'),
+      'ScatterGraph' => array('type' => 'Scatter Plot', 'style' => 'Simple', 'xaxis' => TRUE),
+      'MultiScatterGraph' => array('type' => 'Scatter Plot', 'style' => '3D', 'xaxis' => TRUE),
+      'RadarGraph' => array('type' => 'Radar Graph', 'style' => 'Simple'),
+      'MultiRadarGraph' => array('type' => 'Radar Graph', 'style' => 'Multi'),
     );
   }
 
@@ -142,10 +340,9 @@ class FrxSVGGraph extends FrxRenderer {
     return array('types' => $type, 'styles' => $style);
   }
 
-  function renderChart($type, $data, $options, $links ) {
+  function renderChart($type, $data ) {
     $options['width'] = @$options['width'] ? $options['width'] : 600;
     $options['height'] = @$options['height'] ? $options['height'] : 400;
-    $this->links = $links;
     $type = strtolower($type);
     // Legacy sustitions for backcward compatibility.
     if ($type == 'piechart') $type = 'piegraph';
@@ -162,43 +359,39 @@ class FrxSVGGraph extends FrxRenderer {
 
     if ($data && isset($graph_classes[$type])) {
       $class = $graph_classes[$type];
-      if (@$graph_types[$class]['series'] == 1) {
-        $output = $this->renderGraph($class, $options, $data[0]);
-      }
-      else {
-        $output = $this->renderGraph($class, $options, $data);
-      }
+      $output = $this->renderGraph($class);
     }
     return $output;
   }
 
 
-  function renderGraph($type, $options, $data) {
+  function renderGraph($type) {
     static $jsinc = FALSE;
+    $options = $this->graphOptions;
+    $data = $this->graphData;
+
     if (!isset($options['scatter_2d']) && ($type == 'ScatterGraph' || $type=='MultiScatterGraph') && $this->xy_data && !isset($options['scatter_2d'])) {
       $options['scatter_2d'] = TRUE;
     }
     else {
       $options['scatter_2d'] = (bool) @$options['scatter_2d'];
     }
-    $links = $this->links;
     $width = (@$options['width']) ? @$options['width'] : 600;
     $height = (@$options['height']) ? @$options['height'] : 400;
+    //dpm($options, 'svg graph options');
     $graph = new SVGGraph($width, $height, $options);
     $this->graph = $graph;
     $graph->Values($data);
-    if (is_array(@$options['colors'])) {
-      $graph->colours = $options['colors'];
+    if (isset($options['colour']) && is_array($options['colour'])) {
+      $graph->Colours($options['colour']);
     }
-
-    if ($links) {
-      $graph->Links($links);
-    }
+    // Generate the graph
     $output = $graph->Fetch($type, FALSE);
     // Add a viewbox to be compatible with Prince PDF generation.
     $output = str_replace('<svg width', "<svg viewBox='0 0 $width $height' width", $output);
     $javascript = '/<script[^>]*?>.*?<\/script>/si';
     $noscript = '';
+
     if (!$jsinc && $this->format == 'web') {
       $output .= $graph->FetchJavascript();
     }
@@ -209,114 +402,191 @@ class FrxSVGGraph extends FrxRenderer {
     return $output;
   }
 
+  /**
+   * Generate series from crosstab.
+   * @param unknown $config
+   */
+  private function seriesFromColumns(&$config) {
+    $series = array();
+    foreach ($config['crosstab_columns'] as $key => $col) {
+      if ($col['type'] == 'value') {
+        $series[] = '{' . $key . '}';
+      }
+    }
+    $config['series'] = $series;
+  }
+
+  private function keyFromColumns(&$config) {
+    $key = '';
+    foreach ($config['crosstab_columns'] as $k => $col) {
+      if ($col['type'] == 'heading') {
+        $key = trim($key . ' {' . $k . '}');
+      }
+    }
+    $config['key'] = $key;
+  }
+
   public function configForm($config) {
-    $form_ctl = array();
-
-    $graph_types = array(
-        'bargraph' => 'Bar Graph',
-        'linegraph' => 'Line Graph',
-        'multilinegraph' => 'Line Graph (Multi Series)',
-        'piechart' => 'Pie Chart',
-        'radargraph' => 'Radar Graph',
-        'multiradargraph' => 'Radar Graph (Multi Series)',
-        'scatterplot' => 'Scatter Plot',
-    );
-
-    $type = isset($config['type']) ? $config['type'] : 'Bar Graph';
-    $style = isset($config['style']) ? $config['style'] : 'BarGraph';
+    $form = array();
     $graph_options = FrxSVGGraph::graphOptions();
     $graph_types = FrxSVGGraph::graphTypes();
-    $styles = $graph_options['styles'][$type];
-    $xvalues = @$graph_types[$type]['xaxis'];
-    $num_series = isset($graph_types[$style]['series']) ? $graph_types[$style]['series'] : 1;
-    $types = $graph_options['types'];
-    $form_ctl['xpath'] = array(
-      '#type' => 'textfield',
-      '#title' => ('xpath'),
-      '#default_value' => @$config['xpath'],
-    );
+    $gt = array_change_key_case($graph_types);
 
-    $form_ctl['type'] = array(
+    $type = @$config['type'];
+    if (!isset($config['base_type'])) {
+      $base_type = $type ? $gt[strtolower($type)]['type'] : 'Bar Graph';
+    }
+    else {
+      $base_type = $config['base_type'];
+    }
+    $styles = $graph_options['styles'][$base_type];
+    $types = $graph_options['types'];
+    $form = parent::configForm($config);
+
+    $form['base_type'] = array(
         '#type' => 'select',
         '#title' => t('Graph Type'),
         '#options' => $graph_options['types'],
+        '#default_value' => $base_type,
+        '#ajax' => $this->configAjax(),
+    );
+
+    $form['style'] = array(
+        '#type' => 'select',
+        '#title' => t('Style'),
+        '#options' => $styles,
         '#default_value' => $type,
         '#ajax' => $this->configAjax(),
     );
 
-    $form_ctl['style'] = array(
-        '#type' => 'select',
-        '#title' => t('Style'),
-        '#options' => $styles,
-        '#default_value' => $style,
-        '#ajax' => $this->configAjax(),
-    );
-
-    $form_ctl['gen_table'] = array(
+    $form['gen_table'] = array(
         '#type' => 'checkbox',
         '#title' => t('Include data table with graph'),
         '#default_value' => @$config['gen_table'],
         '#ajax' => $this->configAjax(),
     );
 
-    $form_ctl['label'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Label'),
-        '#default_value' => @$config['label'],
-        '#ajax' => $this->configAjax('blur'),
-    );
 
-
-    $form_ctl['series'] = array(
-        '#type' => 'fieldset',
-        '#title' => t('Series'),
-        '#ajax' => $this->configAjax('blur'),
-    );
-    if ($xvalues) {
-      $form_ctl['seriesx'] = array(
-          '#type' => 'fieldset',
-          '#title' => t('Series X'),
-          '#description' => t('Forena token expression to get the X value (.e.g. {years}'),
-          '#ajax' => $this->configAjax('blur'),
-      );
-      $form_ctl['series']['#title'] = t('Series Y');
-    }
-
-
-    for ($i=0; $i <= $num_series -1; $i++) {
-      if ($xvalues) {
-        $form_ctl['seriesx'][$i] = array(
-            '#type' => 'textfield',
-            '#title' => check_plain((string)($i + 1)),
-            '#default_value' => $config['seriesx'][$i],
-            '#description' => t('Forena token expressioin for series %s x value. (e.g. {total} )', array('%s' => $i+1)),
-        );
-      }
-      $form_ctl['series'][$i] = array(
+    $this->weight_sort($config['crosstab_columns']);
+    $types = array('heading' => t('Label'), 'crosstab' => t('Crosstab'), 'value' => 'Value', 'ignore' => t('Ignore'));
+    $form['crosstab_columns'] = array('#theme' => 'forena_element_draggable',   '#draggable_id' => 'FrxCrosstab-columns');
+    foreach ($config['crosstab_columns'] as $key => $col) {
+      $ctl = array();
+      $ctl['label'] = array(
           '#type' => 'textfield',
-          '#title' => check_plain((string)($i + 1)),
-          '#default_value' => @$config['series'][$i],
-          '#description' => t('Forena token expressioin for series %s. (e.g. {total} )', array('%s' => $i+1)),
+          '#size' => 30,
+          '#title' => t('Label'),
+          '#default_value' => $col['label'],
       );
 
+      $ctl['contents'] = array(
+          '#type' => 'textfield',
+          '#size' => '30',
+          '#title' => t('Data'),
+          '#default_value' => $col['contents'],
+      );
+
+      $ctl['type'] = array(
+          '#type' => 'radios',
+          '#title' => t('Type'),
+          '#default_value' => $col['type'],
+          '#options' => $types,
+          '#ajax' => $this->configAjax()
+      );
+
+      $ctl['weight'] = array(
+          "#type" => 'weight',
+          '#title' => t('Weight'),
+          '#delta' => 50,
+          '#default_value' => $col['weight'],
+      );
+
+      $form['crosstab_columns'][$key] = $ctl;
     }
 
-    $form_ctl['link'] = array(
+    $form['label'] = array(
+    	'#type' => 'textfield',
+      '#title' => t('Graph Label'),
+      '#default_value' => @$config['label'],
+    );
+
+    $form['link'] = array(
         '#type' => 'textfield',
-        '#title' => 'link',
+        '#title' => t('Link Url'),
         '#default_value' => @$config['link'],
     );
 
-    return $form_ctl;
+    $form['legend_entries'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Legend'),
+        '#default_value' => @$config['legend_entry'],
+    );
+
+    $form['tooltip'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Tool Tip'),
+        '#default_value' => @$config['tooltip'],
+    );
+
+
+    return $form;
+  }
+
+  public function configValidate(&$config) {
+    $type = $config['style'];
+    $base_type = $config['base_type'];
+    $graph_options = $this->graphOptions();
+    if(!array_key_exists($type, $graph_options['styles'][$base_type])) {
+      $styles = array_keys($graph_options['styles'][$base_type]);
+      $config['type'] = $config['style'] = array_shift($styles);
+    }
+    $config['type'] = $config['style'];
   }
 
   public function generate($xml, &$config) {
     $config['class'] = get_class($this);
     $media = 'FrxSVGGraph';
     $div = $this->blockDiv($config);
+    $attrs  = array();
+    // Determine columns and make sure we represent them all
+    $found_columns = $this->columns($xml);
+    if (!$found_columns) {
+      $found_columns = $this->columns($xml, '/*');
+    }
+
+    $numeric_columns = $this->numeric_columns;
+    $new_columns = @$config['crosstab_columns'] ? FALSE : TRUE;
+    foreach ($found_columns as $column => $label) {
+      $token = '{' . $column . '}';
+      if ($new_columns) {
+        $type = isset($numeric_columns[$column]) ? 'value' : 'heading';
+      } else {
+        $type = 'ignore';
+      }
+      if (!isset($config['crosstab_columns'][$column])) {
+        $this->addColumn($type, '{' . $column . '}', $column, $config);
+      }
+    }
+
+    // Generate the grouping row
+    $group = '';
+    $dim = array();
+    foreach($config['crosstab_columns'] as $col) {
+      if ($col['type'] == 'heading') $group[] = $col['contents'];
+      if ($col['type'] == 'crosstab') $dim = $col['contents'];
+    }
+    if ($group) $config['group'] = is_array($group) ?  implode(' ', $group) : $group;
+    if ($dim) $config['dim'] = $dim;
+    // PUt on the header
+    $this->removeChildren($div);
+    if (isset($config['header']['value'])) $this->addFragment($div, $config['header']['value']);
+
+
     if ($config) {
-      // Clean series
-      foreach ($config['series'] as $i => $series) if (!$series) unset($config['series'][$i]);
+      $this->seriesFromColumns($config);
+      $this->keyFromColumns($config);
+
+
       // Clean colors
       if (isset($config['colors'])) foreach ($config['colors'] as $i => $color) if (!$color) unset($color[$i]);
 
@@ -324,37 +594,42 @@ class FrxSVGGraph extends FrxRenderer {
       if (!$type) $type = 'Bar Graph';
 
       $gen_table = $this->extract('gen_table', $config);
-      $style = $this->extract('style', $config);
-      if (!$style) $style = 'BarGraph';
       $graph_options = FrxSVGGraph::graphOptions();
-      if (!isset($graph_options['styles'][$type][$style])) {
-        $styles = array_keys($graph_options['styles'][$type]);
-        $style = $styles[0];
-      }
-      if ($style) $type = $style;
 
       // LImit the config
-      $frxattrs = $this->arrayAttributes(array_intersect_key($config, array_fill_keys(array('path', 'series', 'series_x', 'label', 'group', 'link'), 1 )));
+      $frxattrs = $this->arrayAttributes(array_intersect_key($config,
+        array_fill_keys(array('path', 'series', 'series_x', 'label', 'key', 'group', 'link', 'dim', 'tooltip', 'legend_entries'), 1 )));
       $frxattrs = $this->arrayAttributes($frxattrs);
       $frxattrs['renderer'] = 'FrxSVGGraph';
       $frxattrs['type'] = $type;
 
 
       $svg = $this->setFirstNode($div, 2, 'svg',  NULL, NULL,  $frxattrs);
-      if ($gen_table) {
-        $columns = $this->columns($xml);
-        $table = $this->addNode($div, 4, 'table');
-        $thead = $this->addNode($table, 6, 'thead');
-        $throw = $this->addNode($thead, 8, 'tr');
-        $tbody = $this->addNode($table, 6, 'tbody');
-        $tdrow = $this->addNode($tbody, 8, 'tr', NULL, NULL, array('foreach' => '*'));
-        if ($columns) foreach ($columns as $col=>$label) {
-          $this->addNode($throw, 10, 'th', $label);
-          $this->addNode($tdrow, 10, 'td', '{' . $col . '}');
-        }
-      }
 
     }
+
+    $table_frx['renderer'] = 'FrxCrosstab';
+    $table_frx['group'] = is_array($group) ? implode(' ', $group) : $group;
+    $table_frx['dim'] = $dim;
+    if (!$gen_table) $table_frx['hidden'] = '1';
+    $table = $this->setFirstNode($div, 4, 'table', NULL, $attrs, $table_frx);
+    $thead = $this->setFirstNode($table, 6, 'thead');
+    $throw = $this->setFirstNode($thead, 8, 'tr');
+    $tbody = $this->setFirstNode($table, 6, 'tbody');
+    $tdrow = $this->setFirstNode($tbody, 8, 'tr', NULL, NULL, $attrs);
+    if ($config['crosstab_columns']) foreach ($config['crosstab_columns'] as $key => $col) if ($col['type']!=='ignore') {
+      if ($col['type']=='heading') {
+        $tag = 'th';
+      }
+      else {
+        $tag = 'td';
+      }
+      if ($col['type'] != 'crosstab') {
+        $this->addNode($throw, 10, $tag, $col['label']);
+        $this->addNode($tdrow, 10, $tag, $col['contents']);
+      }
+    }
+    if (isset($config['footer']['value'])) $this->addFragment($div, $config['footer']['value']);
   }
 
 

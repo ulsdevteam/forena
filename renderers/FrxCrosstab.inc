@@ -15,6 +15,9 @@ class FrxCrosstab extends FrxRenderer {
 
 
     $variables = $this->mergedAttributes();
+    if (!empty($variables['hidden']) && $this->format != 'csv' && $this->format != 'xls') {
+      return '';
+    }
     $path = isset($variables['path']) ? $variables['path'] : '*';
     if (!$path) $path = "*";
     $group = $variables['group'];

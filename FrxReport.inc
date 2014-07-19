@@ -695,6 +695,7 @@ class FrxReport {
    */
   public function group($data,  $group='') {
     $rows = array();
+    if (is_array($group)) $group = implode(' ', $group);
     $group = (string)$group;
     if (is_array($data) || is_object($data)) {
       foreach ($data as $row) {
