@@ -19,6 +19,14 @@ class FrxSVGGraph extends FrxRenderer {
   private $graphData;
   private $graphOptions;
   private $colors;
+  private $unset_attrs = array(
+    'base_type',
+    'crosstab_columns',
+    'content',
+    'sections',
+    'columns',
+    'style',
+  );
 
   // Place to indicate which fields are sourced from the data.
   private $field_sources = array();
@@ -549,7 +557,10 @@ class FrxSVGGraph extends FrxRenderer {
     $this->removeChildren($div);
     $attrs  = array();
     // PUt on the header
-    if (isset($config['header']['value'])) $this->addFragment($div, $config['header']['value']);
+    if (isset($config['header']['value'])) {
+      $header = $this->extract('header', $config);
+      $this->addFragment($div, $header['value']);
+    }
 
     // Determine columns and make sure we represent them all
     $found_columns = $this->columns($xml);
@@ -574,6 +585,7 @@ class FrxSVGGraph extends FrxRenderer {
     // Generate the grouping row
     $group = '';
     $dim = array();
+
     foreach($config['crosstab_columns'] as $col) {
       if ($col['type'] == 'heading') $group[] = $col['contents'];
       if ($col['type'] == 'crosstab') $dim = $col['contents'];
@@ -594,11 +606,14 @@ class FrxSVGGraph extends FrxRenderer {
 
     $gen_table = $this->extract('gen_table', $config);
     $graph_options = FrxSVGGraph::graphOptions();
-
     // LImit the config
-    $frxattrs = $this->arrayAttributes(array_intersect_key($config,
-      array_fill_keys(array('path', 'series', 'series_x', 'label', 'key', 'group', 'link', 'dim', 'tooltip', 'legend_entries'), 1 )));
+    $frxattrs = $config;
+    // Unset common option configurations?
+    foreach($this->unset_attrs as $k) unset($frxattrs[$k]);
+
     $frxattrs = $this->arrayAttributes($frxattrs);
+
+
     $frxattrs['renderer'] = 'FrxSVGGraph';
     $frxattrs['type'] = $type;
 
