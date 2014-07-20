@@ -176,7 +176,7 @@ class FrxSVGGraph extends FrxRenderer {
     $types = array_change_key_case($types);
     $config['base_type'] = $types[strtolower($graph_type)]['type'];
 
-    $this->extractTemplateHTML($this->reportDocDomNode, $config, array('svg'));
+    $this->extractTemplateHTML($this->reportDocDomNode, $config, array('svg', 'table'));
     if (!isset($config['key'])) $config['key'] =  @$config['label'];
     if (!isset($config['key'])) $config['key'] = @$config['seriesx'];
     $key = $config['key'];
@@ -302,10 +302,10 @@ class FrxSVGGraph extends FrxRenderer {
       $this->graphOptions['legend_entries'] = $legend;
     }
     if (isset($this->graphOptions['legend_entries']) && !is_array($this->graphOptions['legend_entries'])) {
-      $options['legend_entries'] = explode('|', $this->graphOptions['legend_entries']);
+      $this->graphOptions['legend_entries'] = explode('|', $this->graphOptions['legend_entries']);
     }
     if ($data) {
-      $output = $this->renderChart($type, $data, $options, $links);
+      $output = $this->renderChart($type, $data);
     }
     return $output;
   }
@@ -366,7 +366,7 @@ class FrxSVGGraph extends FrxRenderer {
 
 
   function renderGraph($type) {
-    static $jsinc = FALSE;
+    static $jsinc = '';
     $options = $this->graphOptions;
     $data = $this->graphData;
 
@@ -378,7 +378,6 @@ class FrxSVGGraph extends FrxRenderer {
     }
     $width = (@$options['width']) ? @$options['width'] : 600;
     $height = (@$options['height']) ? @$options['height'] : 400;
-    //dpm($options, 'svg graph options');
     $graph = new SVGGraph($width, $height, $options);
     $this->graph = $graph;
     $graph->Values($data);
@@ -391,14 +390,11 @@ class FrxSVGGraph extends FrxRenderer {
     $output = str_replace('<svg width', "<svg viewBox='0 0 $width $height' width", $output);
     $javascript = '/<script[^>]*?>.*?<\/script>/si';
     $noscript = '';
-
     if (!$jsinc && $this->format == 'web') {
-      $output .= $graph->FetchJavascript();
+      $js =  $graph->FetchJavascript();
+      drupal_add_html_head($js);
+      $jsinc = TRUE;
     }
-    else {
-      $output = preg_replace($javascript, $noscript, $output);
-    }
-
     return $output;
   }
 
@@ -519,7 +515,7 @@ class FrxSVGGraph extends FrxRenderer {
     $form['legend_entries'] = array(
         '#type' => 'textfield',
         '#title' => t('Legend'),
-        '#default_value' => @$config['legend_entry'],
+        '#default_value' => @$config['legend_entries'],
     );
 
     $form['tooltip'] = array(
@@ -547,7 +543,11 @@ class FrxSVGGraph extends FrxRenderer {
     $config['class'] = get_class($this);
     $media = 'FrxSVGGraph';
     $div = $this->blockDiv($config);
+    $this->removeChildren($div);
     $attrs  = array();
+    // PUt on the header
+    if (isset($config['header']['value'])) $this->addFragment($div, $config['header']['value']);
+
     // Determine columns and make sure we represent them all
     $found_columns = $this->columns($xml);
     if (!$found_columns) {
@@ -577,41 +577,78 @@ class FrxSVGGraph extends FrxRenderer {
     }
     if ($group) $config['group'] = is_array($group) ?  implode(' ', $group) : $group;
     if ($dim) $config['dim'] = $dim;
-    // PUt on the header
-    $this->removeChildren($div);
-    if (isset($config['header']['value'])) $this->addFragment($div, $config['header']['value']);
 
 
-    if ($config) {
-      $this->seriesFromColumns($config);
-      $this->keyFromColumns($config);
 
+    $this->seriesFromColumns($config);
+    $this->keyFromColumns($config);
 
-      // Clean colors
-      if (isset($config['colors'])) foreach ($config['colors'] as $i => $color) if (!$color) unset($color[$i]);
+    // Clean colors
+    if (isset($config['colors'])) foreach ($config['colors'] as $i => $color) if (!$color) unset($color[$i]);
 
-      $type = $this->extract('type', $config);
-      if (!$type) $type = 'Bar Graph';
+    $type = $this->extract('type', $config);
+    if (!$type) $type = 'Bar Graph';
 
-      $gen_table = $this->extract('gen_table', $config);
-      $graph_options = FrxSVGGraph::graphOptions();
+    $gen_table = $this->extract('gen_table', $config);
+    $graph_options = FrxSVGGraph::graphOptions();
 
-      // LImit the config
-      $frxattrs = $this->arrayAttributes(array_intersect_key($config,
-        array_fill_keys(array('path', 'series', 'series_x', 'label', 'key', 'group', 'link', 'dim', 'tooltip', 'legend_entries'), 1 )));
-      $frxattrs = $this->arrayAttributes($frxattrs);
-      $frxattrs['renderer'] = 'FrxSVGGraph';
-      $frxattrs['type'] = $type;
+    // LImit the config
+    $frxattrs = $this->arrayAttributes(array_intersect_key($config,
+      array_fill_keys(array('path', 'series', 'series_x', 'label', 'key', 'group', 'link', 'dim', 'tooltip', 'legend_entries'), 1 )));
+    $frxattrs = $this->arrayAttributes($frxattrs);
+    $frxattrs['renderer'] = 'FrxSVGGraph';
+    $frxattrs['type'] = $type;
 
+    $svg = $this->setFirstNode($div, 2, 'svg',  NULL, NULL,  $frxattrs);
 
-      $svg = $this->setFirstNode($div, 2, 'svg',  NULL, NULL,  $frxattrs);
-
+    if (isset($config['footer']['value'])) $this->addFragment($div, $config['footer']['value']);
+    if ($gen_table) {
+      if($group && $dim) {
+        $this->generateCrossTab($xml, $config, $div, $group, $dim);
+      }
+      else {
+        $this->generateTable($xml, $config, $div);
+      }
     }
 
+  }
+
+  /**
+   * Generate a basic table.
+   * @param unknown $xml
+   * @param unknown $config
+   * @param unknown $div
+   */
+  function generateTable($xml, &$config, &$div) {
+    $attrs = array('foreach' => '*');
+    $table = $this->setFirstNode($div, 4, 'table');
+    if (@$config['caption']) {
+      $this->setFirstNode($table, 6, 'caption', $config['caption']);
+    }
+
+    $thead = $this->setFirstNode($table, 6, 'thead');
+    $throw = $this->setFirstNode($thead, 8, 'tr');
+    $tbody = $this->setFirstNode($table, 6, 'tbody');
+    $tdrow = $this->setFirstNode($tbody, 8, 'tr', NULL, array(),$attrs);
+
+    if (isset($config['crosstab_columns'])) foreach ($config['crosstab_columns'] as $key => $col) if ($col['type']!='ignore') {
+      $this->addNode($throw, 10, 'th', $col['label']);
+      $this->addNode($tdrow, 10, 'td', $col['contents']);
+    }
+  }
+
+  /**
+   * Generate a crosstab table.
+   * @param unknown $xml
+   * @param unknown $config
+   * @param unknown $div
+   * @param unknown $group
+   * @param unknown $dim
+   */
+  function generateCrossTab($xml, &$config, &$div, $group, $dim) {
     $table_frx['renderer'] = 'FrxCrosstab';
     $table_frx['group'] = is_array($group) ? implode(' ', $group) : $group;
     $table_frx['dim'] = $dim;
-    if (!$gen_table) $table_frx['hidden'] = '1';
     $table = $this->setFirstNode($div, 4, 'table', NULL, $attrs, $table_frx);
     $thead = $this->setFirstNode($table, 6, 'thead');
     $throw = $this->setFirstNode($thead, 8, 'tr');
@@ -629,9 +666,7 @@ class FrxSVGGraph extends FrxRenderer {
         $this->addNode($tdrow, 10, $tag, $col['contents']);
       }
     }
-    if (isset($config['footer']['value'])) $this->addFragment($div, $config['footer']['value']);
+
   }
-
-
 
 }
