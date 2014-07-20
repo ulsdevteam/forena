@@ -367,6 +367,7 @@ class FrxSVGGraph extends FrxRenderer {
 
   function renderGraph($type) {
     static $jsinc = '';
+
     $options = $this->graphOptions;
     $data = $this->graphData;
 
@@ -391,8 +392,10 @@ class FrxSVGGraph extends FrxRenderer {
     $javascript = '/<script[^>]*?>.*?<\/script>/si';
     $noscript = '';
     if (!$jsinc && $this->format == 'web') {
-      $js =  $graph->FetchJavascript();
-      drupal_add_html_head($js);
+      if (@$options['add_js']) {
+        $js =  $graph->FetchJavascript();
+        $output .= $js;
+      }
       $jsinc = TRUE;
     }
     return $output;
