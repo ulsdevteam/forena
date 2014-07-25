@@ -21,7 +21,7 @@ scripts[] = default_skin.js
 stylesheets[all][] = table_padding.css
 ; ---------------------------
 ; 
-;  Sample graphing Graph defaults uncomment to experiment. 
+;  Sample graphing Graph defaults uncomment to experiment.
 ; 
 ; FrxSVGGraph[colors][] = red 
 ; FrxSVGGraph[colors][] = blue
@@ -41,5 +41,6 @@ stylesheets[all][] = table_padding.css
 ; 
 ; company_name = My Cool Company
 ; 
-; Then you could reference {skin.company_name} anywhere in your report. 
-
+; Then you could reference {skin.company_name} anywhere in your report.
+FrxSVGGraph[legend_position] = outer right -5 5
+FrxSVGGraph[add_js] = TRUE

@@ -57,7 +57,7 @@ class FrxSVGGraph extends FrxRenderer {
       Frx::Data()->push($row, '_row');
       $trow = array();
       // Base group
-      $trow['key'] =  $this->teng->replace($key);;
+      $trow['key'] =  $this->teng->replace($key, TRUE);;
       // Dimensions
       foreach($series as $col) {
           $val = $this->teng->replace($col, TRUE);
@@ -65,7 +65,7 @@ class FrxSVGGraph extends FrxRenderer {
           $trow[trim("$col", '{}')] = $val;
       }
       foreach($this->field_sources as $k => $src) {
-        $trow[$k] = $this->teng->replace($src);
+        $trow[$k] = $this->teng->replace($src, TRUE);
       }
       Frx::Data()->pop();
       $this->graphData[] = $trow;
@@ -125,10 +125,10 @@ class FrxSVGGraph extends FrxRenderer {
       $trow = array();
       // Base group
 
-      $gkey = $this->teng->replace($group);
+      $gkey = $this->teng->replace($group, TRUE);
       $trow['key'] = $gkey;
       foreach($this->field_sources as $fk => $src) {
-        $trow[$fk] = $this->teng->replace($src);
+        $trow[$fk] = $this->teng->replace($src, TRUE);
       }
       Frx::Data()->pop();
       // Dimensions
@@ -180,6 +180,7 @@ class FrxSVGGraph extends FrxRenderer {
 
     // Determine graph type
     $graph_type =  isset($config['type']) ? $config['type'] : 'BarGraph';
+
     $types = $this->graphTypes();
     $types = array_change_key_case($types);
     $config['base_type'] = $types[strtolower($graph_type)]['type'];
@@ -208,7 +209,7 @@ class FrxSVGGraph extends FrxRenderer {
         $this->addColumn('crosstab', $dim, trim($dim, '{}'), $config);
       }
     }
-
+    $config['style'] = $config['type'];
     return $config;
   }
 
@@ -284,8 +285,8 @@ class FrxSVGGraph extends FrxRenderer {
         $options['structure'][$fk] = $fk;
       }
     }
-    if (isset($attributes['height'])) $options['height'] = $this->teng->replace($attributes['height']);
-    if (isset($attributes['width'])) $options['width'] = $this->teng->replace($attributes['width']);
+    if (isset($attributes['height'])) $options['height'] = $this->teng->replace($attributes['height'], TRUE);
+    if (isset($attributes['width'])) $options['width'] = $this->teng->replace($attributes['width'], TRUE);
     if (isset($options['legend_entries']) && !isset($options['label']) && !isset($options['show_labels'])) {
       $options['show_labels'] = FALSE;
     }
@@ -400,7 +401,7 @@ class FrxSVGGraph extends FrxRenderer {
     $javascript = '/<script[^>]*?>.*?<\/script>/si';
     $noscript = '';
     if (!$jsinc && $this->format == 'web') {
-      if (@$options['add_js']) {
+      if (@!$options['no_js']) {
         $js =  $graph->FetchJavascript();
         $output .= $js;
       }
@@ -438,8 +439,7 @@ class FrxSVGGraph extends FrxRenderer {
     $graph_options = FrxSVGGraph::graphOptions();
     $graph_types = FrxSVGGraph::graphTypes();
     $gt = array_change_key_case($graph_types);
-
-    $type = @$config['type'];
+    $type = @$config['style'];
     if (!isset($config['base_type'])) {
       $base_type = $type ? $gt[strtolower($type)]['type'] : 'Bar Graph';
     }
