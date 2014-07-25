@@ -84,6 +84,8 @@ class FrxSVGGraph extends FrxRenderer {
     $dim_values = array();
     $rows = array();
     $data = $this->frxReport->group($block_data, $group);
+    $this->graphOptions['structure'] = array('key' => 0);
+    $structure_idx = 0;
 
     foreach ($data as $gk => $group_rows) {
       $row_copy = array_values($group_rows);
@@ -111,10 +113,14 @@ class FrxSVGGraph extends FrxRenderer {
       }
     }
 
-    $this->graphOptions['structure']['value'] = array();
     foreach($dim_values as $dk) {
       foreach($dim_columns as $col) {
-        $this->graphOptions['structure']['value'][] = $dk . ' ' . trim("$col", '{}');
+        $structure_idx++;
+        $this->graphOptions['structure']['value'][] = $structure_idx;
+        foreach($this->field_sources as $k=>$fld) {
+          $structure_idx++;
+          $this->graphOptions['structure'][$k][] = $structure_idx;
+        }
       }
     }
 
@@ -126,10 +132,7 @@ class FrxSVGGraph extends FrxRenderer {
       // Base group
 
       $gkey = $this->teng->replace($group, TRUE);
-      $trow['key'] = $gkey;
-      foreach($this->field_sources as $fk => $src) {
-        $trow[$fk] = $this->teng->replace($src, TRUE);
-      }
+      $trow[] = $gkey;
       Frx::Data()->pop();
       // Dimensions
       $dim_data = $dim_rows[$k];
@@ -137,17 +140,20 @@ class FrxSVGGraph extends FrxRenderer {
         $dim_row = isset($dim_data[$dk]) ? $dim_data[$dk] : array();
         frx::Data()->push($dim_row, '_dim');
         foreach($dim_columns as $col) {
+
           $cell = $col;
           $val = $this->teng->replace($col, TRUE);
           if(!$val) $val = 0;
-          $trow[$dk . ' ' . trim("$col", '{}')] = $val;
+          $trow[] = $val;
+          foreach($this->field_sources as $fk => $src) {
+            $trow[] = $this->teng->replace($src, TRUE);
+          }
         }
         frx::Data()->pop();
       }
       $this->graphData[] = $trow;
 
     }
-
     return $this->graphData;
   }
 
@@ -279,6 +285,7 @@ class FrxSVGGraph extends FrxRenderer {
 
     // Find out data that is designed to be sepecif to series.
     $this->field_sources = array();
+    $i= 0;
     foreach ($options as $fk => $opt) {
       if ($fk != 'value' && $fk != 'key' && $opt && !is_array($opt) && strpos($options[$fk], '{')!==FALSE) {
         $this->field_sources[$fk] = $opt;
@@ -439,6 +446,7 @@ class FrxSVGGraph extends FrxRenderer {
     $graph_options = FrxSVGGraph::graphOptions();
     $graph_types = FrxSVGGraph::graphTypes();
     $gt = array_change_key_case($graph_types);
+
     $type = @$config['style'];
     if (!isset($config['base_type'])) {
       $base_type = $type ? $gt[strtolower($type)]['type'] : 'Bar Graph';
