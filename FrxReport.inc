@@ -588,7 +588,6 @@ class FrxReport {
     $parameters = array();
     $head = $this->rpt_xml->head;
 
-    //FrxReportGenerator::instance()->alter_parameters('', $parms);
     $nodes = $head->xpath('frx:parameters/frx:parm');
     if ($nodes) {
       foreach ($nodes as $node) {
