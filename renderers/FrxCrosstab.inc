@@ -86,8 +86,8 @@ class FrxCrosstab extends FrxRenderer {
       // Base group
       foreach($this->group_columns as $col) {
         $cell = $col;
-        foreach ($col as $k => $v) {
-          $cell[$k] = $this->teng->replace($v);
+        foreach ($col as $key => $v) {
+          $cell[$key] = $this->teng->replace($v);
         }
         $trow[] = $cell;
       }
