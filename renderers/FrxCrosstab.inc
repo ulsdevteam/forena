@@ -86,7 +86,9 @@ class FrxCrosstab extends FrxRenderer {
       // Base group
       foreach($this->group_columns as $col) {
         $cell = $col;
-        $cell['data'] = $this->teng->replace($col['data']);
+        foreach ($col as $k => $v) {
+          $cell[$k] = $this->teng->replace($v);
+        }
         $trow[] = $cell;
       }
       Frx::Data()->pop();
@@ -98,7 +100,9 @@ class FrxCrosstab extends FrxRenderer {
         frx::Data()->push($dim_row, '_dim');
         foreach($this->dim_columns as $col) {
           $cell = $col;
-          $cell['data'] = $this->teng->replace($col['data']);
+          foreach ($col as $k => $v) {
+            $cell[$k] = $this->teng->replace($v);
+          }
           $trow[] = $cell;
         }
         frx::Data()->pop();
@@ -123,11 +127,12 @@ class FrxCrosstab extends FrxRenderer {
     $node = $this->reportDocNode;
     if ($node->thead && $node->thead->tr) {
     		foreach ($node->thead->tr->children() as $name => $cell) {
+    		  $hcol = array();
     		  $hcol['data'] = (string)$cell;
     		  $hcol['depth'] = 1;
-    		  $hcol['colspan'] = @(string)$cell['colspan'];
-    		  $hcol['class'] = @(string)$cell['class'];
-    		  $hcol['style'] = @(string)$cell['style'];
+    		  foreach ($cell->attributes() as $k => $v) {
+    		    $hcol[$k] = (string)$v;
+    		  }
     		  if ($name == 'th') {
     		    $this->group_headers[] = $hcol;
     		  }
@@ -138,9 +143,11 @@ class FrxCrosstab extends FrxRenderer {
     }
     if ($node->tbody && $node->tbody->tr) {
     		foreach ($node->tbody->tr->children() as $name => $cell) {
+    		  $col = array();
     		  $col['data'] = @(string)$cell;
-    		  $col['class'] = @(string)$cell['class'];
-    		  $col['style'] = @(string)$col['style'];
+    		  foreach ($cell->attributes() as $k => $v) {
+    		    $col[$k] = (string)$v;
+    		  }
     		  if ($name == 'th') {
     		    $this->group_columns[] = $col;
     		  }
