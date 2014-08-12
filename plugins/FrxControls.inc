@@ -19,7 +19,8 @@ class FrxControls {
                      'iso_date' => 'ISO Date',
                      'sprintf' => 'PHP sprintf()',
                      'number' => 'Number',
-                     'drupal_translation' => 'Translatable Text'
+                     'drupal_translation' => 'Translatable Text',
+                     'template' => 'Field is a forena template',
                      );
                      return $formats;
   }
@@ -139,6 +140,24 @@ class FrxControls {
 
 
     if ($value && $this->is_number($value))  $value = number_format($value, $dec, $dec_sep, $th_sep);
+    return $value;
+  }
+
+  /**
+   * Indicates the data in the field is a template that can be used by forena to format.
+   * @param unknown $value
+   * @param unknown $format_str
+   * @param string $teng
+   * @return Ambigous <string, The, mixed>
+   */
+  public function template($value, $format_str, $teng='') {
+    if ($value) {
+      $value = $teng->replace($value);
+      $value = html_entity_decode($value, ENT_QUOTES, 'UTF-8');
+      if ($format_str && filter_format_exists($format_str)) {
+        $value = check_markup($value, $format_str);
+      }
+    }
     return $value;
   }
 
