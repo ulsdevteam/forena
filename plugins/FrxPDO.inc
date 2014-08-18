@@ -21,7 +21,7 @@ class FrxPDO extends FrxDataSource {
   public function __construct($conf, $repos_path, $name) {
     parent::__construct($conf, $repos_path, $name);
     $uri = $conf['uri'];
-    $this->debug = $conf['debug'];
+    $this->debug = @$conf['debug'];
     if ($uri) {
       // Test for PDO suport
       if (!class_exists('PDO')) {
