@@ -946,7 +946,7 @@ function forena_report($name_in, $parms = NULL, $print = TRUE, $filename='') {
   $time = @new DateTime($value);
   $desc['time'] = date_format($time, 'Y-m-d H:i:s');
   $desc['basepath'] = base_path();
-  $desc['path'] = $desc['basepath'] . Frx::File()->path($desc['filename'], TRUE);
+  $desc['path'] = $desc['basepath'] . Frx::File()->directory(Frx::File()->path($desc['filename'], TRUE));
   $desc['theme'] = $desc['basepath'] . drupal_get_path('theme',$GLOBALS['theme']);
   $desc['q'] = $_GET['q'];
   if (!$desc['exists']) {

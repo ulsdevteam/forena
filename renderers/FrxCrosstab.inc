@@ -128,7 +128,7 @@ class FrxCrosstab extends FrxRenderer {
     if ($node->thead && $node->thead->tr) {
     		foreach ($node->thead->tr->children() as $name => $cell) {
     		  $hcol = array();
-    		  $hcol['data'] = (string)$cell;
+    		  $hcol['data'] = forena_inner_xml($cell, $name);
     		  $hcol['depth'] = 1;
     		  foreach ($cell->attributes() as $k => $v) {
     		    $hcol[$k] = (string)$v;
@@ -144,7 +144,7 @@ class FrxCrosstab extends FrxRenderer {
     if ($node->tbody && $node->tbody->tr) {
     		foreach ($node->tbody->tr->children() as $name => $cell) {
     		  $col = array();
-    		  $col['data'] = @(string)$cell;
+    		  $col['data'] = forena_inner_xml($cell, $name);
     		  foreach ($cell->attributes() as $k => $v) {
     		    $col[$k] = (string)$v;
     		  }
