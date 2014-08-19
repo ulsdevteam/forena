@@ -46,11 +46,10 @@ class FrxSVGGraph extends FrxRenderer {
     $dim_headers = array($key);
 
     $this->graphOptions['structure']['value'] = array();
-    foreach($series as $dk) {
-      foreach($series as $col) {
-        $this->graphOptions['structure']['value'][] = trim("$col", '{}');
-      }
+    foreach($series as $col) {
+      $this->graphOptions['structure']['value'][] = trim("$col", '{}');
     }
+
 
     $this->graphData = array();
     foreach ($data as $row) {
