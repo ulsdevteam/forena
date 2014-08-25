@@ -581,7 +581,7 @@ class FrxReport {
       }
     }
     $this->parms = $parms;
-    return $this->missing_parms;
+    return $missing_parms;
   }
 
   public function parametersArray() {

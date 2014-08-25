@@ -928,7 +928,6 @@ class FrxEditor {
     global $user;
     global $language;
     $this->field_ids = array();
-    $content = array();
     $format = $this->desc['format'];
     if ($format == 'web' && $print) {
       drupal_add_css(drupal_get_path('module', 'forena') . '/forena.css');
@@ -945,11 +944,12 @@ class FrxEditor {
     $this->alterParameters($parms);
 
     //check for default parameters
-    $r->processParameters($parms);
+    $missing_parms = $r->processParameters($parms);
     Frx::Skin()->load($r->skin);
     Frx::Skin()->loadSkinFiles($this->report_name);
     $cached_data = FALSE;
     $cache = array();
+
 
     $o =  Frx::Document($format);
     $o->header($this->frxReport, $print);
@@ -958,49 +958,51 @@ class FrxEditor {
       $this->frxReport->file = fopen($filename, 'w');
     }
 
-    /**
-     * Allow modules to alter the parameters of a report.
-     * @param unknown_type $report_name
-     * @param unknown_type $parms
-     */
-
     Frx::Data()->push($parms, 'parm');
-    // Check for cache data
-    if ($r->cache && !$r->preview_mode) {
-      // Get file modification time for determining if cache needs to be rebuilt.
-      $entry = @Frx::File()->getCacheEntry($this->desc['filename']);
-      $cid = 'forena:report:' . $this->report_name . ':' . drupal_http_build_query($parms);
-      if (@$r->cache['per_user'] && $user) $cid .= ':' . $user->uid;
-      if (@$r->cache['per_doctype']) @$cid .= ':' . $format;
-      $cache = cache_get($cid, 'cache');
-      if (!$cache || (isset($r->cache['duration']) && $cache->expire < time()) || $cache->created < $entry->mtime || $no_cache) {
-        $this->field_ids = array();
-        $r->render($format);
-        $time = null;
-        if (isset($r->cache['duration'])) {
-          try {
-            $time = @new DateTime($r->cache['duration']);
+
+
+    if (!$missing_parms) {
+      // Check for cache data
+      if ($r->cache && !$r->preview_mode) {
+        // Get file modification time for determining if cache needs to be rebuilt.
+        $entry = @Frx::File()->getCacheEntry($this->desc['filename']);
+        $cid = 'forena:report:' . $this->report_name . ':' . drupal_http_build_query($parms);
+        if (@$r->cache['per_user'] && $user) $cid .= ':' . $user->uid;
+        if (@$r->cache['per_doctype']) @$cid .= ':' . $format;
+        $cache = cache_get($cid, 'cache');
+        if (!$cache || (isset($r->cache['duration']) && $cache->expire < time()) || $cache->created < $entry->mtime || $no_cache) {
+          $this->field_ids = array();
+          $r->render($format);
+          $time = null;
+          if (isset($r->cache['duration'])) {
+            try {
+              $time = @new DateTime($r->cache['duration']);
+            }
+            catch (Exception $e) {
+              drupal_set_message('Invalid Cache Duration', 'error', TRUE);
+            }
+            if ($time) $time = $time->getTimeStamp();
           }
-          catch (Exception $e) {
-            drupal_set_message('Invalid Cache Duration', 'error', TRUE);
+          if (!$time) {
+            $time = CACHE_PERMANENT;
           }
-          if ($time) $time = $time->getTimeStamp();
+          $r->cache['content'] = $r->html;
+          $r->cache['title'] = $r->title;
+          cache_set($cid, $r->cache, 'cache', $time);
         }
-        if (!$time) {
-          $time = CACHE_PERMANENT;
+        else {
+          $r->html = $cache->data['content'];
+          $r->title = $cache->data['title'];
         }
-        $r->cache['content'] = $r->html;
-        $r->cache['title'] = $r->title;
-        cache_set($cid, $r->cache, 'cache', $time);
       }
       else {
-        $r->html = $cache->data['content'];
-        $r->title = $cache->data['title'];
+        $r->render($format);
       }
     }
     else {
-      $r->render($format);
+      $r->parametersForm(array('collapsible' => FALSE, 'collapsed' => FALSE));
     }
+
     $links = '';
     if ($r->preview_mode) {
       $r_link = str_replace('/', '.', $this->report_name);
@@ -1008,6 +1010,7 @@ class FrxEditor {
       unset($parms['q']);
       $links = $this->l_icon("reports/$r_link/edit/select-data/add-data", 'doc-option-add.png', 'Add Data', $parms);
     }
+
     $content = array(
       '#has_data' => $r->blocks_loaded,
       'parameter_form' => $r->parameters_form,
