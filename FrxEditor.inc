@@ -1100,8 +1100,9 @@ class FrxEditor {
 
   public function blockLinks($block_name, $frx, $attrs, $id='', $context = array()) {
     $o = '';
+    if (!$context) $context = array();
     $parms = Frx::Data()->getContext('parm');
-    if ($parms) $context = array_merge($parms, $context);
+    if ($parms && is_array($context)) $context = array_merge($parms, $context);
     $class = @(string)$attrs['class'];
     $frx_class = strpos($class, 'Frx') !== FALSE;
     if ($frx_class) {
