@@ -83,10 +83,10 @@ class FrxRenderer {
     {
       $text = $dom_node->textContent;
       if (!empty($settings['stripWhiteSpace'])) {
-       $o .= trim( $this->teng->replace(htmlspecialchars($text)));
+       $o .= trim( $this->teng->replace(htmlspecialchars($text, ENT_NOQUOTES)));
       }
       else {
-        $o .= $this->teng->replace(htmlspecialchars($text));
+        $o .= $this->teng->replace(htmlspecialchars($text, ENT_NOQUOTES));
       }
       return;
     }
