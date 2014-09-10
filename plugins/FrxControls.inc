@@ -21,6 +21,7 @@ class FrxControls {
                      'number' => 'Number',
                      'drupal_translation' => 'Translatable Text',
                      'template' => 'Field is a forena template',
+                     'indentation' => 'Indentation', 
                      );
                      return $formats;
   }
@@ -112,7 +113,7 @@ class FrxControls {
     return $value;
   }
 
-  public function number($value, $format_str, $data='') {
+  public function number($value, $format_str, $teng) {
     // Determine number nubmer formatter from the string.
     $chars = str_replace(array('9', '0', '$'), '', $format_str);
     if (strlen($chars) > 1) {
@@ -159,6 +160,14 @@ class FrxControls {
       }
     }
     return $value;
+  }
+  
+  public function indentation($value, $format_str, $teng='') { 
+    if ($value) { 
+      $vars = array('size' => $value);
+      $value = theme_indentation($vars); 
+    }
+    return $value; 
   }
 
 

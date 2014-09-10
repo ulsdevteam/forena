@@ -203,7 +203,7 @@ function forena_settings_validate($form, &$form_state) {
   if (!file_exists($path) || !is_writable($path)) {
     form_set_error('forena_report_repos', 'Report Directory must be writable by the web user');
   }
-  if ($values['forena_query_data_path']) {
+  if (isset($values['forena_query_data_path'])) {
     $path = $values['forena_query_data_path'];
     if ($path != $values['forena_last_query_data_path']) {
       if (!file_exists($path)) {

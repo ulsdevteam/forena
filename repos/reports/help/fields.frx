@@ -58,6 +58,11 @@
             &nbsp;Normally you can leave this blank. &nbsp;</td>
         </tr>
         <tr>
+          <td>indentation</td>
+          <td>Use the field to generate indentation using drupal's theme_indentation function. 
+          The size of the indenation is expected to be in the value of the field.</td>
+        </tr>
+        <tr>
           <td>iso_date</td>
           <td>ISO standard dates are of the form, YYYY-MM-DD
             followed by a 24 hour timestamp (e.g. 2012-12-01 20:30:30).

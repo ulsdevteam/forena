@@ -26,7 +26,6 @@
     however, will be available in all reports.&#xA0;</p>
   <p>To implement a formatter in control or plugin class requires
     the implementation of two methods.</p>
-  <p>&#xA0;</p>
   <h3>Formatter Methods</h3>
   <p>Formatter methods should take a value and a format string
     parameter, and should return the formatted value. The following
@@ -42,7 +41,7 @@
     formats registration function that returns an associative array that
     lists the function names and their appropriate user label. Forena
     uses its own registration mechanisms for advertising its
-    controls.&#xA0; The following can be used as a reference
+    controls. The following can be used as a reference
     implementation for this method.</p>
   <pre>
   //date formats
