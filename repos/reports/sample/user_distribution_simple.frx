@@ -20,7 +20,7 @@
 <frx:menu/><frx:cache/></head>
 <body>
   <div frx:block="sampledb/state" id="state" frx:foreach="*">
-    <h2>{name}</h2>
+    <h2 frx:renderer="FrxTitle" id="frx-title">Users in cities in state {name}</h2>
   </div>
   <div frx:block="sampledb/distribution" id="distribution_block" class="FrxTable">
     <p>This report lists all users in cities assigned to a state with
