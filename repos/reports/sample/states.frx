@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE root [
 <!ENTITY nbsp "&#160;">
 ]>
@@ -6,13 +6,12 @@
 <head>
 <title>1. Simple Table of States</title>
 <frx:category>Sample</frx:category>
-<frx:options hidden="0" form=""></frx:options>
+<frx:options hidden="0"></frx:options>
 <frx:parameters>
 </frx:parameters>
 <frx:docgen>
 </frx:docgen>
-
-</head>
+<frx:fields/><frx:menu/><frx:cache/></head>
 <body>
   <div frx:block="sampledb/states" id="state-block" class="FrxTable">
     <table>

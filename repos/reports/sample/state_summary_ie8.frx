@@ -6,7 +6,7 @@
 <head>
 <title>6. External SVG Graph Example</title>
 <frx:category>Sample</frx:category>
-<frx:options />
+<frx:options hidden="0"></frx:options>
 <frx:parameters>
 </frx:parameters>
 <frx:docgen>
@@ -18,11 +18,11 @@
     link="reports/sample.user_distribution_simple?state={state}#test"
     format="" format-string="" target="" />
 </frx:fields>
-</head>
+<frx:menu/><frx:cache/></head>
 <body>
   <div>
     <p>This example demonstrates graphing with SVG in a way that supports
-    older browsers that do not support inline SVG.  If using Internet Explorer prior to version
+    older browsers that do not support inline SVG. If using Internet Explorer prior to version
     9 you would need an additional plugin to enable SVG support.</p>
   </div>
   <div frx:block="sampledb/users_by_state" id="forena-1">

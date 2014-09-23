@@ -6,7 +6,7 @@
 <head>
 <title>3. Master Summary with drill down</title>
 <frx:category>Sample</frx:category>
-<frx:options />
+<frx:options hidden="0"></frx:options>
 <frx:parameters>
 </frx:parameters>
 <frx:docgen>
@@ -18,7 +18,7 @@
     link="reports/sample.user_distribution_simple?state={state}#test"
     format="" format-string="" target="" />
 </frx:fields>
-</head>
+<frx:menu/><frx:cache/></head>
 <body>
   <div>
     <p>This report links back to the sample report 2. You can begin
