@@ -10,8 +10,6 @@
 <frx:parameters>
   <frx:parm id="name" label="User Name" require="1" desc=""
     data_source="" data_field="" type="" />
-  <frx:parm id="search" label="Search" require="0" desc=""
-    data_source="" data_field="" type="" />
 </frx:parameters>
 <frx:fields>
   <frx:field id="name" link="" format="" format-string="" target="">Anonymous</frx:field>
@@ -27,7 +25,12 @@
 </head>
 <body>
   <div id="forena-1" frx:block="drupal/users_in_logs">
-    <h4>Log Entries for {name}</h4>
+    <h3 frx:if="!{parm.name}">Select the <strong>user name</strong> for which you want to retrieve log entries<br />
+    (enter it as a parameter on the collapsible parameter form above).</h3>
+    <div frx:if="{parm.name}">
+      <h3>Most recent log entries for user <strong>{parm.name}</strong>
+      (limited to the first 100 entries only).</h3>
+    </div>
   </div>
   <table id="forena-2" frx:block="drupal/user_logs">
     <thead>

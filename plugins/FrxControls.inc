@@ -21,7 +21,7 @@ class FrxControls {
                      'number' => 'Number',
                      'drupal_translation' => 'Translatable Text',
                      'template' => 'Field is a forena template',
-                     'indentation' => 'Indentation', 
+                     'indentation' => 'Indentation',
                      );
                      return $formats;
   }
@@ -44,7 +44,8 @@ class FrxControls {
     $field = $teng->replace($field, NULL, TRUE);
     $vars = array();
     if ($field) {
-      $vars = (array) @unserialize($field);
+      $vars = @unserialize($field);
+      if (!$vars) $vars = array();
     }
     return t($value, $vars);
   }
@@ -161,13 +162,13 @@ class FrxControls {
     }
     return $value;
   }
-  
-  public function indentation($value, $format_str, $teng='') { 
-    if ($value) { 
+
+  public function indentation($value, $format_str, $teng='') {
+    if ($value) {
       $vars = array('size' => $value);
-      $value = theme_indentation($vars); 
+      $value = theme_indentation($vars);
     }
-    return $value; 
+    return $value;
   }
 
 

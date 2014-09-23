@@ -4,9 +4,9 @@
 ]>
 <html xmlns:frx="urn:FrxReports">
 <head>
-<title>User logs</title>
+<title>User logs - Obsolete</title>
 <frx:category>Drupal Administration</frx:category>
-<frx:options />
+<frx:options hidden="1" />
 <frx:parameters>
   <frx:parm id="name" label="User Name" require="1" desc=""
     data_source="" data_field="" type="" />
@@ -29,23 +29,8 @@
   <div id="forena-1" frx:block="drupal/users_in_logs">
     <h4>Log Entries for {name}</h4>
   </div>
-  <table id="forena-3" frx:block="drupal/user_logs">
-    <thead>
-      <tr>
-        <th width="200px">Type</th>
-        <th width="200">Location</th>
-        <th>Timestamp</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr id="forena-4" frx:foreach="*">
-        <td>{type}</td>
-        <td>{location}</td>
-        <td>{timestamp}</td>
-        <td>{details}</td>
-        <td>&nbsp;</td>
-      </tr>
-    </tbody>
-  </table>
+  <div>
+    <p>This report is obsolete and will be removed in the next major release</p>
+  </div>
 </body>
 </html>
