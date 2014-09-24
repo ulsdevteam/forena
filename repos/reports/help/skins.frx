@@ -16,52 +16,51 @@
 </frx:fields>
 <frx:menu type="normal-item"/><style/></head>
 <body>
-  <ul id="forena-1" frx:block="forena_help/design_topics">
-    <li id="forena-2" frx:foreach="*"><span>{title}</span></li>
+  <h2>About Skins</h2>
+	<p>Report skins can be used to manage the look and feel and various settings of multiple reports. Skins are basically a
+		collection of:</p>
+	<ul>
+  <li>CSS stylesheets, JavaScript libraries.</li>
+  <li>Configuration entries (settings).</li>
   </ul>
-<p>
-  Report skins can be used to manage the look and feel of multiple reports. Skins are
-  basically a collection of CSS stylesheets, Javascript libraries and configuration entries.  
-</p>
-<h2>Defining Skins</h2>
-<p>
-  Skins are defined be creating skin configuration files (.skinfo) in the reports directory
-  (usually sites/default/files/reports). Forena comes with a single example configuration
-  file default_skin.skinfo which is located in forena's subdirectory repos/reports which 
-  can be used as a template. The 'Revert all delivered reports to original ' option within
-  admin/structure/forena will create a copy of default_skin.skinfo in the reports directory.
-</p>
-<p>
- Skin info (.skinfo) files are created in the same basic syntax as .info files for themes.
- The following example illustrates the syntax: 
-</p>
-<pre>
+	<h2>Defining Skins</h2>
+	<p>
+		Skins are defined be creating skin configuration files (.skinfo) in the reports directory (usually
+		sites/default/files/reports). {skin.forena} comes with a few example configuration files, such as <strong>default_skin.skinfo</strong>,
+		located in {skin.forena}'s subdirectory repos/reports and which can be used as a template for creating new skins. Using the
+		'Revert all delivered reports to original' option (by checking its checkbox) within <a href="/admin/structure/forena"
+			target="_self">admin/structure/forena</a> will create a copy of default_skin.skinfo in the reports directory.
+	</p>
+	<p>Skin info (.skinfo) files are created in the same basic syntax as .info files for themes. The following example
+		illustrates the syntax:</p>
+	<div frx:renderer="FrxSource">
   ; The name indicates the name displayed in the skin select box
   ; on the Format tab when editing reports. 
   name = Default Skin
-  description = Default skin for use with Forena. 
-  ; Javascript include example 
+  description = Default skin for use with {skin.forena}. 
+  ; JavaScript include example 
   scripts[] = dataTables/media/js/jquery.dataTables.min.js
   ; css Include example 
-  stylesheets[all][] = table_padding.css 
-</pre>
-<p>
-  After creating each new skin information file be sure and clear your forena caches using
-  the clear cache button under the Structure -&gt; Forena Reports menu. 
-</p>
-<h2>Assigning Skins to reports</h2>
-<h3>Configuring the default skin</h3>
-<p> 
-  The <b>default report skin</b> can be configured via admin option <a href="../admin/config/content/forena" target="_self">admin/config/content/forena</a> .
-</p>
-<h3>Selecting a skin for a specific report</h3>
-<p>
-  For each report you can select a skin via the Format tab of the report editor (try it out via 
- <a href="./sample.states/edit/format" target="_self">a sample report</a>). Alternatively, you can specify the skin directly in the .frx file
-  by specifying the <b>skin="skin_file_name"</b> attribute in the frx:options element in the head section of
-  the .frx file as follows (whereas skin_file_name is the filename of your skin, without the .skinfo extension of it): 
-</p>
-<html frx:renderer="FrxSource" id="forena-3">
+  stylesheets[all][] = table_padding.css
+  </div>
+	<p>After creating each new skin information file be sure to {clear_drupal_cache} (or {clear_forena_cache} for Forena's pre
+		7.x-4.x versions).</p>
+	<h2>Assigning Skins to reports</h2>
+	<h3>Configuring the default skin</h3>
+	<p>
+		The <strong>default report skin</strong> can be configured via admin option <a href="/admin/config/content/forena"
+			target="_self">admin/config/content/forena</a>.
+	</p>
+	<h3>Selecting a skin for a specific report</h3>
+	<p>
+		For each report you can select a skin via the Format tab of the report editor (try it out via <a
+			href="./sample.states/edit/layout" target="_self">a sample report</a>). Alternatively, you can specify the skin directly in
+		the .frx file by specifying the <strong>skin="skin_file_name"</strong> attribute in the frx:options element in the head
+		section of the .frx file as follows (whereas skin_file_name is the filename of your skin, without the .skinfo extension of
+		it):
+	</p>
+	<div class="FrxSource" >
+<html frx:renderer="FrxSource">
   <head>
     <frx:options skin="skin_file_name"/>
   </head>
@@ -69,50 +68,140 @@
   ... 
   </body>
 </html>
- <b>Hint</b>: if you have multiple skins defined (e.g. default_skin.skinfo and custom_skin.skinfo), you might
-want to switch between them to (temporarily) change the look and feel of your report (e.g.: using a
-dataTables display via the custom_skin, and default_skin to not use the dataTables).
-<h2>CSS Libraries</h2>
-<p>
-  Stylesheets can be included using the same syntax for drupal themes.  Including a 
-  stylesheets[all][]=sheet.css line in your .skinfo file, will cause the sheet.css file to be 
-  loaded for any media types. 
-</p>
-<p> 
-  If you are using a PDF generator (MPDF or Prince), understand that you can specify stylesheets[pdf][] 
-  entries to include particular stylesheets only in the PDF transformation. Forena looks first in the 
-  reports directory for the stylesheets and then at the site root level, so you can specify theme css files by fully 
-  qualifying the path to the theme. This can be particularly useful when you want to include
-  a typography stylesheet in your PDF translations. 
-</p>
-<h2>Javascript Libraries</h2>
-<p> 
-  Javascript libraries are included using the same syntax as is used in the theme info file. 
-  In the above example the scripts[]=dataTables/media/js/jquery.dataTables.js is used 
-  to load the JQuery dataTables library. Forena will search for these libraries first in the 
-  report directory and then in the sites/all/libraries folder. This is particularly useful
-  if you want to load additional JQuery plugins for a set but not all reports. You can add
-  additional javascript libraries without needing to write custom module or theme code. 
-</p>
-<h2>Example</h2>
-<p> 
-  Here is how a custom version of a skin info file might look like, cloned from the delivered
-  default_skin.skinfo :
-<pre>
+</div>
+	<h2>CSS Libraries</h2>
+	<p>Stylesheets can be included using the same syntax for Drupal themes. Including a stylesheets[all][]=sheet.css line in
+		your .skinfo file, will cause the sheet.css file to be loaded for any media types.</p>
+	<p>If you are using a PDF generator (MPDF or Prince), understand that you can specify stylesheets[pdf][] entries to include
+		particular stylesheets only in the PDF transformation. {skin.forena} looks first in the reports directory for the stylesheets
+		and then at the site root level, so you can specify theme css files by fully qualifying the path to the theme. This can be
+		particularly useful when you want to include a typography stylesheet in your PDF translations.</p>
+	<h2>JavaScript Libraries</h2>
+	<p>
+		JavaScript libraries are included using the same syntax as is used in the theme info file. In the above example the
+		scripts[]=dataTables/media/js/jquery.dataTables.js is used to load the JQuery dataTables library. {skin.forena} will search
+		for these libraries first in the report directory and then in the sites/all/libraries folder (checkout <a
+			href="./help.setup.datatables" target="_self">Enable DataTables</a> for instructions about how to install the dataTables
+		library). This is particularly useful if you want to load additional JQuery plugins for a set but not all reports. You can add
+		additional JavaScript libraries without needing to write custom module or theme code.
+	</p>
+	<h2>Example</h2>
+	<h3>Add a custom JS and CSS file</h3>
+	<p>Here is how a custom version of a skin info file might look like, cloned from the delivered default_skin.skinfo :
+	</p>
+	<pre frx:renderer="FrxSource">
   ; The name indicates the name displayed in the skin select box
   ; on the Format tab when editing reports. 
   name = Custom Skin
-  description = Custom skin for use with Forena. 
+  description = Custom skin for use with {skin.forena}. 
   ; Javascript include example 
   scripts[] = dataTables/media/js/jquery.dataTables.min.js
   scripts[] = custom_skin.js
   ; css Include example 
   stylesheets[all][] = table_padding.css 
   stylesheets[all][] = custom_skin.css
-</pre>
-Note the <b>custom_skin.js</b> and <b>custom_skin.css</b> that were added. Storing them in the
-same directory as the custom_skin.skinfo (i.e. the reports directory, usually sites/default/files/reports)
-is a good practice that will simplify upgrading to future forena versions.
-</p>
+  </pre>
+	<p>
+		Note the <strong>custom_skin.js</strong> and <strong>custom_skin.css</strong> that were added. Storing them in the same
+		directory as the custom_skin.skinfo (i.e. the reports directory, usually sites/default/files/reports) is a good practice that
+		will simplify upgrading to future {skin.forena} versions.
+	</p>
+	<h3>Adding content to the custom CSS file</h3>
+	<p>
+		After adding the line containing <strong>stylesheets[all][] = custom_skin.css</strong> to the .skinfo file, just add any
+		combination of CSS elements to the content of the custom_skin.css file (the sky is the limit).
+	</p>
+	<h3>Adding content to the custom JS file</h3>
+	<p>
+		After adding the line containing <strong>scripts[] = custom_skin.js</strong> to the .skinfo file, construct the content of
+		this custom_skin.js file. As a sample, add what's needed to actually use (enable) various features provided by the dataTables
+		plugin (<strong>Note</strong>: adding the line <strong>scripts[] = dataTables/media/js/jquery.dataTables.min.js</strong> to
+		the .skinfo file only makes this plugin available, it doesn't use the plugin yet).
+	</p>
+	<p>According to the dataTables documentation, the content of the custom_skin.js file should look similar to this example:</p>
+	<script frx:renderer="FrxSource">
+  $(document).ready(function() {
+      $('#example').dataTable();
+  } );
+  </script>
+  <p>
+		However, this doesn't take into account that in Drupal the <strong>$(document).ready</strong> is already taken (used by
+		Drupal). So we can't overwrite $(document).ready, but instead we need to implement something called
+		<strong>Drupal 7 behaviors</strong>. To do so, start from a copy of this code snippet (mentioned on the
+		<a href="https://www.drupal.org/node/756722" target="_blank">Managing JavaScript in Drupal 7</a> page), and paste it into the
+		(empty) custom_skin.js file:
+	</p>
+<script frx:renderer="FrxSource">
+	
+  (function ($) {
+    Drupal.behaviors.exampleModule = {
+      attach: function (context, settings) {
+    $('.example', context).click(function () {
+    $(this).next('ul').toggle('show');
+  });
+      }
+    };
+  })(jQuery);
+  </script>
+  <p>
+  Then apply these changes to the copied code snippet:
+  </p>
+  <ul>
+  <li>The behavior name (= <strong>exampleModule</strong>) is not important, so just change it to anything you want, e.g. to <strong>CustomSkin</strong>.</li>
+  <li>We are not going to do the click example (corresponding to lines 4, 5 and 6 in the example above). Instead inside the attach function we want to do what the dataTables example wants us to do on $(document).ready so replace those 3 lines by <strong> $('#example').dataTable();</strong>.</li>
+  <li>Then change the selector from <strong>#example</strong> to <strong>table</strong>, to use the dataTables plugin for all tables (not just for the example table only).</li>
+  </ul>
+  <p>
+  After these changes are applied, the updated custom_skin.js file should look like this:
+  </p>
+  <script frx:renderer="FrxSource">
+  (function ($) {
+    Drupal.behaviors.CustomSkin = {
+      attach: function (context, settings) {
+  $('table').dataTable();
+      }
+    };
+  })(jQuery);
+  </script>
+  <h2>Defining Configuration Settings</h2>
+	<p>Skins also facilitate assigning values to specific variables, which can then be used in all reports using the skin. This
+		is typically done for various flavors of settings, such as:
+	</p>
+	<ul>
+		<li>Establishing defaults for SVGGraph settings.</li>
+		<li>Settings that can be used to control how reports are rendered.</li>
+		<li>Arbitrary variables (and their values) that can be referenced in a report using the skin data context.</li>
+	</ul>
+	<p>
+	The following example (which can be added anywhere in a .skinfo file) contains an illustration of how to do so:
+	</p>
+	<pre frx:renderer="FrxSource">
+  ; *********************************************************************
+  ; Set SVGGraph defaults: 
+  ; 
+  ; FrxSVGGraph[colors][] = red 
+  ; FrxSVGGraph[colors][] = blue
+  ; 
+  ; *********************************************************************
+  ; Settings that can be used to control how reports are rendered:
+  ; 
+  ; Disable helper classes such as even and odd:
+  ; FrxReport[noHelperClasses] = true
+  ; 
+  ; Control the root element tag name:
+  ; FrxXMLDoc[rootElementName] = node
+  ; 
+  ; *********************************************************************
+  ; Arbitrary variables referenced in reports using the skin data context:
+  ; 
+  ; Make skin.my_variable available to be referenced anywhere in a report:
+  ; my_variable = Value of my own variable
+  </pre>
+ 
+  <h2>Recommended video tutorials</h2>
+	<p>
+		For more info about this topic, checkout <a href="http://www.youtube.com/watch?v=ijmM85RGvvk" target="_blank">Report Skins
+			- Create skins that control graphing defaults and integrate JQuery plugin</a>.
+	</p>
 </body>
 </html>
