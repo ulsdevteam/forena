@@ -10,6 +10,7 @@ class FrxFile {
   public $includes = array(); //Other places to look for a directory.
   public $use_includes;
   public $cached_extensions;
+  protected $validated = FALSE;
   protected $cache;
   protected $needSave = TRUE;
   protected $needScan = TRUE;
@@ -152,6 +153,8 @@ class FrxFile {
    * @param string $prefix
    */
   public function validateAllCache($prefix='') {
+    // Make sure once per session.
+    if ($this->validated) return;
     // Load data form the cache
     if (!$this->cache) {
       $cache = cache_get($this->cacheKey, 'cache');
@@ -178,6 +181,7 @@ class FrxFile {
       cache_set($this->cacheKey, $this->cache, 'cache', CACHE_PERMANENT);
     }
     //$this->needScan = FALSE;
+    $this->validated = TRUE;
   }
 
   public function getCache($ext) {
