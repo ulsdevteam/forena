@@ -26,8 +26,8 @@
 	<h2>Defining Skins</h2>
 	<p>
 		Skins are defined be creating skin configuration files (.skinfo) in the reports directory (usually
-		sites/default/files/reports). {skin.forena} comes with a few example configuration files, such as <strong>default_skin.skinfo</strong>,
-		located in {skin.forena}'s subdirectory repos/reports and which can be used as a template for creating new skins. Using the
+		sites/default/files/reports). Forena comes with a few example configuration files, such as <strong>default_skin.skinfo</strong>,
+		located in Forena's subdirectory repos/reports and which can be used as a template for creating new skins. Using the
 		'Revert all delivered reports to original' option (by checking its checkbox) within <a href="/admin/structure/forena"
 			target="_self">admin/structure/forena</a> will create a copy of default_skin.skinfo in the reports directory.
 	</p>
@@ -37,7 +37,7 @@
   ; The name indicates the name displayed in the skin select box
   ; on the Format tab when editing reports. 
   name = Default Skin
-  description = Default skin for use with {skin.forena}. 
+  description = Default skin for use with Forena. 
   ; JavaScript include example 
   scripts[] = dataTables/media/js/jquery.dataTables.min.js
   ; css Include example 
@@ -73,13 +73,13 @@
 	<p>Stylesheets can be included using the same syntax for Drupal themes. Including a stylesheets[all][]=sheet.css line in
 		your .skinfo file, will cause the sheet.css file to be loaded for any media types.</p>
 	<p>If you are using a PDF generator (MPDF or Prince), understand that you can specify stylesheets[pdf][] entries to include
-		particular stylesheets only in the PDF transformation. {skin.forena} looks first in the reports directory for the stylesheets
+		particular stylesheets only in the PDF transformation. Forena looks first in the reports directory for the stylesheets
 		and then at the site root level, so you can specify theme css files by fully qualifying the path to the theme. This can be
 		particularly useful when you want to include a typography stylesheet in your PDF translations.</p>
 	<h2>JavaScript Libraries</h2>
 	<p>
 		JavaScript libraries are included using the same syntax as is used in the theme info file. In the above example the
-		scripts[]=dataTables/media/js/jquery.dataTables.js is used to load the JQuery dataTables library. {skin.forena} will search
+		scripts[]=dataTables/media/js/jquery.dataTables.js is used to load the JQuery dataTables library. Forena will search
 		for these libraries first in the report directory and then in the sites/all/libraries folder (checkout <a
 			href="./help.setup.datatables" target="_self">Enable DataTables</a> for instructions about how to install the dataTables
 		library). This is particularly useful if you want to load additional JQuery plugins for a set but not all reports. You can add
@@ -93,7 +93,7 @@
   ; The name indicates the name displayed in the skin select box
   ; on the Format tab when editing reports. 
   name = Custom Skin
-  description = Custom skin for use with {skin.forena}. 
+  description = Custom skin for use with Forena. 
   ; Javascript include example 
   scripts[] = dataTables/media/js/jquery.dataTables.min.js
   scripts[] = custom_skin.js
@@ -104,7 +104,7 @@
 	<p>
 		Note the <strong>custom_skin.js</strong> and <strong>custom_skin.css</strong> that were added. Storing them in the same
 		directory as the custom_skin.skinfo (i.e. the reports directory, usually sites/default/files/reports) is a good practice that
-		will simplify upgrading to future {skin.forena} versions.
+		will simplify upgrading to future Forena versions.
 	</p>
 	<h3>Adding content to the custom CSS file</h3>
 	<p>

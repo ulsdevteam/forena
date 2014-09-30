@@ -70,8 +70,8 @@
 			title="Structered Query Language">SQL</abbr> files. The .sql data blocks are stored on the file system, typically in a
 		location that is not writable by the web user.
 	</p>
-	<p>This guide documents how to install and configure {skin.forena} as well as how to leverage the power of some external
-		libraries to enhance {skin.forena}'s capabilities.</p>
+	<p>This guide documents how to install and configure Forena as well as how to leverage the power of some external
+		libraries to enhance Forena's capabilities.</p>
 
 	<h2 id="installation">Installation and Configuration</h2>
 	<h3 id="text-formats">Prepare a text format to be used by forena</h3>
