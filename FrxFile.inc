@@ -154,8 +154,6 @@ class FrxFile {
    */
   public function validateAllCache($prefix='') {
     // Make sure once per session.
-    if ($this->validated) return;
-    // Load data form the cache
     if (!$this->cache) {
       $cache = cache_get($this->cacheKey, 'cache');
       if ($cache) {
@@ -163,6 +161,9 @@ class FrxFile {
       }
       $this->needSave = FALSE;
     }
+    // Skip extra stuff after we've validated once.
+    if ($this->validated) return;
+    // Load data form the cache
     // Save current paths away.
     $this->setFilesToDelete();
     $this->scan($prefix);
