@@ -163,7 +163,7 @@ class FrxReportFile extends FrxFile {
     $this->getCache('skinfo');
     $skins = array();
     if (isset($this->cache['skinfo'])) foreach ($this->cache['skinfo'] as $name => $obj) {
-      $skins[$name] = $obj->cache['name'];
+      $skins[$name] = isset($obj->cache['name']) ? $obj->cache['name'] : $name;
     }
     return $skins;
   }
