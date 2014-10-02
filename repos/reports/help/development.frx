@@ -4,9 +4,9 @@
 ]>
 <html xmlns:frx="urn:FrxReports">
 <head>
-<title>Extending Forena Reports</title>
+<title>Developers Guide</title>
 <frx:category>Help</frx:category>
-<frx:options hidden="0" form="" />
+<frx:options hidden="1" skin="tutorial" />
 <frx:parameters>
 </frx:parameters>
 <frx:docgen>
@@ -16,7 +16,7 @@
 </frx:fields>
 </head>
 <body>
-  <div class="toc" id="help-toc-1" frx:block="forena_help/devlopment_topics">
+  <div class="toc" id="help-toc-1" frx:block="forena_help/development_topics">
     <h3>Including</h3>
     <ul>
       <li id="help-toc-2" frx:foreach="/book/chapters/chapter">{title}<span frx:if="{subtitle}">: {subtitle}.</span></li>

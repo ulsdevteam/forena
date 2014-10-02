@@ -6,46 +6,15 @@
 <head>
 <title>Layout</title>
 <frx:category>Help</frx:category>
-<frx:options hidden="1"></frx:options>
+<frx:options hidden="1" />
 <frx:parameters>
 </frx:parameters>
-<frx:docgen></frx:docgen>
+<frx:docgen />
 <frx:fields>
-  <frx:field id="title" link="reports/{name}"></frx:field>
+  <frx:field id="title" link="reports/help.setup">WYSIWYG Reporting Guide</frx:field>
 </frx:fields>
 </head>
 <body>
-  <div id="design_topics_block" frx:block="forena_help/design_topics">
-    <p>In the layout tab, you can edit the body of the report, save
-      the report as another, and control which document exports are
-      available. &nbsp;Explanation of the opions on this form are as
-      follows:</p>
-    <p>
-      <strong>Body -;</strong>&nbsp;The html body of the
-      report.&nbsp;
-    </p>
-    <p>
-      <strong>Category</strong> - This controls under which group the
-      report appears under the My Reports link.
-    </p>
-    <p>
-      <strong>Menu</strong> - Specify configuration options for a drupal menu 
-      here.  
-    </p> 
-    <p><strong>Skin</strong> - The skin determines the look and feel of the report.
-      &nbsp;In conventional report writers this can be thought of as
-      what kinid of paper form the report printed on. &nbsp;In the
-      modern days of the web most layout is controlled by Cascacding
-      Style Sheets (CSS) and Javascript Libraries.   See the section on 
-      Report Skins for additional information on creating report skins.</p>
-    <p>
-      <strong>Hidden</strong> - Checking this box will cause the report
-      not to be listed in the My Reports list regardless of the Category
-      set.&nbsp;
-    </p>
-    <ul>
-      <li id="design_topics" frx:foreach="*">{title}</li>
-    </ul>
-  </div>
+  <p>This document is no longer in use please see the {title}</p>
 </body>
 </html>

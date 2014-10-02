@@ -6,7 +6,7 @@
 <head>
 <title>Setup Guide</title>
 <frx:category>Help</frx:category>
-<frx:options hidden="0" skin="tutorial_skin" />
+<frx:options hidden="1" skin="tutorial_skin" />
 <frx:parameters>
 </frx:parameters>
 <frx:docgen>

@@ -112,6 +112,19 @@
 			</ul>
 		</div>
 	</div>
+	<div class="frx-block" id="sitebuilding-1" frx:block="forena_help/skin_topics">
+		<div frx:if="!{parm.show_chapters}">{booktitle}</div>
+		<div frx:if="{parm.show_chapters}">
+			<hr />
+			<h3>{/book/booktitle}</h3>
+			<ul>
+				<li id="skins-2" frx:foreach="/book/chapters/chapter">{title} <span frx:if="{subtitle}&amp;{parm.show_subtitle}">-
+						{subtitle}.</span>
+					<blockquote frx:if="{abstract}&amp;{parm.show_abstract}">{abstract}</blockquote>
+				</li>
+			</ul>
+		</div>
+	</div>	
 	<div class="frx-block" id="sitebuilding-1" frx:block="forena_help/sitebuilding_topics">
 		<div frx:if="!{parm.show_chapters}">{booktitle}</div>
 		<div frx:if="{parm.show_chapters}">
