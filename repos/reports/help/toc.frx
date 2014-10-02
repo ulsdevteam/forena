@@ -60,7 +60,7 @@
 			</ul>
 		</div>
 	</div>
-	<div class="frx-block" id="accessdata-1" frx:block="forena_help/accessdata_topics">
+	<div class="frx-block" id="data" frx:block="forena_help/data_topics">
 		<div frx:if="!{parm.show_chapters}">{booktitle}</div>
 		<div frx:if="{parm.show_chapters}">
 			<hr />
