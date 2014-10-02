@@ -176,11 +176,6 @@
 			</td>
 		</tr>
 		<tr>
-			<th>Access Demo Reports</th>
-			<td>Even though this is one of the available permissions, it doesn't seem to be used anywhere within Forena (except in
-				forena.test). Feel free to use it to implement {datablocks_security} for any of your (custom) reports.</td>
-		</tr>
-		<tr>
 			<th>List reports</th>
 			<td>Grant access to:
 				<ul>

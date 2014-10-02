@@ -873,7 +873,6 @@ function forena_parameters_callback($form, &$form_state) {
 function forena_permission() {
   $perms = array(
     'administer forena reports' => array('title' => t('Administer Forena Reports')),
-    'access demo reports' => array('title' => t('Access Demo Reports')),
     'list reports' => array('title' => t('List reports')),
     'create any report' => array('title' => t('Create a report')),
     'design any report' => array('title' => t('Design reports')),
