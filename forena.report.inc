@@ -1179,7 +1179,7 @@ function forena_report_parameter_config_form($formid, $form_state, $report_name,
 
   $form['parm']['data_source'] = array(
       '#type' => 'textfield',
-      '#title' => t('Data Source'),
+      '#title' => t('Source Data'),
       '#default_value' => @$parm['data_source'],
       '#autocomplete_path' => 'forena/data_block/autocomplete',
       '#description' => t('Data block to be used for select, multiselect, and checkboxes types'),

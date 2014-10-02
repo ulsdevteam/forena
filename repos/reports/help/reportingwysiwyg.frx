@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+
 <!DOCTYPE root [
 <!ENTITY nbsp "&#160;">
 <!ENTITY reg "&#174;">
@@ -363,10 +363,13 @@
         <th>Input Control Type</th>
         <td>Indicates the type of control or widget used prompt for user input.</td>
       </tr>
-      <tr>
-        <th>Data Source</th>
-        <td>Used in conjunction with the control field to determine which values will be made available to radio buttons, check-boxes or select lists. The value should be a <strong>data block</strong> that users of this report will have access to. Blocks should be written to return key value pairs for use in these controls. <strong>Note</strong>: this is indeed assumed to be a data <strong>block</strong>, and not a data <strong>source</strong>, even though the label here suggests so ...).</td>
-      </tr>
+			<tr>
+				<th>Source Data</th>
+				<td>Used in conjunction with the control field to determine which values will be made available to radio buttons,
+					check-boxes or select lists. The value should be a <strong>data block</strong> that users of this report will have access
+					to. Blocks should be written to return key value pairs for use in these controls.
+				</td>
+			</tr>
 			<tr>
 				<th>Data Field</th>
 				<td>The name of the column from the data block specified in <strong>Data Source</strong> that is used to populate the
@@ -376,7 +379,7 @@
 			</tr>
 			<tr>
 				<th>Label Field</th>
-				<td>The name of the column from the data block specified in <strong>Data Source</strong> that is used to populate the <strong>labels</strong>
+				<td>The name of the column from the data block specified in <strong>Source Data</strong> that is used to populate the <strong>labels</strong>
 					of select or radio buttons. If omitted, then the 2nd column of the data block is used as the Label Field, provided such 2nd
 					column exists (if not, then the 1st column is used instead).
 				</td>
