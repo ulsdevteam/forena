@@ -25,7 +25,7 @@
 	<frx:field id="about_data_sources" link="reports/help.data#datasources">About Data Sources</frx:field>
 	<frx:field id="wysiwyg_editors" link="reports/help.sitebuilding#wysiwygeditors" >WYSIWYG editors</frx:field>
 	<frx:field id="svggraph_library" link="reports/help.setup#svggraph" >SVGGraph library</frx:field>
-	<frx:field id="drupal_status" link="admin/reports/status">Drupal Status</frx:field>
+	<frx:field id="drupal_status" link="admin/reports/status">Status Report</frx:field>
 	<frx:field id="datablocks_security" link="reports/help.data#datablockssecurity" >Data Blocks Security</frx:field>
 	<frx:field id="datablocks" link="reports/help.data#datablocks" >Data Block</frx:field>
 	<frx:field id="grant_permissions" link="admin/people/permissions#module-forena" >grant permissions to roles</frx:field>
@@ -53,12 +53,9 @@
 			title="Structered Query Language">SQL</abbr>.
 	</p>
 	<p>
-		Report definitions are stored as files on the file system in .frx files. These files are basically <abbr
+	Report definitions are stored as files on the file system in .frx files. These files are basically <abbr
 			title="eXtensible HyperText Markup Language">XHTML</abbr> template files extended with frx namespaced attributes and
-		elements.
-	</p>
-	<p>
-		Report authors need only to learn a few special attributes and tags (e.g. frx:block, frx:foreach, frx:if) to create reports in
+		elements. Report authors need only to learn a few special attributes and tags (e.g. frx:block, frx:foreach, frx:if) to create reports in
 		virtually any layout. <abbr title="Forena Report XML">FRX</abbr> report files are typically stored in a location writable by
 		the web user, so that they can be authored using a <abbr title="What You See Is What You Get">WYSIWYG</abbr> report editor.
 		Report definitions can typically be modified by a group of power users. These users do not need to know <abbr
@@ -69,10 +66,14 @@
 			title="Structered Query Language">SQL</abbr> files. The .sql data blocks are stored on the file system, typically in a
 		location that is not writable by the web user.
 	</p>
-	<p>This guide documents how to install and configure Forena as well as how to leverage the power of some external
-		libraries to enhance Forena's capabilities.</p>
-
 	<h2 id="installation">Installation and Configuration</h2>
+	<p>After following normal practices for installing a drupal module there are a few steps that must be preformed prior to using forena:</p>
+	<ol>
+	  <li>Prepare a text format for use with forena</li>
+	  <li>Configure forena to use this text format and specify installation and configuration directories.</li>
+	  <li>Enable document types</li>
+	  <li>Configure Forena permissions</li>
+	</ol> 
 	<h3 id="text-formats">Prepare a text format to be used by forena</h3>
 	<p>
 		In a subsequent administration step, a <strong>text format</strong> will have to be specified as the input format for any of
@@ -80,18 +81,19 @@
 	</p>
 	<ul>
 		<li><strong>Use a newly created text format (preferred)</strong>: The advantage of using a new text format is that the
-			impact of tuning the selected text format (as detailed below) will be limited to forena reports only. If you're planning on
+			impact of tuning the selected text format will be limited to forena reports only. If you're planning on
 			using any of the {wysiwyg_editors} to edit the body of a report, it might be a good practice to even create two new text
 			formats (an extra one for reports that will contain graphs)</li>
 		<li><strong>Use an existing text format such as Full HTML</strong>: this is the easiest option, but will likely require
 			you to change the configuration of the exisiting format.</li>
 	</ul>
 	<p>
-		It is <em>strongly recommended</em> create a dedicated text format for use with Forena. I generally use one called "Reports".
-		Text format configuration may be found at {text_format_config}.
+		It is <em>strongly recommended</em> create a dedicated text format for use with Forena (e.g. one named "Reports"). Text format
+		configuration may be found at {text_format_config}. 
+		</p>
+	<p> Regardless as to which Input Format you choose to use with forena, make
+		sure these entries are turned of for the chosen text format :
 	</p>
-	<p>Regardless as to which Input Format you choose to use with forena, make sure these entries are turned of for the chosen
-		text format :</p>
 	<ul>
 		<li>Limit allowed HTML tags.</li>
 		<li>Display any HTML as plain text.</li>
@@ -104,7 +106,7 @@
 	</p>
 	<h3>General Forena Configuration</h3>
 	<p>
-		Navigate to the <strong>general</strong> tab of the {configure_forena} and indicate the directory names for:
+		Navigate to the <strong>general</strong> tab of the {configure_forena} and configure the following options:
 	</p>
 	<ul>
 		<li><strong>Report Repository</strong>: this is the directory to be used for saving the report specifications (.frx
@@ -113,13 +115,11 @@
 		<li><strong>Custom Data Block Repository</strong>: this is the directory to be used to save custom Data Blocks (e.g.
 			using the forena query builder tool). This should be a directory that is writable by the web user, but it should not be
 			possible to browse it via the web.</li>
+		<li><strong>Default Report Skin </strong> only makes sense after defining a custom {custom_skins}. Leave the proposed default value for it unchanged for now.</li> 
+		<li><strong>Text Format</strong> Specify the text format you configured for use with forena earlier.</li>
 	</ul>
 	<p>
-		Selecting another value for <strong>Default report skin </strong> only makes sense after completing the step {custom_skins},
-		so leave the proposed default value for it unchanged for now. Also just accept the proposed <strong>Text Format</strong> value
-		within <strong>Input Formats</strong> (which is next on the list of tasks to be completed, as described below). And ignore the
-		other menu tabs (about Data Sources and Document Types). Use the <strong>Save Configuration</strong> button to already save
-		the directory name changes applied so far.
+		Use the <strong>Save Configuration</strong> button to save changes.
 	</p>
 	<h4>Recommended video tutorials</h4>
 	<p>
@@ -136,36 +136,28 @@
 		<strong>Notes</strong>:
 	</p>
 	<ul>
-		<li>After executing a report (i.e. browsing it), the report user will only be able to save (export) the report in formats
-			that were enabled for that report (by the report developer), whereas the report developer could only enable those formats
-			that were enabled on the Document Types tab of the {configure_forena} (at the time the report specifications were last
-			changed).</li>
-		<li>Don't confuse document formats (as specified within Document Types) with text formats (selected within Input
-			Formats), they are not related to each other.</li>
+		<li>Users are presented with links to export the report in formats that were enabled for that report.  The default types specified here are presented
+		 when no overidding values are set for the report. </li>
+		<li>Users will not be able to export the report in any formats that are not enabled, regardless of the doctypes specified in the report.</li>
+		<li>Don't confuse document formats with text formats described earlier.  They are not related to each other.</li>
 	</ul>
-	<h3 id="enable-create-report">Enable navigation menu item (optional)</h3>
-	<p>
-		As part of the installation of forena, a menu item <strong>Create Report</strong> gets created in the navigation menu. However
-		as delivered it is NOT enabled. If you want to do so, enable this menu item via Structure / Menu / Navigation.
-	</p>
 
 	<h2 id="permissions">Permissions</h2>
 	<p>Forena allows for a lot of granularity as it comes to reporting related authorizations, by using the standard Drupal
-		administration facilities to {grant_permissions}.</p>
-	<p>The list of Forena related Drupal permissions that can be granted may be a bit overwhelming at first. Because there are
-		3 entries for each defined {datasource}, and vanilla Forena already comes with 3 data sources (which explain already 9 of
-		these Drupal permissions).</p>
-	<p>More details about the available Drupal permissions are provided below</p>
-	<h3>Forena Reports Module Permissions</h3>
-	<p>
-		These are the available Drupal permissions related to using and/or managing <strong>Forena Reports</strong> (whereas
-		&quot;[RepName]&quot; represents the name of a data block's repository):
+		administration facilities to {grant_permissions}.  The list of Forena related Drupal permissions that can be granted may be a bit overwhelming at first. Because there are
+		3 entries for each defined data source, and vanilla Forena already comes with 3 data sources.  Available Drupal permissions related to using and/or managing <strong>Forena Reports</strong> are as follows ([data source] represents the name of a data block's repository).:
 	</p>
 	<table>
+	   <thead>
+	     <tr>
+	    <th>Right</th>
+	    <th>Grants access to</th>
+	    </tr>
+	    </thead>
+	    <tbody>
 		<tr>
-			<th>Administer Forena Reports</th>
-			<td>Grant access to:
-				<ul>
+			<td>Administer Forena Reports</td>
+			<td><ul>
 					<li>admin/config/content/forena.</li>
 					<li>admin/config/content/forena/data/configure.</li>
 					<li>admin/config/content/forena/data/add.</li>
@@ -175,18 +167,16 @@
 			</td>
 		</tr>
 		<tr>
-			<th>List reports</th>
-			<td>Grant access to:
-				<ul>
+			<td>List reports</td>
+			<td><ul>
 					<li>menu item {my_reports}.</li>
 					<li>a list of reports produced via {frxmyreports_renderer}.</li>
 				</ul>
 			</td>
 		</tr>
 		<tr>
-			<th>Create a report</th>
-			<td>Grant access to:
-				<ul>
+			<td>Create a report</td>
+			<td><ul>
 					<li>menu item {create_report}.</li>
 					<li>Create a new (custom) report from a template (via reports/%/add).</li>
 					<li>Create a new (custom) report translation (via reports/%/translate).</li>
@@ -194,8 +184,8 @@
 			</td>
 		</tr>
 		<tr>
-			<th>Design reports</th>
-			<td>Grant access to:
+			<td>Design reports</td>
+			<td>
 				<ul>
 					<li>Editing the specifications of an existing (custom) report (via reports/%/edit, or any of its sub-paths to edit
 						general report options, document types, report layout, report parameters, add/remove data blocks, report fields, etc).</li>
@@ -210,57 +200,61 @@
 			</td>
 		</tr>
 		<tr>
-			<th>Delete reports</th>
-			<td>Grant access to deleting an existing (custom) report (via reports/%/delete).</td>
+			<td>Delete reports</td>
+			<td>Deleting an custom report via reports/%/delete.</td>
 		</tr>
 		<tr>
-			<th>Peform email merge</th>
-			<td>Allows users to use the <strong>email</strong> document type to send email form letters using Forena.</td>
+			<td>Peform email merge</td>
+			<td>Use of the <strong>email</strong> document type to send email form letters using Forena.</td>
 		</tr>
 		<tr>
-			<th>Access xml from data blocks directly</th>
-			<td>Grant access to forena/xml/%, useful for ajax calls to data blocks.</td>
+			<td>Access xml from data blocks directly</td>
+			<td>Forena/xml/%, useful for ajax calls to data blocks.</td>
 		</tr>
 		<tr>
-			<th>Access [RepName] Data</th>
-			<td>Grant access to data contained in the [RepName] repository (one such permission for each defined [RepName]), which
-				is a prereq for access to any data contained in any data block of that [RepName] repository.</td>
+			<td>Access [data source] Data</td>
+			<td>Data contained in the [data source] repository (one such permission for each defined [data source]), which
+				is a prereq for access to any data contained in any data block of data source.</td>
 		</tr>
+	    </tbody>
 	</table>
 	<h3>Forena Query Builder Module Permissions</h3>
 	<p>
 		These are the available Drupal permissions related to managing data blocks using the <strong>Forena Query Builder</strong>
-		(whereas &quot;[RepName]&quot; represents the name of a data block's repository):
+		(whereas &quot;[data source]&quot; represents the name of a data block's data source or database connection):
 	</p>
 	<table>
+	  <thead>
+	    <tr>
+	    <th>Right</th>
+	    <th>Grants access to</th>
+	    </tr>
+	  </thead>
+	  <tbody>
 		<tr>
-			<th>Build Forena Data Blocks using SQL</th>
+			<td>Build Forena Data Blocks using SQL</td>
 			<td>Direct access to SQL should not be given without understanding of security ramifications.</td>
 		</tr>
 		<tr>
-			<th>Manage data security</th>
+			<td>Manage data security</td>
 			<td>Allows to create new data queries and alter security on saved queries.</td>
 		</tr>
 		<tr>
-			<th>Create [RepName] Data Blocks</th>
-			<td>Grant access to create data blocks contained in the [RepName] repository (one such permission for each defined
-				[RepName]).</td>
+			<td>Create [data source] Data Blocks</td>
+			<td>Grant access to create data blocks contained in the [data source] repository (one such permission for each defined
+				[data source]).</td>
 		</tr>
 		<tr>
-			<th>Delete [RepName] Data Blocks</th>
-			<td>Grant access to delete data blocks contained in the [RepName] repository (one such permission for each defined
-				[RepName]).</td>
+			<td>Delete [data source] Data Blocks</td>
+			<td>Grant access to delete data blocks contained in the [data source] repository (one such permission for each defined
+				[data source]).</td>
 		</tr>
+	  </tbody>
 	</table>
 	<h2 id="svggraph">Enable SVGGraph</h2>
-	<h3>About the SVG Graph library</h3>
 	<p>
-		Forena also facilitates the creation of all sorts of graphs such as piecharts, barcharts and radarcharts. The actual creation
-		of such graphs is done using the PHP <abbr title="Scalable Vector Graphics">SVG</abbr> Graph library (version 2.11 or above),
-		which is expected to be installed in the sites/all/libraries folder.
-	</p>
-	<h3>Installing the SVG Graph library</h3>
-	<p>To actually install this library, perform these steps:</p>
+		Forena also facilitates the creation of graphs such as piecharts, barcharts and radarcharts using the PHP <abbr title="Scalable Vector Graphics">SVG</abbr> Graph library (version 2.11 or above),
+		which is expected to be installed in the sites/all/libraries folder. To install this library:</p>
 	<ol>
 		<li>Download the PHP SVGGraph library from {svggraph_library}.</li>
 		<li>Unpack (extract) the downloaded SVGGraph library.</li>
@@ -269,18 +263,13 @@
 		</li>
 	</ol>
 	<p>
-		After completing the SVGGraph installation, go to the {drupal_status} and check the line starting with <strong>Forena
-			SVGGraph support</strong>: if it is shown with a status like <strong>Enabled</strong>, then the SVG Graph library is installed
-		correctly (any other value indicates some type of problem with this library).
+		After completing the SVGGraph installation, go to the Drupal {drupal_status} and check the line starting with <strong>Forena
+			SVGGraph support</strong>: if it is shown with a status of <strong>Enabled</strong>, then the SVG Graph library is installed
+		correctly.
 	</p>
 	<p>
 		For a video tutorial about this topic, checkout <a href="https://www.youtube.com/watch?v=FsTluwgvWX4" target="_blank">Graphing
 			with PHP SVG Graph and Forena - Part 1</a> (i.e. what is explained from about 00:10 to 03:10).
-	</p>
-	<h3>Establish default SVGGraph settings</h3>
-	<p>
-		Checkout <strong>Defining Configuration Settings</strong> within Custom Report
-			Skins for instructions about how to assign appropriate default values for various SVG Graph settings.
 	</p>
 	<h3>Validate your text formats configuration</h3>
 	<p>
@@ -295,37 +284,38 @@
 		Drupal.org (search for <strong>html filter</strong>), such as in the <a href="https://drupal.org/node/828458" target="_blank">Graph
 			generation</a> issue.
 	</p>
-	<h3>Learn more about SVGGraph features</h3>
+	<h3>Additional info</h3>
+	<p>
+		Checkout the <strong> Configuration Settings</strong> section within the Skins Guide for instructions about how to assign appropriate 
+		default values for various SVG Graph settings.
+	</p>
 	<p>
 		Refer to the <a href="http://www.goat1000.com/svggraph.php" target="_blank">PHP SVGGraph</a> documentation for more info about
 		the SVG Graph library (e.g. for all sorts of options/features available in SVG Graph).
 	</p>
 	<h2 id="datatables">Enable Data Tables</h2>
 	<p>
-		Forena also facilitates the use of the dataTables JQuery plugin, which adds all sorts of interesting features to display an <abbr
-			title="HyperText Markup Language">HTML</abbr> table, such as presenting paged tables (pagination), filtering of rows, etc. If
-		you're not familiar with the dataTables plugin, checkout some of the available <a
-			href="http://www.datatables.net/examples/basic_init/zero_configuration.html" target="_blank">dataTables examples</a> to get a
-		first impression of its amazing features.
+		Forena also facilitates the use of the dataTables JQuery plugin to enhance the display of tables in your reports, such as presenting paged tables or filtering of rows.  If
+		you're not familiar with the dataTables plugin, refer to the  <a
+			href="http://www.datatables.net/examples/basic_init/zero_configuration.html" target="_blank">dataTables examples</a> to understand its features.
 	</p>
-	<p>The actual creation (rendering) of such tables is done using the dataTables library, which is expected to be installed
-		in the sites/all/libraries folder. To install this library, perform these steps:</p>
+	<p>To install this library:</p>
 	<ol>
 		<li>Download the dataTables library from <a href="http://www.datatables.net/" target="_blank">http://www.datatables.net/</a>.
 		</li>
-		<li>Unpack (extract) the downloaded dataTables library.</li>
-		<li>Transfer (upload) the extracted library in a subfolder of sites/all/libraries, using <strong>dataTables</strong>
-			(case sensitive!) as the name of the subfolder.
+		<li>Extract the downloaded dataTables library from the zip archive.</li>
+		<li>Copy the extracted library into your sites/all/libraries folder, making sure to name it <strong>dataTables</strong>
+			(case sensitive!).
 		</li>
 	</ol>
 	<p>
-		After completing the dataTables installation, go to the {drupal_status} , and check the line starting with <strong>Forena
-			dataTables support</strong>: if it is shown with a status like <strong>Enabled</strong>, then the dataTables library is installed
-		correctly (any other value indicates some type of problem with this library).
+		After completing the dataTables installation, go to the Drupal {drupal_status} , and check the line starting with <strong>Forena
+			dataTables support</strong>: if it is shown with a status of <strong>Enabled</strong>, then the dataTables library is installed
+		correctly.
 	</p>
 	<p>
-		Refer to the <a href="http://www.datatables.net/manual/index" target="_blank">dataTables</a> documentation for more info about
-		the dataTables library (e.g. for all sorts of options/features available in dataTables).
+		Refer to the <a href="http://www.datatables.net/manual/index" target="_blank">dataTables</a> documentation for more information about
+		the dataTables library.
 	</p>
 	<p>
 		For a video tutorial about this topic, checkout <a href="https://www.youtube.com/watch?v=ijmM85RGvvk" target="_blank">Create
@@ -333,18 +323,18 @@
 	</p>
 	<h2 id="upgrading">Ugrading From Prior Versions</h2>
 	<p>
-		Forena version 7.x-4.x is quite a major release upgrade, with lots of new features. In preparation of your reports migration,
-		make sure to checkout the <a href="https://www.drupal.org/node/2278713" target="_blank">release notes</a> for details about
-		this new release.
+		Forena version 7.x-4.x is a major release upgrade, with lots of new features. In preparation of your reports migration,
+		make sure to checkout the release notes found on the <a href="https://drupal.org/project/forena">Forena project page </a> for details about
+		this new release.  
 	</p>
 	<h3>Review permissions</h3>
 	<p>This release come with quite some enhancements (and changes) to user permissions and access to data blocks. So make sure
-		to review and tune the various Forena related {admin_permissions}.</p>
+		to review and tune the various Forena related {admin_permissions}. The following steps should be preformed after upgrading from any 7.x-3.x version.</p>
 	<h3>Revert module delivered reports</h3>
 	<p>
 		After installing this release, make sure to <strong>Revert all delivered reports to original</strong> which will cause all
-		customizations to the reports delivered with the previous version to be lost, since it will remove any module delivered reports from
-		your site's reports folder!. These are the available options:
+		customizations to reports that are delivered with contributed or custom modules to be lost.  Failure to do this will leave outdated versions of 
+		help files and sample reports on your site.  The two provided ways to revert custuomized reports are:
 	</p>
 	<ul>
 		<li>Visit the {structure_forena} Forena structure screen and check the box to "Revert Delivered Reports to original"
@@ -353,14 +343,10 @@
 		<li>Use DRUSH, by executing the <strong>drush frxrevert</strong> command.
 		</li>
 	</ul>
-	<p>
-		<strong>Note</strong>: Revert all Delivered Reports also ensures that the tutorials that come with Forena stay up to date in
-		future releases.
-	</p>
 	<h3>Remove obsoleted features in custom reports</h3>
 	<p>
-		The new <strong>skin</strong> tag replaces the previous <strong>form</strong> tag (used within the <strong>frx:options</strong>
-		element). Even though the form tag is still supported, you are assumed to replace (or remove) it any custom report. Checkout
+		The new <strong>skin</strong> tag replaces the previous <strong>form</strong> tag within the <strong>frx:options</strong>
+		element. Even though the form tag is still supported it has been deprectated, you are encouraged to replace it in all custom reports. Checkout
 		the {report_layout} options for more details about these tags.
 	</p>
 	<h3>Required corrections for charts created with SVG Graph</h3>
