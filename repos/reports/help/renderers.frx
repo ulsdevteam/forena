@@ -29,9 +29,9 @@
 
   </div>
   <p>
-    A renderer specifies how an object is to rendered (displayed) in the report (or graph) output. A good example is to render
-    (produce) a chart using the <a href="http://www.goat1000.com/svggraph.php" target="_blank"> PHP SVGGraph</a> library, as in
-    the {state_summary_report} sample report, for which the .frx file includes these lines:
+    A renderer specifies how an tag in the report template is to render. A good example is to render
+    the use of the svg renderere using the <a href="http://www.goat1000.com/svggraph.php" target="_blank"> PHP SVGGraph</a> library, as in
+    the {state_summary_report} sample report:
   </p>
 <html frx:renderer="FrxSource" id="frxsrc-1">
 <head>...
@@ -47,21 +47,17 @@
 </body>
 </html>
 <h2 id="frxtitle">FrxTitle</h2>
-<p>Use the content of this tag as the title of the report (which will override the title specified within a title HTML tag).
-  This allows both the page title and the tab title to be replaced by token replaced values in the report.</p>
-<p>As an illustration of how to use this renderer, consider the {user_distribution_report} sample report (for state=NJ when
-  you first view that report), for which the .frx file includes these lines:</p>
+<p>Use the content of this tag to override the title of the report. This allows both the page title and the tab title to be replaced by token replaced values in the report.</p>
+<p>As an illustration of how to use this renderer, consider the {user_distribution_report} sample report:</p>
 <div frx:renderer="FrxSource">
   <h2 frx:renderer="FrxTitle" id="frx-frxtitle">Users in cities in state {name}</h2>
 </div>
 <p>
-  Because of the attributes we added to the <strong>h2</strong> HTML tag here (you can use any HTML tag to do so), this is what
-  will be used as the actual title, while the "2. Report that filters based on state lookup" title (near the top of this .frx
-  file) will be ignored.
+  Because of the attributes we added to the <strong>h2</strong> HTML tag here (any HTML tag will do)  the existing
+    "2. Report that filters based on state lookup" title will be ignored.
 </p>
 <p>
-  Moreover, because of the <strong>name</strong> token included in this h2 tag, the rendered title will even be dynamic
-  (including the name of the selected state).
+  Moreover, because of the <strong>name</strong> token included in this h2 tag, the rendered title will be dynamic.
 </p>
 <p>
   For another illustration of this renderer, checkout the video about <a href="http://www.youtube.com/watch?v=7ruWRngKtXY"
@@ -74,8 +70,8 @@
   <div frx:renderer="FrxMyReports" frx:category="Sample" id="frxmyrpts" />
 </div>
 <p>
-  The above sample shows a list of all (not hidden) reports in category <strong>Sample</strong>, using the category as the header
-  of it also. This is the (only!) line to be included in the .frx file to produce this display:
+  The above sample shows a list of all non-hidden reports in category <strong>Sample</strong>, using the category as the header generated 
+  by the following code:
 </p>
 <div frx:renderer="FrxSource">
   <div frx:renderer="FrxMyReports" frx:category="Sample" id="frxmyrpts" />
@@ -84,15 +80,14 @@
 <table>
   <tr>
     <th>frx:category</th>
-    <td>Limit the list of reports to be shown to a particular category.</td>
+    <td>Limit the list of reports to be shown to a particular category. Multiple categories may be used by specifying category_2 and category_3 attribtues accordingly.</td>
   </tr>
 </table>
 <h2 id="frxsource">FrxSource</h2>
 <p>The FrxSource renderer displays markup as a code snippet. No token replacement is done for the children and all embedded
   code is escaped html. This is used in the {tutorial_reports} to display the source of reports.</p>
 <p>
-  Here is an example to display such code snippet, using the FrxSource renderer (which was produced by adding <strong>frx:renderer="FrxSource"</strong>
-  to the div-tag):
+  This renderer is used throughout the documentation as follows:
 </p>
 <div frx:renderer="FrxSource">
   <div frx:renderer="FrxSource">
@@ -103,17 +98,15 @@
 <p>Displays the XML of the current data context, which is particularly useful for debugging purposes. If you embed this in a
   report, it will show you the XML data source that is used for token replacement, so it can give you a good idea as to what data
   is being returned and which tokens can be used.</p>
-<p>Here is a sample that is displayed (rendered) using the FrxXML renderer, which is actually the data block (in XML format,
-  not in SQL format!) containing various details of all chapters in the {wysiwyg_reporting_guide}:</p>
+<p>Here is a sample that is displayed using the FrxXML renderer which shows the data returned by the datablock:</p>
 
 <div class="xml">
   <div frx:renderer="FrxXML" id="frx-frxxml" frx:block="forena_help/reportingwysiwyg_topics"></div>
 </div>
 
-<p>Be aware however that this FrxXML renderers seems to NOT display XML comment lines (e.g. those used to specify
+<p>Be aware however that this FrxXML renderers removes XML comment lines (e.g. those used to specify
   {datablock_security} in XML format).</p>
-<p>These are the (only) lines in the .frx file that were needed to display it what is above (whereas the div with the
-  class="xml" was only added to apply some CSS styling to XML display):</p>
+<p>The above example was generated with the following code:</p>
 <div frx:renderer="FrxSource">
   <div frx:renderer="FrxXML" id="frx-frxxml" frx:block="forena_help/reportingwysiwyg_topics" />
 </div>
@@ -159,21 +152,21 @@
   </tr>
   <tr>
     <th>frx:collapsed</th>
-    <td>Indicate how a collapsible parameter form should be shown collapsed by default (when the parameter form is first
-      shown, prior to any page refreshes):
+    <td>Indicate how a collapsible parameter form should be shown:
       <ul>
         <li>set to "1" for a collapsed form.</li>
         <li>set to "0" for a not collapsed form.</li>
       </ul>
+      The default behavior is to expand the form only if no data was returned by the report. 
     </td>
   </tr>
   <tr>
     <th>frx:submit</th>
-    <td>The label of the submit button (note that there is no update or cancel equivalent for parameter forms).</td>
+    <td>The label of the submit button.</td>
   </tr>
 </table>
 <p>The children of the FrxParameterForm div allow you to specify the exact layout of the parameters form using
-  {skin.forena}'s token replacement syntax, which is illustrated in the above example via the content of the 3 paragraphs
+  Forena's token replacement syntax, which is illustrated in the above example via the content of the 3 paragraphs
   contained in the FrxParameterForm div. The default context is changed to be the rendered parameter form, so that the parameter
   ids will allow replacement of a form control.</p>
 <p>
@@ -181,8 +174,8 @@
   rendered).
 </p>
 <h2 id="frxsvggraph">FrxSVGGraph</h2>
-<p>Render a graph (chart) using the SVG format, using the {setup_svggraph_report}. Make sure to install this library prior
-  to using this renderer (otherwise it cannot work ...).</p>
+<p>Render a graph using the SVG format, using the {setup_svggraph_report}. Make sure to install this library prior
+  to using this renderer.</p>
 <p>We'll use the {state_summary_report} sample report to illustrate how to use this renderer, for which the .frx file
   includes these lines:</p>
 <div frx:renderer="FrxSource">
@@ -197,8 +190,7 @@
   <tr>
     <th>frx:type</th>
     <td>The type of graph to be rendered. If omitted, then <strong>BarGraph</strong> is assumed. These are the currently
-      supported types of graphs (any uppercases contained in the type selection are transformed to lowercases automatically during
-      its processing):
+      supported types of graphs:
       <ul>
         <li>BarGraph</li>
         <li>Bar3DGraph</li>
@@ -223,13 +215,13 @@
     <th>frx:xpath</th>
     <td>The XPATH expression for the data to be graphed (e.g. <strong>*[total&gt;10000]</strong>, which is what is used in
       the sample (note that only states are included in the graph that have a total above 10000). If omitted, then an XPATH
-      expression of <strong>*</strong> (= everything) is assumed.
+      expression of <strong>*</strong> is assumed and all data is graphed.
     </td>
   </tr>
   <tr>
     <th>frx:link</th>
     <td>Create a hyperlink for the data to be graphed (e.g. <strong>sample.user_distribution_simple?state={state}</strong>.
-      If omitted, then no link is created.
+      Use feild tokens to generate the link dynamically .
     </td>
   </tr>
   <tr>
@@ -241,18 +233,18 @@
   <tr>
     <th>frx:label</th>
     <td>The label that should be used for the series. Usually this is specified using tokens (e.g. <strong>{state}</strong>
-      in our sample here).
+      in our sample).
     </td>
   </tr>
   <tr>
     <th>frx:options</th>
     <td>This legacy attribute is currently still supported, but it is recommended to replace them by the corresponding <strong>frx:xyz</strong>
-      attributes (as further described below). Here is a sample of it was used:<br /> <strong>frx:options="series[]={total}&amp;label={state}&amp;colors[]=green&amp;colors[]=yellow"</strong></td>
+      attributes. Here is a sample of it was used:<br /> <strong>frx:options="series[]={total}&amp;label={state}&amp;colors[]=green&amp;colors[]=yellow"</strong></td>
   </tr>
 </table>
 <p>
-  In addition to the attributes mentioned above, any attribute (such as <strong>xyz</strong>) supported as PHP SVGGraph options
-  may be included as <strong>frx:xyz</strong> attributes also. Here are a few examples of some often used attributes:
+  In addition to the attributes mentioned above, any attribute  supported as PHP SVGGraph options
+  may be included as <strong>frx</strong> attributes also. Here are a few examples of some often used attributes:
 </p>
 
 <table>
@@ -276,7 +268,7 @@
   </tr>
 </table>
 <p>
-  To illustrate the power of these <strong>frx:xyz</strong> attributes, consider this example:
+  Here is an example:
 </p>
 <div frx:renderer="FrxSource">
   <div frx:block="sampledb/users_by_state" id="users_by_state-block" class="FrxSVGGraph">
@@ -325,8 +317,7 @@
   </p>
   
   <ul>
-    <li>The tags used to actually render the specified asset, depends on the file extension of the asset (= what is followed
-      by the last "." in the relative URL).</li>
+    <li>The markup used to include the specified asset depends on the file extension of the asset as referenced.</li>
     <li>These are the main groups of supported extensions for the assets:</li>
     <ol>
       <li><strong>svg</strong>: wrapped in an <strong>embed</strong> tag (using a <strong>src</strong> tag as specified in the
@@ -343,70 +334,29 @@
 
 <h2 id="frxcrosstab">FrxCrosstab</h2>
 <p>
-  A <strong>crosstab</strong> table is a table with a special layout. More specific it is formatted as a grid, with:
+  A <strong>crosstab</strong> table is designed to pivot data, that is to creat a table whose columns are determined by the values in 
+  a select statement/data block.  The number of columns in a crosstab query is not constant but rather determined by the data returned by the 
+  block.  It is typically used to conver data of this form:
 </p>
-
-<ul>
-  <li>the <strong>rows</strong> representing one or more (combinations of) facts, such as countries or regions, names of
-    persons (or users) like employees / salespeople (or user IDs / user names), etc.
-  </li>
-  <li>the <strong>columns</strong> representing one or more other facts, such as periods (months of a year, years, etc),
-    available types/flavors of something (like types of errors), etc.
-  </li>
-  <li>the <strong>intersections of rows and columns</strong> containing the actual information (data), such as summarized
-    information (counts of something), timestamps, etc. and which might (optionally) include an hyperlink to a drill-down report.
-  </li>
-</ul>
-<h2>Examples of crosstab tables</h2>
-<p>
-  As an example, consider the {watchdog_stats_report}, of which the data in the report will depend on the content of your Drupal
-  logs. So the content may vary a bit (and might not include all the samples described below). If needed, experiment a bit with
-  the available report parameters until the table includes a few rows (between 5 and 15?), and a few columns (to the right,
-  between 3 and 10?) with a header starting with <strong>Msg type:</strong>). Note that the 'Msg type:' in some of the headers
-  was only added to help explain the concept of a crosstab table (probably omitted in real crosstab tables).
-</p>
-<p>The layout of this example table is follows:</p>
-
-<ul>
-  <li>the <strong>rows</strong> to the left (with table headers that do NOT start with <strong>Msg type:</strong>) represent
-    the facts about (the combination of) <strong>error message, severity and user</strong>, as contained in the Watchdog logging.
-  </li>
-  <li>the <strong>columns</strong> to the right (with table headers starting with <strong>Msg type:</strong>) represent the
-    various flavors of <strong>error types</strong>, as contained in in the Watchdog logging.
-  </li>
-  <li>the <strong>intersections of rows and columns</strong> contain (visualize) the actual information (data), i.e. the <strong>number
-      of occurrences for the specific error type</strong> as contained in the Watchdog logging. These intersections also include an
-    hyperlink to a drill-down report, corresponding to the selected row (= error message, severity and user) and column (= error
-    type).
-  </li>
-</ul>
-<p>
-  For another example of a crosstab table, just follow (click) any of the hyperlinks in this previous example (which opens the
-  corresponding drill-down report). This drill-down report is yet another example of a crosstab table, though it's a bit harder
-  to realize, because it actually only contains 1 column for the specific error type that was selected (= the last column to the
-  right, with a header starting with 'Msg Type'). Go ahead and change the report parameters of this drill-down report, by NOT
-  selecting any <strong>Type of log messages</strong>, leaving all other report parameters unchanged (such as the previously
-  selected <strong>severity</strong>), and refreshing the report. This most probably will create multiple columns to the right
-  (with headers starting with 'Msg Type'). If it doesn't, then further refine the report parameters by NOT selecting any <strong>Log
-    messages severity</strong>, or changing that report parameter to another Log messages severity.
-</p>
-<p>
-  The major difference between these 2 examples is about the actual actual information (data) shown in the intersection of
-  columns. I.e. the 1st example shows <strong>aggregated data</strong> (in this case a COUNT of occurrences of the combinations
-  of error message, severity and user), while the 2nd example shows the <strong>details</strong> (specific timestamps) for the
-  selected combination of error message, severity and user. Or to put it in another way: the 1st example provides a 30,000 feet
-  (or 10.000 m) view of what's happening (events) in your environment, while the 2nd example provides the exact details of any of
-  these events.
-</p>
-<p>
-  The above examples were created using the <strong>FrxCrosstab</strong> renderer. Here are the relevant lines included in the
-  .frx file to produce the crosstab display of the 1st example (checkout the .frx file of the 2nd example for a similar
-  illustration):
-</p>
+<table>
+  <tr><td>WA</td><td>Female</td><td>100</td></tr>
+  <tr><td>WA</td><td>Male</td><td>50</td></tr>
+  <tr><td>ID</td><td>Female</td><td>25</td></tr>
+  <tr><td>ID</td><td>Male</td><td>30</td></tr>
+</table>
+<p>Into a table that looks like:</p>
+<table>
+  <tr><td></td><td>Female</td><td>Male</td></tr>
+  <tr><td>WA</td><td>100</td><td>50</td></tr>
+  <tr><td>ID</td><td>25</td><td>30</td></tr>
+</table>
+<p>In order to do this you will need to specify a grouping attribute and a dimension attribute.  The grouping attribute determines how to group the rows of data while
+the dimension attribute speicifies which field will be used to create the columns out of.</p>
+<p>The layout of the cross tab is follows:</p>
 
 <div frx:renderer="FrxSource">
   <div id="watchdog_stats_block" class="FrxCrosstab" frx:block="drupal/watchdog_stats">
-    <table watchdog_stats="watchdog_stats-renderer" frx:renderer="FrxCrosstab" frx:group="{message}{severity}{name}"
+    <table watchdog_stats="watchdog_stats-renderer" frx:renderer="FrxCrosstab" frx:group="{severity}{name}"
       frx:dim="Msg Type: {type}">
       <thead>
         <tr>
@@ -429,79 +379,5 @@
 
 </div>
 
-<p>Some more details about the fields definitions shown in the above .frx file (shown here for the sake of completeness, but
-  which are not really "needed" for creating a table using the FrxCrosstab renderer):</p>
-
-<ul>
-  <li>the frx:field <strong>name</strong> is used to display <strong>"Anonymous"</strong> (as the User Name) for log
-    messages created without a name of the user (i.e. an Anonymous user).
-  </li>
-  <li>the frx:field <strong>typecount</strong> is used to create an hyperlink from the actual <strong>data</strong> (counts)
-    that are shown in the report.
-  </li>
-</ul>
-<p>Some more details about the above .frx file to actually create a table using the FrxCrosstab renderer:</p>
-
-<ul>
-  <li>the <strong>div</strong> tag contains the frx:block (pointing to <strong>watchdog_stats</strong> in the <strong>drupal</strong>
-    directory/folder) for which the data are to be visualized in the crosstab table. The class for this div tag can be anything,
-    though FrxCrosstab seems a good convention. It's important for the div tag to have an id starting with the name of the data
-    block (=<strong>watchdog_stats</strong>), and to which <strong>_block</strong> is appended.
-  </li>
-  <li>use these attributes within the <strong>table</strong> tag:
-    <ul>
-      <li>enable the FrxCrosstab renderer via <strong>frx:renderer="FrxCrosstab"</strong>.
-      </li>
-      <li>include an attribute similar to <strong>watchdog_stats="watchdog_stats-renderer"</strong>, whereas watchdog_stats is
-        the name of the data block (replace by the correct data block name) and <strong>-renderer</strong> is a hardcoded suffix.
-      </li>
-      <li>use <strong>frx:group</strong> to indicate which data field elements should be used to group the rows (by using the
-        brace token replacement syntax).
-      </li>
-      <li>use <strong>frx:dim</strong> to generate a column (to the right of the table) for each value of the dimension
-        attribute (by using the brace token replacement syntax), whereas each dimension <strong>value</strong> will also be used as
-        the column header of those columns.
-      </li>
-    </ul>
-  </li>
-  <li>use the <strong>thead</strong> section (within the table tag) to specify the <strong> content of the header
-      of the rendered table</strong>:
-    <ul>
-      <li>the content of the <strong>th</strong> elements will be used as the (fixed) column <strong>headers</strong> for the
-        columns to the left of the crosstab table (= the columns mentioned within the <strong>frx:group</strong> also, and in the
-        same order).
-      </li>
-      <li>the content of the <strong>td</strong> element describes the values that will be generated for each <strong>dimension</strong>
-        value (as mentioned within the <strong>frx:dim</strong>), though it is not actually rendered anywhere in the crosstab table
-        output (it is merely used as documentation within the .frx file).
-      </li>
-    </ul>
-  </li>
-  <li>use the <strong>tr</strong> element of the <strong>tbody</strong> section (within the table tag) to <strong>identify
-      the data block for the rows</strong> to be rendered:
-    <ul>
-      <li>the <strong>id</strong> must be equal to the name of the data block (=<strong>watchdog_stats</strong>).
-      </li>
-      <li>it must contain an attribute similar to <strong>frx:watchdog_stats="watchdog_stats-renderer"</strong>, whereas
-        watchdog_stats is the name of the data block (replace by the correct data block name), and <strong>-renderer</strong> is a
-        hardcoded suffix (by omitting the frx: part of it, it should match the <strong>watchdog_stats="watchdog_stats-renderer"</strong>
-        attribute for the table tag).
-      </li>
-    </ul>
-  </li>
-  <li>use the <strong>th</strong> and <strong>td</strong> elements of the <strong>tbody</strong> section (within the table
-    tag) to specify the <strong>content of the body of the rendered table</strong> (by using the brace token replacement syntax):
-    <ul>
-      <li>the content of the <strong>th</strong> elements will be used as the (fixed) column <strong>values</strong> for the
-        columns to the left of the crosstab table (= the columns mentioned within the <strong>frx:group</strong> also, and in the
-        same order).
-      </li>
-      <li>the content of the <strong>td</strong> element will be used as the column <strong>values</strong> for the columns to
-        the right of the crosstab table (= the columns that will be generated for each <strong>dimension</strong> value as mentioned
-        within the <strong>frx:dim</strong>).
-      </li>
-    </ul>
-  </li>
-</ul>
 </body>
 </html>
