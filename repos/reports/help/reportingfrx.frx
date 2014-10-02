@@ -723,7 +723,7 @@
 	</p>
 	<h3>Using token replacements in frx:if attributes</h3>
 	<p>
-		Normally you would use <a href="./help.reportingfrx.tokens">Token Replacements</a> in the attribute to map this to some column
+		Normally you would use token replacements in the attribute to map this to some column
 		in the database (or value of a tag in case of data stores in XML format). As an illustration, consider this example:
 	</p>
 

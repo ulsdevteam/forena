@@ -72,8 +72,8 @@
 		report editor. Users with knowledge of <abbr title="eXtensible HyperText Markup Language">XHTML</abbr>, <abbr
 			title="Cascading Style Sheets">CSS</abbr> and <abbr title="eXtensible Markup Language">XML</abbr> may choose to edit the
 		report definition files (= files with a .frx extension) directly, or edit reports without using the <abbr
-			title="What You See Is What You Get">WYSIWYG</abbr> report editor (the <a href="./help.reportingfrx.intro" target="_self"><abbr
-			title="Forena Report XML">FRX</abbr> Reporting Guide</a> is available for those who are interested in doing so).
+			title="What You See Is What You Get">WYSIWYG</abbr> report editor (the <abbr
+			title="Forena Report XML">FRX</abbr> Reporting Guide is available for those who are interested in doing so).
 	</p>
 	<h2 id="create">Create Report</h2>
 	<p>To create a new report using the WYSIWYG report editor, use either of these methods to do so:</p>

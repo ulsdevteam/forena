@@ -13,28 +13,27 @@
 </frx:docgen>
 <frx:fields>
 	<frx:field id="title" link="reports/help.setup#{link}" />
-	<frx:field id="configure_forena" link="admin/config/content/forena" target="_self">Configuring Forena Reports</frx:field>
+	<frx:field id="configure_forena" link="admin/config/content/forena">Configuring Forena Reports</frx:field>
 	<frx:field id="structure_forena" link="admin/structure/forena" target="_self">Structuring Forena Reports</frx:field>
 	<frx:field id="text_format_config" link="admin/config/content/formats">Text formats</frx:field>
 	<frx:field id="forena_issue_queue" link="https://www.drupal.org/project/issues/forena?status=All&amp;categories=All"
 		target="_blank">Forena Issue Queue</frx:field>
-	<frx:field id="custom_skins" link="reports/help.setup.skins" target="_blank">Adding Custom Report Skins</frx:field>
-	<frx:field id="bean_integration" link="reports/help.sitebuilding.bean" target="_blank">Integration with BEAN</frx:field>
-	<frx:field id="authorizations_tasks" link="reports/help.setup.permissions" target="_blank">Authorizations Tasks</frx:field>
-	<frx:field id="grant_permissions" link="admin/people/permissions" target="_blank">grant permissions to roles</frx:field>
-	<frx:field id="about_data_sources" link="reports/help.accessdata.datasources" target="_self">About Data Sources</frx:field>
-	<frx:field id="wysiwyg_editors" link="reports/help.sitebuilding.wysiwygeditors" target="_blank">WYSIWYG editors</frx:field>
-	<frx:field id="svggraph_library" link="reports/help.setup.svggraph" target="_blank">SVGGraph library</frx:field>
+	<frx:field id="custom_skins" link="reports/help.skins" >Skins</frx:field>
+	<frx:field id="bean_integration" link="reports/help.sitebuilding#bean" >Integration with BEAN</frx:field>
+	<frx:field id="authorizations_tasks" link="reports/help.setup#permissions">Permission</frx:field>
+	<frx:field id="grant_permissions" link="admin/people/permissions" >grant permissions to roles</frx:field>
+	<frx:field id="about_data_sources" link="reports/help.data#datasources">About Data Sources</frx:field>
+	<frx:field id="wysiwyg_editors" link="reports/help.sitebuilding#wysiwygeditors" >WYSIWYG editors</frx:field>
+	<frx:field id="svggraph_library" link="reports/help.setup#svggraph" >SVGGraph library</frx:field>
 	<frx:field id="drupal_status" link="admin/reports/status">Drupal Status</frx:field>
-	<frx:field id="datablocks_security" link="reports/help.accessdata.datablockssecurity" target="_blank">Data Blocks Security</frx:field>
-	<frx:field id="datablocks" link="reports/help.accessdata.datablocks" target="_blank">Data Block</frx:field>
-	<frx:field id="enable_masquerade" link="reports/help.sitebuilding.masquerade" target="_blank">Enable the Masquerade module</frx:field>
-	<frx:field id="grant_permissions" link="admin/people/permissions#module-forena" target="_blank">grant permissions to roles</frx:field>
-	<frx:field id="datasource" link="reports/help.accessdata.datasources" target="_blank">data source</frx:field>
-	<frx:field id="my_reports" link="forena" target="_blank">My Reports</frx:field>
-	<frx:field id="frxmyreports_renderer" link="reports/help.renderers.frxmyreports" target="_blank">FrxMyReports renderer</frx:field>
+	<frx:field id="datablocks_security" link="reports/help.data#datablockssecurity" >Data Blocks Security</frx:field>
+	<frx:field id="datablocks" link="reports/help.data#datablocks" >Data Block</frx:field>
+	<frx:field id="grant_permissions" link="admin/people/permissions#module-forena" >grant permissions to roles</frx:field>
+	<frx:field id="datasource" link="reports/help.data#datasources">data source</frx:field>
+	<frx:field id="my_reports" link="forena">My Reports</frx:field>
+	<frx:field id="frxmyreports_renderer" link="reports/help.renderers.frxmyreports">FrxMyReports renderer</frx:field>
 	<frx:field id="structure_forena" link="admin/structure/forena">Structure Forena</frx:field>
-	<frx:field id="create_report" link="reports/add" target="_blank">Create Report</frx:field>
+	<frx:field id="create_report" link="reports/add">Create Report</frx:field>
 </frx:fields>
 <frx:menu />
 <frx:cache />
@@ -280,16 +279,15 @@
 	</p>
 	<h3>Establish default SVGGraph settings</h3>
 	<p>
-		Checkout <strong>Defining Configuration Settings</strong> within <a href="./help.setup.skins" target="_self">Custom Report
-			Skins</a> for instructions about how to assign appropriate default values for various SVG Graph settings.
+		Checkout <strong>Defining Configuration Settings</strong> within Custom Report
+			Skins for instructions about how to assign appropriate default values for various SVG Graph settings.
 	</p>
 	<h3>Validate your text formats configuration</h3>
 	<p>
 		Assuming you completed the setup of your SVG graph library, you should now be in good shape to start using Forena's charting
-		features. To perform an easy validation about this, just checkout one of the SVG samples delivered with Forena. Use the <a
-			href="./sample.state_summary_ie8" target="_self">external SVG graph sample</a> in case you're using an older browser that
-		does not support inline SVG. Alternatively, if you're using a more recent browser, try using the <a
-			href="./sample.state_summary" target="_blank">Master Summary with drill down</a>.
+		features. To perform an easy validation about this, just checkout one of the SVG samples delivered with Forena. Use the external SVG graph sample
+		 in case you're using an older browser that
+		does not support inline SVG. Alternatively, if you're using a more recent browser, try using the Master Summary with drill down.
 	</p>
 	<p>
 		If you don't see a nicely formatted graph, but only some square with a gray background (about the size of the SVG graph you

@@ -12,13 +12,13 @@
 <frx:docgen />
 <frx:fields>
   <frx:field id="title" link="reports/help.data#{link}" />
-    <frx:field id="datasources_admin" link="reports/help.accessdata.datasourcesadmin"
+    <frx:field id="datasources_admin" link="reports/help.data#datasources"
     target="_self">Configuration screens</frx:field>
-  <frx:field id="datasources_settings" link="reports/help.accessdata.datasourcessettings"
+  <frx:field id="datasources_settings" link="reports/help.data#datasources"
     target="_self">Defining data sources in settings.php file(s)</frx:field>
-  <frx:field id="building_datablocks" link="reports/help.accessdata.datablocks"
+  <frx:field id="building_datablocks" link="reports/help.data#datablocks"
     target="_self">building data blocks</frx:field>
- <frx:field id="role_detail_report" link="reports/drupaladmin.role_detail_enhanced"
+ <frx:field id="role_detail_report" link="reports/drupaladmin.role_detail"
     target="_blank">Roles</frx:field>    
 </frx:fields>
 </head>
@@ -60,7 +60,7 @@
 	<p>Once the data sources are defined, you can start {building_datablocks} using these data sources.</p>
     <h3>Data Sources Settings</h3>
     <p>
-		Visit the <a href="/admin/config/content/forena/data" target="_self">Data tab within {skin.forena} Configuration</a> to define
+		Visit the Data tab within Forena Configuration to define
 		data sources (database connections) using administration (configuration) screens. Note however that prior to defining a new
 		database connection, you'll need to create a folder to store the corresponding data blocks (SQL files) on the file system.
 	</p>
@@ -113,7 +113,7 @@
 			<tr>
 				<th>Driver</th>
 				<td>The name of the class that will be used to provide the data blocks (= the data provider). Data engine plugins
-					delivered with {skin.forena} include:
+					delivered with Forena include:
 					<ul>
 						<li>FrxDrupal - Drupal</li>
 						<li>FrxOracle - Oracle Database</li>
@@ -150,7 +150,7 @@
 				<th>Oracle native XML</th>
 				<td>Enable this option (by checking the check-box) if you want to use Oracle's native XML functions (only for FrxOracle
 					driver). In order to use this you must first install a function called f_forena_xml into your database schema. You'll find
-					the .sql file which can be used to install this function included in the {skin.forena} distribution.</td>
+					the .sql file which can be used to install this function included in the Forena distribution.</td>
 			</tr>
 			<tr>
 				<th>Postgres native XML</th>
@@ -319,8 +319,8 @@
 		editor) of your choice to do so (which of course requires authorization to perform these operations).</p>
 	<p>
 		To create new data blocks in SQL format, you may want to consider using the {create_datablock} link on the
-		{structure_forena_data} screen. This will launch the <strong>query writing tool</strong> that comes with {skin.forena}, which
-		is called the <strong>{skin.forena} Query Builder</strong>. This is a separated module that comes with {skin.forena}. It can
+		{structure_forena_data} screen. This will launch the <strong>query writing tool</strong> that comes with Forena, which
+		is called the <strong>Forena Query Builder</strong>. This is a separated module that comes with Forena. It can
 		be enabled as per standard Drupal instructions to enable an additional module. For a <strong>great</strong> video tutorial
 		about this <strong>amazing</strong> query writing tool, checkout <a href="https://www.youtube.com/watch?v=mPdFftH4CGs"
 			target="_blank">Define data blocks with optional filters</a>.
@@ -518,7 +518,7 @@ ORDER BY name
 	<p>This example illustrates loading a node, but any entity type (like users, or some custom entity type) may be loaded.</p>
  <h2 id="rawmodequeries">Raw Mode Queries</h2>
 	<p>
-		In some cases where {skin.forena} is being used to export data, memory consumption can be reduced by specifying a <strong>return_type</strong>
+		In some cases where Forena is being used to export data, memory consumption can be reduced by specifying a <strong>return_type</strong>
 		option of <strong>raw</strong> in the data block.
 	</p>
 	<p>The following example illustrates raw mode used in a Drupal query.</p>
@@ -529,7 +529,7 @@ ORDER BY name
   return_type = raw
   </pre>
 	<p>Currently this option is only supported in the Drupal and PDO drivers. The one drawback for using raw mode is that all
-		of the XPATH features are disabled for that data query as {skin.forena} will not prerender the result set into XML. This means
+		of the XPATH features are disabled for that data query as Forena will not prerender the result set into XML. This means
 		that your iterators can only use an frx:foreach attribute of * and only column names may be used as token replacements in the
 		query. You also will be unable to use XPATH evaluation expressions in your reports that use this feature.</p>
 		
