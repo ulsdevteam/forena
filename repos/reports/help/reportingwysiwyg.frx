@@ -111,10 +111,10 @@
       by a site administrator or developer.</p>
 	<h3>Adding a first Data Block to your report</h3>
 	<p>
-		Data blocks can be added to a report via the Report Editing screen. To
-		add such a data block to our test/simple report, click on the tiny icon with a green plus sign labeled "Insert Data"  which can be found on the Report Editing screen (if you're not yet on the report editing
-		screen. After doing so, you will be taken to the <strong>Select Data Block</strong> screen. Select a data block to be used on the report. 
-		You may search for the name of any provided data blocks.
+		Data blocks can be added to a report via the Report Editing screen. To add such a data block to our test/simple report, click
+		on the tiny icon with a green plus sign labeled "Insert Data" which can be found on the Report Editing screen. 
+		After doing so, you will be taken to the <strong>Select Data Block</strong> screen. Select a
+		data block to be used on the report. You may search for the name of any provided data blocks.
 	</p>
 	<p>
 		For this report, we'll use one of the sample queries, i.e. <strong>sampledb/users_by_state</strong>. Select this data block by
@@ -133,8 +133,7 @@
 		you can customize the columns of the selected data block (their order, which ones to include/exclude, etc), and optionally
 		enter a header for it. You can also select any of the available templates to decide the basic look
 		and feel of the data block that you are adding to the report. Some of these templates are straight forward, such as the <strong>Simple
-			Table display</strong>. Here are some of the more sophisticated data block templates to choose from (including a link with details
-		about their corresponding renderers and FRX syntax, which includes some examples using these templates also):
+			Table display</strong>. Here are some of the more sophisticated data block templates to choose:
 	</p>
 	<ul>
 		<li>{crosstab_template}.</li>
@@ -271,9 +270,7 @@
 	</p>
 	<h2 id="layout">Layout</h2>
 	 <p>
-    Using the <strong>layout</strong> tab on the report editing screen, you can specify various layout options of the report (if
-    you're not yet on the report editing screen, you can access it by clicking on the tiny edit icon shown when viewing the
-    report).
+    Using the <strong>layout</strong> tab on the report editing screen, you can specify various layout options of the report.
   </p>
   <p>Explanation of the available options on this form are as follows:
   </p>
@@ -381,7 +378,7 @@
 				<th>Label Field</th>
 				<td>The name of the column from the data block specified in <strong>Source Data</strong> that is used to populate the <strong>labels</strong>
 					of select or radio buttons. If omitted, then the 2nd column of the data block is used as the Label Field, provided such 2nd
-					column exists (if not, then the 1st column is used instead).
+					column exists.  If the query returns only one column the Data Field column is used. 
 				</td>
 			</tr>
 			<tr>
@@ -399,10 +396,9 @@
     between the curly braces, and exists in multiple flavors:</p>
 
   <ul>
-    <li>The data fields as contained in the report's data blocks (e.g. corresponding to various columns returned by the SQL
-      query related to the data block).</li>
+    <li>Data fields as contained in the report's data blocks</li>
     <li>The fields defined on the spot while editing the report, and this by just typing the variable name (= token) of the
-      field, surrounded by curly braces, anywhere within the body part of the report (via the layout tab).</li>
+      field, surrounded by curly braces, anywhere within the body part of the report.</li>
     <li>The fields corresponding to the arbitrary variables defined in a report skin file.</li>
   </ul>
   <p>
