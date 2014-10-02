@@ -169,6 +169,11 @@ function forena_my_reports_block() {
  * @param integer $count Number of documents to send.
  */
 function forena_confirm_email($formid, &$form_state, $docs, $count, $prompt_subject, $prompt_body) {
+  // Make sure user has permission for email merge. 
+  if (!user_access('perform email merge')) { 
+    drupal_access_denied(); 
+    exit(); 
+  }
   // Save arguments away for rebuild
   if (!isset($form_state['storage']['args'])) {
     $form_state['storage']['args'] = array(

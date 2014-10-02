@@ -216,8 +216,7 @@
 		</tr>
 		<tr>
 			<th>Peform email merge</th>
-			<td>Even though this is one of the available permissions, it doesn't seem to be used anywhere within Forena. Feel free
-				to use it to implement {datablocks_security} for any of your (custom) reports.</td>
+			<td>Allows users to use the <strong>email</strong> document type to send email form letters using Forena.</td>
 		</tr>
 		<tr>
 			<th>Access xml from data blocks directly</th>
