@@ -192,7 +192,8 @@ class FrxBlockEditor {
    * Return the tokens for the block.
    */
   public function tokens()  {
-
+    // skip non-sql blocks
+    if (!isset($this->block['file'])) return array();  
     $block = Frx::RepoMan()->sqlBlock($this->provider, $this->block['file']);
     $tokens = @$block['tokens'];
     $c_idx = array_search('current_user', $tokens);
