@@ -31,15 +31,12 @@
   </ul>
 	<h2 id="define">Defining Skins</h2>
 	<p>
-		Skins are defined be creating skin configuration files (.skinfo) in the reports directory (usually
-		sites/default/files/reports). Forena comes with a few example configuration files, such as <strong>default_skin.skinfo</strong>,
-		located in Forena's subdirectory repos/reports and which can be used as a template for creating new skins. Using the
-		'Revert all delivered reports to original' option (by checking its checkbox) within <a href="/admin/structure/forena"
-			target="_self">admin/structure/forena</a> will create a copy of default_skin.skinfo in the reports directory.
+		Skins are defined be creating skin configuration files in the reports directory. Forena comes with a few example skin configuration files such as <strong>default_skin.skinfo</strong>,
+		located in Forena's subdirectory repos/reports and which can be used as a template for creating new skins. 
 	</p>
 	<p>Skin info (.skinfo) files are created in the same basic syntax as .info files for themes or modules. The following example
 		illustrates the syntax:</p>
- <pre frx:renderer="FrxSource">
+ <pre>
   ; The name indicates the name displayed in the skin select box
   ; on the Format tab when editing reports. 
   name = Default Skin
@@ -108,21 +105,13 @@
   stylesheets[all][] = custom_skin.css
   </pre>
 	<p>
-		Note the <strong>custom_skin.js</strong> and <strong>custom_skin.css</strong> that were added. Storing them in the same
-		directory as the custom_skin.skinfo (i.e. the reports directory, usually sites/default/files/reports) is a good practice that
-		will simplify upgrading to future Forena versions.
+		The line containing <strong>stylesheets[all][] = custom_skin.css</strong> adds this css to any reports using that skin.
 	</p>
-	<h3>Adding content to the custom CSS file</h3>
 	<p>
-		After adding the line containing <strong>stylesheets[all][] = custom_skin.css</strong> to the .skinfo file, just add any
-		combination of CSS elements to the content of the custom_skin.css file (the sky is the limit).
-	</p>
-	<h3>Adding content to the custom JS file</h3>
-	<p>
-		After adding the line containing <strong>scripts[] = custom_skin.js</strong> to the .skinfo file, construct the content of
-		this custom_skin.js file. As a sample, add what's needed to actually use (enable) various features provided by the dataTables
-		plugin (<strong>Note</strong>: adding the line <strong>scripts[] = dataTables/media/js/jquery.dataTables.min.js</strong> to
-		the .skinfo file only makes this plugin available, it doesn't use the plugin yet).
+		The line containing <strong>scripts[] = custom_skin.js</strong> to the .skinfo file, adds the content of
+		this custom_skin.js file to any report that is using this skin. In our example the javascript needed to actually use various features provided by the dataTables
+		plugin. Adding the line <strong>scripts[] = dataTables/media/js/jquery.dataTables.min.js</strong> to
+		the .skinfo file only makes this plugin available, so we need to add our own javascript to make sure that this plugin gets invoked.
 	</p>
 	<p>According to the dataTables documentation, the content of the custom_skin.js file should look similar to this example:</p>
 	<script frx:renderer="FrxSource">
@@ -131,11 +120,10 @@
   } );
   </script>
   <p>
-		However, this doesn't take into account that in Drupal the <strong>$(document).ready</strong> is already taken (used by
-		Drupal). So we can't overwrite $(document).ready, but instead we need to implement something called
-		<strong>Drupal 7 behaviors</strong>. To do so, start from a copy of this code snippet (mentioned on the
-		<a href="https://www.drupal.org/node/756722" target="_blank">Managing JavaScript in Drupal 7</a> page), and paste it into the
-		(empty) custom_skin.js file:
+		However, this doesn't take into account that in Drupal the <strong>$(document).ready</strong> is already used by
+		Drupal. Rather than overwrite $(document).ready we need to implement a 
+		<strong>Drupal 7 behavior</strong>. Start from a copy of this code snippet mentioned on 
+		<a href="https://www.drupal.org/node/756722" target="_blank">Managing JavaScript in Drupal 7</a> in the provided custom.js:
 	</p>
 <script frx:renderer="FrxSource">
 	
@@ -153,9 +141,9 @@
   Then apply these changes to the copied code snippet:
   </p>
   <ul>
-  <li>The behavior name (= <strong>exampleModule</strong>) is not important, so just change it to anything you want, e.g. to <strong>CustomSkin</strong>.</li>
-  <li>We are not going to do the click example (corresponding to lines 4, 5 and 6 in the example above). Instead inside the attach function we want to do what the dataTables example wants us to do on $(document).ready so replace those 3 lines by <strong> $('#example').dataTable();</strong>.</li>
-  <li>Then change the selector from <strong>#example</strong> to <strong>table</strong>, to use the dataTables plugin for all tables (not just for the example table only).</li>
+  <li>The behavior name <strong>exampleModule</strong> should be a variable name unique to our implementation so we change it to <strong>CustomSkin</strong>.</li>
+  <li>Change the attatch function to be code based on the dataTables example.</li>
+  <li>Change <strong>#example</strong> to <strong>table</strong>, to use the dataTables plugin for all tables. </li>
   </ul>
   <p>
   After these changes are applied, the updated custom_skin.js file should look like this:
@@ -181,7 +169,7 @@
 	<p>
 	The following example (which can be added anywhere in a .skinfo file) contains an illustration of how to do so:
 	</p>
-	<pre frx:renderer="FrxSource">
+  <pre >
   ; *********************************************************************
   ; Set SVGGraph defaults: 
   ; 
