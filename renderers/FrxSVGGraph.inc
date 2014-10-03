@@ -60,8 +60,7 @@ class FrxSVGGraph extends FrxRenderer {
       // Dimensions
       foreach($series as $col) {
           $val = $this->teng->replace($col, TRUE);
-          if(!$val) $val = 0;
-          $trow[trim("$col", '{}')] = $val;
+          if ($val != '' && $val !==NULL) $trow[trim("$col", '{}')] = $val;
       }
       foreach($this->field_sources as $k => $src) {
         $trow[$k] = $this->teng->replace($src, TRUE);
@@ -83,8 +82,7 @@ class FrxSVGGraph extends FrxRenderer {
     $dim_values = array();
     $rows = array();
     $data = $this->frxReport->group($block_data, $group);
-    $this->graphOptions['structure'] = array('key' => 0);
-    $structure_idx = 0;
+    $this->graphOptions['structure'] = array('key' => $group);
 
     foreach ($data as $gk => $group_rows) {
       $row_copy = array_values($group_rows);
@@ -114,10 +112,10 @@ class FrxSVGGraph extends FrxRenderer {
 
     foreach($dim_values as $dk) {
       foreach($dim_columns as $col) {
-        $structure_idx++;
+        $structure_idx = $dk . $col; 
         $this->graphOptions['structure']['value'][] = $structure_idx;
         foreach($this->field_sources as $k=>$fld) {
-          $structure_idx++;
+          $structure_idx = $dk . $k; 
           $this->graphOptions['structure'][$k][] = $structure_idx;
         }
       }
@@ -131,7 +129,7 @@ class FrxSVGGraph extends FrxRenderer {
       // Base group
 
       $gkey = $this->teng->replace($group, TRUE);
-      $trow[] = $gkey;
+      $trow[$group] = $gkey;
       Frx::Data()->pop();
       // Dimensions
       $dim_data = $dim_rows[$k];
@@ -142,10 +140,10 @@ class FrxSVGGraph extends FrxRenderer {
 
           $cell = $col;
           $val = $this->teng->replace($col, TRUE);
-          if(!$val) $val = 0;
-          $trow[] = $val;
+          //if(!$val) $val = 0;
+          if ($val !== '' && $val !== NULL) $trow[$dk . $col] = $val;
           foreach($this->field_sources as $fk => $src) {
-            $trow[] = $this->teng->replace($src, TRUE);
+            $trow[$dk . $fk] = $this->teng->replace($src, TRUE);
           }
         }
         frx::Data()->pop();
@@ -153,6 +151,7 @@ class FrxSVGGraph extends FrxRenderer {
       $this->graphData[] = $trow;
 
     }
+
     return $this->graphData;
   }
 
@@ -671,6 +670,7 @@ class FrxSVGGraph extends FrxRenderer {
    * @param unknown $dim
    */
   function generateCrossTab($xml, &$config, &$div, $group, $dim) {
+    $attrs = array(); 
     $table_frx['renderer'] = 'FrxCrosstab';
     $table_frx['group'] = is_array($group) ? implode(' ', $group) : $group;
     $table_frx['dim'] = $dim;
