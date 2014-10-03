@@ -336,7 +336,7 @@
 <p>
   A <strong>crosstab</strong> table is designed to pivot data, that is to creat a table whose columns are determined by the values in 
   a select statement/data block.  The number of columns in a crosstab query is not constant but rather determined by the data returned by the 
-  block.  It is typically used to conver data of this form:
+  block.  It is typically used to transform data that looks like:
 </p>
 <table>
   <tr><td>WA</td><td>Female</td><td>100</td></tr>
@@ -378,6 +378,10 @@ the dimension attribute speicifies which field will be used to create the column
   </div>
 
 </div>
-
+<p>In the above layout the td elements in the thead section of the table tell the crosstab renderer to use that field as the
+	dynamic columns that make up the pivot. The frx:dim attribute determines the values that will be used as columns in the table.
+	Columns that are indicated with th elements are fixed. The structure is then mirrored in the tbody section. The frx:group
+	attribute dictates what will be used to uniquely group the rows. One row will be generated for each unique frx:group specified.
+	The frx:dim element d</p>
 </body>
 </html>
