@@ -55,8 +55,12 @@
   </table>
   <p>Forena uses its own mechanisms for advertising its controls. The following can be used as a reference
     implementation for this hook.</p>
-  <div class="php">function forena_forena_controls() { $controls[] = array('file' =&gt; 'plugins/FrxControls.inc', 'class'
-    =&gt; 'FrxControls', ); return $controls; }</div>
+  <pre>
+function forena_forena_controls() { 
+  $controls[] = array('file' =&gt; 'plugins/FrxControls.inc', 'class' =&gt; 'FrxControls'); 
+  return $controls; 
+  }
+  </pre>
   <h3>hook_forena_plugins</h3>
   <p>This hook defines custom data providing plugins for Forena. The most common use is for implementing custom XML
     data repository types, but they can also be used for defining formatting functions that are specific to a data provider type.
@@ -115,8 +119,12 @@ function forena_forena_controls() {
   <h3>hook_forena_parameters_alter</h3>
   <p>This alter hook allows you to alter the incoming parameters for any report, but also to provide additional data contexts
     that can be made available in your reports. A simple implementation follows:</p>
-  <pre class="php">function myexample_forena_parameters_alter($report_name, &amp;$parms) { // Set a data context for use in
-    reports $sec['admin'] = user_access('access administration pages') ? 'Y' : ''; Frx::Data()-&gt;setContext('security', $sec); }
+  <pre class="php">
+function myexample_forena_parameters_alter($report_name, &amp;$parms) { 
+  // Set a data context for use in reports 
+  $sec['admin'] = user_access('access administration pages') ? 'Y' : ''; 
+  Frx::Data()-&gt;setContext('security', $sec); 
+}
   </pre>
   <p>
     In the above example, you would be able to reference <strong>:security.admin</strong> in any data block or <strong>{security_admin}</strong>
