@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <book>
-  <booktitle>Skins and Theming)</booktitle>
+  <booktitle>Skins and Theming</booktitle>
   <bookfolder>help.skins</bookfolder>
   <chapters>
     <chapter>
@@ -11,7 +11,7 @@
     </chapter>
     <chapter>
       <title>Assigning Skins</title>
-      <subtitle>Set default skins and assigne custom skins to reports </subtitle>
+      <subtitle>Set default skins and assign custom skins to reports </subtitle>
       <abstract></abstract>
       <link>assign</link>
     </chapter>
@@ -22,8 +22,8 @@
       <link>css</link>
     </chapter>
     <chapter>
-      <title>Javascript Libraries</title>
-      <subtitle>Add a javascript libraries for use in reports</subtitle>
+      <title>JavaScript Libraries</title>
+      <subtitle>Add a JavaScript libraries for use in reports</subtitle>
       <abstract></abstract>
       <link>javascript</link>
     </chapter>

@@ -18,8 +18,18 @@
     target="_self">Defining data sources in settings.php file(s)</frx:field>
   <frx:field id="building_datablocks" link="reports/help.data#datablocks"
     target="_self">building data blocks</frx:field>
- <frx:field id="role_detail_report" link="reports/drupaladmin.role_detail"
-    target="_blank">Roles</frx:field>    
+  <frx:field id="datasource" link="reports/help.data#datasources"
+    target="_self">data source</frx:field>
+  <frx:field id="create_datablock" link="admin/structure/forena/data/add"
+    target="_blank">Create New SQL Query</frx:field>
+  <frx:field id="structure_forena_data" link="admin/structure/forena/data"
+    target="_blank">Structuring Forena Data</frx:field>
+  <frx:field id="masquerade_module" link="https://drupal.org/project/masquerade"
+    target="_blank">Masquerade</frx:field>
+  <frx:field id="role">{role}</frx:field>
+  <frx:field id="users_roles">{users_roles}</frx:field>
+  <frx:field id="role_detail" link="reports/drupaladmin.role_detail"
+    target="_blank">Roles</frx:field>
 </frx:fields>
 </head>
 <body>
@@ -270,27 +280,26 @@
  <h2 id="datablocks">Data Blocks (SQL Queries)</h2>
   <p>
     Data blocks are files that are located in a <strong>database repository</strong>, which is a (secured) directory on the web
-    server that contains all data block files related to a specific {datasource}. The actual format of these files is dependent on
-    which data provider or driver is being used for the data source:
-  
+    server that contains all data block files related to a specific {datasource}. The actual format of these files is dependent on which data provider or driver is being used for the data source:
   </p>
   <ul>
-    <li>the most common format for these files is <abbr title="Structered Query Language">SQL</abbr>, used for all supported
-      data engines except for FrxFiles (XML Files). Here is a sample of such SQL file:<br />
-      <div class="sql">--ACCESS=access administration pages SELECT type, count(type) as typecount FROM {watchdog} GROUP BY
-        type ORDER BY type asc LIMIT 50</div> <strong>Note</strong>: Checkout the {skills-sql} if you're interested in learning more about
-      SQL Files.
+    <li>the most common format for these files is <abbr title="Structered Query Language">SQL</abbr>, used for all supported data engines except for FrxFiles (XML Files). Here is a sample of such SQL file:<br />
+  <pre>
+--ACCESS=access administration pages
+SELECT type, count(type) as typecount
+FROM {watchdog}
+GROUP BY type
+ORDER BY type asc
+LIMIT 50
+</pre>
     </li>
-    <li>an alternative format for these files is <abbr title="eXtensible Markup Language">XML</abbr> 
+    <li>an alternative format for these files is <abbr title="eXtensible Markup Language">XML</abbr>.
     </li>
   </ul>
-
   <p>SQL and XML files live on the file system on the web server and can be created using the SQL or XML editor of your choice.</p>
   <p>
     To create new data blocks in SQL format, you may want to consider using the {create_datablock} link on the
-    {structure_forena_data} screen. This will launch the <strong>query writing tool</strong> that comes with Forena, which
-    is called the <strong>Forena Query Builder</strong>. This is a separated module that comes with Forena. It can
-    be enabled as per standard Drupal instructions to enable an additional module. For a video tutorial
+    {structure_forena_data} screen. This will launch the <strong>query writing tool</strong> that comes with Forena, which is called the <strong>Forena Query Builder</strong>. This is a separated module that comes with Forena. It can be enabled as per standard Drupal instructions to enable an additional module. For a video tutorial
     about this query writing tool, checkout <a href="https://www.youtube.com/watch?v=mPdFftH4CGs"
       target="_blank">Define data blocks with optional filters</a>.
   </p>
@@ -312,26 +321,23 @@
   <p>
     Data Blocks Security is actually implemented by means of a comment containing <strong>ACCESS=<em>some_permission</em></strong>.
     It is added near the top of a data block which indicates the Drupal permission required to access the data
-    retrieved by the data block. Its format depends on the format of the Data Block (which can be either in SQL format or in XML
-    format), as further detailed below.
+    retrieved by the data block. Its format depends on the format of the Data Block (which can be either in SQL format or in XML format), as further detailed below.
   </p>
   <p>
-    <strong>Note</strong>: While working on these permissions, it may be a good idea to {enable_masquerade} to experience the
-    effects of granting some permission to various types of user roles.
+    <strong>Note</strong>: While working on these permissions, it may be a good idea to enable the {masquerade_module} module to experience the effects of granting some permission to various types of user roles.
   </p>
   <h3>SQL Data Blocks Security</h3>
   <p>
     To specifying Data Blocks Security for a data block in SQL format, use an SQL comment starting with <strong>ACCESS=<em>some_permission</em></strong>,
     as in this example:
   </p>
-  
   <pre>
 --ACCESS=administer users
-SELECT u.uid,u.name 
-FROM {role} r 
-  JOIN {users_roles} ur ON r.rid=ur.rid 
+SELECT u.uid,u.name
+FROM {role} r
+  JOIN {users_roles} ur ON r.rid=ur.rid
   JOIN users u ON ur.uid=u.uid WHERE r.rid = :role
---INFO 
+--INFO
 type[role]=int
   </pre>
   <h3>XML Data Blocks Security</h3>
@@ -350,7 +356,7 @@ type[role]=int
     versions of the rights found on the Drupal permission tab. However, module and core developers may use any string that they
     want in creating rights. There is unfortunately no easy way in Drupal to list module permissions, but after the permission has
     been granted to a role, you may use the {role_detail} sample report to determine a listing of rights that may
-    be used to identify permissions</p>
+    be used to identify permissions.</p>
  <h2 id="sqlparameters">SQL Parameters</h2>
   <p>
     The <strong>:role</strong> parameter in the data blocks example is a
@@ -382,7 +388,7 @@ type[role]=int
   type[limit]=int
   </pre>
   <p>
-  In the above example (the last line of it)), the <strong>:limit</strong> parameter is specified to be of type <strong>int</strong>.  The following Parameter Data Types are supported:
+  In the above example (the last line of it), the <strong>:limit</strong> parameter is specified to be of type <strong>int</strong>.  The following Parameter Data Types are supported:
   </p>
   <table>
     <tbody>
