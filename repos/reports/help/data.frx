@@ -184,8 +184,12 @@
     new data block repository using <strong>local</strong> as the machine readable name (which is used in referencing all data
     blocks used by this data source and which should not contain any special characters or spaces):
   </p>
-  <pre frx:renderer="FrxSource"> global $_forena_repositories; $_forena_repositories['local'] = array( 'path' =&gt;
-    'sites/default/local_blocks', 'title' =&gt; 'Site Specific Data Blocks' ); </pre>
+<pre class="code">
+global $_forena_repositories;
+$_forena_repositories['local'] = array(
+  'path' =&gt; 'sites/default/local_blocks',
+  'title' =&gt; 'Site Specific Data Blocks' );
+</pre>
   <p>The following table illustrates the options provided:
   </p>
   <table>
@@ -284,7 +288,7 @@
   </p>
   <ul>
     <li>the most common format for these files is <abbr title="Structered Query Language">SQL</abbr>, used for all supported data engines except for FrxFiles (XML Files). Here is a sample of such SQL file:<br />
-  <pre>
+<pre class="code">
 --ACCESS=access administration pages
 SELECT type, count(type) as typecount
 FROM {watchdog}
@@ -331,7 +335,7 @@ LIMIT 50
     To specifying Data Blocks Security for a data block in SQL format, use an SQL comment starting with <strong>ACCESS=<em>some_permission</em></strong>,
     as in this example:
   </p>
-  <pre>
+<pre class="code">
 --ACCESS=administer users
 SELECT u.uid,u.name
 FROM {role} r
@@ -339,7 +343,7 @@ FROM {role} r
   JOIN users u ON ur.uid=u.uid WHERE r.rid = :role
 --INFO
 type[role]=int
-  </pre>
+</pre>
   <h3>XML Data Blocks Security</h3>
   <p>
     To specifying Data Blocks Security for a data block in XML format, use an XML comment line containing <strong>ACCESS=<em>some_permission</em></strong>.
@@ -373,20 +377,20 @@ type[role]=int
   <p>You can use the --INFO section of your data block to specify data types for parameters in the data block as in this
     example:
   </p>
- <pre>
-  --ACCESS=access content
-  SELECT nid FROM node 
-    WHERE promote=1
-      AND status=1
-    ORDER BY sticky DESC, created 
-  --IF=:limit
-  LIMIT :limit 
-  --ELSE 
-  LIMIT 10
-  --END
-  --INFO
-  type[limit]=int
-  </pre>
+<pre class="code">
+--ACCESS=access content
+SELECT nid FROM node 
+  WHERE promote=1
+    AND status=1
+  ORDER BY sticky DESC, created 
+--IF=:limit
+LIMIT :limit 
+--ELSE 
+LIMIT 10
+--END
+--INFO
+type[limit]=int
+</pre>
   <p>
   In the above example (the last line of it), the <strong>:limit</strong> parameter is specified to be of type <strong>int</strong>.  The following Parameter Data Types are supported:
   </p>
@@ -422,7 +426,7 @@ type[role]=int
     The <strong>--IF / --ELSE / --END</strong> syntax provides a way to test a value of an incoming parameter to conditionally
     construct part of an SQL statement. The following example illustrates this technique: 
   </p>
-  <pre>
+<pre class="code">
 SELECT * from
   states 
 --IF=:state 
@@ -431,7 +435,7 @@ WHERE code=:state
 WHERE code='AL' 
 --END 
 ORDER BY NAME
-  </pre>
+</pre>
   <p>
   In the above example the WHERE clause is only added to the SQL if there is a value specified for the report parameter
   <strong>:state</strong>. If no value for the :state parameter is provided, then the WHERE clause limits the selection to code
@@ -442,7 +446,7 @@ ORDER BY NAME
     Alternatively the <strong>--SWITCH / --CASE / --ELSE / --END</strong> syntax provides a way to test for multiple values of an
     incoming parameter and conditionally construct part of an SQL statement. The following example illustrates this technique:
   </p>
-  <pre>
+<pre class="code">
 SELECT * from some_database_table
 --SWITCH=:sort
 --CASE=code
@@ -452,7 +456,7 @@ ORDER BY total
 --ELSE
 ORDER BY name
 --END 
-  </pre>
+</pre>
   <p>
   In the above example, if the report parameter
   <strong>:sort</strong> passed a value of
@@ -465,13 +469,13 @@ ORDER BY name
 <h2 id="datablockincludes">Data Block Includes</h2>
   <p>Data blocks can be build from other data blocks. To accomplish this use the --INCLUDE directive as in this example:
   </p>
-  <pre>
-  --ACCESS=access content
-  SELECT * FROM (
-  --INCLUDE=users_by_state
-  ) t
-  WHERE state=:state
-  </pre>
+<pre class="code">
+--ACCESS=access content
+SELECT * FROM (
+--INCLUDE=users_by_state
+) t
+WHERE state=:state
+</pre>
   <p>Be aware however of these restrictions / limitations when including other data blocks:
   </p>
   <ul>
@@ -485,16 +489,16 @@ ORDER BY name
     your data block as illustrated in this example:
     </p>
   
-<pre>
-  --ACCESS=access content
-  SELECT nid, type, title, uid, sticky, promote FROM node
-  WHERE type=:content_type AND status=1 
-  ORDER BY title
-  --INFO
-  ; This demonstrates loading node entities.
-  entity_type = node
-  entity_id = nid
-  </pre>
+<pre class="code">
+--ACCESS=access content
+SELECT nid, type, title, uid, sticky, promote FROM node
+WHERE type=:content_type AND status=1 
+ORDER BY title
+--INFO
+; This demonstrates loading node entities.
+entity_type = node
+entity_id = nid
+</pre>
   <p>This example illustrates loading a node, but any entity type (like users, or some custom entity type) may be loaded.</p>
  <h2 id="rawmodequeries">Raw Mode Queries</h2>
   <p>
@@ -502,12 +506,12 @@ ORDER BY name
     option of <strong>raw</strong> in the data block.
   </p>
   <p>The following example illustrates raw mode used in a Drupal query.</p>
-  <pre>
-  SELECT nid, type, title, uid, sticky, promote from node
-  --INFO
-  ; Use raw mode 
-  return_type = raw
-  </pre>
+<pre class="code">
+SELECT nid, type, title, uid, sticky, promote from node
+--INFO
+; Use raw mode 
+return_type = raw
+</pre>
   <p>Currently this option is only supported in the Drupal and PDO drivers. The one drawback for using raw mode is that all
     of the XPATH features are disabled for that data query as Forena will not prerender the result set into XML. This means
     that your iterators can only use an frx:foreach attribute of * and only column names may be used as token replacements in the

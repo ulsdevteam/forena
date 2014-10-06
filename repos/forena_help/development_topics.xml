@@ -16,7 +16,7 @@
       <link>hooks</link>
     </chapter>
     <chapter>
-      <title>Field Formatters</title>
+      <title>Custom Formatters</title>
       <subtitle>Implement custom formatters either in control objects or in data plugin objects</subtitle>
       <abstract>Implementing a formatter requires the implementation of Formatter Methods and a Formats Registration Function.</abstract>
       <link>formats</link>
