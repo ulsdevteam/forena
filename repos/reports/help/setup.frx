@@ -22,18 +22,19 @@
 	<frx:field id="bean_integration" link="reports/help.sitebuilding#bean" >Integration with BEAN</frx:field>
 	<frx:field id="authorizations_tasks" link="reports/help.setup#permissions">Permission</frx:field>
 	<frx:field id="grant_permissions" link="admin/people/permissions" >grant permissions to roles</frx:field>
+	<frx:field id="admin_permissions" link="admin/people/permissions" >permissions</frx:field>
 	<frx:field id="about_data_sources" link="reports/help.data#datasources">About Data Sources</frx:field>
 	<frx:field id="wysiwyg_editors" link="reports/help.sitebuilding#wysiwygeditors" >WYSIWYG editors</frx:field>
-	<frx:field id="svggraph_library" link="reports/help.setup#svggraph" >SVGGraph library</frx:field>
 	<frx:field id="drupal_status" link="admin/reports/status">Status Report</frx:field>
 	<frx:field id="datablocks_security" link="reports/help.data#datablockssecurity" >Data Blocks Security</frx:field>
 	<frx:field id="datablocks" link="reports/help.data#datablocks" >Data Block</frx:field>
-	<frx:field id="grant_permissions" link="admin/people/permissions#module-forena" >grant permissions to roles</frx:field>
 	<frx:field id="datasource" link="reports/help.data#datasources">data source</frx:field>
 	<frx:field id="my_reports" link="forena">My Reports</frx:field>
-	<frx:field id="frxmyreports_renderer" link="reports/help.renderers.frxmyreports">FrxMyReports renderer</frx:field>
+	<frx:field id="frxmyreports_renderer" link="reports/help.renderers#frxmyreports">FrxMyReports renderer</frx:field>
 	<frx:field id="structure_forena" link="admin/structure/forena">Structure Forena</frx:field>
 	<frx:field id="create_report" link="reports/add">Create Report</frx:field>
+	<frx:field id="report_layout" link="reports/help.reportingfrx#layout" target="_blank">Report Layout</frx:field>
+	<frx:field id="svggraph_template" link="reports/help.renderers#frxsvggraph" target="_blank">SVG Graph template</frx:field>
 </frx:fields>
 <frx:menu />
 <frx:cache />
@@ -85,7 +86,7 @@
 			using any of the {wysiwyg_editors} to edit the body of a report, it might be a good practice to even create two new text
 			formats (an extra one for reports that will contain graphs)</li>
 		<li><strong>Use an existing text format such as Full HTML</strong>: this is the easiest option, but will likely require
-			you to change the configuration of the exisiting format.</li>
+			you to change the configuration of the existing format.</li>
 	</ul>
 	<p>
 		It is <em>strongly recommended</em> create a dedicated text format for use with Forena (e.g. one named "Reports"). Text format
@@ -115,7 +116,7 @@
 		<li><strong>Custom Data Block Repository</strong>: this is the directory to be used to save custom Data Blocks (e.g.
 			using the forena query builder tool). This should be a directory that is writable by the web user, but it should not be
 			possible to browse it via the web.</li>
-		<li><strong>Default Report Skin </strong> only makes sense after defining a custom {custom_skins}. Leave the proposed default value for it unchanged for now.</li> 
+		<li><strong>Default Report Skin </strong> only makes sense after defining 1 or more custom {custom_skins}. Leave the proposed default value for it unchanged for now.</li> 
 		<li><strong>Text Format</strong> Specify the text format you configured for use with forena earlier.</li>
 	</ul>
 	<p>
@@ -137,7 +138,7 @@
 	</p>
 	<ul>
 		<li>Users are presented with links to export the report in formats that were enabled for that report.  The default types specified here are presented
-		 when no overidding values are set for the report. </li>
+		 when no overriding values are set for the report. </li>
 		<li>Users will not be able to export the report in any formats that are not enabled, regardless of the doctypes specified in the report.</li>
 		<li>Don't confuse document formats with text formats described earlier.  They are not related to each other.</li>
 	</ul>
@@ -204,12 +205,12 @@
 			<td>Deleting an custom report via reports/%/delete.</td>
 		</tr>
 		<tr>
-			<td>Peform email merge</td>
+			<td>Perform email merge</td>
 			<td>Use of the <strong>email</strong> document type to send email form letters using Forena.</td>
 		</tr>
 		<tr>
 			<td>Access xml from data blocks directly</td>
-			<td>Forena/xml/%, useful for ajax calls to data blocks.</td>
+			<td>Forena/xml/%, useful for AJAX calls to data blocks.</td>
 		</tr>
 		<tr>
 			<td>Access [data source] Data</td>
@@ -256,7 +257,7 @@
 		Forena also facilitates the creation of graphs such as piecharts, barcharts and radarcharts using the PHP <abbr title="Scalable Vector Graphics">SVG</abbr> Graph library (version 2.11 or above),
 		which is expected to be installed in the sites/all/libraries folder. To install this library:</p>
 	<ol>
-		<li>Download the PHP SVGGraph library from {svggraph_library}.</li>
+		<li>Download the <a href="http://www.goat1000.com/svggraph.php" target="_blank">PHP SVGGraph</a> library.</li>
 		<li>Unpack (extract) the downloaded SVGGraph library.</li>
 		<li>Transfer (upload) the extracted library in a subfolder of sites/all/libraries, using <strong>SVGGraph</strong> (case
 			sensitive!) as the name of the subfolder.
@@ -321,7 +322,7 @@
 		For a video tutorial about this topic, checkout <a href="https://www.youtube.com/watch?v=ijmM85RGvvk" target="_blank">Create
 			skins that integrate JQuery plugins</a> (i.e. what is explained from about 08:15 to 10:20).
 	</p>
-	<h2 id="upgrading">Ugrading From Prior Versions</h2>
+	<h2 id="upgrading">Upgrading From Prior Versions</h2>
 	<p>
 		Forena version 7.x-4.x is a major release upgrade, with lots of new features. In preparation of your reports migration,
 		make sure to checkout the release notes found on the <a href="https://drupal.org/project/forena">Forena project page </a> for details about
@@ -334,10 +335,10 @@
 	<p>
 		After installing this release, make sure to <strong>Revert all delivered reports to original</strong> which will cause all
 		customizations to reports that are delivered with contributed or custom modules to be lost.  Failure to do this will leave outdated versions of 
-		help files and sample reports on your site.  The two provided ways to revert custuomized reports are:
+		help files and sample reports on your site.  The two provided ways to revert customized reports are:
 	</p>
 	<ul>
-		<li>Visit the {structure_forena} Forena structure screen and check the box to "Revert Delivered Reports to original"
+		<li>Visit the {structure_forena} screen and check the box to "Revert Delivered Reports to original"
 			(near the bottom) and press the <strong>Revert</strong> button.
 		</li>
 		<li>Use DRUSH, by executing the <strong>drush frxrevert</strong> command.
@@ -346,7 +347,7 @@
 	<h3>Remove obsoleted features in custom reports</h3>
 	<p>
 		The new <strong>skin</strong> tag replaces the previous <strong>form</strong> tag within the <strong>frx:options</strong>
-		element. Even though the form tag is still supported it has been deprectated, you are encouraged to replace it in all custom reports. Checkout
+		element. Even though the form tag is still supported it has been depreciated, you are encouraged to replace it in all custom reports. Checkout
 		the {report_layout} options for more details about these tags.
 	</p>
 	<h3>Required corrections for charts created with SVG Graph</h3>
