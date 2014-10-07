@@ -12,12 +12,21 @@
 <frx:docgen />
 <frx:fields>
   <frx:field id="title" link="reports/help.renderers#{link}" />
+  <frx:field id="user_distribution_report" link="reports/sample.user_distribution_simple?state=NJ"
+    target="_blank">User Distribution</frx:field>
+  <frx:field id="tutorial_reports" link="reports/help.toc" target="_blank">Reporting Tutorials</frx:field>
+  <frx:field id="datablock_security" link="reports/help.data#datablocksecurity"
+    target="_self">data block security</frx:field>
   <frx:field id="role_detail_report" link="reports/drupaladmin.role_detail" target="_blank"> Roles</frx:field>
   <frx:field id="setup_svggraph_report" link="reports/help.setup#svggraph" target="_blank">PHP SVGGraph library</frx:field>
   <frx:field id="state_summary_report" link="reports/sample.state_summary" target="_blank">State Summary</frx:field>
-    <frx:field id="state_summary_ie8_report" link="reports/sample.state_summary_ie8"
+  <frx:field id="state">{State}</frx:field>
+  <frx:field id="total">{total}</frx:field>
+  <frx:field id="color">{color}</frx:field>
+  <frx:field id="svggraph_library" link="http://www.goat1000.com/svggraph.php"
+    target="_blank">PHP SVGGraph library</frx:field>
+  <frx:field id="state_summary_ie8_report" link="reports/sample.state_summary_ie8"
     target="_blank">External SVG Graph Example</frx:field>
-  <frx:field id="watchdog_stats_report" link="reports/drupaladmin.watchdog_stats?prmsev=4" target="_blank">Watchdog Statistics (for entries with severity 4)</frx:field>
 </frx:fields>
 </head>
 <body>
@@ -28,13 +37,14 @@
     </ul>
 
   </div>
+  <h2 id="intro">Introduction</h2>
   <p>
-    A renderer specifies how an tag in the report template is to render. A good example is to render
-    the use of the svg renderere using the <a href="http://www.goat1000.com/svggraph.php" target="_blank"> PHP SVGGraph</a> library, as in
-    the {state_summary_report} sample report:
+    A renderer specifies how a tag in the report template is to render. A good example is to render
+    a chart using the <a href="http://www.goat1000.com/svggraph.php" target="_blank"> PHP SVGGraph</a> library, as in the {state_summary_report} sample report:
   </p>
 <html frx:renderer="FrxSource" id="frxsrc-1">
-<head>...
+<head>
+...
 </head>
 <body>
   ...
@@ -49,7 +59,7 @@
 <h2 id="frxtitle">FrxTitle</h2>
 <p>Use the content of this tag to override the title of the report. This allows both the page title and the tab title to be replaced by token replaced values in the report.</p>
 <p>As an illustration of how to use this renderer, consider the {user_distribution_report} sample report:</p>
-<div frx:renderer="FrxSource">
+<div frx:renderer="FrxSource" id="frxsrc-2">
   <h2 frx:renderer="FrxTitle" id="frx-frxtitle">Users in cities in state {name}</h2>
 </div>
 <p>
@@ -73,25 +83,25 @@
   The above sample shows a list of all non-hidden reports in category <strong>Sample</strong>, using the category as the header generated 
   by the following code:
 </p>
-<div frx:renderer="FrxSource">
+<div frx:renderer="FrxSource" id="frxsrc-3">
   <div frx:renderer="FrxMyReports" frx:category="Sample" id="frxmyrpts" />
 </div>
 <p>The following attributes are supported for the FrxMyReports renderer:</p>
 <table>
   <tr>
     <th>frx:category</th>
-    <td>Limit the list of reports to be shown to a particular category. Multiple categories may be used by specifying category_2 and category_3 attribtues accordingly.</td>
+    <td>Limit the list of reports to be shown to a particular category. Multiple categories may be used by specifying category_2 and category_3 attributes accordingly.</td>
   </tr>
 </table>
 <h2 id="frxsource">FrxSource</h2>
 <p>The FrxSource renderer displays markup as a code snippet. No token replacement is done for the children and all embedded
-  code is escaped html. This is used in the {tutorial_reports} to display the source of reports.</p>
+  code is escaped HTML. This is used in the {tutorial_reports} to display the source of reports.</p>
 <p>
   This renderer is used throughout the documentation as follows:
 </p>
-<div frx:renderer="FrxSource">
+<div frx:renderer="FrxSource" id="frxsrc-4">
   <div frx:renderer="FrxSource">
-    <p>Embedded xhtml that you want displayed as source including {tokens} that you want to display without being replaced</p>
+    <p>Embedded XHTML that you want displayed as source including {tokens} that you want to display without being replaced</p>
   </div>
 </div>
 <h2 id="frxxml">FrxXML</h2>
@@ -99,15 +109,11 @@
   report, it will show you the XML data source that is used for token replacement, so it can give you a good idea as to what data
   is being returned and which tokens can be used.</p>
 <p>Here is a sample that is displayed using the FrxXML renderer which shows the data returned by the datablock:</p>
-
-<div class="xml">
-  <div frx:renderer="FrxXML" id="frx-frxxml" frx:block="forena_help/reportingwysiwyg_topics"></div>
-</div>
-
+<div frx:renderer="FrxXML" id="frx-frxxml" frx:block="forena_help/reportingwysiwyg_topics"></div>
 <p>Be aware however that this FrxXML renderers removes XML comment lines (e.g. those used to specify
   {datablock_security} in XML format).</p>
 <p>The above example was generated with the following code:</p>
-<div frx:renderer="FrxSource">
+<div frx:renderer="FrxSource" id="frxsrc-5">
   <div frx:renderer="FrxXML" id="frx-frxxml" frx:block="forena_help/reportingwysiwyg_topics" />
 </div>
 <h2 id="frxparameterform">FrxParamterForm</h2>
@@ -116,7 +122,7 @@
   report to control various aspects of the rendering of the parameter form, as in the {role_detail_report} sample report, for
   which the .frx file includes these lines:
 </p>
-<html frx:renderer="FrxSource">
+<html frx:renderer="FrxSource" id="frxsrc-6">
 <head>
 ...
 <frx:parameters>
@@ -178,7 +184,7 @@
   to using this renderer.</p>
 <p>We'll use the {state_summary_report} sample report to illustrate how to use this renderer, for which the .frx file
   includes these lines:</p>
-<div frx:renderer="FrxSource">
+<div frx:renderer="FrxSource" id="frxsrc-7">
   <div frx:block="sampledb/users_by_state" id="users_by_state-block" class="FrxSVGGraph">
     <svg id="state-chart" frx:renderer="FrxSVGGraph" frx:type="bargraph" frx:xpath="*[total&gt;10000]" frx:color="{color}"
       frx:link="sample.user_distribution_simple?state={state}" frx:series_1="{total}" frx:label="{state}">
@@ -221,7 +227,7 @@
   <tr>
     <th>frx:link</th>
     <td>Create a hyperlink for the data to be graphed (e.g. <strong>sample.user_distribution_simple?state={state}</strong>.
-      Use feild tokens to generate the link dynamically .
+      Use field tokens to generate the link dynamically.
     </td>
   </tr>
   <tr>
@@ -239,7 +245,7 @@
   <tr>
     <th>frx:options</th>
     <td>This legacy attribute is currently still supported, but it is recommended to replace them by the corresponding <strong>frx:xyz</strong>
-      attributes. Here is a sample of it was used:<br /> <strong>frx:options="series[]={total}&amp;label={state}&amp;colors[]=green&amp;colors[]=yellow"</strong></td>
+      attributes. Here is a sample of how it was used:<br /> <strong>frx:options="series[]={total}&amp;label={state}&amp;colors[]=green&amp;colors[]=yellow"</strong></td>
   </tr>
 </table>
 <p>
@@ -268,9 +274,9 @@
   </tr>
 </table>
 <p>
-  Here is an example:
+  Checkout the {svggraph_library} documentation to fully understand the available options, as in this example:
 </p>
-<div frx:renderer="FrxSource">
+<div frx:renderer="FrxSource" id="frxsrc-8">
   <div frx:block="sampledb/users_by_state" id="users_by_state-block" class="FrxSVGGraph">
     <svg id="state-chart" frx:renderer="FrxSVGGraph" frx:type="bargraph" frx:xpath="*[total&gt;10000]" frx:color="{color}"
       frx:link="sample.user_distribution_simple?state={state}" frx:series_1="{total}" frx:label="{state}" frx:height="300"
@@ -282,9 +288,6 @@
       </svg>
   </div>
 </div>
-<p>
-  <strong>Note</strong>: checkout the {svggraph_library} documentation to fully understand those options.
-</p>
 <h2 id="frxinclude">FrxInclude</h2>
   <p>This renderer includes another report as an asset with the appropriate tag. The primary use of this renderer is to
     create references to external SVG assets. When rendered in a web page, these need to be wrapped in embed tags, but when being
@@ -292,10 +295,10 @@
     the .frx file includes these lines:
   </p>
   
-  <div frx:renderer="FrxSource">
-    <div frx:src="reports/sample.state_graph.svg?height=400&amp;width=600" frx:renderer="FrxInclude" frx:height="480"
-      frx:width="640">...</div>
-  </div>
+<div frx:renderer="FrxSource" id="frxsrc-9">
+  <div frx:src="reports/sample.state_graph.svg?height=400&amp;width=600" frx:renderer="FrxInclude" frx:height="480"
+    frx:width="640">...</div>
+</div>
   <p>
   The above example illustrates the following FRX attributes supported by the FrxInclude renderer:
   </p>
@@ -350,11 +353,11 @@
   <tr><td>WA</td><td>100</td><td>50</td></tr>
   <tr><td>ID</td><td>25</td><td>30</td></tr>
 </table>
-<p>In order to do this you will need to specify a grouping attribute and a dimension attribute.  The grouping attribute determines how to group the rows of data while
-the dimension attribute speicifies which field will be used to create the columns out of.</p>
+<p>In order to do this you will need to specify a <strong>grouping</strong> attribute and a <strong>dimension</strong> attribute.  The grouping attribute determines how to group the rows of data while
+the dimension attribute specifies which field will be used to create the columns out of.</p>
 <p>The layout of the cross tab is follows:</p>
 
-<div frx:renderer="FrxSource">
+<div frx:renderer="FrxSource" id="frxsrc-10">
   <div id="watchdog_stats_block" class="FrxCrosstab" frx:block="drupal/watchdog_stats">
     <table watchdog_stats="watchdog_stats-renderer" frx:renderer="FrxCrosstab" frx:group="{severity}{name}"
       frx:dim="Msg Type: {type}">
@@ -376,12 +379,10 @@ the dimension attribute speicifies which field will be used to create the column
       </tbody>
     </table>
   </div>
-
 </div>
-<p>In the above layout the td elements in the thead section of the table tell the crosstab renderer to use that field as the
-	dynamic columns that make up the pivot. The frx:dim attribute determines the values that will be used as columns in the table.
-	Columns that are indicated with th elements are fixed. The structure is then mirrored in the tbody section. The frx:group
-	attribute dictates what will be used to uniquely group the rows. One row will be generated for each unique frx:group specified.
-	The frx:dim element d</p>
+<p>In the above layout the <strong>td</strong> elements in the <strong>thead</strong> section of the table tell the crosstab renderer to use that field as the
+	dynamic columns that make up the pivot. The <strong>frx:dim</strong> attribute determines the values that will be used as columns in the table.
+	Columns that are indicated with th elements are fixed. The structure is then mirrored in the <strong>tbody</strong> section. The <strong>frx:group</strong>
+	attribute dictates what will be used to uniquely group the rows. One row will be generated for each unique frx:group specified.</p>
 </body>
 </html>
