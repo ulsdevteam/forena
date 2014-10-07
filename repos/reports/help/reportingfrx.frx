@@ -8,16 +8,32 @@
 <head>
 <title>FRX Reporting Reference</title>
 <frx:category>Help</frx:category>
-<frx:options hidden="1" />
+<frx:options hidden="1" skin="tutorial_skin" />
 <frx:fields>
   <frx:field id="title" link="reports/help.reportingfrx#{link}" />
-	<frx:field id="admin_reports" link="admin/structure/forena">admin/structure/forena</frx:field>
-	<frx:field id="my_reports" link="forena" target="_self">My Reports</frx:field>
-	<frx:field id="repords_add" link="reports/add">reports/add</frx:field>
-	  <frx:field id="crosstab_template" link="reports/help.renderers#frxcrosstab"
-    target="_blank">Crosstab template</frx:field>
-  <frx:field id="svggraph_template" link="reports/help.renderers#frxsvggraph"
-    target="_blank">SVG Graph template</frx:field>
+  <frx:field id="wysiwyg_editor" link="reports/help.reportingwysiwyg"
+    target="_blank">WYSIWYG reporting user interface</frx:field>
+  <frx:field id="data_renderers" link="reports/help.renderers"
+    target="_blank">Data Renderers Guide</frx:field>
+  <frx:field id="reportingfrx_general" link="reports/help.reportingfrx#general"
+    target="_self">General Report Options</frx:field>
+  <frx:field id="reportingfrx_datacontexts" link="reports/help.reportingfrx#datacontexts"
+    target="_self">data context</frx:field>
+  <frx:field id="reportingfrx_parameters" link="reports/help.reportingfrx#parameters"
+    target="_self">Report parameters</frx:field>
+  <frx:field id="renderers_intro" link="reports/help.renderers"
+    target="_self">Data Renderers Guide</frx:field>
+  <frx:field id="skip_id_issue" link="https://www.drupal.org/node/2222743"
+    target="_blank">Ability to have no id in frx:foreach elements</frx:field>
+  <frx:field id="jamesdixon" link="https://www.drupal.org/u/jamesdixon" target="_blank">jamesdixon</frx:field>
+  <frx:field id="report_layout" link="reports/help.reportingfrx#layout"
+    target="_self">Report Layout</frx:field>
+  <frx:field id="general_report_options" link="reports/help.reportingfrx#general"
+    target="_self">General Report Options</frx:field>
+  <frx:field id="report_time" link="">{report.time}</frx:field>
+  <frx:field id="report_name" link="">{report.name}</frx:field>
+  <frx:field id="report_format" link="">{report.format}</frx:field>
+  <frx:field id="my_reports" link="forena" target="_self">My Reports</frx:field>
 </frx:fields>
 <frx:parameters />
 <frx:docgen />
@@ -32,7 +48,7 @@
   </div>
 	<h2 id="intro">Forena Reports XML</h2>
 	<p>
-       Forean reports are defined using the <strong><em>F</em>orena <em>R</em>eport
+       Forena reports are defined using the <strong><em>F</em>orena <em>R</em>eport
 			<em>X</em>ML</strong> (frx) template format. Templates are <abbr
 			title="eXtensible HyperText Markup Language">XHTML</abbr> documents which are extended by some custom <abbr
 			title="HyperText Markup Language">HTML</abbr> tags and attributes. The result should be something familiar to anyone that
@@ -46,11 +62,11 @@
 	</p>
 	<h2 id="anatomy">Anatomy of an FRX File</h2>
 	 <h3 id="frx_newfile">Creating a new frx file</h3>
-	<p>To create a brand new report, just create a new .frx file in your report directory with a minimal set of XMTML
+	<p>To create a brand new report, just create a new .frx file in your report directory with a minimal set of XHTML
 		content, as further explained below.</p>
 	<p>
 		Each .frx file should start with the mandatory lines at the very top of any .frx file. These lines specify XML version,
-		DOCTYPE and xml entities. Checkout
+		DOCTYPE and XML entities. Checkout
 		<strong>default.frx</strong> in the root of the Forena module directory for a good sample to start from. Note that sometimes
 		you may have more then just those 4 lines, i.e. when using HTML entities such as &reg; or &copy;. In such case an extra
 		<strong>ENTITY</strong> line is added to those lines, to match the entity name with its entity number. Browse the .frx source
@@ -61,26 +77,26 @@
 		should include the lines starting from the <strong>head</strong> tag and ending with the <strong>/body</strong> tag, as in
 		this example:
     </p>
-  <html frx:renderer="FrxSource" >
-  <head>
-    <title>
-    </title>
-    <frx:category>
-    </frx:category>
-    <frx:options>
-    </frx:options>
-    <frx:parameters>
-    </frx:parameters>
-    <frx:docgen>
-    </frx:docgen>
-    <frx:fields>
-    </frx:fields>
-    <frx:menu/>
-    <frx:cache/>
-    <style/>
-  </head>
-  <body>
-  </body>
+<html frx:renderer="FrxSource" id="frxsrc-16">
+<head>
+  <title>
+  </title>
+  <frx:category>
+  </frx:category>
+  <frx:options>
+  </frx:options>
+  <frx:parameters>
+  </frx:parameters>
+  <frx:docgen>
+  </frx:docgen>
+  <frx:fields>
+  </frx:fields>
+  <frx:menu/>
+  <frx:cache/>
+  <style/>
+</head>
+<body>
+</body>
 </html>
   <p>
 	<strong>Note</strong>: most of the tags shown above are optional, though it appears to be a good practice to have them
@@ -89,21 +105,21 @@
   <h3 id="frx_example">Example of an frx file</h3>
   <p>Here is an example of a report definition for a very simple report:
   </p>
-  <html frx:renderer="FrxSource" id="frxsrc-2">
-  <head>
-    <title>A sample report</title>
-    <frx:category>Sample</frx:category>
-    <frx:options hidden="0" skin="skin_file_name" />
-  </head>
-  <body>
-    <div frx:block="sampledb/states">
-      <p frx:foreach="*">{code} - {name}</p>
-    </div>
-  </body>
-  </html>
+<html frx:renderer="FrxSource" id="frxsrc-2">
+<head>
+  <title>A sample report</title>
+  <frx:category>Sample</frx:category>
+  <frx:options hidden="0" skin="skin_file_name" />
+</head>
+<body>
+  <div frx:block="sampledb/states">
+    <p frx:foreach="*">{code} - {name}</p>
+  </div>
+</body>
+</html>
 
   <h3 id="frx_common">Commonly used FRX elements and attributes</h3>
-  <p>The above .frx example illustrates a few of the most commonly used FRX elements and attributes (custom HTML tags), i.e.:
+  <p>The above .frx example illustrates some of the most commonly used FRX elements and attributes (custom HTML tags), i.e.:
   </p>
 <table>
 	<tr id="xmlns_frx">
@@ -151,7 +167,7 @@
 </table>
 
 <h3 id="frx_advanced">Advanced FRX attributes</h3>
-  <p>Advanced FRX attributes:
+  <p>Some more advanced FRX attributes:
   </p>
 <table>
 	<tr id="skip_root">
@@ -189,7 +205,7 @@
   <p>
   Here is an example illustrating various general report options, which are further explained below.
   </p>
-<html frx:renderer="FrxSource" id="frxsrc-13">
+<html frx:renderer="FrxSource" id="frxsrc-11">
   <head>
   <title>A sample report</title>
   ...
@@ -291,7 +307,7 @@
   </table>
 <p>
 	<strong>Note</strong>: changes to menu properties only become
-	  in effect after {clear_drupal_cache} .
+	  in effect after clearing the Drupal cache.
 </p>
 <h3>Report caching options</h3>
 <p>
@@ -322,7 +338,7 @@
 	 in several common document formats. The document types options are used to set the available formats in which a
 	report can be saved.</p>
 <p>Here is an example illustrating some of the document types options</p>
-<html frx:renderer="FrxSource" >
+<html frx:renderer="FrxSource" id="frxsrc-7">
   <head>
   ...
   <frx:docgen>
@@ -396,7 +412,7 @@
   Here is an example illustrating various general layout options, which are further explained below.
   </p>
 
-  <html frx:renderer="FrxSource" id="frxsrc-13">
+  <html frx:renderer="FrxSource" id="frxsrc-3">
   <head>
   ...
   <frx:options hidden="0" skin="skin_file_name"/>
@@ -485,7 +501,7 @@
 		in this example:
 	</p>
 
-  <head frx:renderer="FrxSource" id="frxsrc-12">
+  <head frx:renderer="FrxSource" id="frxsrc-6">
     <title>My Report Title</title>
     <frx:parameters>
     <frx:parm id="state" label="State" require="1"
@@ -559,7 +575,7 @@
 	In the head section of the .frx file, you will find a series of <strong>frx:field</strong> elements contained in a <strong>frx:fields</strong>
 	element. These elements define special formatting rules for report fields referenced in the .frx file, as in this example:
 </p>
-<html frx:renderer="FrxSource">
+<html frx:renderer="FrxSource" id="frxsrc-12">
   <head>
   <title>A sample report</title>
   ...
@@ -638,18 +654,18 @@
       <th>link</th>
       <td>Specify the URL that the field is to be linked to as in this example. You can refer to any tokens in the current content using the normal curly brace syntax:
 
-    <html frx:renderer="FrxSource" id="frxsrc-8">
-    <head>
-    ...
-    <frx:fields>
-      <frx:field id="profile" link="profile/{some_field_name}"
-	format="" format-string="" target="" />
-    </frx:fields>
-    </head>
-    <body>
-      ...
-    </body>
-    </html>
+<html frx:renderer="FrxSource" id="frxsrc-8">
+<head>
+...
+<frx:fields>
+  <frx:field id="profile" link="profile/{some_field_name}"
+  format="" format-string="" target="" />
+</frx:fields>
+</head>
+<body>
+  ...
+</body>
+</html>
       This will create a link to this <strong>some_field_name</strong> 's profile.</td>
     </tr>
     <tr>
@@ -701,9 +717,7 @@
 	template <strong>states.frx</strong>. This report may be embedded in another report simply by including the string <strong>FrxReport.sample.states</strong>,
 	enclosed by curly braces, anywhere in a report, as in this example:
 </p>
-<div frx:renderer="FrxSource" id="frxsrc-10">... {FrxReport.sample.states} ...
-	</div>
-
+<div frx:renderer="FrxSource" id="frxsrc-10">... {FrxReport.sample.states} ...</div>
 	<p>
 	It is important to understand that the data from the current context will be used as parameters to the report when this context
 	is used.
@@ -720,11 +734,11 @@
 		in the database or value of a tag in case of data stores in XML format. As an illustration, consider this example:
 	</p>
 
-  <div frx:renderer="FrxSource" id="frxsrc-1">
-  ...
-  <sometag frx:if="{my_column}">something surrounded by sometag</sometag>
-  ...
-  </div>
+<div frx:renderer="FrxSource" id="frxsrc-1">
+...
+<sometag frx:if="{my_column}">something surrounded by sometag</sometag>
+...
+</div>
 <p>
 	This would cause the tag <strong>sometag</strong> and its children only to be rendered if the <strong>my_column</strong> field
 	in the database returned true.
@@ -732,11 +746,11 @@
 <h3>Using conditions in frx:if attributes</h3>
   <p>Here is a variation of the previous example:
   </p>
-  <div frx:renderer="FrxSource">
-  ...
-  <sometag frx:if="{type[text()='article']}">something related to article and surrounded by sometag</sometag>
-  ...
-  </div>
+<div frx:renderer="FrxSource" id="frxsrc-13">
+...
+<sometag frx:if="{type[text()='article']}">something related to article and surrounded by sometag</sometag>
+...
+</div>
 	<p>
 		In the above example the tag <strong>sometag</strong> and its children would only be rendered if the <strong>type</strong>
 		field in the SQL query were <strong>article</strong>.
@@ -744,11 +758,11 @@
 	<h3>Using negations in frx:if attributes</h3>
   <p>You may use an <strong>exclamation point</strong> to indicate negation as in this example:
   </p>
-  <div frx:renderer="FrxSource">
-  ...
-  <sometag frx:if="!{my_column}">something surrounded by sometag</sometag>
-  ...
-  </div>
+<div frx:renderer="FrxSource" id="frxsrc-14">
+...
+<sometag frx:if="!{my_column}">something surrounded by sometag</sometag>
+...
+</div>
 	<p>
 		This frx:if attribute would only evaluate to true if <strong>my_column</strong> was not present or zero.
 	</p>
@@ -757,11 +771,11 @@
 		Because of the way PHP string expressions work, listing multiple conditions in an frx:if attribute is interpreted as an <strong>OR</strong>.
 		As an illustration, consider this example:
 	</p>
-  <div frx:renderer="FrxSource" id="frxsrc-4">
-  ...
-  <sometag frx:if="{my_column}{your_column}">something surrounded by sometag</sometag>
-  ...
-  </div>
+<div frx:renderer="FrxSource" id="frxsrc-4">
+...
+<sometag frx:if="{my_column}{your_column}">something surrounded by sometag</sometag>
+...
+</div>
 	<p>
 		This frx:if attribute would evaluate to true if either column <strong>my_column</strong> OR <strong>your_column</strong>
 		contains data. If instead you need to use an <strong>AND</strong> operator, separate the conditions by <strong>&amp;amp;</strong>
@@ -778,7 +792,7 @@
 </p>
 <h2 id="tokens">Token Replacement</h2>
 <p>Each field in the report is referenced by an XPATH expression enclosed by curly braces, as in this example:</p>
-<div frx:renderer="FrxSource">... {SomeXpathExpression} ...</div>
+<div frx:renderer="FrxSource" id="frxsrc-15">... {SomeXpathExpression} ...</div>
 
 <p>In its simplest form the XPATH expression can be thought of as the name of the field in the database, but when using more
 	complex data sources, there is a lot that can be done using these XPATH expressions.</p>

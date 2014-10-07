@@ -1,4 +1,3 @@
-
 <!DOCTYPE root [
 <!ENTITY nbsp "&#160;">
 <!ENTITY reg "&#174;">
@@ -7,14 +6,13 @@
 <head>
 <title>WYSIWYG Reporting</title>
 <frx:category>Help</frx:category>
-<frx:options hidden="1" />
+<frx:options hidden="1" skin="tutorial_skin" />
 <frx:fields>
   <frx:field id="title" link="reports/help.reportingwysiwyg#{link}" />
-	<frx:field id="admin_reports" link="admin/structure/forena">admin/structure/forena</frx:field>
-	<frx:field id="reports_add" link="reports/add">reports/add</frx:field>
-	<frx:field id="my_reports" link="forena" target="_self">My Reports</frx:field>
-	<frx:field id="repords_add" link="reports/add">reports/add</frx:field>
-	  <frx:field id="crosstab_template" link="reports/help.renderers#frxcrosstab"
+  <frx:field id="admin_reports" link="admin/structure/forena">admin/structure/forena</frx:field>
+  <frx:field id="my_reports" link="forena" target="_self">My Reports</frx:field>
+  <frx:field id="skins_guide" link="reports/help.skins" target="_blank">Skins guide</frx:field>
+  <frx:field id="crosstab_template" link="reports/help.renderers#frxcrosstab"
     target="_blank">Crosstab template</frx:field>
   <frx:field id="svggraph_template" link="reports/help.renderers#frxsvggraph"
     target="_blank">SVG Graph template</frx:field>
@@ -76,8 +74,7 @@
 	<h2 id="create">Creating a Report</h2>
 	<p>To create a new report using the WYSIWYG report editor, use either of these methods to do so:</p>
 	<ul>
-		<li>Use the menu option Create Report, which is typically located in the navigation menu block, provided it has been
-			enabled by your site administrator during Forena's administration, as explained within {enable_create_report}.</li>
+		<li>Use the menu option Create Report, which is typically located in the navigation menu block, provided it is enabled in your site.</li>
 		<li>Visit the {admin_reports} page and select the Create New Report link on that page.</li>
 	</ul>
 	<h3>Specify the Title and Name</h3>
@@ -88,7 +85,7 @@
 	<p>
 		The <strong>Report Name</strong> is a unique name that is used to save the report definition. In this example we
 		will use test/simple as the Report Name, which implies that our report will be stored in directory <strong>test</strong>, and
-		that the filename of our report will be <strong>simple.frx</strong> The .frx extention is automatically added to the
+		that the filename of our report will be <strong>simple.frx</strong> The .frx extension is automatically added to the
 		filename. 
 	</p>
 	<p>
@@ -100,7 +97,7 @@
 	<h3>Save the Report</h3>
 	<p>Saving the report will  store all details in the .frx file we specified and display an informational message at the top of the screen, which states "Your report,
 		test/simple has been saved.". Voilà!</p>
-	<p>Note that your test/simple report does NOTshow up in the list of reports shown via menu item {my_reports}. 
+	<p>Note that your test/simple report does NOT show up in the list of reports shown via menu item {my_reports}. 
 	   That's because we have not specified a category yet for our report, something we'll be doing via
 		the General Tab later on.</p>
 	<h3>Retrieving your report</h3>
@@ -205,7 +202,7 @@
 					:parm syntax (e.g. :parma/:parmb.)</li>
 				<li><strong>Type of menu to create</strong> - Use standard conventions for creating a menu item in the format of normal
 					menu items, tabbed menus, etc.</li>
-			</ul> <strong>Note</strong>: changes to values of menu options  only become visible after {clear_drupal_cache}</li>
+			</ul> <strong>Note</strong>: changes to values of menu options  only become visible after clearing the Drupal cache.</li>
 		<li id="report-caching"><strong>Cache</strong> - Click on the cache link to expand it so that some additional options
 			related to it become visible. These additional options can be used to enable some options related to the caching of the
 			report, which is a technique to reduce the resources required for rendering the report, in situations such as:
@@ -227,7 +224,7 @@
 		be saved until the <strong>Save</strong> button is selected.</p>
 	<h2 id="doctypes">Document Types</h2>
 	<p>The output of any report is normally an HTML document.  It can  optionally be exported in several common document formats.</p>
-	<p>The exact list of document types avalable your report is determined by your site
+	<p>The exact list of document types available for your report is determined by your site
 		administrator and may include:</p>
 	<table>
 		<tr>
@@ -286,7 +283,7 @@
           files. These .skinfo files define which specific CSS files and JavaScript files will get included when that skin is
           selected in a report. </p>
           <p>
-          See the Skins Guide for more information on definiing custom skins.</p>  
+          Refer to the {skins_guide} for more information on defining custom skins.</p>  
         </td>
       </tr>
       <tr>
@@ -467,7 +464,7 @@
       </tr>
       <tr>
         <td>template</td>
-        <td>The field is epxected to contain a template containing further tokens for expansion.  This is useful for form letter data that
+        <td>The field is expected to contain a template containing further tokens for expansion.  This is useful for form letter data that
           may be stored in the database.</td>
       </tr>
     </tbody>
@@ -507,6 +504,5 @@
       <td>The value to use when no value is present in the data.</td>
     </tr>
   </table>
-  
 </body>
 </html>
