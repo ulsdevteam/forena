@@ -250,7 +250,7 @@ class FrxSVGGraph extends FrxRenderer {
     if (!$path) $path = $this->extract('xpath', $options); //Deprecated
     if (!$path) $path = '*';
     $group = $this->extract('group', $options);
-    $series = @$attributes['series'];
+    $series = @(array)$attributes['series'];
     $label = @$attributes['label'];
     $key = @$attributes['key'];
     if (!$key) $key = @$attributes['label']; //Backward compatibility for old graphs.
