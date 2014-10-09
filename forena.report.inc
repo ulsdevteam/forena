@@ -1052,7 +1052,7 @@ function forena_report_field_form($form, &$form_state, $report_name, $id) {
   $form['cancel'] = array(
     '#type' => 'submit',
     '#value' => t('Cancel'),
-    '#submit' => array('forena_update_cacnel'),
+    '#submit' => array('forena_update_cancel'),
   );
 
   return $form;
