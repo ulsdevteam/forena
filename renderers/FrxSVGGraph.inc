@@ -201,7 +201,7 @@ class FrxSVGGraph extends FrxRenderer {
     $this->weight = 0;
     $attrs = array();
     $svg = '';
-    $nodes =  $this->reportDocNode->xpath('//svg');
+    $nodes =  $this->reportDocNode->xpath('svg');
     if ($nodes) {
       $svg = $nodes[0];
       $config = $this->mergedAttributes($svg);
