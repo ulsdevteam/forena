@@ -44,7 +44,7 @@ class FrxSVGGraph extends FrxRenderer {
 
     // Default controling attributes
     $dim_headers = array($key);
-
+    $legend = array();
     $this->graphOptions['structure']['value'] = array();
     foreach($series as $col) {
       $this->graphOptions['structure']['value'][] = trim("$col", '{}');
@@ -65,8 +65,17 @@ class FrxSVGGraph extends FrxRenderer {
       foreach($this->field_sources as $k => $src) {
         $trow[$k] = $this->teng->replace($src, TRUE);
       }
+      if(isset($this->field_sources['legend_entries'])) { 
+        $legend_str = $trow['legend_entries']; 
+        $legend[$legend_str] = $legend_str;  
+      }
       Frx::Data()->pop();
       $this->graphData[] = $trow;
+    }
+    
+    // Deal with rare case where legend are supposed to come from data
+    if (isset($this->field_sources['legend_entries'])) {
+      $this->graphOptions['legend_entries'] = array_values($legend);
     }
   }
 
@@ -81,6 +90,7 @@ class FrxSVGGraph extends FrxRenderer {
     $group_headers = array();
     $dim_values = array();
     $rows = array();
+    $legend = array(); 
     $data = $this->frxReport->group($block_data, $group);
     $this->graphOptions['structure'] = array('key' => $group);
 
@@ -144,12 +154,27 @@ class FrxSVGGraph extends FrxRenderer {
           if ($val !== '' && $val !== NULL) $trow[$dk . $col] = $val;
           foreach($this->field_sources as $fk => $src) {
             $trow[$dk . $fk] = $this->teng->replace($src, TRUE);
+            
+            if (isset($this->field_sources['legend_entries'])) { 
+              $legend_str = $this->teng->replace($this->field_sources['legend_entries']); 
+              $legend[$legend_str] = $legend_str; 
+            }
+            
           }
         }
+        
+        
         frx::Data()->pop();
       }
       $this->graphData[] = $trow;
 
+    }
+    
+    
+    // Deal with rare case where legend are supposed to come from data
+    if (isset($this->field_sources['legend_entries'])) {
+
+      $this->graphOptions['legend_entries'] = array_values($legend);
     }
 
     return $this->graphData;
@@ -305,22 +330,15 @@ class FrxSVGGraph extends FrxRenderer {
     else {
       $this->generateGraphData($nodes, $series, $key);
     }
-
-
-    // Deal with rare case where legend are supposed to come from data
-    if (isset($this->field_sources['legend_entries'])) {
-      $legend = array();
-      foreach($this->graphData as $row) {
-        $legend[] = $row['legend_entries'];
-      }
-      $this->graphOptions['legend_entries'] = $legend;
-    }
+    
     if (isset($this->graphOptions['legend_entries']) && !is_array($this->graphOptions['legend_entries'])) {
       $this->graphOptions['legend_entries'] = explode('|', $this->graphOptions['legend_entries']);
     }
+    
     if ($data) {
       $output = $this->renderChart($type, $data);
     }
+
     return $output;
   }
 
