@@ -170,7 +170,6 @@ class FrxSVGGraph extends FrxRenderer {
 
     }
     
-    
     // Deal with rare case where legend are supposed to come from data
     if (isset($this->field_sources['legend_entries'])) {
 
@@ -206,7 +205,8 @@ class FrxSVGGraph extends FrxRenderer {
       $svg = $nodes[0];
       $config = $this->mergedAttributes($svg);
     }
-
+    $table_nodes = $this->reportDocNode->xpath('table'); 
+    $config['gen_table'] = $table_nodes ? 1 : 0; 
     // Determine graph type
     $graph_type =  isset($config['type']) ? $config['type'] : 'BarGraph';
 
