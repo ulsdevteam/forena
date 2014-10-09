@@ -25,6 +25,8 @@
 	<frx:field id="admin_permissions" link="admin/people/permissions" >permissions</frx:field>
 	<frx:field id="about_data_sources" link="reports/help.data#datasources">About Data Sources</frx:field>
 	<frx:field id="wysiwyg_editors" link="reports/help.sitebuilding#wysiwygeditors" >WYSIWYG editors</frx:field>
+	<frx:field id="svggraph_library" link="http://www.goat1000.com/svggraph.php"
+		target="_blank">PHP SVGGraph</frx:field>
 	<frx:field id="drupal_status" link="admin/reports/status">Status Report</frx:field>
 	<frx:field id="datablocks_security" link="reports/help.data#datablockssecurity" >Data Blocks Security</frx:field>
 	<frx:field id="datablocks" link="reports/help.data#datablocks" >Data Block</frx:field>
@@ -257,7 +259,7 @@
 		Forena also facilitates the creation of graphs such as piecharts, barcharts and radarcharts using the PHP <abbr title="Scalable Vector Graphics">SVG</abbr> Graph library (version 2.11 or above),
 		which is expected to be installed in the sites/all/libraries folder. To install this library:</p>
 	<ol>
-		<li>Download the <a href="http://www.goat1000.com/svggraph.php" target="_blank">PHP SVGGraph</a> library.</li>
+		<li>Download the {svggraph_library} library.</li>
 		<li>Unpack (extract) the downloaded SVGGraph library.</li>
 		<li>Transfer (upload) the extracted library in a subfolder of sites/all/libraries, using <strong>SVGGraph</strong> (case
 			sensitive!) as the name of the subfolder.
@@ -344,20 +346,23 @@
 		<li>Use DRUSH, by executing the <strong>drush frxrevert</strong> command.
 		</li>
 	</ul>
-	<h3>Remove obsoleted features in custom reports</h3>
+	<h3>Replace legacy options in custom reports</h3>
 	<p>
 		The new <strong>skin</strong> tag replaces the previous <strong>form</strong> tag within the <strong>frx:options</strong>
 		element. Even though the form tag is still supported it has been depreciated, you are encouraged to replace it in all custom reports. Checkout
 		the {report_layout} options for more details about these tags.
 	</p>
-	<h3>Required corrections for charts created with SVG Graph</h3>
+	<h3>Apply corrections for charts created with SVG Graph</h3>
 	<p>Apply these modifications to any custom reports containing graphs that are created with the {svggraph_template}
 		renderer:</p>
 	<ul>
 		<li>Change from <strong>legend_entry</strong> to <strong>legend_entries</strong>.
 		</li>
-		<li>Change from <strong>colors_XX</strong> to <strong>colour_XX</strong>.
+		<li>Change from <strong>colors_XX</strong> to <strong>colour_XX</strong>. Not applying this change will not actually cause any errors during the rendering of a graph, but colors_XX options will simply be ignored. This will result in using the default SVG Graphs colour_XX options.
 		</li>
 	</ul>
+	<h3>Upgrade SVGGraph library to at least version 2.11</h3>
+	<p>The {svggraph_library} library version 2.10 will cause 'Zero length axis' problems because the SVGGraph renderer now uses the structured data syntax that is supported only as of SVG Graph 2.11. So ensure the PHP SVG Graph library is at version 2.11 or above. Even version 2.16 is confirmed to work fine.</p>
+	<p>To verify the version, just browse sites/all/libraries/SVGGraph/SVGGraph.php and check the line near the top of it that contains <strong>SVGGRAPH_VERSION</strong>, followed by the actual version id which should be something like 2.11, ..., 2.16.</p>
 </body>
 </html>
