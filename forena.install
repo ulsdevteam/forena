@@ -24,11 +24,16 @@ function forena_schema() {
   return $schema;
 }
 
-
+/**
+ * Obsolete clear cache
+ */
 function forena_update_7401()  {
   // Clear cache mechanism no longer needed
 }
 
+/**
+ * Remove forena_reports table
+ */
 function forena_update_7402() {
   if (db_table_exists('forena_reports')) db_drop_table('forena_reports');
 }
