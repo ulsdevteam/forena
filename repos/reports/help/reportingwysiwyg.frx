@@ -297,7 +297,10 @@
       <tr>
         <th>CSS Styles</th>
         <td><p>Specify small CSS snippets that can be used anywhere in the report, as in this example:</p>
-            <style frx:renderer="FrxSource">div.FrxTable { line-height: 2.5; color: #FF6633; }</style>
+            <pre>div.FrxTable { 
+              line-height: 2.5; color: #FF6633; 
+            }
+            </pre>
           <p>This will change the look-and-feel of the table content a little bit. In this specific case the height of the
           table rows will be higher then the height for standard table displays, while the color of the text in the table cells is
           shown in a kind of orange.</p>
