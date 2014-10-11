@@ -1506,12 +1506,12 @@ function forena_report_layout_form($form, &$form_state, $report_name) {
   // Skin control
   $frx_options = $r->getOptions();
   $skin = @$frx_options['skin'];
-  $skins[''] = t('Use Default');
-  $skins = array_merge(variable_get('forena_skins', array()), $skins);
+  $skins = Frx::File()->skins();
   $form['skin'] = array(
       '#type' => 'select',
       '#title' => t('Skin'),
       '#options' => $skins,
+      '#empty_option' => t('--use default--'),
       '#default_value' => $skin,
       '#description' => t('The page style of your report.  The {skin}.skinfo file specifies css and js file in your report.')
   );
