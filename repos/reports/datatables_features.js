@@ -6,7 +6,7 @@
 (function ($) {
   Drupal.behaviors.SetDatatablesFeatures = {
     attach: function (context, settings) {
-      $('table').dataTable({
+      $('.frxTable table').dataTable({
         "sPaginationType": "full_numbers",
         "stateSave": true
       });
