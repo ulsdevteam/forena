@@ -33,12 +33,12 @@
   <p>The {state_summary} sample that comes with
   <a href="https://drupal.org/project/forena" target="_blank">Forena</a>, includes an SVG graph (near the top). It's named the <strong>state graph</strong> and comes with a set of predefined graph generation options, such as colors (green and yellow), graph type (bargraph), data selection criteria (total at least 10000), etc. This included state graph is actually another sample that comes with forena, though it is	hidden (using a forena option to do so)	in the list of sample reports. Checkout this {state_graph} link to see it anyhow. As a variation, remove the hidden='true' tag in its frx member and see what happens.</p>
   <p>Even though forena does an amazing job in creating SVG graphs, it is not (yet) obvious to get started with creating your own forena based SVG Graphs. And this because, as delivered, the <strong>state graph</strong>:
+  </p>
   <ul>
   <li>is the very only SVG sample within the delivered samples.</li>
   <li>is hidden from the list of sample reports.</li>
   <li>contains some predefined options (frx and/or svg related) that take some time to learn about them.</li>
   </ul>
-  </p>
   <p>That's why this <strong>SVG Graph Demo</strong> was created ... enjoy reviewing it!</p>
   <table>
     <tbody>
@@ -162,10 +162,11 @@
   </table>
   <p>By the way, in case you haven't noticed yet: all graphs above also includes drill-down links. Just click on any of the colored items in any of the charts, and see what the result of doing so is!</p>
   <p>As a reminder: this is just an introduction to create SVG Graphs. We haven't even mentioned some of the additional features, such as:
+  </p>
   <ul>
     <li><strong>stacked</strong> and <strong>grouped</strong> variations of horizontal or vertical BarGraphs or CylinderGraphs, which out-of-the-box are supported also (can't cover everything in an introduction ...).</li>
     <li><strong>MultiRadarGraph</strong> variations of RadarGraphs.</li>
-  </ul></p>
+  </ul>
   <p>So what do you think after this first SVG Graph Introduction, pretty impressive already, no? If you like what you've seen above, and want to take all this a step further, you should consider checking out all those SVG Graph options available, your creativity is about your only limitation. That's where the fun with SVG Graphs really starts.</p>
   </div>
 </body>
