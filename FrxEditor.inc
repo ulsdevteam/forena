@@ -1008,7 +1008,9 @@ class FrxEditor {
       $r_link = str_replace('/', '.', $this->report_name);
       $parms = $_GET;
       unset($parms['q']);
-      $links = $this->l_icon("reports/$r_link/edit/select-data/add-data", 'plus.svg', 'Add Data', $parms);
+      $links = '<div class="forena-edit-links">';
+      $links .= $this->l_icon("reports/$r_link/edit/select-data/add-data", 'plus.svg', 'Add Data', $parms, t('Data'));
+      $links .= '</div>';
     }
 
     $content = array(
@@ -1051,15 +1053,17 @@ class FrxEditor {
   public function fieldLink($id, $value) {
     $o = '';
     if (!isset($this->field_ids[$id])) {
+      $m_path = drupal_get_path('module', 'forena');
       $report_link = $this->report_link;
       $image = array(
-          'path' => url("misc/configure.png"),
+          'path' => url("$m_path/icons/cog.svg"),
           'alt' => t('Configure'),
           'title' => t('Configure'),
+          'class' => 'forena-field-config'
       );
       $image = theme('image', $image);
       $id = urlencode($id);
-      $o= l($image, "$report_link/edit/edit-field/$id", array('html' => TRUE));
+      $o= l($image, "$report_link/edit/edit-field/$id", array('html' => TRUE, 'attributes' => array( 'class' => 'forena-field-config')));
       $this->field_ids[$id] = 1;
     }
     return $o;
@@ -1078,13 +1082,13 @@ class FrxEditor {
     $report_name = $this->report_name;
     // Add the block or ID link
     $o .= '<div class="forena-edit-links">'
-        . $this->l_icon("reports/$report_name/edit/select-data/add-data/$id", 'plus.svg', 'Add Detail')
+        . $this->l_icon("reports/$report_name/edit/select-data/add-data/$id", 'plus.svg', 'Add Detail', null, t("Data"))
         . "</div>";
     return $o;
   }
 
 
-  public function l_icon($link, $name, $alt, $context=array()) {
+  public function l_icon($link, $name, $alt, $context=array(), $label="") {
     $path = $name=='configure.png' ? 'misc' : drupal_get_path('module', 'forena') . '/icons';
 
     $image = array(
@@ -1094,7 +1098,7 @@ class FrxEditor {
     );
     $image = theme('image', $image);
     $options = array('query' => $context, 'html' => TRUE);
-    return l($image, $link, $options);
+    return l($image . $label, $link, $options);
   }
 
 
@@ -1127,7 +1131,7 @@ class FrxEditor {
       // Add the prepend link.
       if ($block_tag) {
         // If we have a block tag we're going to prepend another data block?
-        $o .= '<div class="forena-edit-links">' . $this->l_icon("reports/$report_name/edit/select-data/prepend-data/$id", 'plus.svg', 'Insert Data').  "</div>";
+        $o .= '<div class="forena-edit-links">' . $this->l_icon("reports/$report_name/edit/select-data/prepend-data/$id", 'plus.svg', 'Insert Data', null, t("Data")).  "</div>";
       }
       else {
         //$o .= '<div class="forena-edit-links">' . $this->l_icon("reports/$report_name/edit/prepend-section/$block_link/$id", 'plus.svg', 'Add Data').  "</div>";
