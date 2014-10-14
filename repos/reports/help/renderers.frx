@@ -6,7 +6,7 @@
 <head>
 <title>Custom Renderers</title>
 <frx:category>Help</frx:category>
-<frx:options hidden="1" />
+<frx:options hidden="1" skin="tutorial_skin" />
 <frx:parameters>
 </frx:parameters>
 <frx:docgen />

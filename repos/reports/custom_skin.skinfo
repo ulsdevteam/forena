@@ -1,7 +1,7 @@
 ;
 ;  skinfo file used for my reports.
 ;  
-name = Custom Skin
+name = Sample Custom Skin
 description = Skin used in customized reports. 
 ;
 ; -----------------------------------------------------------
@@ -14,14 +14,13 @@ scripts[] = dataTables/media/js/jquery.dataTables.min.js
 ;
 ; Use (enable) some dataTables features (by specifying so in a custom JS file):
 ; 
-scripts[] = datatables_features.js
+scripts[] = datatables.js
 ;
 ; -----------------------------------------------------------
 ;
 ; Stylesheet inclusions:
 ; 
-stylesheets[all][] = datatables_styling.css
-stylesheets[all][] = custom_forena_styling.css
+stylesheets[all][] = datatables.css
 ;
 ; -----------------------------------------------------------
 ;

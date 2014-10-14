@@ -1,0 +1,4 @@
+name = Tutorial Documentation
+description = Customize look and feel of integrated help
+; Base styesheets for coding skins. 
+stylesheets[all][] = coding.css
