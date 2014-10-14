@@ -39,7 +39,7 @@
 }
 
 .graph-description {
-	width: 48%;
+	width: 32%;
 	display: inline-block;
 	clear: left;
 	margin-top: 1em;
@@ -47,9 +47,10 @@
 }
 
 .graph-sample {
-	width: 50%;
+	width: 66%;
 	clear: right;
 	margin-top: 1em;
+  padding: 0; 
 	display: inline-block;
 	vertical-align: top;
 }
