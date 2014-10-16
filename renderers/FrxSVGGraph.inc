@@ -65,14 +65,14 @@ class FrxSVGGraph extends FrxRenderer {
       foreach($this->field_sources as $k => $src) {
         $trow[$k] = $this->teng->replace($src, TRUE);
       }
-      if(isset($this->field_sources['legend_entries'])) { 
-        $legend_str = $trow['legend_entries']; 
-        $legend[$legend_str] = $legend_str;  
+      if(isset($this->field_sources['legend_entries'])) {
+        $legend_str = $trow['legend_entries'];
+        $legend[$legend_str] = $legend_str;
       }
       Frx::Data()->pop();
       $this->graphData[] = $trow;
     }
-    
+
     // Deal with rare case where legend are supposed to come from data
     if (isset($this->field_sources['legend_entries'])) {
       $this->graphOptions['legend_entries'] = array_values($legend);
@@ -90,7 +90,7 @@ class FrxSVGGraph extends FrxRenderer {
     $group_headers = array();
     $dim_values = array();
     $rows = array();
-    $legend = array(); 
+    $legend = array();
     $data = $this->frxReport->group($block_data, $group);
     $this->graphOptions['structure'] = array('key' => $group);
 
@@ -122,10 +122,10 @@ class FrxSVGGraph extends FrxRenderer {
 
     foreach($dim_values as $dk) {
       foreach($dim_columns as $col) {
-        $structure_idx = $dk . $col; 
+        $structure_idx = $dk . $col;
         $this->graphOptions['structure']['value'][] = $structure_idx;
         foreach($this->field_sources as $k=>$fld) {
-          $structure_idx = $dk . $k; 
+          $structure_idx = $dk . $k;
           $this->graphOptions['structure'][$k][] = $structure_idx;
         }
       }
@@ -154,22 +154,22 @@ class FrxSVGGraph extends FrxRenderer {
           if ($val !== '' && $val !== NULL) $trow[$dk . $col] = $val;
           foreach($this->field_sources as $fk => $src) {
             $trow[$dk . $fk] = $this->teng->replace($src, TRUE);
-            
-            if (isset($this->field_sources['legend_entries'])) { 
-              $legend_str = $this->teng->replace($this->field_sources['legend_entries']); 
-              $legend[$legend_str] = $legend_str; 
+
+            if (isset($this->field_sources['legend_entries'])) {
+              $legend_str = $this->teng->replace($this->field_sources['legend_entries']);
+              $legend[$legend_str] = $legend_str;
             }
-            
+
           }
         }
-        
-        
+
+
         frx::Data()->pop();
       }
       $this->graphData[] = $trow;
 
     }
-    
+
     // Deal with rare case where legend are supposed to come from data
     if (isset($this->field_sources['legend_entries'])) {
 
@@ -205,8 +205,8 @@ class FrxSVGGraph extends FrxRenderer {
       $svg = $nodes[0];
       $config = $this->mergedAttributes($svg);
     }
-    $table_nodes = $this->reportDocNode->xpath('table'); 
-    $config['gen_table'] = $table_nodes ? 1 : 0; 
+    $table_nodes = $this->reportDocNode->xpath('table');
+    $config['gen_table'] = $table_nodes ? 1 : 0;
     // Determine graph type
     $graph_type =  isset($config['type']) ? $config['type'] : 'BarGraph';
 
@@ -330,11 +330,11 @@ class FrxSVGGraph extends FrxRenderer {
     else {
       $this->generateGraphData($nodes, $series, $key);
     }
-    
+
     if (isset($this->graphOptions['legend_entries']) && !is_array($this->graphOptions['legend_entries'])) {
       $this->graphOptions['legend_entries'] = explode('|', $this->graphOptions['legend_entries']);
     }
-    
+
     if ($data) {
       $output = $this->renderChart($type, $data);
     }
@@ -420,7 +420,7 @@ class FrxSVGGraph extends FrxRenderer {
     // Generate the graph
     $output = $graph->Fetch($type, FALSE);
     // Add a viewbox to be compatible with Prince PDF generation.
-    $output = str_replace('<svg width', "<svg viewBox='0 0 $width $height' width", $output);
+    if (!@$options['noviewbox']) $output = str_replace('<svg width', "<svg viewBox='0 0 $width $height' width", $output);
     $javascript = '/<script[^>]*?>.*?<\/script>/si';
     $noscript = '';
     if (!$jsinc && $this->format == 'web') {
@@ -688,7 +688,7 @@ class FrxSVGGraph extends FrxRenderer {
    * @param unknown $dim
    */
   function generateCrossTab($xml, &$config, &$div, $group, $dim) {
-    $attrs = array(); 
+    $attrs = array();
     $table_frx['renderer'] = 'FrxCrosstab';
     $table_frx['group'] = is_array($group) ? implode(' ', $group) : $group;
     $table_frx['dim'] = $dim;
