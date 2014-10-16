@@ -4,9 +4,9 @@
 ]>
 <html xmlns:frx="urn:FrxReports">
 <head>
-<title>5. Report with Custom Control</title>
+<title>Report with Custom Control</title>
 <frx:category>Sample</frx:category>
-<frx:options hidden="0"></frx:options>
+<frx:options hidden="1"></frx:options>
 <frx:fields />
 <frx:parameters />
 <frx:docgen />

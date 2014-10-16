@@ -5,7 +5,7 @@
 <html xmlns:frx="urn:FrxReports">
 <head>
 <title>Sample reports and graphs</title>
-<frx:category>Sample</frx:category>
+<frx:category>Help</frx:category>
 <frx:options hidden="0"/>
 <frx:parameters>
 	<frx:parm id="show_chapters" require="0" data_source="forena_help/switches" data_field="codenum" label_field="label"
@@ -16,7 +16,6 @@
 		type="select">0</frx:parm>
 </frx:parameters>
 <frx:docgen>
-	<frx:doc type="doc" />
 </frx:docgen>
 <frx:fields>
 	<frx:field id="title" link="reports/{/book/bookfolder}.{link}" format="" format-string="" target=""></frx:field>
