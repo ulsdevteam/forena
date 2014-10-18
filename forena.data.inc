@@ -1,14 +1,14 @@
 <?php
 /**
  * @file forena.data.inc
- * Common files for diplaying and previewing data blocks.
+ * Common files for displaying and previewing data blocks.
  */
 function forena_display_blocks() {
 
   $header = array(t('Block'), t('Access'), t('Keywords'), t('Actions'));
   $blocks = Frx::BlockEditor()->revertDBBLocks();
   $blocks = Frx::DataFile()->userBlocks();
-  $links[] = array('href' => 'admin/structure/forena/data/add', 'title' => 'Create New SQL Query)' );
+  $links[] = array('href' => 'admin/structure/forena/data/add', 'title' => 'Create New SQL Query' );
   $content['add']['#markup'] = theme('links',
       array(
           'links' => $links,
