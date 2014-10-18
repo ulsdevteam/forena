@@ -1602,14 +1602,36 @@ function forena_requirements($phase) {
   switch ($phase) {
   	case 'runtime':
   	  $writeable = is_writable(Frx::File()->dir);
-  	  if (!$writeable) {
-    	  $requirements['fornea_writable'] = array(
-    	    'title' => 'Forena Report Directory',
-    	    'value' => Frx::File()->dir,
-    	    'severity' => REQUIREMENT_ERROR,
-    	    'description' => t('The directory must be writable by the web user in order to create custom reports. '),
-    	  ) ;
-  	  }
+	  $direxists = file_exists(Frx::File()->dir);
+      $RptDirConfig = t('which is set in the <a href="@report-dir-config">report repository configuration</a>', array('@report-dir-config' => url('admin/config/content/forena')), array('langcode' => $langcode));
+	  if (!$direxists) {
+	    $reqsDesciption = t('The mandatory report directory, ') . $RptDirConfig . t(', has not been created yet.');
+				$requirements['forena_direxists'] = array(
+					'title' => 'Forena Report Directory',
+					'value' => Frx::File()->dir,
+					'severity' => REQUIREMENT_ERROR,
+					'description' => $reqsDesciption,
+				) ;
+			}
+			else {
+				$writeable = is_writable(Frx::File()->dir);
+				if (!$writeable) {
+					$reqsDesciption = t('The directory, ') . $RptDirConfig . t(',  must be writable by the web user in order to create custom reports.');
+					$requirements['fornea_writable'] = array(
+						'title' => 'Forena Report Directory',
+						'value' => Frx::File()->dir,
+						'severity' => REQUIREMENT_ERROR,
+						'description' => $reqsDesciption,
+					) ;
+				}
+				else {
+					$requirements['fornea_writable'] = array(
+							'title' => 'Forena Report Directory',
+							'value' => Frx::File()->dir,
+							'severity' => REQUIREMENT_OK,
+						) ;
+				}
+			}
 
   	  $req = array('severity' => REQUIREMENT_INFO, 'requirement');
   	  $libraries = array('dataTables' ,'mpdf', 'prince', 'SVGGraph' );
