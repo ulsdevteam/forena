@@ -191,19 +191,19 @@ function forena_settings_validate($form, &$form_state) {
       try {
         mkdir($path);
         if (file_exists($path)) {
-          drupal_set_message(t('Created Report Repository %s', array('%s' => $path))) ;
+          drupal_set_message(t('Created Report Directory %s', array('%s' => $path))) ;
         }
       } catch (Exception $e) {
-        Frx::error(t('Unable to create Report Repository'), $e->getMessage());
+        Frx::error(t('Unable to create Report Directory'), $e->getMessage());
       }
     }
   }
   if (!file_exists($path)) {
-    form_set_error('forena_report_repos', t('Report Repository (') . $path . t(') does not exist'));
+    form_set_error('forena_report_repos', t('Report Directory (') . $path . t(') does not exist'));
   }
   else {
     if (!is_writable($path)) {
-      form_set_error('forena_report_repos', t('Report Repository (') . $path . t(') must be writable by the web user'));
+      form_set_error('forena_report_repos', t('Report Directory (') . $path . t(') must be writable by the web user'));
     }
   }
   if (isset($values['forena_query_data_path'])) {
@@ -213,19 +213,19 @@ function forena_settings_validate($form, &$form_state) {
         try {
           mkdir($path);
           if (file_exists($path)) {
-            drupal_set_message(t('Created Custom Data Block Repository %s', array('%s' => $path))) ;
+            drupal_set_message(t('Created Custom Data Block Directory %s', array('%s' => $path))) ;
           }
         } catch (Exception $e) {
-          Frx::error(t('Unable to create Custom Data Block Repository'), $e->getMessage());
+          Frx::error(t('Unable to create Custom Data Block Directory'), $e->getMessage());
         }
       }
     }
     if (!file_exists($path)) {
-      form_set_error('forena_query_data_path', t('Custom Data Block Repository (') . $path . t(') does not exist'));
+      form_set_error('forena_query_data_path', t('Custom Data Block Directory (') . $path . t(') does not exist'));
     }
     else {
       if (!is_writable($path)) {
-	form_set_error('forena_query_data_path', t('Custom Data Block Repository (') . $path . t(') must be writable by the web user'));
+	form_set_error('forena_query_data_path', t('Custom Data Block Directory (') . $path . t(') must be writable by the web user'));
       }
     }
   }
