@@ -10,8 +10,13 @@ class FrxMPDF extends FrxDocument {
 
   public function __construct() {
 
+    $tmp = file_directory_temp();
     // To do - use config variable of path to mpdf libs
+    if (!file_exists("$tmp/mpdf")) {
+      mkdir("$tmp/mpdf");
+    }
     define('_MPDF_PATH', 'sites/all/libraries/mpdf/');
+    define("_MPDF_TEMP_PATH","$tmp/mpdf/");
     include_once('sites/all/libraries/mpdf/mpdf.php');
     $this->content_type='application/pdf';
 
