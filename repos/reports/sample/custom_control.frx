@@ -12,16 +12,6 @@
 <frx:docgen />
 <frx:fields/><frx:menu/><frx:cache/></head>
 <body>
-  <div frx:block="sampledb/states"/>
-  <div>
-    <p>This sample report demonstrates the use of a custom control.
-      In this case, the FrxSource control overrides the rendering of the
-      the div tag to make sure that it gets rendered as properly escaped
-      html. Custom renderers like these can be used to extend forena
-      reports with custom rendering controls tailored to a specific
-      domain. This mechanism is how we plan to add graphing support to
-      Forena Reports.</p>
-  </div>
-  <div frx:renderer="FrxSource"></div>
+  <p>This report is obsolete and will be removed in the next major release</p>
 </body>
 </html>

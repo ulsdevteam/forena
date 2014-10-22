@@ -140,8 +140,8 @@ function forena_settings() {
   $form['forena_report_repos'] = array(
     '#type' => 'textfield',
     '#title' => t('Report Repository'),
-    '#description' => t('Indicate the directory that you want to use for your reports.  In order for you to ' .
-                        'to be able to save reports, this directory should be writable by the web user. Relative' .
+    '#description' => t('Indicate the directory that you want to use for storing your report sources (frx files). In order for you ' .
+                        'to be able to save report sources, this directory should be writable by the web user. Relative ' .
                         'paths should be entered relative to the base path of your drupal installation.'),
     '#default_value' => $report_path,
   );
@@ -155,10 +155,9 @@ function forena_settings() {
       $form['forena_query_data_path'] = array(
         '#type' => 'textfield',
         '#title' => t('Custom Data Block Repository'),
-        '#description' => t('Indicate the directory that you want to use to save custom created data blocks using
-            the forena query builder tool.  These will override any module delivered data blocks.  This needs to
-            be a directory that is writable by the web user but should not be browsable by the web.  It defaults to
-            '),
+        '#description' => t('Indicate the directory that you want to use to save custom created data blocks (SQLs or
+            XMLs) using the forena query builder tool. These will override any module delivered data blocks. This
+            needs to be a directory that is writable by the web user but should not be browsable by the web.'),
         '#default_value' => Frx::DataFile()->dir,
       );
 
@@ -190,41 +189,46 @@ function forena_settings_validate($form, &$form_state) {
   if ($path != $values['forena_last_report_path']) {
     if (!file_exists($path)) {
       try {
-        if (file_exists($path)) {
-          drupal_set_message(t('Created directory %s', array('%s' => $path))) ;
-        }
         mkdir($path);
-
+        if (file_exists($path)) {
+          drupal_set_message(t('Created Report Directory %s', array('%s' => $path))) ;
+        }
       } catch (Exception $e) {
-        Frx::error(t('Unable to create report directory'), $e->getMessage());
+        Frx::error(t('Unable to create Report Directory'), $e->getMessage());
       }
     }
   }
-  if (!file_exists($path) || !is_writable($path)) {
-    form_set_error('forena_report_repos', 'Report Directory must be writable by the web user');
+  if (!file_exists($path)) {
+    form_set_error('forena_report_repos', t('Report Directory (') . $path . t(') does not exist'));
+  }
+  else {
+    if (!is_writable($path)) {
+      form_set_error('forena_report_repos', t('Report Directory (') . $path . t(') must be writable by the web user'));
+    }
   }
   if (isset($values['forena_query_data_path'])) {
     $path = $values['forena_query_data_path'];
     if ($path != $values['forena_last_query_data_path']) {
       if (!file_exists($path)) {
         try {
-
           mkdir($path);
           if (file_exists($path)) {
-            drupal_set_message(t('Created directory %s', array('%s' => $path))) ;
+            drupal_set_message(t('Created Custom Data Block Directory %s', array('%s' => $path))) ;
           }
-
         } catch (Exception $e) {
-          Frx::error(t('Unable to create data directory'), $e->getMessage());
+          Frx::error(t('Unable to create Custom Data Block Directory'), $e->getMessage());
         }
       }
     }
-    if (!file_exists($path) || !is_writable($path)) {
-      form_set_error('forena_query_data_path', 'Data Directory must be writable by the web user');
+    if (!file_exists($path)) {
+      form_set_error('forena_query_data_path', t('Custom Data Block Directory (') . $path . t(') does not exist'));
+    }
+    else {
+      if (!is_writable($path)) {
+	form_set_error('forena_query_data_path', t('Custom Data Block Directory (') . $path . t(') must be writable by the web user'));
+      }
     }
   }
-
-
 }
 
 
