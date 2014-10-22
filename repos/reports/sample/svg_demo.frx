@@ -9,9 +9,6 @@
 <frx:options hidden="1" />
 <frx:parameters></frx:parameters>
 <frx:docgen>
-  <frx:doc type="csv" />
-  <frx:doc type="doc" />
-  <frx:doc type="xls" />
 </frx:docgen>
 <frx:fields>
   <frx:field id="state" link="" format="" format-string="" target="" />
