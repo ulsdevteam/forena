@@ -74,7 +74,8 @@ class FrxMPDF extends FrxDocument {
 
       $mpdf->WriteHTML($output);
       // $pdf = $mpdf->Output('', 'S');
-      $pdf = $mpdf->Output();
+      $file_name = basename($_GET['q']);
+      $pdf = $mpdf->Output($filename, 'I');
       return $pdf;
   }
 
