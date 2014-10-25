@@ -533,7 +533,7 @@ function forena_json($block_name, $parms= NULL) {
   $block_name = str_replace('.', '/', $block_name);
   if ($parms === NULL) {
     $parms = array_merge($_GET, $_POST);
-    unset($_parms['q']);
+    unset($parms['q']);
   }
   $data = forena_data($block_name, $parms);
   $ret = array();
