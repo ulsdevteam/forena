@@ -63,19 +63,19 @@ class FrxEmailMergeDoc extends FrxDocument {
     }
     $count = count($docs);
     if ($count) {
-      $form = drupal_get_form('forena_confirm_email', $emails, $count, $prompt_subject, $prompt_body);
-      $output = drupal_render($form);
+      $content = drupal_get_form('forena_confirm_email', $emails, $count, $prompt_subject, $prompt_body);
     }
     else {
       drupal_set_message(t('No mail merge information in report. Displaying report instead.'), 'error');
-      $output = $body;
+      $content = array(
+          'content' => array('#markup' => $body),
+      );
     }
-    $content = array(
-        'content' => array('#markup' => $output),
-    );
     return $content;
   }
 
-
+  public function output(&$output) {
+    return FALSE;
+  }
 
 }
