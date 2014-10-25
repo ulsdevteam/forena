@@ -14,7 +14,7 @@
   <frx:field id="title" link="reports/help.renderers#{link}" />
   <frx:field id="user_distribution_report" link="reports/sample.user_distribution_simple?state=NJ"
     target="_blank">User Distribution</frx:field>
-  <frx:field id="tutorial_reports" link="reports/help.toc" target="_blank">Reporting Tutorials</frx:field>
+  <frx:field id="tutorial_reports" link="reports/help.toc" target="_blank">Reporting Documentation</frx:field>
   <frx:field id="datablock_security" link="reports/help.data#datablocksecurity"
     target="_self">data block security</frx:field>
   <frx:field id="role_detail_report" link="reports/drupaladmin.role_detail" target="_blank"> Roles</frx:field>

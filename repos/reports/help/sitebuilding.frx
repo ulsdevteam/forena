@@ -16,7 +16,7 @@
   <frx:field id="views_module" link="https://drupal.org/project/views" target="_blank">Views module</frx:field>
   <frx:field id="masquerade_module" link="https://drupal.org/project/masquerade" target="_blank">Masquerade module</frx:field>  
   <frx:field id="enable_locale" link="admin/modules#core" target="_blank">enable module locale</frx:field>
-  <frx:field id="tutorial_toc_report" link="reports/help.toc" target="_blank">Tutorial Table Of Contents</frx:field>
+  <frx:field id="tutorial_toc_report" link="reports/help.toc" target="_blank">Documentation Table Of Contents</frx:field>
   <frx:field id="admin_content_blocks" link="admin/content/blocks" target="_blank">Admin / Content / Blocks</frx:field>
   <frx:field id="block_add" link="block/add" target="_blank">Add Block</frx:field>
   <frx:field id="block_add_forena" link="block/add/forena" target="_blank">Block / Add / Forena</frx:field>
@@ -103,7 +103,7 @@
 				</tr>
 				<tr>
 					<th>Title</th>
-					<td>Reporting Tutorials</td>
+					<td>Reporting Documentation</td>
 				</tr>
 				<tr>
 					<th>Select a report (within Settings)</th>

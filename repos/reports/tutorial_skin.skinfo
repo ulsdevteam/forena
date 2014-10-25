@@ -1,4 +1,4 @@
-name = Tutorial Skin
-description = Customize look and feel of integrated help
+name = Documentation Tutorial Skin
+description = Customize look and feel of integrated help documentation
 ; Base styesheets for coding skins. 
 stylesheets[all][] = coding.css
