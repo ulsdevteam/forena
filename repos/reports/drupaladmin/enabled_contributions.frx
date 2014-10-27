@@ -6,7 +6,7 @@
 <head>
 <title>Enabled Modules and Themes</title>
 <frx:category>Drupal Administration</frx:category>
-<frx:options hidden="0" form="" />
+<frx:options hidden="0" />
 <frx:parameters>
 </frx:parameters>
 <frx:docgen>
