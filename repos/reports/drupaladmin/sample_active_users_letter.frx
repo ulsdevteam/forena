@@ -13,8 +13,6 @@
   <frx:doc type="email" />
 </frx:docgen>
 <frx:fields>
-  <frx:field id="mail" link="" format="" format-string="" target="" />
-  <frx:field id="name" link="" format="" format-string="" target="" />
 </frx:fields>
 </head>
 <body>
