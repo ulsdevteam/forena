@@ -1601,53 +1601,53 @@ function forena_requirements($phase) {
   $requirements = array();
   switch ($phase) {
   	case 'runtime':
-  	  $writeable = is_writable(Frx::File()->dir);
-	  $direxists = file_exists(Frx::File()->dir);
-      $RptDirConfig = t('which is set in the <a href="@report-dir-config">report repository configuration</a>', array('@report-dir-config' => url('admin/config/content/forena')), array('langcode' => $langcode));
-	  if (!$direxists) {
-	    $reqsDesciption = t('The mandatory report directory, ') . $RptDirConfig . t(', has not been created yet.');
-				$requirements['forena_direxists'] = array(
-					'title' => 'Forena Report Directory',
-					'value' => Frx::File()->dir,
-					'severity' => REQUIREMENT_ERROR,
-					'description' => $reqsDesciption,
-				) ;
-			}
-			else {
-				$writeable = is_writable(Frx::File()->dir);
-				if (!$writeable) {
-					$reqsDesciption = t('The directory, ') . $RptDirConfig . t(',  must be writable by the web user in order to create custom reports.');
-					$requirements['fornea_writable'] = array(
-						'title' => 'Forena Report Directory',
-						'value' => Frx::File()->dir,
-						'severity' => REQUIREMENT_ERROR,
-						'description' => $reqsDesciption,
-					) ;
-				}
-				else {
-					$requirements['fornea_writable'] = array(
-							'title' => 'Forena Report Directory',
-							'value' => Frx::File()->dir,
-							'severity' => REQUIREMENT_OK,
-						) ;
-				}
-			}
+      $writeable = is_writable(Frx::File()->dir);
+      $direxists = file_exists(Frx::File()->dir);
+      $RptDirConfig = t('which is set in the <a href="@report-dir-config">report repository configuration</a>', array('@report-dir-config' => url('admin/config/content/forena')));
+      if (!$direxists) {
+        $reqsDesciption = t('The mandatory report directory, ') . $RptDirConfig . t(', has not been created yet.');
+      		$requirements['forena_direxists'] = array(
+      			'title' => 'Forena Report Directory',
+      			'value' => Frx::File()->dir,
+      			'severity' => REQUIREMENT_ERROR,
+      			'description' => $reqsDesciption,
+      		) ;
+      	}
+      	else {
+      		$writeable = is_writable(Frx::File()->dir);
+      		if (!$writeable) {
+      			$reqsDesciption = t('The directory, ') . $RptDirConfig . t(',  must be writable by the web user in order to create custom reports.');
+      			$requirements['forena_writable'] = array(
+      				'title' => 'Forena Report Directory',
+      				'value' => Frx::File()->dir,
+      				'severity' => REQUIREMENT_ERROR,
+      				'description' => $reqsDesciption,
+      			) ;
+      		}
+      		else {
+      			$requirements['forena_writable'] = array(
+      					'title' => 'Forena Report Directory',
+      					'value' => Frx::File()->dir,
+      					'severity' => REQUIREMENT_OK,
+      				) ;
+      		}
+      	}
 
-  	  $req = array('severity' => REQUIREMENT_INFO, 'requirement');
-  	  $libraries = array('dataTables' ,'mpdf', 'prince', 'SVGGraph' );
-  	  foreach ($libraries as $lib) {
-  	    $requirements['forena_' . $lib] = $req;
-  	    $requirements['forena_' . $lib]['title'] = "Forena $lib support";
-	    $usinglib = t('sites/all/libraries/') . $lib . t(' (Enabled)');
-	    $missinglib = $lib . t(' library missing in sites/all/libraries/') . t(' (Not Enabled)');
-	    $requirements['forena_' . $lib]['value'] = forena_library_file($lib) ? $usinglib : $missinglib;
-  	    $requirements['forena_' . $lib]['severity'] = forena_library_file($lib) ? REQUIREMENT_OK : REQUIREMENT_INFO;
-  	  }
-  	  if (!module_exists('forena_pdf')) {
-  	    unset($requirements['forena_prince']);
-  	    unset($requirements['forena_mpdf']);
-  	  }
-  	  break;
+        $req = array('severity' => REQUIREMENT_INFO, 'requirement');
+        $libraries = array('dataTables' ,'mpdf', 'prince', 'SVGGraph' );
+        foreach ($libraries as $lib) {
+          $requirements['forena_' . $lib] = $req;
+          $requirements['forena_' . $lib]['title'] = "Forena $lib support";
+        $usinglib = t('sites/all/libraries/') . $lib . t(' (Enabled)');
+        $missinglib = $lib . t(' library missing in sites/all/libraries/') . t(' (Not Enabled)');
+        $requirements['forena_' . $lib]['value'] = forena_library_file($lib) ? $usinglib : $missinglib;
+          $requirements['forena_' . $lib]['severity'] = forena_library_file($lib) ? REQUIREMENT_OK : REQUIREMENT_INFO;
+        }
+        if (!module_exists('forena_pdf')) {
+          unset($requirements['forena_prince']);
+          unset($requirements['forena_mpdf']);
+        }
+        break;
   }
   return $requirements;
 }
