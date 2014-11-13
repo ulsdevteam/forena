@@ -90,13 +90,21 @@ class FrxMenu {
       }
       else {
         if ($lang != 'en') {
-          $name = $lang . '/' . $name;
+          $def_language = language_default('language');
+          if (Frx::File()->exists("$lang/$name.frx")) {
+            $name = "$lang/$name";
+          }
+          elseif($def_language != 'en' && Frx::File()->exists("$def_language/$name.frx")) {
+            $name = "$def_language/$name";
+            $lang = $def_language;
+          }
         }
       }
     }
 
     //$name = trim(str_replace('.', '/', $base_name), '/');
     $filename = $name . '.frx';
+
 
     $desc['name'] = $this->name = $name;
     $desc['directory'] = Frx::File()->directory($filename);
