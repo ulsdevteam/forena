@@ -26,8 +26,8 @@ function forena_admin_reports() {
   // Add Data tables if it exists.
   $headers = array(t('category'), t('title'), t('name'), t('operation'));
   $result = Frx::File()->allReports();
-  foreach ($result as $row) {
-    $rpt = str_replace('/', '.', $row->name);
+  foreach ($result as $report => $row) {
+    $rpt = str_replace('/', '.', $report);
     if ($row->include) {
       $edit = l(t('Override'), 'reports/' . $rpt . '/edit');
     }
@@ -47,7 +47,7 @@ function forena_admin_reports() {
     }
 
     $title = l(t($row->cache['title']), 'reports/' . $rpt);
-    $data[] = array($row->cache['category'], $title, $row->name, $edit . ' ' . $clone . ' ' . $delete);
+    $data[] = array($row->cache['category'], $title, $report, $edit . ' ' . $clone . ' ' . $delete);
   }
   $output .= '<div id="forena-reports-list">';
   $output .= theme('forena_data_table', array('header' => $headers, 'rows' => $data));
