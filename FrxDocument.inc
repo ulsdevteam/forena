@@ -84,7 +84,7 @@ class FrxDocument {
    * @param $output
    */
   public function check_markup($output) {
-    return check_markup($output, variable_get('forena_input_format', filter_default_format()));
+    return check_markup($output, variable_get('forena_input_format', 'none'));
   }
 
   public function convertCharset($data, $default_encoding='UTF-8') {

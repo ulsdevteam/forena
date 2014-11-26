@@ -1488,7 +1488,7 @@ function forena_report_layout_form($form, &$form_state, $report_name) {
   // Need to get all option attributes
   $frx_options = $r->getOptions();
   $report_form = @$frx_options['form'];
-  $filter = variable_get('forena_input_format', filter_default_format());
+  $filter = variable_get('forena_input_format', 'none');
   if (isset($frx_options['input_format'])) $filter = $frx_options['input_format'];
 
   $body = $r->simplexml->body->asXML();
@@ -1586,7 +1586,7 @@ function forena_report_layout_form_submit($form, &$form_state) {
   $r_link = $r->report_link;
 
   $options = array();
-  $filter = variable_get('forena_input_format', filter_default_format());
+  $filter = variable_get('forena_input_format', 'none');
   if (isset($values['body']['format']) && $values['body']['format'] != $filter) {
     $options['input_format'] = $values['body']['format'];
   }

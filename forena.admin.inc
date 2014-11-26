@@ -131,7 +131,7 @@ function forena_sync_form($formid, &$form_state) {
  * Forena admin settings form
  *
  */
-function forena_settings() {
+function forena_settings($form, &$form_state) {
   $skins = Frx::File()->skins();
 
   $report_path = forena_report_path();
@@ -168,7 +168,23 @@ function forena_settings() {
 
   }
 
-  $form['forena_input_format'] = forena_filter_element(variable_get('forena_input_format', filter_default_format()), 'forena_input_format');
+  $input_format = variable_get('forena_input_format', 'none');
+  $input_format_enabled = isset($form_state['values']['forena_input_format_enabled']) ? $form_state['values']['forena_input_format_enabled'] : $input_format != 'none';
+  $form['format'] = array('#prefix' => '<div id="forena-format">', '#suffix' => '</div>');
+  $form['format']['forena_input_format_enabled'] = array(
+  	'#type' => 'checkbox',
+    '#title' => t('Use Text Format filtering system'),
+    '#default_value' => $input_format_enabled,
+    '#ajax' => array(
+  	  'callback' => 'forena_settings_format_callback',
+      'wrapper' => 'forena-format',
+    ),
+  );
+
+  $form['format']['forena_input_format'] = forena_filter_element(variable_get('forena_input_format', filter_default_format()), 'forena_input_format');
+
+  $form['format']['forena_input_format']['#access'] = $input_format_enabled;
+  $form['format']['forena_input_format']['#collapsible'] = FALSE;
   $form['forena_default_form'] = array(
     '#type' => 'select',
     '#title' => t('Default report skin'),
@@ -183,8 +199,14 @@ function forena_settings() {
 
 }
 
+function forena_settings_format_callback($form, &$form_state) {
+  return $form['format'];
+}
+
 function forena_settings_validate($form, &$form_state) {
+
   $values = $form_state['values'];
+  if (!$values['forena_input_format_enabled']) $form_state['values']['forena_input_format'] = 'none';
   $path = $values['forena_report_repos'];
   if ($path != $values['forena_last_report_path']) {
     if (!file_exists($path)) {

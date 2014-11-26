@@ -212,7 +212,7 @@ class FrxReport {
     if (!$this->parameters_form) $this->parametersForm(array('collapsible' => TRUE, 'collapsed' => $this->blocks_loaded));
 
     // Determine the correct filter.
-    $filter = variable_get('forena_input_format', filter_default_format());
+    $filter = variable_get('forena_input_format', 'none');
     $skinfo = Frx::Data()->getContext('skin');
     if (isset($skinfo['input_format'])) $filter = $skinfo['input_format'];
     if (isset($this->options['input_format'])) $filter = $this->options['input_format'];
