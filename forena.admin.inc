@@ -170,10 +170,12 @@ function forena_settings($form, &$form_state) {
 
   $input_format = variable_get('forena_input_format', 'none');
   $input_format_enabled = isset($form_state['values']['forena_input_format_enabled']) ? $form_state['values']['forena_input_format_enabled'] : $input_format != 'none';
+
   $form['format'] = array('#prefix' => '<div id="forena-format">', '#suffix' => '</div>');
   $form['format']['forena_input_format_enabled'] = array(
   	'#type' => 'checkbox',
     '#title' => t('Use Text Format filtering system'),
+    '#description' => t('Checking this allows use of Drupal\' custom markup and automatic URL replacement in reports with a slight performance penalty.'),
     '#default_value' => $input_format_enabled,
     '#ajax' => array(
   	  'callback' => 'forena_settings_format_callback',
@@ -194,8 +196,8 @@ function forena_settings($form, &$form_state) {
     '#default_value' => variable_get('forena_default_form', ''),
     );
 
-    $form =  system_settings_form($form);
-    return $form;
+  $form =  system_settings_form($form);
+  return $form;
 
 }
 

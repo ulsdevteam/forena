@@ -72,7 +72,7 @@
 	<h2 id="installation">Installation and Configuration</h2>
 	<p>After following normal practices for installing a drupal module there are a few steps that must be preformed prior to using forena:</p>
 	<ol>
-	  <li>Prepare a text format for use with forena</li>
+	  <li>Prepare a text format for use with forena (optional)</li>
 	  <li>Configure forena to use this text format and specify installation and configuration directories.</li>
 	  <li>Enable document types</li>
 	  <li>Configure Forena permissions</li>
@@ -91,8 +91,8 @@
 			you to change the configuration of the existing format.</li>
 	</ul>
 	<p>
-		It is <em>strongly recommended</em> create a dedicated text format for use with Forena (e.g. one named "Reports"). Text format
-		configuration may be found at {text_format_config}. 
+		If you want to use the input format filtering system, it is <em>strongly recommended</em> create a dedicated text format
+    for use with Forena (e.g. one named "Reports"). Text format	configuration may be found at {text_format_config}.
 		</p>
 	<p> Regardless as to which Input Format you choose to use with forena, make
 		sure these entries are turned of for the chosen text format :
@@ -119,7 +119,7 @@
 			using the forena query builder tool). This should be a directory that is writable by the web user, but it should not be
 			possible to browse it via the web.</li>
 		<li><strong>Default Report Skin </strong> only makes sense after defining 1 or more custom {custom_skins}. Leave the proposed default value for it unchanged for now.</li> 
-		<li><strong>Text Format</strong> Specify the text format you configured for use with forena earlier.</li>
+		<li><strong>Text Format</strong> If you want to use Drupal's custom markup in reports, specify the text format you configured for use with forena earlier.</li>
 	</ul>
 	<p>
 		Use the <strong>Save Configuration</strong> button to save changes.
