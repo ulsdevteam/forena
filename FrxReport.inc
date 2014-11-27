@@ -11,6 +11,7 @@ require_once('renderers/FrxRenderer.inc');
 class FrxReport {
   public $block_edit_mode = false;
   public $blocks_loaded;
+  public $data;
   public $rpt_xml;
   public $fields;
   public $category;
@@ -144,6 +145,13 @@ class FrxReport {
         	    $this->parameters[$id] = $parm;
         	  }
         	  break;
+        	case 'data':
+        	  $data = array();
+        	  foreach($node->attributes() as $key => $value) {
+        	    $data [$key] = (string)$value;
+        	  }
+        	  $this->data[] = $data;
+        	  break;
         	case 'doctypes':
         	  $this->doctypes = $value;
         	  break;
@@ -159,7 +167,7 @@ class FrxReport {
    * @param $block
    * @return unknown_type
    */
-  public function getData($block, $id='', $data_uri='') {
+  public function getData($block, $id='', $data_uri='', $raw_mode=FALSE) {
     $data = array();
     if ($data_uri) {
       parse_str($data_uri, $data);
@@ -168,7 +176,7 @@ class FrxReport {
       }
     }
 
-    $xml = Frx::BlockEditor($block, $this->block_edit_mode)->data($data);
+    $xml = Frx::BlockEditor($block, $this->block_edit_mode)->data($data, $raw_mode);
 
     if ($xml) {
       $this->blocks_loaded = TRUE;
@@ -188,6 +196,31 @@ class FrxReport {
     }
   }
 
+  public function preloadData() {
+    $loaded = $this->blocks_loaded;
+    $jsonData = array();
+    if ($this->data) foreach ($this->data as $d) {
+      if (!empty($d['block'])) {
+        $id = @$d['id'];
+        $block = $d['block'];
+        $parms = @$d['paramaters'];
+        $raw = !empty($d['json']) || !empty($d['raw_mode']);
+        $data = $this->getData($block, $id, $parms, $raw);
+        if (!empty($d['json']) && $this->format == 'web') {
+          $ret = array();
+          foreach($data as $row) {
+            $ret[] = $row;
+          }
+          $jsonData[$d['json']] = $ret;
+        }
+      }
+    }
+    if ($jsonData) {
+      drupal_add_js(array('forenaData' => $jsonData), 'setting');
+    }
+    $this->blocks_loaded = $blocks_loaded;
+  }
+
   /**
    * Render the report
    * @return unknown_type
@@ -202,7 +235,7 @@ class FrxReport {
     $this->format = $format;
     $dom = $this->dom;
     $body = $dom->getElementsByTagName('body')->item(0);
-
+    $this->preloadData();
     // Render the rport.
     $c = Frx::Controls('FrxRenderer');
     $c->initReportNode($body, $this);

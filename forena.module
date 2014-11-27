@@ -521,7 +521,9 @@ function forena_data($block_name, $parms=array()) {
   drupal_alter('forena_parameters', $block_name, $parms );
   //now invoke the data provider with the correct params
   Frx::Data()->push($parms, 'parm');
-  return Frx::RepoMan()->data($block_name, TRUE);
+  $data =  Frx::RepoMan()->data($block_name, TRUE);
+  Frx::Data()->pop();
+  return $data;
 }
 
 /**
