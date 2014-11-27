@@ -46,7 +46,10 @@ class FrxSkin {
    * @param unknown_type $script
    */
   public function addJS($script) {
-    if (Frx::File()->exists($script)) {
+    if (strpos($script, 'http:') === 0 || strpos($script, 'https:') === 0) {
+      $this->scripts[] = $script;
+    }
+    elseif (Frx::File()->exists($script)) {
       $this->scripts[] = Frx::File()->path($script);
     }
     elseif (file_exists('sites/all/libraries/' . $script)) {

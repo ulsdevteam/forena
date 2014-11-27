@@ -36,7 +36,13 @@ class FrxWebDoc extends FrxDocument {
 
     // Add javascript files
     foreach (Frx::Skin()->scripts as $script) {
-      drupal_add_js($script);
+      if (strpos($script, 'http:') === 0 || strpos($script, 'https:') === 0) {
+        drupal_add_js($script, 'external');
+      }
+      else {
+        drupal_add_js($script);
+
+      }
     }
 
     //$output = theme('forena_web_report', $variables);
