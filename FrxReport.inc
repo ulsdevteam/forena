@@ -197,7 +197,7 @@ class FrxReport {
   }
 
   public function preloadData() {
-    $loaded = $this->blocks_loaded;
+    $blocks_loaded = $this->blocks_loaded;
     $jsonData = array();
     if ($this->data) foreach ($this->data as $d) {
       if (!empty($d['block'])) {
