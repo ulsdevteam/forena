@@ -91,7 +91,7 @@ class FrxOracle extends FrxDataSource {
         }
       }
       if ($this->debug) {
-        $d = ($xml) ? htmlspecialchars($xml->asXML()) : '';
+        $d = (is_object($xml)) ? htmlspecialchars($xml->asXML()) : '';
         $this->debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "\n</pre>");
       }
       return $xml;

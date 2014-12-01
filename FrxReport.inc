@@ -208,7 +208,7 @@ class FrxReport {
         $data = $this->getData($block, $id, $parms, $raw);
         if (!empty($d['json']) && $this->format == 'web') {
           $ret = array();
-          foreach($data as $row) {
+          if ($data) foreach($data as $row) {
             $ret[] = $row;
           }
           $jsonData[$d['json']] = $ret;
