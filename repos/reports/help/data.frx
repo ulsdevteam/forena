@@ -482,7 +482,7 @@ WHERE state=:state
   <li>you can only include blocks within the same repository.</li>
   <li>the security of the including data block is the security that is used for the included data block (the --ACCESS line of the included data block is ignored).</li>
   </ul>  
-<h2 id="dupalentities">Drupal Entities</h2>
+<h2 id="drupalentities">Drupal Entities</h2>
   <p>
     When using the Drupal data driver, you can create data blocks that load Drupal entities instead of selecting columns from the
     database. To do this specify an <strong>entity_type</strong> and <strong>entity_id</strong> column in the --INFO section of
