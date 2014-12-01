@@ -93,6 +93,7 @@
   </frx:fields>
   <frx:menu/>
   <frx:cache/>
+  <frx:data/>
   <style/>
 </head>
 <body>
@@ -694,7 +695,23 @@
 <p>Any data from any other section of a report may be used by referencing those data by their id. For example: if you place
 	an id attribute on the tag that you place an frx:foreach attribute on (e.g id='state' frx:foreach='*'), then you can reference
 	any data element in that data context using that id as follows:</p>
-<div frx:renderer="FrxSource" id="frxsrc-9">... {state.nameofstate} ...</div>
+<div frx:renderer="FrxSource" >... {state.name} ...</div>
+  <p>Additional data contexts may be added to the document in the <strong>head</strong> section of the document.  Data in the head section 
+  of the document is preloaded before the report renders.  The example below illustrates the syntax for preloading data in the head section:</p>
+  <head frx:renderer="FrxSource">
+    ..
+    <frx:data id="state" block="sampledb/state"/>
+  </head>
+  <p>In addition, data in the head section can be loaded into drupals settings objects for use later in javascript. as in the following:
+  </p>
+  <head frx:renderer="FrxSource">
+    ... 
+    <frx:data block="sampledb/users_by_state" json="stateSummary"/> 
+  </head>
+  <p> 
+    The data in the above example would be accessible to the javascript by referencing the object property 
+    <strong>Drupal.settings.forenaData.stateSummary</strong>.  
+  </p> 
 <h3>Custom Contexts</h3>
 <p>Modules may provide their own custom data contexts either by adding them in a hook_forena_parameters_alter implementation
 	or by implementing a custom context class of their own.</p>
@@ -717,12 +734,15 @@
 	template <strong>states.frx</strong>. This report may be embedded in another report simply by including the string <strong>FrxReport.sample.states</strong>,
 	enclosed by curly braces, anywhere in a report, as in this example:
 </p>
-<div frx:renderer="FrxSource" id="frxsrc-10">... {FrxReport.sample.states} ...</div>
+<div frx:renderer="FrxSource">... {FrxReport.sample.states} ...</div>
 	<p>
 	It is important to understand that the data from the current context will be used as parameters to the report when this context
 	is used.
 	</p>
+
+   
    <h2 id="conditionalrendering">Conditional Element Rendering</h2>
+
 	<p>
 		By adding the <strong>frx:if="some_test"</strong> attribute to any HTML tag, that HTML tag is only rendered if <strong>some_test</strong>
 		evaluates to true. The normal php rules apply to values specified here: <strong>frx:if="0"</strong> evaluates to false, while
