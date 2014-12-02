@@ -347,7 +347,6 @@ function forena_menu() {
    	'page callback' => 'forena_block_xml',
     'page arguments' => array(2),
    	'access arguments' => array('access forena block xml'),
-    'file' => 'forena.common.inc',
    	'type' => MENU_CALLBACK,
   );
 
@@ -516,12 +515,12 @@ function forena_xml($block_name, $parms=array()) {
  * @param unknown $parms
  * @return Ambigous <unknown, string, NULL>
  */
-function forena_data($block_name, $parms=array()) {
+function forena_data($block_name, $parms=array(), $raw_mode = TRUE) {
   include_once('forena.common.inc');
   drupal_alter('forena_parameters', $block_name, $parms );
   //now invoke the data provider with the correct params
   Frx::Data()->push($parms, 'parm');
-  $data =  Frx::RepoMan()->data($block_name, TRUE);
+  $data =  Frx::RepoMan()->data($block_name, $raw_mode);
   Frx::Data()->pop();
   return $data;
 }
@@ -544,6 +543,25 @@ function forena_json($block_name, $parms= NULL) {
   }
   drupal_json_output($ret);
 }
+
+/**
+ * Send report block XML
+ * Enter description here ...
+ * @param unknown_type $block_name
+ */
+function forena_block_xml($block_name='', $parms = NULL) {
+  $block_name = str_replace('.', '/', $block_name);
+  if ($parms === NULL) {
+    $parms = array_merge($_GET, $_POST);
+    unset($parms['q']);
+  }
+  $data = forena_data($block_name, $parms, FALSE);
+  if (is_object($data) && method_exists($data, 'asXML')) {
+    header('Content-Type: text/xml');
+    print $data->asXML();
+  }
+}
+
 
 /**
  * Auto complete for formats
