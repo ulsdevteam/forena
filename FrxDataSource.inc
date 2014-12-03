@@ -144,6 +144,7 @@ class FrxDataSource{
    * @return unknown
    */
   public function list_blocks($search, &$block_list, $subdir='') {
+    $count=0;
     // First find files that match the search string
     $path = $this->block_path . '/';
     if ($subdir) $path .= $subdir . '/';
@@ -270,6 +271,7 @@ class FrxDataSource{
     $file = '';
     $skip = FALSE;
     $in_info = FALSE;
+    $found_case = FALSE;
     $info_text = '';
     $tokens = array();
     $options = array();
@@ -363,6 +365,7 @@ class FrxDataSource{
    */
   public function xmlData($source, $parm_data='') {
     $xml ='';
+    $xmlData='';
     try {
       $xmlData = $source;
       $xml = new SimpleXMLElement($xmlData);
