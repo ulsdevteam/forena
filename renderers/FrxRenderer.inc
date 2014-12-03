@@ -236,7 +236,7 @@ class FrxRenderer {
         $r_attr_text = '';
         if (trim($id)) {
           if (strpos($attrs['id'],'{')!== FALSE) {
-            $id = $this->teng->replace($attrs['id']);
+            $id_attr = $this->teng->replace($attrs['id']);
           }
           else {
             if (!empty($settings['numericFrxForeachID'])) {
