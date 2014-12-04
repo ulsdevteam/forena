@@ -1,5 +1,5 @@
 name = Forena PDF Generation
-description = Generate PDF documents using external PDF generators.  Currenlty only supports PrinceXML which is a commercial product. 
+description = Generate PDF documents using external PDF generators. Supports MPDF and Prince XML.
 core = 7.x
 dependencies[] = forena
 package = Forena
