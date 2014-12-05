@@ -774,6 +774,8 @@ function forena_parameter_form($formid, &$form_state, $parameters, $attributes= 
             '#description' => t($desc),
         );
 
+        if(isset($option[size])) $forms['params'][$id]['#size'] = @$options['size'];
+
         $form['params'][$id] = array_merge($form['params'][$id], $ctl_attrs);
 
         if ($type == 'item') {
