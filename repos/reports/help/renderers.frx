@@ -243,6 +243,10 @@
     </td>
   </tr>
   <tr>
+    <th>frx:wrap_label</th>
+    <td>When specified, graph labels are word wrapped at the indicated number of characters using the php wordwrap function.</td>
+  </tr>
+  <tr>
     <th>frx:options</th>
     <td>This legacy attribute is currently still supported, but it is recommended to replace them by the corresponding <strong>frx:xyz</strong>
       attributes. Here is a sample of how it was used:<br /> <strong>frx:options="series[]={total}&amp;label={state}&amp;colors[]=green&amp;colors[]=yellow"</strong></td>

@@ -13,9 +13,9 @@ class FrxSVGGraph extends FrxRenderer {
   private $links;
   public $templateName = 'Graph (svg)';
   public $xy_data = FALSE;
-  private $point_attributes;
   private $headers = array();
   private $weight;
+  private $wrap_label;
   private $graphData;
   private $graphOptions;
   private $colors;
@@ -42,8 +42,7 @@ class FrxSVGGraph extends FrxRenderer {
    */
   public function generateGraphData(&$data, $series, $key) {
 
-    // Default controling attributes
-    $dim_headers = array($key);
+    // Default controlling attributes
     $legend = array();
     $this->graphOptions['structure']['value'] = array();
     foreach($series as $col) {
@@ -56,7 +55,7 @@ class FrxSVGGraph extends FrxRenderer {
       Frx::Data()->push($row, '_row');
       $trow = array();
       // Base group
-      $trow['key'] =  $this->teng->replace($key, TRUE);;
+      $trow['key'] =  $this->wrap_label ? wordwrap($this->teng->replace($key, TRUE), $this->wrap_label) : $this->teng->replace($key, TRUE);
       // Dimensions
       foreach($series as $col) {
           $val = $this->teng->replace($col, TRUE);
@@ -86,8 +85,6 @@ class FrxSVGGraph extends FrxRenderer {
   public function generateGroupGraphData(&$block_data, $group, $series, $key, $dim) {
     $dim_headers = array();
     $dim_rows = array();
-    $dim_columns = array();
-    $group_headers = array();
     $dim_values = array();
     $rows = array();
     $legend = array();
@@ -139,6 +136,7 @@ class FrxSVGGraph extends FrxRenderer {
       // Base group
 
       $gkey = $this->teng->replace($group, TRUE);
+      if ($this->wrap_label) $gkey = wordwrap($gkey, $this->wrap_label);
       $trow[$group] = $gkey;
       Frx::Data()->pop();
       // Dimensions
@@ -148,9 +146,8 @@ class FrxSVGGraph extends FrxRenderer {
         frx::Data()->push($dim_row, '_dim');
         foreach($dim_columns as $col) {
 
-          $cell = $col;
           $val = $this->teng->replace($col, TRUE);
-          //if(!$val) $val = 0;
+
           if ($val !== '' && $val !== NULL) $trow[$dk . $col] = $val;
           foreach($this->field_sources as $fk => $src) {
             $trow[$dk . $fk] = $this->teng->replace($src, TRUE);
@@ -198,8 +195,7 @@ class FrxSVGGraph extends FrxRenderer {
    */
   public function scrapeConfig() {
     $this->weight = 0;
-    $attrs = array();
-    $svg = '';
+
     $nodes =  $this->reportDocNode->xpath('svg');
     if ($nodes) {
       $svg = $nodes[0];
@@ -250,11 +246,6 @@ class FrxSVGGraph extends FrxRenderer {
     // Get data from source
     $output = '';
     $options = array();
-    $series = array();
-    $label = '';
-    $links = '';
-    $dim='';
-    $seriesx = array();
     $attributes = $this->mergedAttributes();
     // Default in xpath for backward compatibility
     // Legacy options.  New charts should be generated using Frx:attribute syntax
@@ -276,12 +267,12 @@ class FrxSVGGraph extends FrxRenderer {
     if (!$path) $path = '*';
     $group = $this->extract('group', $options);
     $series = @(array)$attributes['series'];
-    $label = @$attributes['label'];
     $key = @$attributes['key'];
     if (!$key) $key = @$attributes['label']; //Backward compatibility for old graphs.
     $options['key'] = $key;
     $dim = $this->extract('dim', $options);
     $type = $this->extract('type', $options);
+    $this->wrap_label = (int)$this->extract('wrap_label', $options);
     if (!$key) $key = @$options['seriesx']; // Deprecated
 
     // Determine basic data to iterate.
@@ -308,7 +299,7 @@ class FrxSVGGraph extends FrxRenderer {
 
     // Find out data that is designed to be sepecif to series.
     $this->field_sources = array();
-    $i= 0;
+
     foreach ($options as $fk => $opt) {
       if ($fk != 'value' && $fk != 'key' && $opt && !is_array($opt) && strpos($options[$fk], '{')!==FALSE) {
         $this->field_sources[$fk] = $opt;
@@ -420,9 +411,9 @@ class FrxSVGGraph extends FrxRenderer {
     // Generate the graph
     $output = $graph->Fetch($type, FALSE);
     // Add a viewbox to be compatible with Prince PDF generation.
-    if (!@$options['noviewbox']) $output = str_replace('<svg width', "<svg viewBox='0 0 $width $height' width", $output);
-    $javascript = '/<script[^>]*?>.*?<\/script>/si';
-    $noscript = '';
+    if (!@$options['noviewbox'] && !strpos($output, 'viewBox')) $output = str_replace('<svg width', "<svg viewBox='0 0 $width $height' width", $output);
+
+
     if (!$jsinc && $this->format == 'web') {
       if (@!$options['no_js']) {
         $js =  $graph->FetchJavascript();
@@ -458,7 +449,6 @@ class FrxSVGGraph extends FrxRenderer {
   }
 
   public function configForm($config) {
-    $form = array();
     $graph_options = FrxSVGGraph::graphOptions();
     $graph_types = FrxSVGGraph::graphTypes();
     $gt = array_change_key_case($graph_types);
@@ -471,7 +461,6 @@ class FrxSVGGraph extends FrxRenderer {
       $base_type = $config['base_type'];
     }
     $styles = $graph_options['styles'][$base_type];
-    $types = $graph_options['types'];
     $form = parent::configForm($config);
 
     $form['base_type'] = array(
@@ -579,7 +568,7 @@ class FrxSVGGraph extends FrxRenderer {
     $media = 'FrxSVGGraph';
     $div = $this->blockDiv($config);
     $this->removeChildren($div);
-    $attrs  = array();
+
     // PUt on the header
     if (isset($config['header']['value'])) {
       $header = $this->extract('header', $config);
@@ -629,7 +618,7 @@ class FrxSVGGraph extends FrxRenderer {
     if (!$type) $type = 'Bar Graph';
 
     $gen_table = $this->extract('gen_table', $config);
-    $graph_options = FrxSVGGraph::graphOptions();
+
     // LImit the config
     $frxattrs = $config;
     // Unset common option configurations?
@@ -641,7 +630,7 @@ class FrxSVGGraph extends FrxRenderer {
     $frxattrs['renderer'] = 'FrxSVGGraph';
     $frxattrs['type'] = $type;
 
-    $svg = $this->setFirstNode($div, 2, 'svg',  NULL, NULL,  $frxattrs);
+    $this->setFirstNode($div, 2, 'svg',  NULL, NULL,  $frxattrs);
 
     if (isset($config['footer']['value'])) $this->addFragment($div, $config['footer']['value']);
     if ($gen_table) {
