@@ -135,6 +135,15 @@ class FrxBlockEditor {
 
     if ($parms) Frx::Data()->pop();
 
+    // Allow modules to alter data returned.
+    $context = array(
+      'block' => $this->block_name,
+      'provider' => $this->provider,
+      'parameters' => $parms,
+      'raw_mode' => $raw_mode,
+    );
+    drupal_alter('forena_data', $xml, $context);
+
     return $xml;
   }
 

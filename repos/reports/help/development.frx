@@ -128,6 +128,20 @@ function myexample_forena_parameters_alter($report_name, &amp;$parms) {
     In the above example, you would be able to reference <strong>:security.admin</strong> in any data block or <strong>{security_admin}</strong>
     to reference a value of 'Y' whenever the user had access to Drupal's access administration pages right.
   </p>
+  <h3>hook_forena_data_alter</h3>
+  <p>
+    This alter hook allows you to alter the data retrieved by any forena data block before it gets passed back to the reporting
+    engine. A simple implementation follows:
+  </p>
+<pre class="code">
+  function myexample_forena_data_alter(&amp;$data, $context) {
+  if ($context['provider'] == 'sampledb' && !$context['raw_mode'] && $data ) {
+    foreach($data as $row) {
+      $row->mydata = 'foo';
+    }
+  }
+  }
+</pre>
    <h2 id="formats">Custom Formatters</h2>
     <p>Custom formatters may be implemented either in control objects or in data plugin objects. Formatters that are implemented in plugin objects are only available within data blocks that reference data block repositories that use that plugin type. For example, formatters defined by the FrxOracle plugin will only be available fore repositories that are Oracle repositories. Formatters defined in FrxControls, however, will be available in all reports.</p>
   <p>To implement a formatter in control or plugin class requires the implementation of two methods.</p>
