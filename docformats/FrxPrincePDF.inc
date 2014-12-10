@@ -32,7 +32,7 @@ class FrxPrincePDF extends FrxDocument {
     $output .= '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>';
     if (@$options['css'] || isset($r->rpt_xml->head->style)) {
       $output .= '<style type="text/css">';
-      $output .= $css;
+      $output .= @$options['css'];
       if (isset($r->rpt_xml->head->style) || isset($r->rpt_xml->head->style)) {
         $sheet = (string)$r->rpt_xml->head->style;
         $output .= $sheet;
@@ -41,7 +41,7 @@ class FrxPrincePDF extends FrxDocument {
     }
 
     $output .= '<title>' . $r->title . "</title></head><body class='forena-report $link_class'><h1>" . $r->title . '</h1>' . $html . '</body></html>';
-    $prince_css = drupal_get_path('module', 'forena_pdf') . '/forena_pdf_prince.css';
+
     // Generate the document
     if ($this->p) {
       $p = $this->p;
