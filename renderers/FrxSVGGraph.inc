@@ -9,17 +9,14 @@
 include_once('FrxCrosstab.inc');
 include_once('FrxTable.inc');
 class FrxSVGGraph extends FrxRenderer {
-  private $graph;
-  private $links;
+  public $graph;
   public $templateName = 'Graph (svg)';
   public $xy_data = FALSE;
-  private $headers = array();
-  private $weight;
-  private $wrap_label;
-  private $graphData;
-  private $graphOptions;
-  private $colors;
-  private $unset_attrs = array(
+  public $weight;
+  public $wrap_label;
+  public $graphData;
+  public $graphOptions;
+  public $unset_attrs = array(
     'base_type',
     'crosstab_columns',
     'content',
@@ -29,7 +26,7 @@ class FrxSVGGraph extends FrxRenderer {
   );
 
   // Place to indicate which fields are sourced from the data.
-  private $field_sources = array();
+  public $field_sources = array();
 
   public function __construct() {
     parent::__construct();
