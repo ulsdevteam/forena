@@ -137,7 +137,7 @@ function myexample_forena_parameters_alter($report_name, &amp;$parms) {
   function myexample_forena_data_alter(&amp;$data, $context) {
   if ($context['provider'] == 'sampledb' &amp;&amp; $data ) {
     foreach($data as $row) {
-      $row->mydata = 'foo';
+      $row-&gt;mydata = 'foo';
     }
   }
   }
