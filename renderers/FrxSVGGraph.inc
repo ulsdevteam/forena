@@ -235,13 +235,7 @@ class FrxSVGGraph extends FrxRenderer {
     return $config;
   }
 
-  /**
-   * Render the graph.
-   * @return Ambigous <string, mixed>
-   */
-  public function render() {
-    // Get data from source
-    $output = '';
+  public function prepareGraph() {
     $options = array();
     $attributes = $this->mergedAttributes();
     // Default in xpath for backward compatibility
@@ -268,7 +262,6 @@ class FrxSVGGraph extends FrxRenderer {
     if (!$key) $key = @$attributes['label']; //Backward compatibility for old graphs.
     $options['key'] = $key;
     $dim = $this->extract('dim', $options);
-    $type = $this->extract('type', $options);
     $this->wrap_label = (int)$this->extract('wrap_label', $options);
     if (!$key) $key = @$options['seriesx']; // Deprecated
 
@@ -322,9 +315,20 @@ class FrxSVGGraph extends FrxRenderer {
     if (isset($this->graphOptions['legend_entries']) && !is_array($this->graphOptions['legend_entries'])) {
       $this->graphOptions['legend_entries'] = explode('|', $this->graphOptions['legend_entries']);
     }
+  }
 
-    if ($data) {
-      $output = $this->renderChart($type, $data);
+  /**
+   * Render the graph.
+   * @return Ambigous <string, mixed>
+   */
+  public function render() {
+    // Get data from source
+    $output = '';
+    $this->prepareGraph();
+    $type = $this->graphOptions['type'];
+
+    if ($this->graphData) {
+      $output = $this->renderChart($type);
     }
 
     return $output;
@@ -360,9 +364,8 @@ class FrxSVGGraph extends FrxRenderer {
     return array('types' => $type, 'styles' => $style);
   }
 
-  function renderChart($type, $data ) {
-    $options['width'] = @$options['width'] ? $options['width'] : 600;
-    $options['height'] = @$options['height'] ? $options['height'] : 400;
+  function renderChart($type ) {
+
     $type = strtolower($type);
     // Legacy sustitions for backcward compatibility.
     if ($type == 'piechart') $type = 'piegraph';
@@ -376,8 +379,7 @@ class FrxSVGGraph extends FrxRenderer {
     $lower_graphs_types = array_change_key_case($graph_types);
     $graph_classes = array_combine(array_keys($lower_graphs_types), array_keys($graph_types));
 
-
-    if ($data && isset($graph_classes[$type])) {
+    if (isset($graph_classes[$type])) {
       $class = $graph_classes[$type];
       $output = $this->renderGraph($class);
     }
