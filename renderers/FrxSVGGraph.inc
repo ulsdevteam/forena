@@ -410,6 +410,7 @@ class FrxSVGGraph extends FrxRenderer {
     // Generate the graph
     $output = $graph->Fetch($type, FALSE);
     // Add a viewbox to be compatible with Prince PDF generation.
+    if (!@$options['noviewbox']) $options['auto_fit'] = true; 
     if (!@$options['noviewbox'] && !strpos($output, 'viewBox')) $output = str_replace('<svg width', "<svg viewBox='0 0 $width $height' width", $output);
 
 
