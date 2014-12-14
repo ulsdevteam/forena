@@ -6,15 +6,17 @@
 function forena_display_blocks() {
 
   $header = array(t('Block'), t('Access'), t('Keywords'), t('Actions'));
-  $blocks = Frx::BlockEditor()->revertDBBLocks();
+  Frx::BlockEditor()->revertDBBLocks();
   $blocks = Frx::DataFile()->userBlocks();
-  $links[] = array('href' => 'admin/structure/forena/data/add', 'title' => 'Create New SQL Query' );
-  $content['add']['#markup'] = theme('links',
-      array(
-          'links' => $links,
-          'attributes' => array('class' => 'action-links'),
-      )
-  );
+  if(module_exists('forena_query') && user_access('build forena sql blocks')) {
+    $links[] = array('href' => 'admin/structure/forena/data/add', 'title' => 'Create New SQL Query' );
+    $content['add']['#markup'] = theme('links',
+        array(
+            'links' => $links,
+            'attributes' => array('class' => 'action-links'),
+        )
+    );
+  }
   $data=array();
 
   foreach ($blocks as $block_name => $block) {
