@@ -168,6 +168,9 @@ class FrxControls {
       $vars = array('size' => $value);
       $value = theme_indentation($vars);
     }
+    else {
+      $value = '';
+    }
     return $value;
   }
 
