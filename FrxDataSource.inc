@@ -57,12 +57,9 @@ class FrxDataSource{
   }
 
   protected function loadBlockFromFile($block_name) {
-    $base_file = $this->block_path . '/' . $block_name;
-    $parts = @explode('.', $block_name);
     $full_name = $this->name . '/' . $block_name;
-    $php_method = array_pop($parts);
-    $php_class = implode('.', $parts);
-    $php_file = $this->block_path . '/' . $php_class . '.inc';
+    $php_class = $block_name;
+    $php_file = $this->block_path . '/' . $php_class . '.php';
     if (Frx::DataFile()->exists($full_name . '.sql')) {
       $contents = Frx::DataFile()->contents($full_name . '.sql');
       $block = $this->parseSQLFile($contents);
@@ -73,14 +70,14 @@ class FrxDataSource{
       $block = $this->parseXMLFile($contents);
       $block['type'] = 'xml';
     }
-    elseif (file_exists($php_file)) {
-      require_once $php_file;
+    elseif (Frx::DataFile()->exists($full_name . '.php')) {
+      include_once $php_file;
+
       if (class_exists($php_class)) {
         $o = new $php_class();
         $block['type'] = 'php';
         $block['access'] = @$o->access;
         $block['object'] = $o;
-        $block['method'] = $php_method;
         if (method_exists($o, 'tokens' )) {
           $block['tokens'] = $o->tokens();
         }
@@ -375,10 +372,11 @@ class FrxDataSource{
     return $xml;
   }
 
-  public function phpData($o, $method, $parameters) {
+  public function phpData($o, $parameters) {
     $data = NULL;
-    if (is_object($o) && is_callable(array($o, $method))) {
-      $data = $o->$method($parameters);
+
+    if (is_object($o) && is_callable(array($o, 'data'))) {
+      $data = $o->data($parameters);
     }
     return $data;
   }
