@@ -6,7 +6,7 @@
 <head>
 <title>SVG Graph Demo</title>
 <frx:category>Sample</frx:category>
-<frx:options hidden="1" skin="tutorial" />
+<frx:options hidden="1" />
 <frx:parameters></frx:parameters>
 <frx:docgen>
 </frx:docgen>

@@ -236,20 +236,21 @@ class FrxSVGGraph extends FrxRenderer {
   }
 
   public function prepareGraph() {
-    $options = array();
+    $skin_options = Frx::Data()->getContext('skin');
+    $options = isset($skin_options['FrxSVGGraph']) ? $skin_options['FrxSVGGraph'] : array();
     $attributes = $this->mergedAttributes();
     // Default in xpath for backward compatibility
     // Legacy options.  New charts should be generated using Frx:attribute syntax
     if (isset($attributes['options'])) {
-      parse_str($attributes['options'], $options);
+      $attr_options = array();
+      parse_str($attributes['options'], $attr_options);
       unset($attributes['options']);
-      foreach ($options as $key => $value) {
+      foreach ($attr_options as $key => $value) {
         $options[$key] = $this->teng->replace($value, TRUE);
       }
-      $options  = array_merge($attributes, $options);
     }
     else {
-      $options = $attributes;
+      $options = array_merge($options, $attributes);
     }
 
     // Main Graphing options
@@ -378,7 +379,6 @@ class FrxSVGGraph extends FrxRenderer {
     // Build map for array types.
     $lower_graphs_types = array_change_key_case($graph_types);
     $graph_classes = array_combine(array_keys($lower_graphs_types), array_keys($graph_types));
-
     if (isset($graph_classes[$type])) {
       $class = $graph_classes[$type];
       $output = $this->renderGraph($class);
@@ -390,7 +390,7 @@ class FrxSVGGraph extends FrxRenderer {
   function renderGraph($type) {
     static $jsinc = '';
 
-    $options = $this->graphOptions;
+    $options = $this->replaceTokens($this->graphOptions);
     $data = $this->graphData;
 
     if (!isset($options['scatter_2d']) && ($type == 'ScatterGraph' || $type=='MultiScatterGraph') && $this->xy_data && !isset($options['scatter_2d'])) {

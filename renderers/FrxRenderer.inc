@@ -61,7 +61,21 @@ class FrxRenderer {
    * @return Ambigous <unknown_type, text, mixed, string, unknown>
    */
   public function replaceTokens($text, $raw_mode=FALSE) {
-    return $this->teng->replace($text, $raw_mode);
+    if (is_array($text)) {
+      foreach($text as $k => $v) {
+        $text[$k] = $this->replaceTokens($v, $raw_mode);
+      }
+      return $text;
+    }
+    elseif (is_object($text)) {
+      foreach($text as $k => $v) {
+        $text->$k = $this->replaceTokens($v, $raw_mode);
+      }
+      return $text;
+    }
+    else {
+      return $this->teng->replace($text, $raw_mode);
+    }
   }
 
   /**
