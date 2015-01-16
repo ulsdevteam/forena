@@ -12,6 +12,10 @@ ul.forena-doclinks li {
   display: inline; 
 }
 
+#forena-block-preview table {
+	width : 100%;
+}
+
 .forena-editor-links {
 	display: block; 
 	float: right; 

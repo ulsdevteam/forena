@@ -63,7 +63,7 @@ function forena_data_block_preview($block_name, $parms = array(), $edit=FALSE) {
   $config = array();
   $o->addBlock($block_name, 'FrxTable', $config);
   $o->update();
-  $content = $o->preview($parms);
+  $content =   $o->preview($parms);
   $o->cancel();
   return $content;
 }
@@ -74,7 +74,21 @@ function forena_data_preview() {
   $parms = $_GET;
   unset($parms['q']);
   $content['add_report']['form'] = drupal_get_form('forena_data_quick_report_form', $block_name);
+
   $content['preview'] = forena_data_block_preview($block_name, $parms);
+  $content['preview']['#prefix'] = '<div id="forena-block-preview">';
+  $content['preview']['#suffix'] = '</div>';
+  $m_path = drupal_get_path('module', 'forena');
+  $content['#attached'] = array(
+    'js' => array(
+      "$m_path/forena.admin.js",
+      forena_library_file('dataTables'),
+    ),
+    'css' => array(
+      "$m_path/forena.css",
+
+    ),
+  );
   return $content;
 }
 
