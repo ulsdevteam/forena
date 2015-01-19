@@ -880,7 +880,7 @@ class FrxRenderer {
    */
   public function extractSource(DOMNode $node) {
     $content = '';
-    switch ($$node->nodeType) {
+    switch ($node->nodeType) {
       	case XML_ELEMENT_NODE:
       	  $content = $this->dom->saveXML($node);
       	  break;
