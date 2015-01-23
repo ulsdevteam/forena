@@ -194,12 +194,22 @@ class FrxRenderer {
       if (!$this->teng->test($cond)) return ;
     }
 
-    // Preserve non frx attributes
+    // Preserve plain attributes
     $attr_text='';
     $tmp_attrs = array();
     if ($attrs) foreach ($attrs as $key => $value) {
       $attr_text .=  ' ' . $key . '="' . (string)$value . '"';
       $tmp_attrs[$key] = (string)$value;
+    }
+
+    // Preserve other namespaced attributes
+    $ns_attrs = '';
+    foreach ($node->getNamespaces() as $ns_key => $ns_uri) {
+      if ($ns_key && $ns_key != 'frx') {
+        foreach ($node->attributes($ns_uri) as $key => $value) {
+          $ns_attrs .= ' ' . $ns_key . ':' . $key . '="' . (string)$value . '"';
+        }
+      }
     }
 
     // Determine if we have a custom renderer
@@ -271,7 +281,7 @@ class FrxRenderer {
           $r_attr_text .=  ' ' . $key . '="' . (string)$value . '"';
         }
 
-        if ($include_root) $o .= $this->teng->replace('<' . $tag . $r_attr_text . '>', TRUE);
+        if ($include_root) $o .= $this->teng->replace('<' . $tag . $r_attr_text . $ns_attrs .  '>', TRUE);
         foreach ($dom_node->childNodes as $child) {
           $this->renderDomNode($child, $o);
         }
@@ -299,7 +309,7 @@ class FrxRenderer {
       }
       else {
         if ($has_children) {
-          if ($include_root) $o .= $this->teng->replace('<' . $tag . $attr_text . '>', TRUE);
+          if ($include_root) $o .= $this->teng->replace('<' . $tag . $attr_text . $ns_attrs .  '>', TRUE);
 
           // None found, so render children
           foreach ($dom_node->childNodes as $child) {
@@ -308,7 +318,7 @@ class FrxRenderer {
           if ($include_root) $o .= '</' . $tag . '>';
         }
         else {
-          $o .= $this->teng->replace('<' . $tag . $attr_text . '/>', TRUE);
+          $o .= $this->teng->replace('<' . $tag . $attr_text . $ns_attrs . '/>', TRUE);
         }
       }
     }
