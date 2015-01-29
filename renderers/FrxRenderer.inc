@@ -172,18 +172,19 @@ class FrxRenderer {
     }
 
     if ((string)$frx['block']) {
+      // Determine the context
       $this->blockName = (string)$frx['block'];
       $this->blockParms = $context;
-    }
-    if ($this->frxReport->preview_mode) $o .= Frx::Editor()->blockLinks($this->blockName, $frx, $attrs, $id, $this->blockParms);
+      if   ($this->frxReport->preview_mode) $o .= Frx::Editor()->blockLinks($this->blockName, $frx, $attrs, $id, $this->blockParms);
 
-    if ((string)$frx['block']) {
+      // Now get the block
       $is_data_block = TRUE;
       $xml = $this->frxReport->getData((string)$frx['block'], $id, (string)$frx['parameters']);
       if ($xml) {
         Frx::Data()->push($xml, $id);
       }
       else {
+        if ($id) Frx::Data()->setContext($id, '');
         return;
       }
     }
