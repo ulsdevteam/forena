@@ -189,8 +189,8 @@ class FrxData extends FrxContext {
     }
   }
 
-  public function setContext($id, $data) {
-    $this->data_sources[$id] = $data;
+  public function setContext($id, &$data) {
+    $this->data_sources[$id] = &$data;
   }
 
   /**
