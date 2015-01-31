@@ -230,7 +230,27 @@ class FrxData extends FrxContext {
     drupal_set_message(filter_xss('cur_context ' . $this->id . '<br/>Stack<br/><pre>' . print_r($this->cur_context, 1) . '</pre>'));
   }
 
-
+  /**
+   * Iterate the data based on the provided path.
+   *
+   * @param $path xpath to iterate xml on
+   * @param $group grouping value
+   * @param $sort Sort criteria
+   */
+  public function group($data,  $group='') {
+    $rows = array();
+    if (is_array($group)) $group = implode(' ', $group);
+    $group = (string)$group;
+    if (is_array($data) || is_object($data)) {
+      foreach ($data as $row) {
+        Frx::Data()->push($row, '_group');
+        $gval = $this->teng->replace($group, TRUE);
+        Frx::Data()->pop();
+        $rows[$gval][] = $row;
+      }
+    }
+    return $rows;
+  }
 
 
 }
