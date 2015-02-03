@@ -725,18 +725,31 @@ class FrxReport {
    * @param $group grouping value
    * @param $sort Sort criteria
    */
-  public function group($data,  $group='') {
+  public function group($data,  $group='', $sums= array()) {
     $rows = array();
+    $totals = array();
     if (is_array($group)) $group = implode(' ', $group);
     $group = (string)$group;
     if (is_array($data) || is_object($data)) {
       foreach ($data as $row) {
         Frx::Data()->push($row, '_group');
         $gval = $this->teng->replace($group, TRUE);
+        foreach($sums as $sum_col) {
+          $sval = $this->teng->replace($sum_col, FALSE);
+          $skey = trim($sum_col, '{}');
+          $totals[$gval][$skey] = isset($totals[$gval][$skey]) ? $totals[$gval][$skey] + $sval : (float)$sval;
+        }
         Frx::Data()->pop();
         $rows[$gval][] = $row;
       }
     }
+    foreach($totals as $gval => $col) {
+      foreach ($col as $skey => $total) {
+        $tkey = $skey . '_total';
+        $rows[$gval][0]->$tkey = (string)$total;
+      }
+    }
+
     return $rows;
   }
 

@@ -79,15 +79,14 @@ class FrxSVGGraph extends FrxRenderer {
    /**
    * Re-architect the data into something that the graphing engine can work with
    */
-  public function generateGroupGraphData(&$block_data, $group, $series, $key, $dim) {
+  public function generateGroupGraphData(&$block_data, $group, $series, $key, $dim, $sum) {
     $dim_headers = array();
     $dim_rows = array();
     $dim_values = array();
     $rows = array();
     $legend = array();
-    $data = $this->frxReport->group($block_data, $group);
+    $data = $this->frxReport->group($block_data, $group, $sum);
     $this->graphOptions['structure'] = array('key' => $group);
-
     foreach ($data as $gk => $group_rows) {
       $row_copy = array_values($group_rows);
       $dims = $this->frxReport->group($group_rows, $dim);
@@ -103,20 +102,9 @@ class FrxSVGGraph extends FrxRenderer {
     $dim_headers = array($key);
     $dim_columns = $series;
 
-    // Add the dimension headers.
-    foreach ($dim_values as $dk) {
-      foreach ($dim_headers as $i => $col) {
-        $cell = '';
-        if (count($dim_columns) > 1) {
-          $cell = $i ? $col : $dk . ' ' . $col;
-        }
-        $hrow []  = $cell;
-      }
-    }
-
     foreach($dim_values as $dk) {
       foreach($dim_columns as $col) {
-        $structure_idx = $dk . $col;
+        $structure_idx = trim($dk, '{}') . trim($col, '{}');
         $this->graphOptions['structure']['value'][] = $structure_idx;
         foreach($this->field_sources as $k=>$fld) {
           $structure_idx = $dk . $k;
@@ -134,7 +122,7 @@ class FrxSVGGraph extends FrxRenderer {
 
       $gkey = $this->teng->replace($group, TRUE);
       if ($this->wrap_label) $gkey = wordwrap($gkey, $this->wrap_label);
-      $trow[$group] = $gkey;
+      $trow['key'] = $gkey;
       Frx::Data()->pop();
       // Dimensions
       $dim_data = $dim_rows[$k];
@@ -144,11 +132,9 @@ class FrxSVGGraph extends FrxRenderer {
         foreach($dim_columns as $col) {
 
           $val = $this->teng->replace($col, TRUE);
-
-          if ($val !== '' && $val !== NULL) $trow[$dk . $col] = $val;
+          if ($val !== '' && $val !== NULL) $trow[trim($dk, '{}') . trim($col, '{}')] = $val;
           foreach($this->field_sources as $fk => $src) {
             $trow[$dk . $fk] = $this->teng->replace($src, TRUE);
-
             if (isset($this->field_sources['legend_entries'])) {
               $legend_str = $this->teng->replace($this->field_sources['legend_entries']);
               $legend[$legend_str] = $legend_str;
@@ -169,7 +155,7 @@ class FrxSVGGraph extends FrxRenderer {
 
       $this->graphOptions['legend_entries'] = array_values($legend);
     }
-
+    $this->graphOptions['structure']['key'] = 'key';
     return $this->graphData;
   }
 
@@ -259,6 +245,7 @@ class FrxSVGGraph extends FrxRenderer {
     if (!$path) $path = '*';
     $group = $this->extract('group', $options);
     $series = @(array)$attributes['series'];
+    $sums = @(array)$attributes['sum'];
     $key = @$attributes['key'];
     if (!$key) $key = @$attributes['label']; //Backward compatibility for old graphs.
     $options['key'] = $key;
@@ -306,8 +293,8 @@ class FrxSVGGraph extends FrxRenderer {
 
     $this->graphOptions = $options;
 
-    if ($group && $dim) {
-      $this->generateGroupGraphData($nodes, $group, $series, $key, $dim);
+    if ($group) {
+      $this->generateGroupGraphData($nodes, $group, $series, $key, $dim, $sums);
     }
     else {
       $this->generateGraphData($nodes, $series, $key);

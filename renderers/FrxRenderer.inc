@@ -184,7 +184,7 @@ class FrxRenderer {
         Frx::Data()->push($xml, $id);
       }
       else {
-        if ($id) Frx::Data()->setContext($id, '');
+        if ($id) Frx::Data()->setContext($id, $xml);
         return;
       }
     }
@@ -241,10 +241,12 @@ class FrxRenderer {
         $this->frxReport->sort($data, $sort, $compare_type);
       }
 
-      // Group values
+      //  values
       $group = @(string)$frx['group'];
       if ($group) {
-        $nodes = $this->frxReport->group($nodes, $group);
+        $opt = $this->mergedAttributes($node);
+        $sums = (array)@$opt['sum'];
+        $nodes = $this->frxReport->group($nodes, $group, $sums);
       }
 
       $i=0;
