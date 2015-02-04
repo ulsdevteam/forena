@@ -630,6 +630,12 @@
         <td>Use Drupal's translation API to translate the value prior to display.</td>
         <td>Specify a field that contains the serialized data used for translations (e.g. watchdog table). Normally you can leave this blank.</td>
       </tr>
+			<tr>
+				<td>expression</td>
+				<td>The field should be replaced with the value from an xpath expression that is specified in the format string.</td>
+				<td>A valid xpath expression.  Different contexts may be used by using the id of hte context in the report (e.g.
+				mycontext.name or mycontext.*[@num=2]/mynode )</td>
+			</tr>
       <tr>
         <td>iso_date</td>
         <td>ISO standard dates are of the form, YYYY-MM-DD followed by a 24 hour timestamp (e.g. 2012-12-01 20:30:30). Dates in this format may be reformatted.</td>
@@ -645,6 +651,12 @@
         <td>Use PHP's sprintf function for adding labels and such.</td>
         <td>See <a href="http://us.php.net/manual/en/function.sprintf.php" target="_blank">http://us.php.net/manual/en/function.sprintf.php</a> for possibilities.</td>
       </tr>
+		  <tr>
+				<td>template</td>
+				<td>The field being referenced is a foreana template. The data is assumed to be valid xhtml with normal forena fields that will be replaced based on the current
+				data context.</td>
+				<td>Indicates the machine name of an input format that is used to process the data after bing run through forena's templating system.</td>
+			</tr>
     </tbody>
   </table>
   <h3>Field linking</h3>
