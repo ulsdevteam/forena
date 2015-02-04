@@ -86,17 +86,20 @@ class FrxData extends FrxContext {
 
   static public function arrayToXml($a, &$xml=NULL) {
     if (!$xml) $xml = new SimpleXMLElement('<root/>');
-    static $tag = '';
+    $tag = '';
     foreach($a as $k => $v) {
-      if ($k===0 || $k ==='0' || (int)$k) {
+      if (preg_match('/^[0-9\-\.]/', $k)) {
         if (!$tag) $tag = "element";
       }
       else {
         $tag = $k;
       }
       if (is_array($v) || is_object($v)) {
-        $node = $xml->addChild($tag);
-        $node['key'] = $k;
+        $node = $xml->addChild($tag, '');
+        if ($tag != $k) {
+          $node['key'] = $k;
+        }
+        $node['type'] = is_object($v) ? 'object' : 'array';
         FrxData::arrayToXml($v, $node);
       }
       else {
@@ -125,8 +128,7 @@ class FrxData extends FrxContext {
       $data = $this->getContext($context);
     }
 
-
-    if (is_array($data) && !preg_match('/(\[\/)/', $key)) {
+    if (is_array($data) && !preg_match('/[\=\[\/\]\(\)]/', $key)) {
 
       $retvar = @$data[$key];
     }
