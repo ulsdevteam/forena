@@ -14,6 +14,7 @@ class FrxData extends FrxContext {
 
   public $id;
   private $cur_context;  // The data of the xml;
+  private $cur_context_xml; //
   private $data_sources = array();
   private $data_stack = array();
   private $id_stack = array();
@@ -83,6 +84,31 @@ class FrxData extends FrxContext {
   }
 
 
+  static public function arrayToXml($a, &$xml=NULL) {
+    if (!$xml) $xml = new SimpleXMLElement('<root/>');
+    static $tag = '';
+    foreach($a as $k => $v) {
+      if ($k===0 || $k ==='0' || (int)$k) {
+        if (!$tag) $tag = "element";
+      }
+      else {
+        $tag = $k;
+      }
+      if (is_array($v) || is_object($v)) {
+        $node = $xml->addChild($tag);
+        $node['key'] = $k;
+        FrxData::arrayToXml($v, $node);
+      }
+      else {
+        $node = $xml->addChild($tag, $v);
+        $node['key'] = $k;
+      }
+
+      $tag =  preg_replace( '/[^a-zA-Z0-9]/', '_', (string) $k);
+    }
+    return $xml;
+  }
+
   /**
    * Get the value from the data.
    * This is used by token_replace method to extract the data based on the path provided.
@@ -98,11 +124,17 @@ class FrxData extends FrxContext {
     if ($context && $this->contextExists($context)) {
       $data = $this->getContext($context);
     }
-    if (is_array($data)) {
+
+
+    if (is_array($data) && !preg_match('/(\[\/)/', $key)) {
+
       $retvar = @$data[$key];
     }
-    elseif (is_object($data)) {
-
+    elseif (is_object($data) || is_array($data)) {
+      if (is_array($data) || !method_exists($data, 'xpath')) {
+        if ( !$this->cur_context_xml) $this->cur_context_xml = FrxData::arrayToXml($data);
+        $data = $this->cur_context_xml;
+      }
       if (strpos($key, '=')===0) {
         $retvar = $this->simplexml_evaluate($data, ltrim($key, '='));
       }
@@ -154,10 +186,11 @@ class FrxData extends FrxContext {
   public function setValue($key, $value, $context='') {
     if (is_array($this->cur_context)) {
       $this->cur_context[$key] = $value;
+      if ($this->cur_context_xml) $this->cur_context_xml->$key = $value;
     }
     elseif (is_object($this->cur_context)) {
       if (strpos($key, '@')===0) {
-        $this->cur_context[$key] = $value;
+        $this->cur_context[trim($key, '@')] = $value;
       }
       else {
         $this->cur_context->$key = $value;
@@ -179,6 +212,7 @@ class FrxData extends FrxContext {
     $this->id_stack[] = $this->id;
     $this->id = $id;
     $this->cur_context = $data;
+    $this->cur_context_xml = '';
 
     if ($id) {
       /*    if (@is_array($this->data_sources[$id]) && is_array($data)) {
@@ -202,6 +236,7 @@ class FrxData extends FrxContext {
   public function pop() {
     $this->id = array_pop($this->id_stack);
     $this->cur_context = array_pop($this->data_stack);
+    $this->cur_context_xml = '';
   }
 
   /**

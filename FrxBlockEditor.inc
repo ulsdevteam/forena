@@ -133,16 +133,21 @@ class FrxBlockEditor {
       $xml = Frx::RepoMan()->data($this->block_name, $raw_mode);
     }
 
-    if ($parms) Frx::Data()->pop();
+    $driver = get_class(Frx::RepoMan()->repository($this->provider));
 
     // Allow modules to alter data returned.
     $context = array(
       'block' => $this->block_name,
+      'definition' => $this->block,
       'provider' => $this->provider,
       'parameters' => $parms,
       'raw_mode' => $raw_mode,
+      'driver' => $driver,
     );
     drupal_alter('forena_data', $xml, $context);
+
+    if ($parms) Frx::Data()->pop();
+
 
     return $xml;
   }
