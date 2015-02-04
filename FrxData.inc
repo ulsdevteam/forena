@@ -125,9 +125,10 @@ class FrxData extends FrxContext {
     $data = $this->currentContext();
 
     if ($context && $this->contextExists($context)) {
-      $data = $this->getContext($context);
-    }
 
+      $data = $this->getContext($context);
+
+    }
     if (is_array($data) && !preg_match('/[\=\[\/\]\(\)]/', $key)) {
 
       $retvar = @$data[$key];

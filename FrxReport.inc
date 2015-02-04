@@ -198,6 +198,7 @@ class FrxReport {
 
   public function preloadData() {
     $blocks_loaded = $this->blocks_loaded;
+
     $jsonData = array();
     if ($this->data) foreach ($this->data as $d) {
       if (!empty($d['block'])) {
@@ -205,7 +206,9 @@ class FrxReport {
         $block = $d['block'];
         $parms = @$d['paramaters'];
         $raw = !empty($d['json']) || !empty($d['raw_mode']);
+
         $data = $this->getData($block, $id, $parms, $raw);
+        Frx::Data()->setContext($id, $data);
         if (!empty($d['json']) && $this->format == 'web') {
           $ret = array();
           if ($data) foreach($data as $row) {
@@ -234,6 +237,8 @@ class FrxReport {
     // Find the Body of the report.
     $this->format = $format;
     $dom = $this->dom;
+    // Trap error condition
+    if (!$dom) return '';
     $body = $dom->getElementsByTagName('body')->item(0);
     $this->preloadData();
     // Render the rport.
@@ -357,7 +362,7 @@ class FrxReport {
     }
 
     if ($format) {
-      $value = FrxReportGenerator::$instance->format_data($value, $format, $format_str, $this->teng);
+      $value = FrxReportGenerator::$instance->format_data($value, $format, $format_str, $this->teng, $default);
     }
 
     if (is_array($value)) {

@@ -17,11 +17,12 @@ class FrxControls {
                      'xhtml' => 'XHTML Decode of data',
                      'drupal_text_format' => 'Drupal Text Format',
                      'iso_date' => 'ISO Date',
-                     'sprintf' => 'PHP sprintf()',
+                     'sprintf' => 'Sprintf() function',
                      'number' => 'Number',
-                     'drupal_translation' => 'Translatable Text',
-                     'template' => 'Field is a forena template',
+                     'drupal_translation' => 'Translation Text (Drupal)',
+                     'template' => 'Template (Field is a forena)',
                      'indentation' => 'Indentation',
+                     'expression' => 'Expression (xpath)'
                      );
                      return $formats;
   }
@@ -152,7 +153,10 @@ class FrxControls {
    * @param string $teng
    * @return Ambigous <string, The, mixed>
    */
-  public function template($value, $format_str, $teng='') {
+  public function template($value, $format_str, $teng='', $default='') {
+    if (!$value) {
+      $value = $default;
+    }
     if ($value) {
       $value = $teng->replace($value);
       $value = html_entity_decode($value, ENT_QUOTES, 'UTF-8');
@@ -160,6 +164,7 @@ class FrxControls {
         $value = check_markup($value, $format_str);
       }
     }
+
     return $value;
   }
 
@@ -171,6 +176,19 @@ class FrxControls {
     else {
       $value = '';
     }
+    return $value;
+  }
+
+  /**
+   * @param $value
+   * @param $format_str
+   * @param string $teng
+   * @return mixed
+   * Return an xapth expression based on data in the
+   */
+  public function expression($value, $format_str, $teng='', $default='') {
+    $value = $teng->replace($format_str);
+    if ($value) $value = $teng->replace('{' . $value . '}');
     return $value;
   }
 

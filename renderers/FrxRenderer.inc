@@ -218,9 +218,15 @@ class FrxRenderer {
     // if we have a foreach in this node, we need to iterate the children
 
     if ((string)$frx['foreach'] ) {
-      // Save xml
+      // Get proper XML for current data context.
       $path = $this->teng->replace((string)$frx['foreach'], TRUE);
-      $data = Frx::Data()->currentContext();
+      if ($path && strpos($path, '.')) {
+        @list($context, $path) = explode('.', $path, 2);
+        $data = Frx::Data()->getContext($context);
+      }
+      else {
+        $data = Frx::Data()->currentContext();
+      }
 
       if (is_object($data)) {
         if (method_exists($data, 'xpath') && $path != '*') {
