@@ -9,7 +9,14 @@ class FrxXML extends FrxRenderer {
   public function render() {
     $output = '';
     $node = $this->reportDocNode;
-    $xml = FrxData::instance()->currentContext();
+    $options = $this->mergedAttributes();
+    if (isset($options['context'])) {
+      $xml = Frx::Data()->getContext($options['context']);
+    }
+    else {
+      $xml = FrxData::instance()->currentContext();
+    }
+    if (is_array($xml)) $xml = FrxData::arrayToXml($xml);
     if ($xml && is_callable(array($xml, 'asXML')))  {
         $dom = dom_import_simplexml($xml);
         $dom->ownerDocument->formatOutput = TRUE;

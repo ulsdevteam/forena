@@ -228,8 +228,9 @@ class FrxRenderer {
         $data = Frx::Data()->currentContext();
       }
 
-      if (is_object($data)) {
-        if (method_exists($data, 'xpath') && $path != '*') {
+      if (is_object($data) || $path != '*') {
+        if ((method_exists($data, 'xpath') || is_array($data)) && $path != '*') {
+          if (is_array($data)) $data = FrxData::arrayToXml($data);
           $nodes = $data->xpath($path);
         }
         else {
