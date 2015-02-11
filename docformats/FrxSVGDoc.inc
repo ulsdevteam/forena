@@ -42,7 +42,7 @@ class FrxSVGDoc extends FrxDocument {
       $output = '<svg/>';
     }
     // Add in namespaces
-    if (!strpos('xmlns', $svg) ) {
+    if (!strpos('xmlns', $output) ) {
       $output = str_replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"', $output);
     }
     return $output;
