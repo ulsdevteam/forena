@@ -150,6 +150,7 @@ class FrxReport {
         	  foreach($node->attributes() as $key => $value) {
         	    $data [$key] = (string)$value;
         	  }
+            $data['data'] = $node;
         	  $this->data[] = $data;
         	  break;
         	case 'doctypes':
@@ -217,7 +218,12 @@ class FrxReport {
           $jsonData[$d['json']] = $ret;
         }
       }
+      else {
+        $id = @$d['id'];
+        if ($id) Frx::Data()->setContext($id, $d['data']);
+      }
     }
+
     if ($jsonData) {
       drupal_add_js(array('forenaData' => $jsonData), 'setting');
     }

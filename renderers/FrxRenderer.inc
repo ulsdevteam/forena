@@ -229,12 +229,13 @@ class FrxRenderer {
       }
 
       if (is_object($data) || $path != '*') {
-        if ((method_exists($data, 'xpath') || is_array($data)) && $path != '*') {
+        if ((method_exists($data, 'xpath') || is_array($data))) {
           if (is_array($data)) $data = FrxData::arrayToXml($data);
           $nodes = $data->xpath($path);
         }
         else {
-          $nodes = $data;
+        dpm($nodes, 'nodes');
+        $nodes = $data;
         }
       }
       else {
