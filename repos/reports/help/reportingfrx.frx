@@ -630,12 +630,6 @@
         <td>Use Drupal's translation API to translate the value prior to display.</td>
         <td>Specify a field that contains the serialized data used for translations (e.g. watchdog table). Normally you can leave this blank.</td>
       </tr>
-			<tr>
-				<td>expression</td>
-				<td>The field should be replaced with the value from an xpath expression that is specified in the format string.</td>
-				<td>A valid xpath expression.  Different contexts may be used by using the id of hte context in the report (e.g.
-				mycontext.name or mycontext.*[@num=2]/mynode )</td>
-			</tr>
       <tr>
         <td>iso_date</td>
         <td>ISO standard dates are of the form, YYYY-MM-DD followed by a 24 hour timestamp (e.g. 2012-12-01 20:30:30). Dates in this format may be reformatted.</td>
@@ -703,6 +697,15 @@
       <td>The value to be displayed in the report output when no value exists.</td>
     </tr>
   </table>
+	<h3>Field calculations</h3>
+	<p>The <strong>frx:field</strong> element supports redefining fields as complex calculations using xpath expressions.  These expressions
+		are evaluated for the current selected data using PHP's DOMXMPATH evaluate method.  Specify the the calculation you want to perform in the <strong>calc</strong> attribute of
+		the field element.  You can also use the forena field tokens in these calculations to further enhance the kinds of calculations you can perform.
+	</p>
+	<p>
+		Additional information on xpath expression syntax may be found in the  <a href="http://www.w3schools.com/xpath/xpath_operators.asp">XPath Operators</a> seciton of the w3schools
+		XPath Tutorial.
+	</p>
 <h2 id="datacontexts">Data Contexts</h2>
 <p>Any data from any other section of a report may be used by referencing those data by their id. For example: if you place
 	an id attribute on the tag that you place an frx:foreach attribute on (e.g id='state' frx:foreach='*'), then you can reference
@@ -714,6 +717,18 @@
     ..
     <frx:data id="state" block="sampledb/state"/>
   </head>
+	<p>
+		Additional data that is only needed for the rendering of the report may be included by leaving of the block attribute and specifying XML data
+		as child elements of an frx:data element as in the following example.
+	</p>
+	<head frx:renderer="FrxSource">
+		..
+		<frx:data id="scale">
+			<scale min="0" max="50" red="255" green="0" blue="0" red_scale="0" green_scale="255" blue_scale="0"/>
+			<scale min="50" max="100" red="255" green="255" blue="0" red_scale ="-255" green_scale="-100" blue_scale="0"/>
+			<scale min="100" max="101" red="0" green="100" blue="100" red_scale="0" green_scale="0" blue_scale="0"/>
+		</frx:data>
+	</head>
   <p>In addition, data in the head section can be loaded into drupals settings objects for use later in javascript. as in the following:
   </p>
   <head frx:renderer="FrxSource">

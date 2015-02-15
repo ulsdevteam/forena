@@ -334,7 +334,7 @@ class FrxEditor {
     $this->verifyHeaderElements(array('fields'));
     $this->setFrxHeader('fields', 'field',
     $fieldElements,
-    array('id', 'link', 'format', 'format-string', 'target', 'rel', 'class', 'add-query'),
+    array('id', 'link', 'format', 'format-string', 'target', 'rel', 'class', 'add-query', 'calc'),
       'default');
 
   }

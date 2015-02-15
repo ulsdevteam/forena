@@ -1044,6 +1044,14 @@ function forena_report_field_form($form, &$form_state, $report_name, $id) {
       '#description' => t('The value to be displayed in the report when no value exists.')
   );
 
+  $form['field']['calc'] = array(
+    '#type' => 'textfield',
+    '#title' => t('calulation'),
+    '#default_value' => $field['calc'],
+    '#size' => 100,
+    '#description' => t('Enter a valid XPath expression to calculate this field with. ')
+  );
+
   $form['update'] = array(
     '#type' => 'submit',
     '#value' => t('Update'),

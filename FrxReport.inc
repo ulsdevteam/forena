@@ -314,7 +314,7 @@ class FrxReport {
 
 
   public function getField($id) {
-    $field = array_fill_keys(array('default', 'link', 'add-query', 'class', 'rel', 'format', 'format-string', 'target'), '');
+    $field = array_fill_keys(array('default', 'link', 'add-query', 'class', 'rel', 'format', 'format-string', 'target', 'calc'), '');
     if ($this->fields) {
       $path = 'frx:field[@id="' . $id . '"]';
       $formatters = $this->fields->xpath($path);
@@ -329,6 +329,7 @@ class FrxReport {
         $field['format'] = (string) $formatter['format'];
         $field['format-string'] = (string) $formatter['format-string'];
         $field['target'] = (string) $formatter['target'];
+        $field['calc'] = (string) $formatter['calc'];
       }
     }
 
