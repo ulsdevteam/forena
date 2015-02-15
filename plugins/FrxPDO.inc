@@ -181,7 +181,8 @@ class FrxPDO extends FrxDataSource {
    * @param unknown_type $key
    * @param unknown_type $data
    */
-  public function format($value, $key) {
+  public function format($value, $key, $raw = FALSE) {
+    if ($raw) return $value;
     $db = $this->db;
     $value = $this->parmConvert($key, $value);
     if ($db) {

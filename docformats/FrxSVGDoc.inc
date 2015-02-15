@@ -15,9 +15,6 @@ class FrxSVGDoc extends FrxDocument {
     $r->html = '';
     if ($print && $this->content_type) {
       header('Content-Type: ' . $this->content_type);
-      header('Cache-Control:');
-      header('Pragma:');
-      header('Cache-Control: must-revalidate');
     }
   }
 
@@ -42,7 +39,7 @@ class FrxSVGDoc extends FrxDocument {
       $output = '<svg/>';
     }
     // Add in namespaces
-    if (!strpos('xmlns', $output) ) {
+    if (!strpos( $output, 'xmlns') ) {
       $output = str_replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"', $output);
     }
     return $output;

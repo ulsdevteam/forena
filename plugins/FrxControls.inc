@@ -187,8 +187,10 @@ class FrxControls {
    * Return an xapth expression based on data in the
    */
   public function expression($value, $format_str, $teng='', $default='') {
-    $value = $teng->replace($format_str);
-    if ($value) $value = $teng->replace('{' . $value . '}');
+    if ($value) {
+      $value = $teng->replace($format_str);
+      if ($value) $value = $teng->replace('{' . $value . '}');
+    }
     return $value;
   }
 

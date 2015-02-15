@@ -234,8 +234,7 @@ class FrxRenderer {
           $nodes = $data->xpath($path);
         }
         else {
-        dpm($nodes, 'nodes');
-        $nodes = $data;
+          $nodes = $data;
         }
       }
       else {

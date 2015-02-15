@@ -339,7 +339,7 @@ class FrxReport {
    * Formatter used by the syntax engine to alter data that gets extracted.
    * This invokes the field translation
    */
-  public function format($value, $key) {
+  public function format($value, $key, $raw=FALSE) {
     // Determine if there is a field overide entry
     $default='';
     $link ='';
@@ -348,6 +348,7 @@ class FrxReport {
     $target = '';
     $class = '';
     $rel = '';
+    $calc= '';
     if ($this->fields) {
       $path = 'frx:field[@id="' . $key . '"]';
       $formatters = $this->fields->xpath($path);
@@ -361,13 +362,21 @@ class FrxReport {
           $class = (string)$formatter['class'];
           $rel = (string)$formatter['rel'];
           $format = (string) $formatter['format'];
+          $calc = (string) $formatter['calc'];
           $format_str = (string) $formatter['format-string'];
           $target = (string) $formatter['target'];
         }
       }
     }
 
-    if ($format) {
+    // Evaluate any calculations first.
+    if ($calc) {
+      $calc = $this->teng->replace($calc);
+      if ($calc) $value = $this->teng->replace('{=' . $calc . '}');
+
+    }
+
+    if ($format && !$raw) {
       $value = FrxReportGenerator::$instance->format_data($value, $format, $format_str, $this->teng, $default);
     }
 
@@ -380,7 +389,8 @@ class FrxReport {
       $value = $default;
     }
 
-    if ($link) {
+
+    if ($link && !$raw) {
       $attributes = array();
       $target = $this->teng->replace($target, TRUE);
       // use the target attribute to open links in new tabs or as popups.
@@ -416,7 +426,7 @@ class FrxReport {
         array('fragment' => $fragment, 'query' => $data, 'attributes' => $attributes, 'absolute' => TRUE)
       );
     }
-    if ($this->preview_mode) $value .= Frx::Editor()->fieldLink($key, $value);
+    if ($this->preview_mode && !$raw) $value .= Frx::Editor()->fieldLink($key, $value);
     return $value;
   }
 

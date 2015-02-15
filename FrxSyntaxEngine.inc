@@ -56,8 +56,8 @@ class FrxSyntaxEngine {
       $o = $this->data;
     }
     $value = $o->getValue($key, $context);
-    if (!$raw && $this->formatter) {
-      $value = trim($this->formatter->format($value, $raw_key));
+    if ($this->formatter) {
+      $value = trim($this->formatter->format($value, $raw_key, $raw));
     }
     return $value;
   }
