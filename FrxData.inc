@@ -19,6 +19,27 @@ class FrxData extends FrxContext {
   private $data_stack = array();
   private $id_stack = array();
 
+  /**
+   * Constructor to initialize drupal site specific settings.
+   *
+   */
+  public function __construct() {
+    $site = array();
+    global $language;
+    global $user;
+    global $theme_path;
+    global $base_root;
+    $site['base_path'] = base_path();
+    $site['theme_path'] = &$theme_path;
+    $site['base_root'] = &$base_root;
+    $site['user_name'] = $user ? $user->name : '';
+    $site['uid'] = $user ? $user->uid : 0;
+    $site['language'] = &$language;
+    $site['args'] = arg();
+    $site['q'] = $_GET['q'];
+    $site['destination'] = drupal_get_destination();
+    $this->setContext('site', $site);
+  }
 
   // For backward compatibility.
   public static function instance() {
