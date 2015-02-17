@@ -6,6 +6,7 @@
  *
  */
 class FrxEmailMergeDoc extends FrxDocument {
+  private $title;
   public function render($r, $format, $content = array()) {
     $body = $r->html;
     $doc = new DOMDocument('1.0', 'UTF-8');
@@ -18,6 +19,9 @@ class FrxEmailMergeDoc extends FrxDocument {
     $docs = $xml->xpath('.//*[@class="email-document"]');
     $prompt_subject = TRUE;
     $prompt_body = TRUE;
+    if ($r->title) {
+      $this->title = $r->title;
+    }
     if ($docs) foreach ($docs as $doc) {
 
       // From
@@ -64,6 +68,7 @@ class FrxEmailMergeDoc extends FrxDocument {
     $count = count($docs);
     if ($count) {
       $content = drupal_get_form('forena_confirm_email', $emails, $count, $prompt_subject, $prompt_body);
+      drupal_set_title($this->title);
     }
     else {
       drupal_set_message(t('No mail merge information in report. Displaying report instead.'), 'error');
