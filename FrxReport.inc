@@ -209,6 +209,10 @@ class FrxReport {
         $raw = !empty($d['json']) || !empty($d['raw_mode']);
 
         $data = $this->getData($block, $id, $parms, $raw);
+        if (@$d['path'] && !$raw && $data) {
+          $data = $data->xpath((string)$d['path']);
+          if ($data) $data = $data[0];
+        }
         Frx::Data()->setContext($id, $data);
         if (!empty($d['json']) && $this->format == 'web') {
           $ret = array();

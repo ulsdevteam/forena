@@ -248,7 +248,12 @@ class FrxData extends FrxContext {
   }
 
   public function setContext($id, &$data) {
-    $this->data_sources[$id] = &$data;
+    if (is_object($data)) {
+      $this->data_sources[$id] = $data;
+    }
+    else {
+      $this->data_sources[$id] = &$data;
+    }
   }
 
   /**
