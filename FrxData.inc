@@ -30,13 +30,14 @@ class FrxData extends FrxContext {
     global $theme_path;
     global $base_root;
     $site['base_path'] = base_path();
-    $site['theme_path'] = &$theme_path;
+    $site['theme_path'] = base_path() . $theme_path;
+    $site['theme_dir'] = &$theme_path;
     $site['base_root'] = &$base_root;
     $site['user_name'] = $user ? $user->name : '';
     $site['uid'] = $user ? $user->uid : 0;
     $site['language'] = &$language;
     $site['args'] = arg();
-    $site['q'] = $_GET['q'];
+    $site['page'] = base_path() . $_GET['q'];
     $site['destination'] = drupal_get_destination();
     $this->setContext('site', $site);
   }
