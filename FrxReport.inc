@@ -368,6 +368,7 @@ class FrxReport {
           $rel = (string)$formatter['rel'];
           $format = (string) $formatter['format'];
           $calc = (string) $formatter['calc'];
+          $context = (string) $formatter['context'];
           $format_str = (string) $formatter['format-string'];
           $target = (string) $formatter['target'];
         }
@@ -376,8 +377,9 @@ class FrxReport {
 
     // Evaluate any calculations first.
     if ($calc) {
+      if ($context) $context .= ".";
       $calc = $this->teng->replace($calc);
-      if ($calc) $value = $this->teng->replace('{=' . $calc . '}');
+      if ($calc) $value = $this->teng->replace('{' . $context . '=' . $calc . '}');
 
     }
 

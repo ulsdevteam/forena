@@ -199,7 +199,15 @@ class FrxData extends FrxContext {
       }
     }
 
-    if (!is_array($retvar)) $retvar = trim((string)$retvar);
+    if (!is_array($retvar)) {
+      if (is_object($retvar) && is_a($retvar, 'DOMNodeList')) {
+        $retvar = $retvar->item(0);
+        if ($retvar) ($retvar = trim($retvar->textContent));
+      }
+      else {
+        $retvar = trim((string)$retvar);
+      }
+    }
     return $retvar;
   }
 
