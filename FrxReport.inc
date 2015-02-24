@@ -205,7 +205,7 @@ class FrxReport {
       if (!empty($d['block'])) {
         $id = @$d['id'];
         $block = $d['block'];
-        $parms = @$d['paramaters'];
+        $parms = @$d['parameters'];
         $raw = !empty($d['json']) || !empty($d['raw_mode']);
 
         $data = $this->getData($block, $id, $parms, $raw);
