@@ -32,21 +32,19 @@ class FrxXMLDoc extends FrxDocument {
       header('Cache-Control: must-revalidate');
     }
     $r->html =  '<?xml version="1.0"?>' . "\n";
+    $opening_tag = $this->_build_opening_root_tag_contents();
+    if ($this->root_tag) {
+      $r->html .= "<$opening_tag";
+    }
+
   }
 
   public function render($r, $format, $options = array()) {
-    $output = '';
-
-    $opening_tag = $this->_build_opening_root_tag_contents();
     $ending_tag = $this->root_tag;
-    if ($this->root_tag) {
-      $output = "<$opening_tag>\n  $r->html\n</$ending_tag>";
-      return $output;
+    if ($ending_tag) {
+      $r->html .= "</$ending_tag>";
     }
-    else {
-      return $r->html;
-    }
-
+    return $r->html;
   }
 
   private function _build_opening_root_tag_contents() {
