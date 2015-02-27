@@ -108,6 +108,24 @@ function forena_menu() {
     'file' => 'forena.common.inc',
   );
 
+  $items['reports/%/nojs'] = array(
+    'page callback' => 'forena_report',
+    'page arguments' => array(1),
+    'title' => 'Reports',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+    'file' => 'forena.common.inc',
+  );
+
+  $items['reports/%/ajax'] = array(
+    'page callback' => 'forena_report_ajax_callback',
+    'page arguments' => array(1),
+    'title' => 'Reports',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+    'file' => 'forena.common.inc',
+  );
+
   $items['report_doc/%'] = array(
     'page callback' => 'forena_report',
     'page arguments' => array(1),
@@ -343,6 +361,14 @@ function forena_menu() {
     'type' => MENU_NORMAL_ITEM,
   );
 
+  $items['reports'] = array(
+    'page callback' => 'forena_user_reports',
+    'page arguments' => array(),
+    'title' => 'My Reports',
+    'access arguments' => array('list reports'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
   $items['forena/xml/%'] = array(
    	'page callback' => 'forena_block_xml',
     'page arguments' => array(2),
@@ -391,6 +417,8 @@ function forena_menu() {
  */
 function forena_admin_paths_alter(&$paths) {
   $paths['reports/*/*'] = TRUE;
+  $paths['reports/*/nojs'] = FALSE;
+  $paths['reports/*/ajax'] = FALSE;
   $paths['reports/*/view'] = FALSE;
   $paths['reports/*/edit'] = FALSE;
   $paths['reports/add'] = TRUE;
@@ -954,6 +982,21 @@ function forena_include_data_tables() {
   }
 }
 
+/**
+ * @param $report_name
+ */
+function forena_report_ajax_callback($report_name) {
+  $content = forena_report("$report_name");
+  $title = Frx::Editor()->frxReport->title;
+  if (is_callable('ctools_include')) {
+    ctools_include('modal');
+    ctools_modal_render($title, $content['content']['#markup']);
+  }
+  else {
+    drupal_set_title($title);
+    return $content;
+  }
+}
 
 /**
  * Load and render a report based on a drupal path.

@@ -380,8 +380,8 @@ class FrxReport {
       if ($context) $context .= ".";
       $calc = $this->teng->replace($calc);
       if ($calc) $value = $this->teng->replace('{' . $context . '=' . $calc . '}');
-
     }
+
 
     if ($format && !$raw) {
       $value = FrxReportGenerator::$instance->format_data($value, $format, $format_str, $this->teng, $default);
@@ -399,17 +399,23 @@ class FrxReport {
 
 
     if ($link && !$raw) {
+
       $attributes = array();
       $target = $this->teng->replace($target, TRUE);
       // use the target attribute to open links in new tabs or as popups.
       if (@strpos(strtolower($target), 'popup')===0) {
-        $opts = 'status=1';
         $options = "status=1";
         $attributes = array('onclick' =>
           'window.open(this.href, \'' . $target . '\', "' . $options . '"); return false;');
       }
       else {
         if ($target) $attributes['target'] = $target;
+      }
+
+      // Adding support for ctools modals.
+      if ($link && strpos($class, 'ctools-use-modal') !== FALSE && is_callable('ctools_include')) {
+        ctools_include('modal');
+        ctools_modal_add_js();
       }
       if ($rel) $attributes['rel'] = $this->teng->replace($rel, TRUE);
       if ($class) $attributes['class'] = explode(' ', trim($this->teng->replace($class, TRUE)));
