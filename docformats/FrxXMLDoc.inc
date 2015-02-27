@@ -34,7 +34,7 @@ class FrxXMLDoc extends FrxDocument {
     $r->html =  '<?xml version="1.0"?>' . "\n";
     $opening_tag = $this->_build_opening_root_tag_contents();
     if ($this->root_tag) {
-      $r->html .= "<$opening_tag";
+      $r->html .= "<$opening_tag>";
     }
 
   }
