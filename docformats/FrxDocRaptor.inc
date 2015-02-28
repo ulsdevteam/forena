@@ -23,7 +23,6 @@ class FrxDocRaptor extends FrxDocument {
 
 
   public function render($r, $format, $options = array()) {
-    $this->access = FALSE;
     if (!$this->access) {
       drupal_set_message(t('Not Authorized to use PDF Document Generation Service!'), 'error');
 
