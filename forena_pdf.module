@@ -67,12 +67,13 @@ function forena_pdf_configure($formid, &$form_state)  {
   else {
     unset($pdf_options['FrxPrincePDF']);
   }
-
+  if (isset($form_state['values']['forena_pdf_generator'])) $pdf_generator = $form_state['values']['forena_pdf_generator'];
   $form['forena_pdf_generator'] = array(
     '#type' => 'select',
     '#title' => t('PDF Generation Method'),
     '#options' => $pdf_options,
     '#default_value' => $pdf_generator,
+    '#ajax' => array('wrapper' => 'config-wrapper', 'callback' => 'forena_pdf_config_callback'),
   );
 
   $form['forena_pdf_disable_links'] = array(
@@ -81,22 +82,23 @@ function forena_pdf_configure($formid, &$form_state)  {
     '#description' => t('When checked links in reports will not appear as links in PDF documents.'),
     '#default_value' => $disable_links,
   );
-  $form['mpdf'] = array('#type' => 'fieldset', '#title' => t('MPDF library'));
-  $form['mpdf']['library'] = array(
+  $form['config'] = array('#prefix' => '<div id="config-wrapper">', '#suffix' => '</div>');
+  $form['config']['mpdf'] = array('#type' => 'fieldset', '#title' => t('MPDF library'), '#access' => $pdf_generator == 'FrxMPDF');
+  $form['config']['mpdf']['library'] = array(
     '#type' => 'item',
     '#title' => 'Installation path',
     '#markup' => $mpdf_path,
   );
 
-  $form['prince'] = array('#type' => 'fieldset', '#title' => t('Prince XML'));
+  $form['config']['prince'] = array('#type' => 'fieldset', '#title' => t('Prince XML'), '#access' => $pdf_generator == 'FrxPrincePDF');
 
-  $form['prince']['library'] = array(
+  $form['config']['prince']['library'] = array(
     '#type' => 'item',
     '#title' => t('PHP Library path'),
     '#markup' => $prince_path,
   );
 
-  $form['prince']['forena_pdf_prince_path'] = array(
+  $form['config']['prince']['forena_pdf_prince_path'] = array(
     '#type' => 'textfield',
     '#title' => t('Path to binary'),
     '#description' => t('Specify the location of the prince executable (e.g. /usr/local/bin/prince'),
@@ -107,23 +109,23 @@ function forena_pdf_configure($formid, &$form_state)  {
   $docraptor_url = variable_get('fornea_pdf_docrapter_url', 'https://docraptor.com/docs');
   $docraptor_key = variable_get('forena_pdf_docraptor_key', '');
   $docraptor_test = variable_get('forena_pdf_docraptor_test', TRUE);
-  $form['docraptor'] = array('#type' => 'fieldset', '#title' => t("DocRaptor PDF Generation Service"));
+  $form['config']['docraptor'] = array('#type' => 'fieldset', '#title' => t("DocRaptor PDF Generation Service"), '#access' => $pdf_generator == 'FrxDocRaptor');
 
-  $form['docraptor']['forena_pdf_docraptor_url'] = array(
+  $form['config']['docraptor']['forena_pdf_docraptor_url'] = array(
     '#type' => 'textfield',
     '#title' => t('URL to Docraptor Service'),
     '#description' => t('Specify the URL to the PDF Document Generation Service'),
     '#default_value' => $docraptor_url,
   );
 
-  $form['docraptor']['forena_pdf_docraptor_key'] = array(
+  $form['config']['docraptor']['forena_pdf_docraptor_key'] = array(
     '#type' => 'textfield',
     '#title' => t('DocRaptor API Key'),
     '#description' => t('Enter the API key for your DocRaptor account here.'),
     '#default_value' => $docraptor_key,
   );
 
-  $form['docraptor']['forena_pdf_docraptor_test'] = array(
+  $form['config']['docraptor']['forena_pdf_docraptor_test'] = array(
     '#type' => 'checkbox',
     '#title' => t('Test Mode Document Generation'),
     '#desciption' => t('Generating Documents in Test mode generally does not count towards document counts, but places
@@ -133,6 +135,10 @@ function forena_pdf_configure($formid, &$form_state)  {
 
   $form['submit'] = array('#type' => 'submit', '#value' => 'Save');
   return $form;
+}
+
+function forena_pdf_config_callback($form, &$form_state) {
+  return $form['config'];
 }
 
 function forena_pdf_configure_submit($form, &$form_state) {
