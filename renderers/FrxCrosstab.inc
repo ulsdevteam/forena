@@ -22,6 +22,7 @@ class FrxCrosstab extends FrxRenderer {
     if (!$path) $path = "*";
     $group = $variables['group'];
     $dim = $variables['dim'];
+    $sum = (array)$variables['sum'];
     // Get the current context
     $data = Frx::Data()->currentContext();
 
@@ -39,7 +40,7 @@ class FrxCrosstab extends FrxRenderer {
     }
 
     // Group the data.
-    $data = $this->frxReport->group($nodes, $group);
+    $data = $this->frxReport->group($nodes, $group, $sum);
     $this->dim_headers = array();
     $this->dim_rows = array();
     $this->dim_columns = array();
