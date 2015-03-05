@@ -60,7 +60,7 @@ class FrxPDO extends FrxDataSource {
       } catch (PDOException $e) {
         $this->error('Unable to connect to database', $e->getMessage());
       }
-      $this->db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_OBJ);
+      if($this->db) $this->db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_OBJ);
 
     }
     else {
