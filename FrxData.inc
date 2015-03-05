@@ -33,7 +33,7 @@ class FrxData extends FrxContext {
     $site['theme_path'] = base_path() . $theme_path;
     $site['theme_dir'] = &$theme_path;
     $site['base_url'] = &$base_root;
-    $site['user_name'] = $user ? $user->name : '';
+    $site['user_name'] = $user->uid ? $user->name : '';
     $site['uid'] = $user ? $user->uid : 0;
     $site['language'] = &$language;
     $site['args'] = arg();
