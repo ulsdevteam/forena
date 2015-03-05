@@ -126,7 +126,7 @@ class FrxDrupal extends FrxDataSource {
         $type = $options['entity_type'];
         $id = $data->$id_key;
         if ($id) {
-          $entity_map[$id] = $row_node;
+          $entity_map[$id][] = $row_node;
           $select_fields[$id] = $data;
         }
       }
@@ -159,47 +159,73 @@ class FrxDrupal extends FrxDataSource {
         // Get node permissions
         $access = ($type=='node') ? node_access('view', $e) : TRUE;
         if (isset($entity_map[$id])) {
-          $row_node = $entity_map[$id];
-          $lang = isset($e->language) ? $e->language : 'und';
+          foreach($entity_map[$id] as $entry) {
+            $row_node = $entry;
+            $lang = isset($e->language) ? $e->language : 'und';
 
-          // remove elements we don't have access to
-          if (!$access) {
-            unset($row_node[0]);
-          }
-          else {
-
-            foreach ($e as $key => $val) if ($val && !isset($row_node->$key)) {
-              if (strpos($key, 'field_') === 0) {
-                //$fields = field_get_items('node', $node, $key);
-                $field = field_view_field($type, $e, $key);
-                $field['#theme'] = array('forena_inline_field');
-                $value  = drupal_render($field);
-                $f = $row_node->addChild($key, $value);
-                if (isset($field['#field_type'])) $f['type'] = $field['#field_type'];
-                if (isset($field['#field_name'])) $f['name'] = $field['#field_name'];
-              } else if (is_array($val) && isset($val[$lang])) {
-                $tmp = $val[$lang][0];
-                if (isset($tmp['safe_value'])) {
-                  $row_node->addChild($key, $tmp['safe_value']);
-                } else if (isset($tmp['value'])) {
-                  $row_node->addChild($key, $tmp['value']);
-                }
-              } else if (is_array($val) && isset($val['und'])) {
-                $tmp = $val['und'][0];
-                if (isset($tmp['safe_value'])) {
-                  $row_node->addChild($key, $tmp['safe_value']);
-                } else if (isset($tmp['value'])) {
-                  $row_node->addChild($key, $tmp['value']);
-                }
-              }else if (is_scalar($val)) {
-                $row_node->addChild($key, $val);
-              }
+            // remove elements we don't have access to
+            if (!$access) {
+              unset($row_node[0]);
             }
-            // Now add on select fields
-            if ($select_fields[$id]) foreach ($select_fields[$id] as $key=>$val) {
-              if (!isset($row_node->$key)) {
-                $row_node->addChild($key, $val);
+            else {
+
+              foreach ($e as $key => $val) {
+                if ($val && !isset($row_node->$key)) {
+                  if (strpos($key, 'field_') === 0) {
+                    //$fields = field_get_items('node', $node, $key);
+                    $field = field_view_field($type, $e, $key);
+                    $field['#theme'] = array('forena_inline_field');
+                    $value = drupal_render($field);
+                    $f = $row_node->addChild($key, $value);
+                    if (isset($field['#field_type'])) {
+                      $f['type'] = $field['#field_type'];
+                    }
+                    if (isset($field['#field_name'])) {
+                      $f['name'] = $field['#field_name'];
+                    }
+                  }
+                  else {
+                    if (is_array($val) && isset($val[$lang])) {
+                      $tmp = $val[$lang][0];
+                      if (isset($tmp['safe_value'])) {
+                        $row_node->addChild($key, $tmp['safe_value']);
+                      }
+                      else {
+                        if (isset($tmp['value'])) {
+                          $row_node->addChild($key, $tmp['value']);
+                        }
+                      }
+                    }
+                    else {
+                      if (is_array($val) && isset($val['und'])) {
+                        $tmp = $val['und'][0];
+                        if (isset($tmp['safe_value'])) {
+                          $row_node->addChild($key, $tmp['safe_value']);
+                        }
+                        else {
+                          if (isset($tmp['value'])) {
+                            $row_node->addChild($key, $tmp['value']);
+                          }
+                        }
+                      }
+                      else {
+                        if (is_scalar($val)) {
+                          $row_node->addChild($key, $val);
+                        }
+                      }
+                    }
+                  }
+                }
               }
+              // Now add on select fields
+              if ($select_fields[$id]) {
+                foreach ($select_fields[$id] as $key => $val) {
+                  if (!isset($row_node->$key)) {
+                    $row_node->addChild($key, $val);
+                  }
+                }
+              }
+
             }
           }
         }
