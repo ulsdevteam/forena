@@ -17,8 +17,9 @@
     </chapter>
     <chapter>
       <title>Master Summary with drill down</title>
-      <subtitle>A graph containing links to another drill down report</subtitle>
-      <abstract>Graph with a related report with links back to the Report that filters based on state lookup.</abstract>
+      <subtitle>A graph containing links to another drill down report and embedded calculations.</subtitle>
+      <abstract>Graph with a related report with links back to the Report that filters based on state lookup. This report also demonstrates the
+      use of calculation fields embedded in a report. </abstract>
       <link>state_summary</link>
     </chapter>
     <chapter>

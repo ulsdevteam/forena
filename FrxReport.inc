@@ -318,7 +318,7 @@ class FrxReport {
 
 
   public function getField($id) {
-    $field = array_fill_keys(array('default', 'link', 'add-query', 'class', 'rel', 'format', 'format-string', 'target', 'calc'), '');
+    $field = array_fill_keys(array('default', 'link', 'add-query', 'class', 'rel', 'format', 'format-string', 'target', 'calc', 'context'), '');
     if ($this->fields) {
       $path = 'frx:field[@id="' . $id . '"]';
       $formatters = $this->fields->xpath($path);
@@ -379,7 +379,7 @@ class FrxReport {
     if ($calc) {
       if ($context) $context .= ".";
       $calc = $this->teng->replace($calc);
-      if ($calc) $value = $this->teng->replace('{' . $context . '=' . $calc . '}');
+      if ($calc) $value = $this->teng->replace('{' . $context . '=' . $calc . '}', TRUE);
     }
 
 
