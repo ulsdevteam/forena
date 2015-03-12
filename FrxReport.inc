@@ -382,7 +382,6 @@ class FrxReport {
       if ($calc) $value = $this->teng->replace('{' . $context . '=' . $calc . '}', TRUE);
     }
 
-
     if ($format && !$raw) {
       $value = FrxReportGenerator::$instance->format_data($value, $format, $format_str, $this->teng, $default);
       $value = trim($value);
