@@ -33,13 +33,26 @@ class FrxDocRaptor extends FrxDocument {
     if ($disable_links) {
       $html = preg_replace('/<a href=\"(.*?)\">(.*?)<\/a>/', "\\2", $html);
     }
-
     $link_class = $disable_links ? 'prince-disable-links': '';
     $output = '<html><head>';
     $output .= '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>';
-    if (@$options['css'] || isset($r->rpt_xml->head->style)) {
+    $css = '';
+    foreach (Frx::Skin()->stylesheets as $type => $sheets) {
+      foreach ($sheets as $sheet) {
+        switch ($type) {
+          case 'all':
+          case 'print':
+          case 'screen':
+          case 'pdf':
+            $css .= file_get_contents($sheet);
+            //echo $sheet;
+            break;
+        }
+      }
+    }
+    if ( $css || isset($r->rpt_xml->head->style)) {
       $output .= '<style type="text/css">';
-      $output .= @$options['css'];
+      $output .= $css;
       if (isset($r->rpt_xml->head->style) || isset($r->rpt_xml->head->style)) {
         $sheet = (string)$r->rpt_xml->head->style;
         $output .= $sheet;
@@ -48,7 +61,6 @@ class FrxDocRaptor extends FrxDocument {
     }
 
     $output .= '<title>' . $r->title . "</title></head><body class='forena-report $link_class'><h1>" . $r->title . '</h1>' . $html . '</body></html>';
-
     $api_key = $this->api_key;
     if ($api_key) {
 
