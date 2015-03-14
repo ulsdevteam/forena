@@ -122,6 +122,7 @@ class FrxDrupal extends FrxDataSource {
        * loadEntitys method
        */
       if (@$options['entity_type']  && @$options['entity_id'] ) {
+        $display = @$options['entity_display'];
         $id_key = $options['entity_id'];
         $type = $options['entity_type'];
         $id = $data->$id_key;
@@ -133,7 +134,7 @@ class FrxDrupal extends FrxDataSource {
     }
 
     if ($entity_map) {
-      $this->loadEntities($type, $entity_map, $select_fields);
+      $this->loadEntities($type, $entity_map, $select_fields, $display);
     }
     if ($this->debug) {
       $d = ($xml) ? htmlspecialchars($xml->asXML()) : '';
@@ -147,7 +148,7 @@ class FrxDrupal extends FrxDataSource {
    * @param $type Type of entity being loaded.
    * @param $entity_map Map of entity ids to nodes.
    */
-  private function loadEntities($type, $entity_map, $select_fields) {
+  private function loadEntities($type, $entity_map, $select_fields, $display=array()) {
     // Do these 100 at a time for performance reasons
     $chunks = array_chunk($entity_map, 100, TRUE);
     foreach ($chunks as $chunk) {
@@ -173,7 +174,8 @@ class FrxDrupal extends FrxDataSource {
                 if ($val && !isset($row_node->$key)) {
                   if (strpos($key, 'field_') === 0) {
                     //$fields = field_get_items('node', $node, $key);
-                    $field = field_view_field($type, $e, $key);
+                    if (!$display) $display = 'default';
+                    $field = field_view_field($type, $e, $key, $display);
                     $field['#theme'] = array('forena_inline_field');
                     $value = drupal_render($field);
                     $f = $row_node->addChild($key, $value);

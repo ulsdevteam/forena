@@ -38,8 +38,8 @@ class FrxSVGGraph extends FrxRenderer {
    * Re-architect the data into something that the graphing engine can work with
    */
   public function generateGraphData(&$data, $series, $key) {
-
     // Default controlling attributes
+    $counts = array();
     $legend = array();
     $this->graphOptions['structure']['value'] = array();
     foreach($series as $col) {
@@ -56,7 +56,10 @@ class FrxSVGGraph extends FrxRenderer {
       // Dimensions
       foreach($series as $col) {
           $val = $this->teng->replace($col, TRUE);
-          if ($val != '' && $val !==NULL) $trow[trim("$col", '{}')] = $val;
+          if ($val != '' && $val !==NULL) {
+            $trow[trim("$col", '{}')] = $val;
+            @$counts[trim("$col", '{}')]++;
+          }
       }
       foreach($this->field_sources as $k => $src) {
         $trow[$k] = $this->teng->replace($src, TRUE);
@@ -68,6 +71,7 @@ class FrxSVGGraph extends FrxRenderer {
       Frx::Data()->pop();
       $this->graphData[] = $trow;
     }
+    $this->counts = $counts;
 
     // Deal with rare case where legend are supposed to come from data
     if (isset($this->field_sources['legend_entries'])) {
@@ -85,6 +89,7 @@ class FrxSVGGraph extends FrxRenderer {
     $dim_values = array();
     $rows = array();
     $legend = array();
+    $counts = array();
     $data = $this->frxReport->group($block_data, $group, $sum);
     $this->graphOptions['structure'] = array('key' => $group);
     foreach ($data as $gk => $group_rows) {
@@ -132,7 +137,10 @@ class FrxSVGGraph extends FrxRenderer {
         foreach($dim_columns as $col) {
 
           $val = $this->teng->replace($col, TRUE);
-          if ($val !== '' && $val !== NULL) $trow[trim($dk, '{}') . trim($col, '{}')] = $val;
+          if ($val !== '' && $val !== NULL) {
+            $trow[trim($dk, '{}') . trim($col, '{}')] = $val;
+            @$counts[trim($dk, '{}') . trim($col, '{}')]++;
+          }
           foreach($this->field_sources as $fk => $src) {
             $trow[$dk . $fk] = $this->teng->replace($src, TRUE);
             if (isset($this->field_sources['legend_entries'])) {
@@ -147,6 +155,7 @@ class FrxSVGGraph extends FrxRenderer {
         frx::Data()->pop();
       }
       $this->graphData[] = $trow;
+      $this->counts = $counts;
 
     }
 
@@ -303,6 +312,41 @@ class FrxSVGGraph extends FrxRenderer {
     if (isset($this->graphOptions['legend_entries']) && !is_array($this->graphOptions['legend_entries'])) {
       $this->graphOptions['legend_entries'] = explode('|', $this->graphOptions['legend_entries']);
     }
+
+  }
+
+  public function validSeries() {
+    $valid = TRUE;
+    $removed = array();
+    if (is_array($this->graphOptions['structure']['value'])) {
+      foreach ($this->graphOptions['structure']['value'] as $k=>$series) {
+        if (!isset($this->counts[$series])) {
+          // remove empty series.
+          unset($this->graphOptions['structure']['value'][$k]);
+          $removed[] = $k;
+        }
+      }
+
+      if ($removed) {
+        $this->graphOptions['structure']['value'] = array_values($this->graphOptions['structure']['value']);
+        foreach($this->graphOptions as $option => $data) {
+          if (is_array($data)) {
+            $modified = FALSE;
+            foreach($removed as $k) {
+              if (isset($data[$k])) {
+                unset($this->graphOptions[$option][$k]);
+                $modified = TRUE;
+              }
+            }
+            if ($modified) {
+              $this->graphOptions[$option] = array_values($this->graphOptions[$option]);
+            }
+          }
+        }
+        if (!$this->graphOptions['structure']['value']) $valid = FALSE;
+      }
+    }
+    return $valid;
   }
 
   /**
@@ -314,8 +358,7 @@ class FrxSVGGraph extends FrxRenderer {
     $output = '';
     $this->prepareGraph();
     $type = $this->graphOptions['type'];
-
-    if ($this->graphData) {
+    if ($this->graphData && $this->validSeries()) {
       $output = $this->renderChart($type);
     }
 

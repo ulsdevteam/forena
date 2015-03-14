@@ -8,7 +8,7 @@
 class FrxEmailMergeDoc extends FrxDocument {
   private $title;
   public function render($r, $format, $content = array()) {
-    $body = $r->html;
+    $body =  '<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/></head><body>' . $r->html . '</body></html>';
     $doc = new DOMDocument('1.0', 'UTF-8');
     $doc->strictErrorChecking = FALSE;
     libxml_use_internal_errors(true);
@@ -40,7 +40,6 @@ class FrxEmailMergeDoc extends FrxDocument {
       $body = $doc->xpath('.//*[@class="email-body"]');
       if ($body) $prompt_body = FALSE;
       $body = $body ? $body[0]->asXML() : $body;
-
       // Assemble email
       $email = array(
         'to' => $to,
