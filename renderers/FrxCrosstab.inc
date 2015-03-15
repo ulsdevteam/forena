@@ -15,6 +15,8 @@ class FrxCrosstab extends FrxRenderer {
 
 
     $variables = $this->mergedAttributes();
+    $attributes = $this->replacedAttributes();
+
     if (!empty($variables['hidden']) && $this->format != 'csv' && $this->format != 'xls') {
       return '';
     }
@@ -111,11 +113,18 @@ class FrxCrosstab extends FrxRenderer {
       $trows[] = $trow;
 
     }
+
+
+    $class = 'crosstab-table';
+    if (isset($attributes['class'])) $class .= ' ' . $attributes['class'];
+
     $vars = array(
     	'header' => $hrow,
       'rows' => $trows,
-      'attributes' => array('class' => array('crosstab-table' )),
+      'attributes' => array('class' => array($class)),
     );
+
+
 
     $output = theme('table', $vars);
     return $output;
