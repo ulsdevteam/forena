@@ -22,7 +22,11 @@ class FrxWebDoc extends FrxDocument {
           case 'all':
           case 'print':
           case 'screen':
-            drupal_add_css($sheet, array('media' => $type));
+            $options = $type=='all' ? array() :  array('media' => $type);
+            if (strpos($sheet, 'http:') === 0 || strpos($sheet, 'https:') === 0) {
+              $options['type'] = 'external';
+            }
+            drupal_add_css($sheet, $options);
             break;
         }
       }

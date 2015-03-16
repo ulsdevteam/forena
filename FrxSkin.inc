@@ -32,7 +32,10 @@ class FrxSkin {
    * @param $sheet
    */
   public function addCSS($type, $sheet) {
-    if (Frx::File()->exists($sheet)) {
+    if (strpos($sheet, 'http:') === 0 || strpos($sheet, 'https:') === 0) {
+      $this->stylesheets[$type][] = $sheet;
+    }
+    elseif (Frx::File()->exists($sheet)) {
       $this->stylesheets[$type][] = Frx::File()->path($sheet);
     }
     elseif (file_exists($sheet)) {

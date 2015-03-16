@@ -44,7 +44,12 @@ class FrxDocRaptor extends FrxDocument {
           case 'print':
           case 'screen':
           case 'pdf':
-            $css .= file_get_contents($sheet);
+            if (strpos($sheet, 'http:') === 0 || strpos($sheet, 'https:') === 0) {
+              $output .= "    <link rel='stylesheet' type='text/css' href='$sheet'> \n";
+            }
+            else {
+              $css .= file_get_contents($sheet);
+            }
             //echo $sheet;
             break;
         }

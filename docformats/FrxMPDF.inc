@@ -46,6 +46,25 @@ class FrxMPDF extends FrxDocument {
       $output = '';
       $output = '<html><head>';
       $output .= '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>';
+      $css = '';
+      foreach (Frx::Skin()->stylesheets as $type => $sheets) {
+        foreach ($sheets as $sheet) {
+          switch ($type) {
+            case 'all':
+            case 'print':
+            case 'screen':
+            case 'pdf':
+            if (strpos($sheet, 'http:') === 0 || strpos($sheet, 'https:') === 0) {
+              $output .= "    <link rel='stylesheet' type='text/css' href='$sheet'> \n";
+            }
+            else {
+              $css .= file_get_contents($sheet);
+            }
+              //echo $sheet;
+              break;
+          }
+        }
+      }
       if (@$options['css'] || isset($r->rpt_xml->head->style)) {
         $output .= '<style type="text/css">';
         $output .= $css;
@@ -57,20 +76,6 @@ class FrxMPDF extends FrxDocument {
       }
       $output .= '<title>' . $r->title . "</title></head><body class='forena-report $link_class'><h1>" . $r->title . '</h1>' . $html;
       $output .= '</body></html>';
-
-      foreach (Frx::Skin()->stylesheets as $type => $sheets) {
-        foreach ($sheets as $sheet) {
-          switch ($type) {
-            case 'all':
-            case 'print':
-            case 'screen':
-            case 'pdf':
-              $mpdf->WriteHTML(file_get_contents($sheet), 1);
-              //echo $sheet;
-              break;
-          }
-        }
-      }
 
       $mpdf->WriteHTML($output);
       // $pdf = $mpdf->Output('', 'S');
