@@ -43,7 +43,6 @@ class FrxMPDF extends FrxDocument {
     $mpdf = new mPDF('UTF-8');
     $mpdf->AddPageByArray($page_data);
 
-      $output = '';
       $output = '<html><head>';
       $output .= '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>';
       $css = '';
@@ -79,7 +78,7 @@ class FrxMPDF extends FrxDocument {
 
       $mpdf->WriteHTML($output);
       // $pdf = $mpdf->Output('', 'S');
-      $file_name = basename($_GET['q']);
+      $filename = basename($_GET['q']);
       $pdf = $mpdf->Output($filename, 'I');
       return $pdf;
   }
