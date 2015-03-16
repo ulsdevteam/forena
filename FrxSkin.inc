@@ -72,9 +72,10 @@ class FrxSkin {
     if ($this->name != $name) {
       //Check for an info file
       if (Frx::File()->exists($name . '.skinfo')) {
-
         // Parse the info file using drupals stock version
         $this->info = drupal_parse_info_format(Frx::File()->contents($name . '.skinfo'));
+        $path_info = Frx::File()->pathinfo($name . '.skinfo');
+        $this->info['base_path'] = base_path() . $path_info['dirname'];
         Frx::Data()->setContext('skin', $this->info);
         if (isset($this->info['stylesheets'])) {
           foreach ($this->info['stylesheets'] as $type => $sheets) {
