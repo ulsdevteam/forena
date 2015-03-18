@@ -969,7 +969,10 @@ And this is the very last line of the report body.
         <td>site.args</td><td>See XML Below</td><td>The path as returned by drupals args function</td>
       </tr>
       <tr>
-        <td>site.base_path</td><td>{site.base_path}</td><td>Root relative reference to your site.  Useful when referencing assets.</td>
+        <td>site.dir</td><td>{site.dir}</td><td>Root Relative reference to your site.  Useful when referencing assets. </td>
+      </tr>
+      <tr>
+        <td>site.base_path (deprecated)</td><td>{site.base_path}</td><td>Same as above but the raw result for drupal_base_path() call. </td>
       </tr>
       <tr>
         <td>site.base_url</td><td>{site.base_url}</td><td>Full url reference to the base url of your site</td>
@@ -1019,6 +1022,9 @@ And this is the very last line of the report body.
     <td>report.name</td><td>{report.name}</td><td>Machine name of the current report.</td>
   </tr>
   <tr>
+    <td>report.dir</td><td>{report.dir}</td><td>Directory of the current report. </td>
+  </tr>
+  <tr>
     <td>report.link</td><td>{report.link}</td><td>The site relative path where you will find this report. </td>
   </tr>
   <tr>
@@ -1033,10 +1039,29 @@ And this is the very last line of the report body.
   </tbody>
   </table>
 </div>
-
+<div>
+  <h3>The Skin Context (skin)</h3>
+  <p>The Skin data context is always available to help provide information regarding the current skin for the report.
+  In addition to the tokens below, arbitrary varialbes may be defined in the skin and used in the report for skin
+  specific variables.</p>
+  <table>
+    <thead>
+    <tr>
+      <th>Property</th><th>Sample</th><th>Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+      <td>skin.name</td><td>{skin.name}</td><td>The display name of the current skin.</td>
+    </tr>
+    <tr>
+      <td>skin.dir</td><td>{skin.dir}</td><td>Directory of the current skin.  Useful for including skin assets.  </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
 <div>
   <h3>The FrxReport Context (FrxReport)</h3>
-
   <p>
     A custom FrxReport context is provided to allow you to embed reports easily. For example, consider the <strong>Simple
     Table of States</strong> report, which is located the report repository in a subdirectory named
@@ -1052,8 +1077,24 @@ And this is the very last line of the report body.
     this context
     is used.
   </p>
+</div>
+<div>
+  <h3>The FrxReport Context (FrxReport)</h3>
+  <p>
+    A custom FrxReport context is provided to allow you to embed reports easily. For example, consider the <strong>Simple
+    Table of States</strong> report, which is located the report repository in a subdirectory named
+    <strong>sample</strong>, in report
+    template <strong>states.frx</strong>. This report may be embedded in another report simply by including the string
+    <strong>FrxReport.sample.states</strong>,
+    enclosed by curly braces, anywhere in a report, as in this example:
+  </p>
 
-
+  <div frx:renderer="FrxSource">... {FrxReport.sample.states} ...</div>
+  <p>
+    It is important to understand that the data from the current context will be used as parameters to the report when
+    this context
+    is used.
+  </p>
 </div>
 <div>
   <h3>Custom Contexts</h3>

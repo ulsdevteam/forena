@@ -30,6 +30,7 @@ class FrxData extends FrxContext {
     global $theme_path;
     global $base_root;
     $site['base_path'] = base_path();
+    $site['dir'] = rtrim(base_path(), '/');
     $site['theme_path'] = base_path() . $theme_path;
     $site['theme_dir'] = &$theme_path;
     $site['base_url'] = &$base_root;

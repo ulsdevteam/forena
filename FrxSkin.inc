@@ -76,6 +76,7 @@ class FrxSkin {
         $this->info = drupal_parse_info_format(Frx::File()->contents($name . '.skinfo'));
         $path_info = Frx::File()->pathinfo($name . '.skinfo');
         $this->info['base_path'] = base_path() . $path_info['dirname'];
+        $this->info['dir'] = base_path() . $path_info['dirname'];
         Frx::Data()->setContext('skin', $this->info);
         if (isset($this->info['stylesheets'])) {
           foreach ($this->info['stylesheets'] as $type => $sheets) {
