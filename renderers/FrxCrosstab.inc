@@ -24,7 +24,7 @@ class FrxCrosstab extends FrxRenderer {
     if (!$path) $path = "*";
     $group = $variables['group'];
     $dim = $variables['dim'];
-    $sum = (array)$variables['sum'];
+    $sum = (array)@$variables['sum'];
     // Get the current context
     $data = Frx::Data()->currentContext();
 
