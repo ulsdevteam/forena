@@ -6,8 +6,8 @@
  *
  */
 class ForenaReportTestCase extends DrupalWebTestCase {
+  public $privileged_user;
   public static function getInfo() {
-    $privileged_user;
 
     return array(
       'name' => 'Forena Reports',
@@ -17,16 +17,19 @@ class ForenaReportTestCase extends DrupalWebTestCase {
   }
 
   public function setup() {
-    parent::setup('forena', 'devel');
+    parent::setup('forena');
     // Create and log in our privileged user.
     $this->privileged_user = $this->drupalCreateUser(array(
-      'access demo reports',
+      'access sampledb data',
       'administer forena reports',
       'list reports',
     ));
     $this->drupalLogin($this->privileged_user);
   }
 
+  /**
+   * Test basic Forena Report.
+   */
   public function testConfig() {
     $this->drupalGet('forena');
     $this->drupalGet('reports/sample.states');
