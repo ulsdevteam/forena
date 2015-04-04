@@ -14,7 +14,7 @@ class FrxContext {
   }
 
   public function getValue($key,  $context = '') {
-    $value = @$values[$key];
+    $value = @$this->values[$key];
     return $value;
   }
 
