@@ -126,8 +126,7 @@ class FrxData extends FrxContext {
         FrxData::arrayToXml($v, $node);
       }
       else {
-        $node = $xml->addChild($tag);
-        $node->value = $v;
+        $node = $xml->addChild($tag, htmlspecialchars($v));
         $node['key'] = $k;
       }
 
