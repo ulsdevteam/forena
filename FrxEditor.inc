@@ -960,7 +960,6 @@ class FrxEditor {
 
     Frx::Data()->push($parms, 'parm');
 
-
     if (!$missing_parms) {
       // Check for cache data
       if ($r->cache && !$r->preview_mode) {
@@ -996,6 +995,7 @@ class FrxEditor {
         }
       }
       else {
+
         $r->render($format);
       }
     }
@@ -1020,7 +1020,6 @@ class FrxEditor {
       'links' => $this->documentLinks(),
       'content' => array('#markup' => $r->html . $links),
     );
-
     if ($this->frxReport->file) {
       $this->frxReport->writeBuffer();
       fclose($this->frxReport->file);

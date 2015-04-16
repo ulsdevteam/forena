@@ -56,14 +56,13 @@ class FrxMenu {
     // Determine if the report has an extention that is one of the docuemnt types
     $p = pathinfo($url);
     if (isset($p['extension']) && array_search($p['extension'], $this->doc_formats)!==FALSE) {
-      $name = $p['filename'];
+      $name = $p['dirname'] == '.' ? $p['filename'] : $p['dirname'] . '/' . $p['filename'];
       $format = $p['extension'];
     }
     else {
       $format = 'web';
       $ext = '';
     }
-
     // Convert class names to directory names.
     $base_name = str_replace('.', '/', $name);
     $name = $base_name;
@@ -101,7 +100,6 @@ class FrxMenu {
         }
       }
     }
-
     //$name = trim(str_replace('.', '/', $base_name), '/');
     $filename = $name . '.frx';
 
@@ -115,7 +113,6 @@ class FrxMenu {
     $desc['i_link']= 'reports/' . $this->i_link = str_replace('/', '.', $i_name);
     $desc['language'] = $this->language = $lang;
     $desc['format'] = $this->format = $format;
-
     return $desc;
   }
 

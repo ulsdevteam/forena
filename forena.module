@@ -1015,7 +1015,6 @@ function forena_report($name_in, $parms = NULL, $print = TRUE, $filename='') {
   $desc['dir'] = base_path() . $path_info['dirname'];
   $desc['theme'] = $desc['basepath'] . drupal_get_path('theme',$GLOBALS['theme']);
   $desc['q'] = $_GET['q'];
-
   if (!$desc['exists']) {
     watchdog('error', 'Report %s not found', array('%s' => $name_in), WATCHDOG_ERROR);
     if($print) {
@@ -1030,7 +1029,6 @@ function forena_report($name_in, $parms = NULL, $print = TRUE, $filename='') {
   // Load dataTable plugin if possible.
   //forena_include_data_tables();
   $content = Frx::Editor($name_in, FALSE)->report($parms, $print, FALSE, $filename);
-
   $m_path = drupal_get_path('module', 'forena');
   if ($content) {
     // This has been deprecated, but we'll eave it in for now.
