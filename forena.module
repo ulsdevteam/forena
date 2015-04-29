@@ -519,9 +519,9 @@ function forena_reports_autocomplete($string='', $string2='') {
   }
   $string = '*' .$string .'*';
   $result = Frx::File()->allReports();
-  foreach ($result as $row) {
-    if (drupal_match_path($row->name, $string)) {
-      $reports[$row->name] = $row->name . ' - ' . $row->cache['title'];
+  foreach ($result as $name => $row) {
+    if (drupal_match_path($name, $string)) {
+      $reports[$name] = $name . ' - ' . $row->cache['title'];
     }
   }
   return drupal_json_output($reports);
@@ -902,7 +902,15 @@ function forena_parameter_form_submit($form, &$form_state) {
       }
     }
   }
-  $form_state['redirect']= array($_GET['q'], array('query' => @$values['params']));
+
+  $desc = $form_state['storage']['desc'];
+  if ($desc['always_redirect']) {
+    $path = $desc['link'];
+  }
+  else {
+    $path = $desc['q'];
+  }
+  $form_state['redirect']= array($path, array('query' => @$values['params']));
 }
 
 /**
@@ -1005,6 +1013,10 @@ function forena_report_ajax_callback($report_name) {
  * @return unknown
  */
 function forena_report($name_in, $parms = NULL, $print = TRUE, $filename='') {
+  $in_block = FALSE;
+  if ($print === 'block') {
+    $in_block = TRUE;
+  }
   require_once('forena.common.inc');
   $desc = Frx::Menu()->parseURL($name_in);
   $time = @new DateTime($value);
@@ -1014,7 +1026,9 @@ function forena_report($name_in, $parms = NULL, $print = TRUE, $filename='') {
   $path_info = Frx::File()->pathinfo($desc['filename']);
   $desc['dir'] = base_path() . $path_info['dirname'];
   $desc['theme'] = $desc['basepath'] . drupal_get_path('theme',$GLOBALS['theme']);
+  $desc['print'] = $print;
   $desc['q'] = $_GET['q'];
+  $desc['always_redirect'] = $in_block;
   if (!$desc['exists']) {
     watchdog('error', 'Report %s not found', array('%s' => $name_in), WATCHDOG_ERROR);
     if($print) {
@@ -1028,7 +1042,9 @@ function forena_report($name_in, $parms = NULL, $print = TRUE, $filename='') {
   $report_name = $desc['name'];
   // Load dataTable plugin if possible.
   //forena_include_data_tables();
-  $content = Frx::Editor($name_in, FALSE)->report($parms, $print, FALSE, $filename);
+  $o = Frx::Editor($name_in, FALSE);
+  $o->alwaysRedirect = $in_block;
+  $content = $o->report($parms, $print, FALSE, $filename);
   $m_path = drupal_get_path('module', 'forena');
   if ($content) {
     // This has been deprecated, but we'll eave it in for now.

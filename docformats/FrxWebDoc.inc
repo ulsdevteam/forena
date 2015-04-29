@@ -54,7 +54,8 @@ class FrxWebDoc extends FrxDocument {
   }
 
   public function output(&$output) {
-    if ($this->title) {
+    $desc = Frx::Data()->getContext('report');
+    if ($this->title && $desc['print'] !== 'block') {
       drupal_set_title(filter_xss($this->title), PASS_THROUGH);
     }
     return FALSE;

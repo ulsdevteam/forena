@@ -57,6 +57,9 @@ class FrxBean extends BeanPlugin {
 
     if (!$parms) $parms = array();
     $report = $bean->settings['selected_report'];
+    if (('reports/' . str_replace('/','.',$report)) == $_GET['q']) {
+      return array();
+    }
     if ($bean->settings['include_url_parameters']) {
       $query = $_GET;
       unset($query['q']);
@@ -64,8 +67,8 @@ class FrxBean extends BeanPlugin {
       if (Frx::Data()->contextExists('parm')) $parms = array_merge($parms, Frx::Data()->getContext('parm'));
     }
 
-    $output = forena_report($report, $parms, FALSE);
-    return array('content' => array('#markup' => $output));
+    $content = forena_report($report, $parms, 'block');
+    return $content;
   }
 }
 
