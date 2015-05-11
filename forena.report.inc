@@ -1046,7 +1046,7 @@ function forena_report_field_form($form, &$form_state, $report_name, $id) {
 
   $form['field']['calc'] = array(
     '#type' => 'textfield',
-    '#title' => t('calulation'),
+    '#title' => t('calculation'),
     '#default_value' => $field['calc'],
     '#size' => 100,
     '#description' => t('Enter a valid XPath expression used to calculate this field. Tokens (e.g. {title} may be used in the calculation.'),
