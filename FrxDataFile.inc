@@ -12,7 +12,11 @@ class FrxDataFile extends FrxFile {
     // Load default directory from configuration.
     $report_path = variable_get('forena_query_data_path', '');
     if (!$report_path) {
-      $report_path = variable_get('file_private_path' . '/data', conf_path() . '/data');
+      $report_path = drupal_realpath('private://data');
+      if ($report_path) {
+        if (!file_exists($report_path)) @mkdir($report_path);
+      }
+      if (!$report_path) $report_path = conf_path() . '/data';
     }
 
     // Add directories for data  repos.
@@ -25,10 +29,10 @@ class FrxDataFile extends FrxFile {
     foreach ($directories as $dir) {
       $this->includes[$k] = rtrim($dir, '/');
     }
-
     // Parent constructor.
     parent::__construct($default_directory, $directories, array('sql', 'xml', 'inc'));
   }
+
 
   /**
    * List all the reports for a language.

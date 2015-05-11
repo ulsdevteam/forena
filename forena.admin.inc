@@ -157,8 +157,9 @@ function forena_settings($form, &$form_state) {
         '#title' => t('Custom Data Block Repository'),
         '#description' => t('Indicate the directory that you want to use to save custom created data blocks (SQLs or
             XMLs) using the forena query builder tool. These will override any module delivered data blocks. This
-            needs to be a directory that is writable by the web user but should not be browsable by the web.'),
-        '#default_value' => Frx::DataFile()->dir,
+            needs to be a directory that is writable by the web user but should not be browsable by the web.  If you leave this blank
+            Forena will use a data path in your <a href="@file_config">private file system</a>', array('@file_config' => url('admin/config/media/file-system'))),
+        '#default_value' => variable_get('fornea_query_data_path', ''),
       );
 
       $form['forena_last_query_data_path'] = array(

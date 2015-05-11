@@ -311,6 +311,7 @@ class FrxFile {
 
   function verifyDirectory($fullpath, $recursive=FALSE) {
     static $path='';
+    dpm($fullpath);
     $success = TRUE;
     if (!$recursive) {
       $path = $this->dir;
@@ -346,6 +347,7 @@ class FrxFile {
    */
   public function save($filename, $data) {
     $path = $this->dir . '/' . $filename;
+
     $this->verifyDirectory($filename);
 
     if (is_writable($path) || (!file_exists($path) && is_writable(dirname($path)))) {

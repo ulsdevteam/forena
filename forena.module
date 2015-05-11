@@ -37,7 +37,7 @@ function forena_menu() {
     'title' => 'Forena Reports',
     'description' => 'Tell Forena where to store report files and how users should access them.',
     'access arguments' => array('administer forena reports'),
-    'type' => MENU_CALLBACK,
+    'type' => MENU_NORMAL_ITEM,
     'file' => 'forena.admin.inc',
   );
 
@@ -358,7 +358,7 @@ function forena_menu() {
     'page arguments' => array(),
     'title' => 'My Reports',
     'access arguments' => array('list reports'),
-    'type' => MENU_NORMAL_ITEM,
+    'type' => MENU_CALLBACK,
   );
 
   $items['reports'] = array(
