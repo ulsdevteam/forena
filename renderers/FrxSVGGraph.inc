@@ -371,6 +371,7 @@ class FrxSVGGraph extends FrxRenderer {
       'Bar3DGraph' => array('type' => 'Bar Graph', 'style' => '3D' ),
       'StackedBarGraph' => array('type' => 'Bar Graph', 'style' => 'Stacked'),
       'GroupedBarGraph' => array('type' => 'Bar Graph', 'style' => 'Grouped'),
+      'BarAndLineGraph' => array('type' => 'Bar and Line Graph', 'style' => 'Grouped'),
       'CylinderGraph' => array('type' => 'Bar Graph', 'style' => 'Cylinder'),
       'StackedCylinderGraph' => array('type' => 'Bar Graph', 'style' => 'Stacked Cylinder'),
       'GroupedCylinderGraph' =>  array('type' => 'Bar Graph', 'style' => 'Grouped Cylinder'),
