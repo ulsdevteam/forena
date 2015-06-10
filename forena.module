@@ -638,15 +638,21 @@ function forena_parameters_report() {
 
 function forena_parameter_form($formid, &$form_state, $parameters, $attributes= array()) {
   $parms = $_GET;
-  // Set menu parms
-  $menu_parms = Frx::Data()->getContext('menu-parms');
-  if ($menu_parms) $form_state['storage']['menu-parms'] = $menu_parms;
-  // Set Descriptors
-  $desc = FrxData::instance()->getContext('report');
-  $form_state['storage']['desc'] = $desc;
-  $desc = $form_state['storage']['desc'];
+  $menu_parms = array();
+  $desc = array();
+  if (!isset($form_state['storage'])) {
+    // Set Descriptors
+    $desc = FrxData::instance()->getContext('report');
+    $form_state['storage']['desc'] = $desc;
+    $desc = $form_state['storage']['desc'];
+    // Set menu parms
+    $menu_parms = Frx::Data()->getContext('menu-parms');
+    if ($menu_parms) $form_state['storage']['menu-parms'] = $menu_parms;
+  }
+  else {
+    extract($form_state['storage']);
+  }
   $report_name = @$desc['name'];
-
   $collapse = isset($attributes['collapsed']) ? $attributes['collapsed'] : FALSE;
   if (isset($form_state['values'])) {
     $collapse=FALSE;
