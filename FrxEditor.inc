@@ -914,7 +914,8 @@ class FrxEditor {
   public function preview($parms = array()) {
     $r = $this->frxReport;
     if(strpos($this->report_name, '__') !== 0) $r->preview_mode = TRUE;
-    return $this->report($parms, TRUE, TRUE);
+    $content = $this->report($parms, TRUE, TRUE);
+    return $content;
   }
 
   /**

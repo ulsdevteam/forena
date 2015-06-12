@@ -652,6 +652,7 @@ function forena_parameter_form($formid, &$form_state, $parameters, $attributes= 
   else {
     extract($form_state['storage']);
   }
+
   $report_name = @$desc['name'];
   $collapse = isset($attributes['collapsed']) ? $attributes['collapsed'] : FALSE;
   if (isset($form_state['values'])) {
@@ -661,7 +662,6 @@ function forena_parameter_form($formid, &$form_state, $parameters, $attributes= 
     if (isset($form_state['storage']['menu-parms'])) {
       $menu_parms = $form_state['storage']['menu-parms'];
       $parms = array_merge($menu_parms,$parms);
-
     }
     drupal_alter('forena_parameters', $report_name,  $parms);
     Frx::Data()->push($parms, 'parm');
@@ -914,9 +914,10 @@ function forena_parameter_form_submit($form, &$form_state) {
     $path = $desc['link'];
   }
   else {
-    $path = $desc['q'];
+    $path =  isset($desc['q']) ? $desc['q'] : '';
   }
-  $form_state['redirect']= array($path, array('query' => @$values['params']));
+  if (!$path) $path=$_GET['q'];
+  if ($path) $form_state['redirect']= array($path, array('query' => @$values['params']));
 }
 
 /**
