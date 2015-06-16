@@ -56,6 +56,9 @@ function forena_display_blocks() {
 
 
 function forena_data_block_preview($block_name, $parms = array(), $edit=FALSE) {
+  if (isset($_SESSION['forena_report_editor']['__forena_block_preview__'])) {
+    unset($_SESSION['forena_report_editor']['__forena_block_preview__']);
+  }
   $o = Frx::Editor('__forena_block_preview__');
   $o->frxReport->block_edit_mode = $edit;
   $o->alterParameters($parms);

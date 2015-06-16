@@ -311,7 +311,6 @@ class FrxFile {
 
   function verifyDirectory($fullpath, $recursive=FALSE) {
     static $path='';
-    dpm($fullpath);
     $success = TRUE;
     if (!$recursive) {
       $path = $this->dir;

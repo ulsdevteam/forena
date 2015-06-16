@@ -72,11 +72,18 @@
 	<h2 id="installation">Installation and Configuration</h2>
 	<p>After following normal practices for installing a drupal module there are a few steps that must be preformed prior to using forena:</p>
 	<ol>
+    <li>Configure private file system support</li>
 	  <li>Prepare a text format for use with forena (optional)</li>
 	  <li>Configure forena to use this text format and specify installation and configuration directories.</li>
 	  <li>Enable document types</li>
 	  <li>Configure Forena permissions</li>
-	</ol> 
+	</ol>
+  <h3 id="private-file-config">Configure private file system</h3>
+  <p>
+    Configure a <a href="{site.dir}/admin/config/media/file-system">private file system location</a>.  I usually use the
+    value sites/default/files/private.  This is done so that when using the Forena Query module, newly created .sql data
+    block files cannot be viewed by prying eyes.
+  </p>
 	<h3 id="text-formats">Prepare a text format to be used by forena</h3>
 	<p>
 		In a subsequent administration step, a <strong>text format</strong> will have to be specified as the input format for any of
