@@ -363,7 +363,7 @@ the dimension attribute specifies which field will be used to create the columns
 
 <div frx:renderer="FrxSource" id="frxsrc-10">
   <div id="watchdog_stats_block" class="FrxCrosstab" frx:block="drupal/watchdog_stats">
-    <table watchdog_stats="watchdog_stats-renderer" frx:renderer="FrxCrosstab" frx:group="{severity}{name}"
+    <table frx:renderer="FrxCrosstab" frx:group="{severity}{name}"
       frx:dim="Msg Type: {type}">
       <thead>
         <tr>
@@ -374,7 +374,7 @@ the dimension attribute specifies which field will be used to create the columns
         </tr>
       </thead>
       <tbody>
-        <tr id="watchdog_stats" frx:watchdog_stats="watchdog_stats-renderer">
+        <tr id="watchdog_stats">
           <th>{message}</th>
           <th>{severity}</th>
           <th>{name}</th>
