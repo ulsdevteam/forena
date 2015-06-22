@@ -39,7 +39,8 @@ class FrxData extends FrxContext {
     $site['language'] = &$language;
     $site['args'] = arg();
     $site['page'] = base_path() . $_GET['q'];
-    $site['destination'] = drupal_get_destination();
+    $dest = drupal_get_destination();
+    $site['destination'] = $dest['destination'];
     $this->setContext('site', $site);
   }
 
