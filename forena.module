@@ -1445,14 +1445,14 @@ function _forena_filter_process($text='') {
   require_once('forena.admin.inc');
   GLOBAL $language;
   // initial Parameters
-  $in_parms = array();
-  $in_parms  = $_GET;
+  $in_parms = Frx::Data()->getContext('parm');
+  if (!$in_parms) $parms = $_GET;
 
   // Find the instances of [xmlreport:view,
   if (preg_match_all("/\[report?:?([^\]]+)\]/i", $text, $match)) {
 
     foreach ($match[1] as $idx => $value) {
-      $parms=array();
+      $parms=$in_parms;
       // Separate view from parmeters
       @list($report_name, $parmsStr) = explode(':', $value);
 
@@ -1460,10 +1460,9 @@ function _forena_filter_process($text='') {
       $pairs = explode(',', $parmsStr);
       if ($pairs) foreach ($pairs as $pair) {
         @list($key, $value)=explode('=', $pair);
-        $parms[$key]=$value;
+        if ($key) $parms[$key]=$value;
       }
 
-      $parms = array_merge($parms, $in_parms);
       // Render it
       $output = forena_report($report_name, $parms, FALSE);
 
