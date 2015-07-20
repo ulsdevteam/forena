@@ -10,7 +10,7 @@ class FrxDocument {
   public $content_type='';
   public $charset = 'UTF-8';
   public $allowDirectOutput = FALSE;
-
+  public $print;
   public function header($r, $print = TRUE) {
     $r->html = '';
     if ($this->content_type) {
@@ -21,6 +21,7 @@ class FrxDocument {
       header('Content-Disposition: attachment; filename="' . $file_name . '"');
       header('Cache-Control: must-revalidate');
     }
+    $this->print;
   }
 
   public function loadCSSFiles($format) {

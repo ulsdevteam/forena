@@ -66,7 +66,13 @@ class FrxEmailMergeDoc extends FrxDocument {
     }
     $count = count($docs);
     if ($count) {
-      $content = drupal_get_form('forena_confirm_email', $emails, $count, $prompt_subject, $prompt_body);
+      if ($this->print) {
+        $content = drupal_get_form('forena_confirm_email', $emails, $count, $prompt_subject, $prompt_body);
+      }
+      else {
+        $content = '';
+        $this->emailDocs($emails);
+      }
       drupal_set_title($this->title);
     }
     else {
@@ -76,6 +82,40 @@ class FrxEmailMergeDoc extends FrxDocument {
       );
     }
     return $content;
+  }
+
+  public function emailDocs($docs, $test_mode=NULL, $max=10, $subject='', $body = '') {
+    global $user;
+    $test_send = $test_mode!==NULL ? $test_mode : variable_get('forena_email_override', FALSE);
+    print("test send: $test_send");
+    $i = 0;
+    $sent = 0;
+    if ($body) {
+      $body =  check_markup($body, variable_get('forena_email_input_format', filter_default_format()));
+    }
+    print_r($docs, 'doc');
+    foreach ($docs as $doc) {
+      $to = $test_send ? $user->mail : $doc['to'];
+      $from = $doc['from'];
+      // Replace body
+      if ($body) {
+        $doc['parms']['body'] = $body;
+      }
+      // Replace subject
+      if ($subject) {
+        $doc['parms']['subject'] = $subject;
+      }
+      if ($test_send) {
+        $i++;
+        // Remove bcc and cc
+        unset($doc['parms']['headers']);
+      }
+      if ($i <= $max) {
+        $sent++;
+        drupal_mail('forena', 'mailmerge', $to, language_default(), $doc['parms'], $from, TRUE);
+      }
+    }
+    drupal_set_message(t('Sent %count messages ', array('%count' => $sent)));
   }
 
   public function output(&$output) {
