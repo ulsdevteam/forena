@@ -263,7 +263,7 @@ function forena_confirm_email_submit($form, &$form_state) {
     }
   }
   drupal_set_message(t('Sent %count messages ', array('%count' => $sent)));
-  if ($form_state['values']['send'] == 'test') {
+  if (isset($form_state['values']['send']) && $form_state['values']['send'] == 'test') {
     $form_state['rebuild'] = TRUE;
   }
   else {

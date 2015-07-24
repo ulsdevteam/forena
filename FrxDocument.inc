@@ -21,7 +21,7 @@ class FrxDocument {
       header('Content-Disposition: attachment; filename="' . $file_name . '"');
       header('Cache-Control: must-revalidate');
     }
-    $this->print;
+    $this->print = $print;
   }
 
   public function loadCSSFiles($format) {
