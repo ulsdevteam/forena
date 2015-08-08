@@ -1026,7 +1026,7 @@ function forena_report($name_in, $parms = NULL, $print = TRUE, $filename='') {
   }
   require_once('forena.common.inc');
   $desc = Frx::Menu()->parseURL($name_in);
-  $time = @new DateTime($value);
+  $time = @new DateTime();
   $desc['time'] = date_format($time, 'Y-m-d H:i:s');
   $desc['basepath'] = base_path();
   $desc['path'] = $desc['basepath'] . Frx::File()->directory(Frx::File()->path($desc['filename'], TRUE));
