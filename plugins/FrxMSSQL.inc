@@ -198,6 +198,24 @@ class FrxMSSQL extends FrxDataSource {
     if ($value===''||$value===NULL) {
       $value = 'NULL';
     }
+    elseif (is_array($value)) {
+      if ($value == array()) {
+        $value = 'NULL';
+      }
+      else {
+        // Build a array of values string
+        $i=0;
+        $val = '';
+        foreach ($value as $v) {
+          $i++;
+          if ($i>1) {
+            $val .= ',';
+          }
+          $val .=  "'" . str_replace("'", "''", $v) . "'";
+        }
+        $value = $val;
+      }
+    }
     elseif (is_int($value)) {
       $value = (int)$value;
       $value = (string)$value;
