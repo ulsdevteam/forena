@@ -314,7 +314,7 @@ class FrxDataSource{
             case 'INCLUDE':
               $inc_block = $this->getSQLInclude(trim($o));
               if ($inc_block) {
-                $data .= $inc_block['source'];
+                if (!$skip) $data .= $inc_block['source'];
                 $tokens = array_merge($tokens, $inc_block['tokens']);
               }
               break;
