@@ -37,7 +37,7 @@ class FrxXLSDoc extends FrxDocument {
     libxml_clear_errors();
     $xml = simplexml_import_dom($doc);
 
-    $tables = $xml->xpath('//table');
+    $tables = $xml ? $xml->xpath('//table') : array();
     $count = 1;
     if ($tables) foreach ($tables as $table) {
       $sheet_name = @(string)$table['data-caption'];
