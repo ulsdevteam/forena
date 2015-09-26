@@ -312,10 +312,12 @@ class FrxDataSource{
               $in_info = TRUE;
               break;
             case 'INCLUDE':
-              $inc_block = $this->getSQLInclude(trim($o));
-              if ($inc_block) {
-                if (!$skip) $data .= $inc_block['source'];
-                $tokens = array_merge($tokens, $inc_block['tokens']);
+              if (!$skip) {
+                $inc_block = $this->getSQLInclude(trim($o));
+                if ($inc_block) {
+                  $data .= $inc_block['source'];
+                  $tokens = array_merge($tokens, $inc_block['tokens']);
+                }
               }
               break;
           }
@@ -339,7 +341,7 @@ class FrxDataSource{
       $i++;
     }
     $tokens = array_merge($tokens, $this->tokens($contents));
-    $options = drupal_parse_info_format($info_text);
+    if ($info_text) $options = drupal_parse_info_format($info_text);
 
     $block = array( 'source' => $data, 'file' => trim($file, " \n"),
       'tokens' => $tokens, 'options' => $options, 'access' => $access);
