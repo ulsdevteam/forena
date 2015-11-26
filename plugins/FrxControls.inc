@@ -83,8 +83,13 @@ class FrxControls {
         $format='';
         break;
       default:
-        $type = 'custom';
-        $format = $format_str;
+        if(variable_get('date_format_' . $format_str, FALSE)){
+          $type = $format_str;
+          $format = '';
+        } else {
+          $type = 'custom';
+          $format = $format_str;
+        }
     }
     if ($value) {
       $value = function_exists('format_date') ? format_date($value, $type, $format) : date($format, $value);
