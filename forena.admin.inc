@@ -528,6 +528,7 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
     '' => 'None',
     'forena_current_user_id' => 'UID',
     'forena_current_user_name' => 'User name',
+    'forena_current_user_email' => 'Email address',
   );
 
   $form['user_callback'] = array(
