@@ -432,7 +432,6 @@ class FrxSVGGraph extends FrxRenderer {
 
 
   function renderGraph($type) {
-    static $jsinc = '';
 
     $options = $this->replaceTokens($this->graphOptions);
     $data = $this->graphData;
@@ -458,12 +457,11 @@ class FrxSVGGraph extends FrxRenderer {
     if (!@$options['noviewbox'] && !strpos($output, 'viewBox')) $output = str_replace('<svg width', "<svg viewBox='0 0 $width $height' width", $output);
 
 
-    if (!$jsinc && $this->format == 'web') {
+    if ($this->format == 'web') {
       if (@!$options['no_js']) {
         $js =  $graph->FetchJavascript();
         $output .= $js;
       }
-      $jsinc = TRUE;
     }
     return $output;
   }
