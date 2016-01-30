@@ -34,8 +34,7 @@ class FrxMPDF extends FrxDocument {
     $disable_links = variable_get('forena_pdf_disable_links', TRUE);
     $skin_data = Frx::Data()->getContext('skin');
     $page_data = isset($skin_data['mpdf']['page']) ? $skin_data['mpdf']['page'] : array('orientation' => 'P');
-
-    $html = $this->check_markup($r->html);
+    $html = $r->html;
     if ($disable_links) {
       $html = preg_replace('/<a href=\"(.*?)\">(.*?)<\/a>/', "\\2", $html);
     }
