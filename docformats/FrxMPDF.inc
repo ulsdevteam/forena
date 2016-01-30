@@ -42,44 +42,44 @@ class FrxMPDF extends FrxDocument {
     $mpdf = new mPDF('UTF-8');
     $mpdf->AddPageByArray($page_data);
 
-      $output = '<html><head>';
-      $output .= '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>';
-      $css = '';
-      foreach (Frx::Skin()->stylesheets as $type => $sheets) {
-        foreach ($sheets as $sheet) {
-          switch ($type) {
-            case 'all':
-            case 'print':
-            case 'screen':
-            case 'pdf':
-            if (strpos($sheet, 'http:') === 0 || strpos($sheet, 'https:') === 0) {
-              $output .= "    <link rel='stylesheet' type='text/css' href='$sheet'> \n";
-            }
-            else {
-              $css .= file_get_contents($sheet);
-            }
-              //echo $sheet;
-              break;
+    $output = '<html><head>';
+    $output .= '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>';
+    $css = '';
+    foreach (Frx::Skin()->stylesheets as $type => $sheets) {
+      foreach ($sheets as $sheet) {
+        switch ($type) {
+          case 'all':
+          case 'print':
+          case 'screen':
+          case 'pdf':
+          if (strpos($sheet, 'http:') === 0 || strpos($sheet, 'https:') === 0) {
+            $output .= "    <link rel='stylesheet' type='text/css' href='$sheet'> \n";
           }
+          else {
+            $css .= file_get_contents($sheet);
+          }
+            //echo $sheet;
+            break;
         }
       }
-      if (@$options['css'] || isset($r->rpt_xml->head->style)) {
-        $output .= '<style type="text/css">';
-        $output .= $css;
-        if (isset($r->rpt_xml->head->style)) {
-          $sheet = (string)$r->rpt_xml->head->style;
-          $output .= $sheet;
-        }
-        $output .= '</style>';
+    }
+    if (@$options['css'] || isset($r->rpt_xml->head->style)) {
+      $output .= '<style type="text/css">';
+      $output .= $css;
+      if (isset($r->rpt_xml->head->style)) {
+        $sheet = (string)$r->rpt_xml->head->style;
+        $output .= $sheet;
       }
-      $output .= '<title>' . $r->title . "</title></head><body class='forena-report $link_class'><h1>" . $r->title . '</h1>' . $html;
-      $output .= '</body></html>';
+      $output .= '</style>';
+    }
+    $output .= '<title>' . $r->title . "</title></head><body class='forena-report $link_class'><h1>" . $r->title . '</h1>' . $html;
+    $output .= '</body></html>';
 
-      $mpdf->WriteHTML($output);
-      // $pdf = $mpdf->Output('', 'S');
-      $filename = basename($_GET['q']);
-      $pdf = $mpdf->Output($filename, 'I');
-      return $pdf;
+    $mpdf->WriteHTML($output);
+    // $pdf = $mpdf->Output('', 'S');
+    $filename = basename($_GET['q']);
+    $pdf = $mpdf->Output($filename, 'I');
+    return $pdf;
   }
 
 
