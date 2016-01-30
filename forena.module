@@ -946,7 +946,7 @@ function forena_permission() {
     'access forena block xml' => array('title' => t('Access data from data blocks directly'), 'description' => t('Useful for ajax calls to data blocks')),
   );
   foreach (Frx::RepoMan()->repositories as $repos => $conf) {
-    $name = $conf['title'] ? $conf['title'] : $repos;
+    $name = !empty($conf['title']) ? $conf['title'] : $repos;
     $perms['access '. $repos . ' data'] = array('title' =>  'Access ' . $name . ' Data');
   }
   return $perms;
