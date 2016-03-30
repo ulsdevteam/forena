@@ -79,4 +79,10 @@ class FeedsForenaXMLParser extends FeedsParser {
     return $form;
   }
 
+  /**
+   * {@inherit}
+   */
+  public function getMappingSources() {
+    return FALSE;
+  }
 }
