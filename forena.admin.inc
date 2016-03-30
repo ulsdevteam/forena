@@ -233,7 +233,7 @@ function forena_settings_validate($form, &$form_state) {
   }
   if (isset($values['forena_query_data_path'])) {
     $path = $values['forena_query_data_path'];
-    if ($path != $values['forena_last_query_data_path']) {
+    if ($path != $values['forena_last_query_data_path'] && $path) {
       if (!file_exists($path)) {
         try {
           mkdir($path);
@@ -245,11 +245,11 @@ function forena_settings_validate($form, &$form_state) {
         }
       }
     }
-    if (!file_exists($path)) {
+    if ($path && !file_exists($path)) {
       form_set_error('forena_query_data_path', t('Custom Data Block Directory (') . $path . t(') does not exist'));
     }
     else {
-      if (!is_writable($path)) {
+      if ($path && !is_writable($path)) {
 	form_set_error('forena_query_data_path', t('Custom Data Block Directory (') . $path . t(') must be writable by the web user'));
       }
     }
