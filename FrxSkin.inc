@@ -17,7 +17,7 @@ class FrxSkin {
   public $stylesheets = array();
   public $scripts = array();
   public $default_skin = '';
-  public $info = '';
+  public $info = array();
 
   /**
    * Method constructor.

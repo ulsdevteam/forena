@@ -32,6 +32,15 @@ class FrxWebDoc extends FrxDocument {
       }
     }
 
+    // Add in defined libraries.
+    $skin_data  = Frx::Skin()->info;
+    if (isset($skin_data['libraries'])) {
+      foreach ($skin_data['libraries'] as $dependency)  {
+        list($module, $library) = explode('/', $dependency);
+        drupal_add_library($module, $library);
+      }
+    }
+
     // Add inline styles
     if (isset($r->rpt_xml->head->style)) {
       $sheet = (string)$r->rpt_xml->head->style;
