@@ -108,18 +108,10 @@ function forena_menu() {
     'file' => 'forena.common.inc',
   );
 
-  $items['reports/%/nojs'] = array(
-    'page callback' => 'forena_report',
-    'page arguments' => array(1),
-    'title' => 'Reports',
-    'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK,
-    'file' => 'forena.common.inc',
-  );
 
-  $items['reports/%/ajax'] = array(
-    'page callback' => 'forena_report_ajax_callback',
-    'page arguments' => array(1),
+  $items['reports/%/%'] = array(
+    'page callback' => 'forena_report_page_callback',
+    'page arguments' => array(1, 2),
     'title' => 'Reports',
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
@@ -998,18 +990,53 @@ function forena_include_data_tables() {
 }
 
 /**
- * @param $report_name
+ * @param string $report_name
+ * @param string $com
  */
-function forena_report_ajax_callback($report_name) {
-  $content = forena_report("$report_name");
-  $title = Frx::Editor()->frxReport->title;
-  if (is_callable('ctools_include')) {
-    ctools_include('modal');
-    ctools_modal_render($title, $content['content']['#markup']);
+function forena_report_page_callback($report_name, $js_mode, $id='', $command = '') {
+  $commands = array();
+  if ($js_mode != 'ajax') {
+    return forena_report($report_name);
   }
   else {
-    drupal_set_title($title);
-    return $content;
+
+    $content = forena_report($report_name);
+    $report = &$content['content']['#markup'];
+
+
+    if (!$command) $command = 'modal';
+
+    switch($command) {
+      case 'after':
+        $commands[] = ajax_command_after("#$id", $report);
+        break;
+      case 'append':
+        $commands[] = ajax_command_append("#$id", $report);
+        break;
+      case 'before':
+        $commands[] = ajax_command_before("#$id", $report);
+        break;
+      case 'modal':
+        $title = Frx::Editor()->frxReport->title;
+        if (is_callable('ctools_include')) {
+          ctools_include('modal');
+          ctools_modal_render($title, $report);
+          return NULL;
+        }
+        else {
+          drupal_set_title($title);
+          return $content;
+        }
+        break;
+      case 'html':
+        $commands[] = ajax_command_html("#$id", $report);
+        break;
+      case 'replace':
+        $commands[] = ajax_command_replace("#$id", $report);
+        break;
+    }
+    ajax_deliver(array('#type' => 'ajax', '#commands' => $commands));
+
   }
 }
 
@@ -1017,7 +1044,8 @@ function forena_report_ajax_callback($report_name) {
  * Load and render a report based on a drupal path.
  * In this function the arglist is used to get the full path to the report.
  *
- * @return unknown
+ * @return string|array
+ *   Render array or content. 
  */
 function forena_report($name_in, $parms = NULL, $print = TRUE, $filename='') {
   $in_block = FALSE;
