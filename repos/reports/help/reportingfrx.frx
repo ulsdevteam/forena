@@ -1203,5 +1203,31 @@ And this is the very last line of the report body.
   more
   complex data sources, there is a lot that can be done using these XPATH expressions.</p>
 </div>
+<div>
+  <h2 id="ajax">Loading Reports with Ajax</h2>
+  <p>
+  Ajax is the process of dynamically updating parts of a page's HTML based on
+  data from the server. When a specified event takes place, a PHP callback is
+  triggered, which performs server-side logic and may return updated markup or
+  JavaScript commands to run. After the return, the browser runs the JavaScript
+  or updates the markup on the fly, with no full page refresh necessary.
+  </p>
+  <p>
+    Here is an outline of the steps required to create a report that loads other
+    reports via Ajax:
+  </p>
+  <ul>
+    <li>Modify the skin used by the report to include the required libraries.
+    (e.g. system/drupal.ajax)</li>
+    <li>Alter the link in the report to use the drupal ajax callback. For example
+    link="reports/myreport/nojs/id-to-replace/html" will assume that html at the
+    element with an id of "id-to-replace" will be replaced using the jQuery html
+    method. In addition to html, the keywords before, after, append, modal and replace
+      are also supported.</li>
+    <li>Add the "use-ajax" class to any links that will be used to load the reports.
+    The /nojs/ referenced in these links will be replaced with /ajax/ which will
+    cause Forena to return the html and place it in the page. </li>
+  </ul>
+</div>
 </body>
 </html>

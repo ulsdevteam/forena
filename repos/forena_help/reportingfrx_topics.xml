@@ -63,5 +63,11 @@
       <abstract></abstract>
       <link>tokens</link>
     </chapter>
+    <chapter>
+      <title>Loading Reports using Ajax</title>
+      <subtitle>Overview of creating reports that load other reports via Drupal Ajax Libraries</subtitle>
+      <abstract></abstract>
+      <link>ajax</link>
+    </chapter>
   </chapters>
 </book>
