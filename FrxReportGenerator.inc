@@ -237,6 +237,7 @@ class FrxReportGenerator {
       //check for default parameters
       $r->processParameters();
       Frx::Skin()->load($r->skin);
+      Frx::Skin()->merge($r->skin_override); 
       Frx::Skin()->loadSkinFiles($name);
       $cached_data = FALSE;
       $cache = array();

@@ -947,6 +947,7 @@ class FrxEditor {
     //check for default parameters
     $missing_parms = $r->processParameters($parms);
     Frx::Skin()->load($r->skin);
+    Frx::Skin()->merge($r->skin_override); 
     Frx::Skin()->loadSkinFiles($this->report_name);
     $cached_data = FALSE;
     $cache = array();

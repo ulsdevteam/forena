@@ -121,4 +121,21 @@ class FrxSkin {
     $this->addJS($name . '.js');
   }
 
+  /**
+   * Merge the skin definiitons.
+   * @param array $definition
+   *   Definintion overriedes for skin.
+   */
+  public function merge($definition) {
+    if (!is_array($definition)) $definition = drupal_parse_info_format($definition);
+    foreach($definition as $key => $value) {
+      if (isset($this->info[$key])) {
+        $this->info[$key] = array_merge($this->info[$key], $value);
+      }
+      else {
+        $this->info[$key] = $value;
+      }
+    }
+  }
+
 }

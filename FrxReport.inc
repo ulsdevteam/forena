@@ -28,6 +28,7 @@ class FrxReport {
   public $html;
   public $parameters_form;
   public $skin;
+  public $skin_override; 
   private $ids;
   private $data_passed = FALSE;
   public $teng;
@@ -156,6 +157,9 @@ class FrxReport {
         	case 'doctypes':
         	  $this->doctypes = $value;
         	  break;
+          case 'skin':
+            $this->skin_override = (string)$node; 
+            break; 
         }
       }
       if ($edit) $this->get_attributes_by_id();
