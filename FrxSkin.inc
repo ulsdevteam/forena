@@ -127,7 +127,7 @@ class FrxSkin {
    *   Definintion overriedes for skin.
    */
   public function merge($definition) {
-    if (!is_array($definition)) $definition = drupal_parse_info_format($definition);
+    if (!is_array($definition)) $definition = json_decode($definition);
     foreach($definition as $key => $value) {
       if (isset($this->info[$key])) {
         $this->info[$key] = array_merge($this->info[$key], $value);
