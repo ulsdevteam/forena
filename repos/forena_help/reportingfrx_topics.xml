@@ -69,5 +69,11 @@
       <abstract></abstract>
       <link>ajax</link>
     </chapter>
+    <chapter>
+      <title>Report Specific Skin Overrides</title>
+      <subtitle>Change skin definition for the purpose of one report.</subtitle>
+      <abstract></abstract>
+      <link>skin</link>
+    </chapter>
   </chapters>
 </book>

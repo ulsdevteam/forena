@@ -1218,7 +1218,9 @@ And this is the very last line of the report body.
   </p>
   <ul>
     <li>Modify the skin used by the report to include the required libraries.
-    (e.g. system/drupal.ajax)</li>
+    (e.g. system/drupal.ajax).  Alternatively, you can add libraries for the
+      purpose of just one report by creating an frx:skin in the HEAD section of
+      your report that includes the libraries you need.</li>
     <li>Alter the link in the report to use the drupal ajax callback. For example
     link="reports/myreport/nojs/id-to-replace/html" will assume that html at the
     element with an id of "id-to-replace" will be replaced using the jQuery html
@@ -1228,6 +1230,18 @@ And this is the very last line of the report body.
     The /nojs/ referenced in these links will be replaced with /ajax/ which will
     cause Forena to return the html and place it in the page. </li>
   </ul>
+</div>
+<div>
+  <h2 id="skin">Report Specific Skin Overrides</h2>
+  <p>
+    To ovverride settings that are in the skin for a spcicific report, include
+    an frx:skin element in the head section of your report. The contents of the
+    frx:skin element should be the same as specified in the skin, but expressed
+    as a JSON object.
+  </p>
+  <head frx:renderer="FrxSource">
+    <frx:skin>{ "libraries" : [ "system/drupal.ajax"] }</frx:skin>
+  </head>
 </div>
 </body>
 </html>
