@@ -174,4 +174,37 @@ class FrxSyntaxEngine {
     }
     return $eval;
   }
+
+  /**
+   * Replaces nested array data.
+   * @param $data
+   *   The array containing values to replace.
+   * @param $raw
+   *   TRUE implies no formatting of data.
+   */
+  public function replaceNested(&$data, $raw = TRUE) {
+    if (is_array($data)) {
+      $values = $data;
+      foreach ($values as $k => $value) {
+        // Replace key data
+        $key = $k;
+        if (strpos($k, '{') !== FALSE) {
+          $key = $this->replace($key);
+          unset($data[$k]);
+          $data[$key] = $value;
+        }
+
+        // Replace value data.
+        if (is_array($value)) {
+          $this->replaceNested($data[$key], $raw);
+        }
+        else {
+          $data[$key] = $this->replace($value, $raw);
+        }
+      }
+    }
+    else {
+      $data = $this->replace($data, $raw); 
+    }
+  }
 }

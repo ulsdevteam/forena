@@ -138,4 +138,12 @@ class FrxSkin {
     }
   }
 
+  /**
+   * @param string $data Data to be parsed
+   */
+  static public function parseJSON($data) {
+    $parsed =  json_decode($data, TRUE);
+    return $parsed;
+  }
+
 }

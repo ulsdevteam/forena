@@ -402,4 +402,40 @@ class Frx {
     return $o;
   }
 
+  /**
+   * @param $command
+   *   The string name representing the command to invoke. 
+   * @return string 
+   *   Class name of ajax command
+   */
+  static public function getAjaxPlugin($command) {
+    
+    $commands = array(
+      'add_css' => 'AddCss',
+      'after' => 'After',
+      'alert' => 'Alert',
+      'append' => 'Append',
+      'before' => 'Before',
+      'changed' => 'Changed',
+      'css' => 'Css',
+      'data' => 'Data',
+      'html' => 'Html',
+      'invoke' => 'Invoke',
+      'prepend' => 'Prepend',
+      'remove' => 'Remove',
+      'replace' => 'Replace',
+      'restripe' => 'Restripe',
+      'settings' => 'Settings'
+    ); 
+    require_once('AjaxCommand/AjaxCommandInterface.php');
+    require_once ('AjaxCommand/AjaxCommandBase.php');
+    $class = '';
+    if (isset($commands[$command])) {
+      $class = $commands[$command]; 
+      require_once("AjaxCommand/$class.php" ); 
+      $class = "\\Drupal\\forena\\FrxPlugin\\AjaxCommand\\$class";
+    }
+    return $class; 
+  }
+
 }

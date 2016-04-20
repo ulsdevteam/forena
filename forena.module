@@ -1034,6 +1034,11 @@ function forena_report_page_callback($report_name, $js_mode, $id='', $command = 
       case 'replace':
         $commands[] = ajax_command_replace("#$id", $report);
         break;
+      
+    }
+
+    if (!empty($content['content']['#ajax_commands'])) {
+      $commands = array_merge($commands, $content['content']['#ajax_commands']);
     }
     ajax_deliver(array('#type' => 'ajax', '#commands' => $commands));
 

@@ -1020,7 +1020,7 @@ class FrxEditor {
       'parameter_form' => $r->parameters_form,
       'editorLinks' => array('#markup' => $this->editorLinks()),
       'links' => $this->documentLinks(),
-      'content' => array('#markup' => $r->html . $links),
+      'content' => array('#markup' => $r->html . $links, '#ajax_commands' => $r->commands),
     );
     if ($this->frxReport->file) {
       $this->frxReport->writeBuffer();

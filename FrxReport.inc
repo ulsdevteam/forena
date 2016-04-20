@@ -20,6 +20,7 @@ class FrxReport {
   public $form;
   public $access;
   public $parameters;
+  public $commands; 
   public $options;
   public $formats;
   public $title;
@@ -146,7 +147,18 @@ class FrxReport {
         	    $this->parameters[$id] = $parm;
         	  }
         	  break;
-        	case 'data':
+          case 'commands':
+            /** @var  \SimpleXMLElement $ajax_node */
+            foreach ($node->children(FRX_NS) as $key => $ajax_node) {
+              $command = array();
+              $command['text'] = forena_inner_xml($ajax_node, 'frx:ajax');
+              foreach ($ajax_node->attributes() as $akey => $attr) {
+                $command[$akey] = (string) $attr;
+              }
+              $this->commands[] = $command;
+            }
+            break;
+          case 'data':
         	  $data = array();
         	  foreach($node->attributes() as $key => $value) {
         	    $data [$key] = (string)$value;
@@ -279,7 +291,35 @@ class FrxReport {
       if ($title) $title = $this->title = $title;
     }
 
+    // Process the commands after the replacement
+    if ($this->commands) {
+      $commands = $this->commands;
+      $this->commands = array();
+      foreach($commands as $command) {
+        $this->addAjaxCommand($command);
+      }
+    }
+
     Frx::Data()->pop();
+  }
+
+  /**
+   * @param array $ajax
+   *   The Array of coommand objects
+   * @param FrxSyntaxEngine $replacer
+   *   The object used to perform the replacement.
+   */
+  public function addAjaxCommand($ajax) {
+    $command = $ajax['command'];
+
+    $plugin = Frx::getAjaxPlugin($command);
+    if ($plugin) {
+      $class = $plugin;
+      /** @var AjaxCommandInterface $command */
+      $command = new $class($this->teng);
+      $ajax_command = $command->commandFromSettings($ajax);
+      if ($ajax_command) $this->commands[] = $ajax_command;
+    }
   }
 
 
