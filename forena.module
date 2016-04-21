@@ -1002,7 +1002,9 @@ function forena_report_page_callback($report_name, $js_mode, $id='', $command = 
 
     $content = forena_report($report_name);
     $report = &$content['content']['#markup'];
-
+    if (!empty($content['content']['#ajax_commands']['pre'])) {
+      $commands = array_merge($commands, $content['content']['#ajax_commands']['pre']);
+    }
 
     if (!$command) $command = 'modal';
 
@@ -1037,8 +1039,8 @@ function forena_report_page_callback($report_name, $js_mode, $id='', $command = 
       
     }
 
-    if (!empty($content['content']['#ajax_commands'])) {
-      $commands = array_merge($commands, $content['content']['#ajax_commands']);
+    if (!empty($content['content']['#ajax_commands']['post'])) {
+      $commands = array_merge($commands, $content['content']['#ajax_commands']['post']);
     }
     ajax_deliver(array('#type' => 'ajax', '#commands' => $commands));
 
