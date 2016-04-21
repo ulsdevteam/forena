@@ -409,8 +409,8 @@ function forena_menu() {
  */
 function forena_admin_paths_alter(&$paths) {
   $paths['reports/*/*'] = TRUE;
-  $paths['reports/*/nojs'] = FALSE;
-  $paths['reports/*/ajax'] = FALSE;
+  $paths['reports/*/nojs/*'] = FALSE;
+  $paths['reports/*/ajax/*'] = FALSE;
   $paths['reports/*/view'] = FALSE;
   $paths['reports/*/edit'] = FALSE;
   $paths['reports/add'] = TRUE;
