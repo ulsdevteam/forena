@@ -1342,6 +1342,11 @@ function forena_forena_controls() {
   );
 
   $controls[] = array(
+    'file' => 'renderers/FrxAjax.inc',
+    'class' => 'FrxAjax', 
+  );
+
+  $controls[] = array(
     'file' => 'renderers/FrxSection.inc',
     'class' => 'FrxSection',
   );

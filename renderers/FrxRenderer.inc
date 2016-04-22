@@ -17,6 +17,7 @@ class FrxRenderer {
   public $name;
   public $id;
   public $format;
+  /** @var  FrxReport */
   public $frxReport;  // The report object being used.
   public $columns;
   public $numeric_columns;

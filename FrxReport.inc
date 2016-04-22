@@ -257,6 +257,8 @@ class FrxReport {
    * @return unknown_type
    */
   public function render($format, $render_form=TRUE, $cache_data=array()) {
+    $events = $this->commands;
+    $this->commands = array();
     if (!$format) $format = 'web';
     // Only push the parameter conte
     Frx::Data()->push($this->parms, 'parm');
@@ -294,9 +296,7 @@ class FrxReport {
     }
 
     // Process the commands after the replacement
-    if ($this->commands) {
-      $events = $this->commands;
-      $this->commands = array();
+    if ($events) {
       foreach ($events as $event => $commands) {
         foreach($commands as $command) {
           $this->addAjaxCommand($command, $event);
