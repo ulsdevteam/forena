@@ -13,7 +13,7 @@ use Drupal\forena\Token\ReportReplacer;
 
 abstract class AjaxCommandBase implements AjaxCommandInterface {
 
-  private $replacer;
+  protected $replacer;
 
   /**
    * AjaxCommandBase constructor.
