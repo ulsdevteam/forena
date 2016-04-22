@@ -21,7 +21,6 @@ class Invoke implements AjaxCommandInterface{
    * {@inheritdoc}
    */
   public function commandFromSettings(array $settings) {
-    dpm($settings); 
     $selector = $settings['selector']; 
     $method = $settings['method'];
     $arguments = []; 
@@ -33,7 +32,6 @@ class Invoke implements AjaxCommandInterface{
       $arguments = json_decode($settings['text']);
     }
     if (!$arguments) $arguments = array();
-    dpm($arguments, 'args');
     $command = ajax_command_invoke($selector, $method, $arguments); 
     return $command; 
   }
