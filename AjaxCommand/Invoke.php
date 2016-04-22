@@ -22,7 +22,6 @@ class Invoke extends AjaxCommandBase {
    */
   public function commandFromSettings(array $settings) {
     $selector = $settings['selector'];
-    $selector = $settings['selector'];
     $method = $settings['method'];
     $arguments = $this->getJSONText($settings, 'arguments');
     if (!$arguments) $arguments = array();
