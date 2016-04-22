@@ -15,22 +15,16 @@ namespace Drupal\forena\FrxPlugin\AjaxCommand;
  *   id = "invoke"
  * )
  */
-class Invoke implements AjaxCommandInterface{
+class Invoke extends AjaxCommandBase {
 
   /**
    * {@inheritdoc}
    */
   public function commandFromSettings(array $settings) {
-    $selector = $settings['selector']; 
+    $selector = $settings['selector'];
+    $selector = $settings['selector'];
     $method = $settings['method'];
-    $arguments = []; 
-    if (isset($settings['arguments'])) {
-      $arguments = $settings['arguments'];
-      if (!is_array($arguments)) $arguments = json_decode($arguments);
-    }
-    elseif (isset($settings['text'])) {
-      $arguments = json_decode($settings['text']);
-    }
+    $arguments = $this->getJSONText($settings, 'arguments');
     if (!$arguments) $arguments = array();
     $command = ajax_command_invoke($selector, $method, $arguments); 
     return $command; 

@@ -48,13 +48,19 @@ abstract class AjaxCommandBase implements AjaxCommandInterface {
    */
   public function getJSONText(&$settings, $default_key='') {
     $data = [];
-    if ($default_key) $data = $this->getSetting($default_key);
+    if ($default_key && isset($settings[$default_key])) {
+      $data = $settings[$default_key];
+      unset($settings[$default_key]);
+    }
     if (!empty($settings['text'])) {
       $data = $settings['text'];
-      $data = @json_decode($data);
       unset($settings['text']);
-      $this->replacer->replaceNested($data);
     }
+    if (!is_array($data) || !is_object($data)) {
+      $data = @json_decode($data);
+      if (!$data) $data = [];
+    }
+    $this->replacer->replaceNested($data);
     return $data;
   }
 
