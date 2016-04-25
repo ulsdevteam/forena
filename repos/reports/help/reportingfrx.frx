@@ -1230,6 +1230,135 @@ And this is the very last line of the report body.
     The /nojs/ referenced in these links will be replaced with /ajax/ which will
     cause Forena to return the html and place it in the page. </li>
   </ul>
+  <h3>Adding oher Ajax Commands on report load</h3>
+  <p>
+    When loading reports via Ajax, additional commands can be specified by using
+    one or two frx:commands element in the head of the report.  Each frx:commands
+    element should contain an event attributes that indciates whether the
+    commands should be run before or after the report is included in the dom.
+    Each commands elemetn should contain frx:ajax elements to specify individual
+    commands to be run. Specify options for each comand as attributes on the
+    frx:ajax element.
+  </p>
+  <p>
+    The folliowing example demonstrates use the invoke command to invoke
+    arbitrary jQuery methods to create a fade ou/in affect during the report
+    load.
+  </p>
+  <head frx:renderer="FrxSource">
+    <frx:commands event="pre">
+      <frx:ajax command="invoke" selector="#ajax-wrapper" method="hide">
+        [ 400 ]
+      </frx:ajax>
+    </frx:commands>
+    <frx:commands event="post">
+      <frx:ajax command="invoke" selector="#ajax-wrapper" method="fadeIn">
+        [ 400 ]
+      </frx:ajax>
+    </frx:commands>
+  </head>
+  <h3>Supported Commands</h3>
+  <p>The following ajax commands are supported</p>
+  <table>
+    <thead>
+    <tr>
+      <th>command</th>
+      <th>Description</th>
+      <th>Attributes</th>
+      <th>Elemetn Contents</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+      <td>add_css</td>
+      <td>Add a css to the document.</td>
+      <td>n/a</td>
+      <td>Css text to add.</td>
+    </tr>
+    <tr>
+      <td>after</td>
+      <td>Insert html after a selector. </td>
+      <td>selector</td>
+      <td>Html to insert</td>
+    </tr>
+    <tr>
+      <td>alert</td>
+      <td>Show text in a javascript alert box.</td>
+      <td>n/a</td>
+      <td>Alert Text</td>
+    </tr>
+    <tr>
+      <td>append</td>
+      <td>Append text to the children of the selected element</td>
+      <td>selector</td>
+      <td>Html to append</td>
+    </tr>
+    <tr>
+      <td>before</td>
+      <td>Place html before selected element.</td>
+      <td>n/a</td>
+      <td>HTML to prepend</td>
+    </tr>
+    <tr>
+      <td>changed</td>
+      <td>Add a change indicator to attribute</td>
+      <td>selector, asterisk</td>
+      <td>n/a</td>
+    </tr>
+    <tr>
+      <td>css</td>
+      <td>Set CSS properties for selected objects</td>
+      <td>selector</td>
+      <td>JSON encoded arry of key value pairs to set.</td>
+    </tr>
+    <tr>
+      <td>data</td>
+      <td>Call data method to add data to an element</td>
+      <td>selector, name, value</td>
+      <td>Alert Text</td>
+    </tr>
+    <tr>
+      <td>html</td>
+      <td>Replace html contents of a slected element</td>
+      <td>selector</td>
+      <td>HTML to replace</td>
+    </tr>
+    <tr>
+      <td>invoke</td>
+      <td>Invoke arbitrary jquery method</td>
+      <td>selector, method</td>
+      <td>JSON encoded array of arguments to paass to method. </td>
+    </tr>
+    <tr>
+      <td>prepend</td>
+      <td>Prepend html content to the children of selected element</td>
+      <td>selector</td>
+      <td>Content to prepend.</td>
+    </tr>
+    <tr>
+      <td>replace</td>
+      <td>Replace selected content. </td>
+      <td>selector</td>
+      <td>content to replace. </td>
+    </tr>
+    <tr>
+      <td>restripe</td>
+      <td>Restripe the slected table rows</td>
+      <td>selector</td>
+      <td>n/a</td>
+    </tr>
+    <tr>
+      <td>settings</td>
+      <td>Alter drupal settings variable.</td>
+      <td>n/a</td>
+      <td>JSON encoded data to set.</td>
+    </tr>
+    </tbody>
+  </table>
+  <p>
+    See <a href="https://api.drupal.org/api/drupal/core%21core.api.php/group/ajax/8.2.x">
+    Drupal API Documentation</a> for additional information on these commands.
+  </p>
 </div>
 <div>
   <h2 id="skin">Report Specific Skin Overrides</h2>

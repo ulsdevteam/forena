@@ -388,5 +388,20 @@ the dimension attribute specifies which field will be used to create the columns
 	dynamic columns that make up the pivot. The <strong>frx:dim</strong> attribute determines the values that will be used as columns in the table.
 	Columns that are indicated with th elements are fixed. The structure is then mirrored in the <strong>tbody</strong> section. The <strong>frx:group</strong>
 	attribute dictates what will be used to uniquely group the rows. One row will be generated for each unique frx:group specified.</p>
+  <h2 id="frxajax">FrxAjax</h2>
+  <p>
+    The FrxAjax renderer is used to place conditional Ajax Commands throughout the
+    report. Commands that are intended to always be issued should instead by stored
+    in frx:commands elements in the head, but in rare cases where a command should
+    only be invoked under certain circumstances, they can be embeded in the report
+    using this renderer.
+  </p>
+  <p>Example:</p>
+  <div frx:renderer="FrxSource">
+    <script frx:renderer="FrxAjax" frx:command="invoke"
+            frx:selector="input#myinput"
+            frx:method="attr"> ["checked", "checked"] </script>
+  </div>
+
 </body>
 </html>
