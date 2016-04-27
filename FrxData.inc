@@ -153,14 +153,25 @@ class FrxData extends FrxContext {
       $data = $this->getContext($context);
 
     }
-    if (is_array($data) && !preg_match('/[\=\[\/\]\(\)]/', $key)) {
-
-      $retvar = @$data[$key];
+    if (!preg_match('/[\=\@\[\/\]\(\)]/', $key)) {
+      if (is_array($data)) {
+        $retvar = @$data[$key];
+      }
+      elseif (is_object($data)) {
+        $retvar = $data->$key;
+      }
     }
     elseif (is_object($data) || is_array($data)) {
-      if (is_array($data) || !method_exists($data, 'xpath')) {
-        if ( !$this->cur_context_xml) $this->cur_context_xml = FrxData::arrayToXml($data);
+      if (is_array($data) ) {
+        if ( !$this->cur_context_xml) $this->cur_context_xml = DataContext::arrayToXml($data);
         $data = $this->cur_context_xml;
+      }
+      elseif (!method_exists($data, 'xpath')) {
+        if(method_exists($data, 'asXML')) {
+          $xml = $data->asXML();
+          if (!is_object($xml) && $xml) $xml = new SimpleXMLElement($xml);
+          $this->cur_context_xml = $xml;
+        }
       }
       if (strpos($key, '=')===0) {
         $retvar = $this->simplexml_evaluate($data, ltrim($key, '='));
@@ -286,10 +297,27 @@ class FrxData extends FrxContext {
    * @return boolean
    */
   public function contextExists($id) {
+    $exists = FALSE;
     if (array_key_exists($id, $this->data_sources)) {
-      return TRUE;
+      $exists = TRUE;
     }
-    else return FALSE;
+    else {
+      // Check for module provided contexts;
+      $contexts = Frx::getContextPlugins();
+      if (isset($contexts[$id])) {
+        $plugin = $contexts[$id];
+        if (isset($plugin['file'])) {
+          include_once($plugin['file']);
+        }
+        $class = $contexts[$id]['class'];
+        if (class_exists($class)) {
+          $object = new $class();
+          $this->setContext($id, $object);
+          $exists = TRUE;
+        }
+      }
+    }
+    return $exists;
   }
 
   /**

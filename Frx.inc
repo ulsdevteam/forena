@@ -457,4 +457,11 @@ class Frx {
     return $class; 
   }
 
+  static public function getContextPlugins() {
+    static $plugins = '';
+    require_once('contexts/FrxContextBase.inc');
+    if (!$plugins) $plugins = module_invoke_all('forena_context');
+    return $plugins;
+  }
+
 }

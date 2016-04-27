@@ -1272,13 +1272,6 @@ function forena_forena_plugins() {
                      'class' => 'FrxMSSQL',
                      'path' => $path,
   );
-  // Normally you wouldn't do this but I wanted to make the FrxReport sytax work.
-  $plugins['FrxReport'] = array(
-    'file' => 'plugins/FrxReportContext.inc',
-    'parent' => 'FrxContext',
-    'class' => 'FrxReportContext',
-    'path' => $path,
-  );
 
   return $plugins;
 }
@@ -1431,6 +1424,18 @@ function forena_forena_controls() {
       );
   }
   return $controls;
+}
+
+/**
+ * Implements hook_forena_context().
+ */
+function forena_forena_context() {
+  $m_path = drupal_get_path('module', 'forena');
+  $contexts['FrxReport'] = array(
+    'file' => "$m_path/contexts/FrxReportContext.inc",
+    'class' => "FrxReportContext",
+  );
+  return $contexts;
 }
 
 /**
