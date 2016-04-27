@@ -45,6 +45,20 @@ class FrxInclude extends FrxRenderer {
     }
 
     switch ($mode) {
+      case 'ajax':
+        if(strpos($url,'/nojs/')=== FALSE) {
+          if (!isset($attributes['id'])) $attributes['id'] = 'frx-include';
+          $id = @$attributes['id'];
+          $url .= "/nojs/$id/replace";
+          if (isset($attributes['class'])) {
+            $attributes['class'] .= ' use-ajax forena-autoload';
+          }
+          else {
+            $attributes['class'] = 'use-ajax forena-autoload';
+          }
+        }
+        $output = $this->render_reference($url, $ext, $attributes);
+        break;
       case 'reference':
         $output = $this->render_reference($url, $ext, $attributes);
         break;
@@ -83,6 +97,7 @@ class FrxInclude extends FrxRenderer {
     }
 
     if (isset($attributes['id'])) $x['id'] = $attributes['id'];
+    if (isset($attributes['class'])) $x['class'] = $attributes['class'];
     return $x->asXML();
   }
 

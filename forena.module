@@ -417,6 +417,24 @@ function forena_admin_paths_alter(&$paths) {
 
 }
 
+/**
+ * Implements hook_library().
+ */
+function forena_library() {
+  $m_path = drupal_get_path('module', 'forena');
+  $libraries['ajax'] = array(
+    'title' => 'Forena Ajax API',
+    'version' => '7.x-4.x',
+    'js' => array(
+      $m_path . '/js/forena-ajax.js' => array('weight' => 15),
+    ),
+    'dependencies' => array(
+      array('system', 'drupal.ajax'),
+    ),
+  );
+  return $libraries;
+}
+
 
 function forena_library_file($library) {
   $libraries = array(
