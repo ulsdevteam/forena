@@ -13,6 +13,7 @@ class FrxInclude extends FrxRenderer {
 
     // Determine data type
     $include = @$attributes['src'];
+    $title = @$attributes['title'];
     // Quit if we have no data.
     if (!$include) return '';
 
@@ -39,7 +40,8 @@ class FrxInclude extends FrxRenderer {
 
     $mode = isset($attributes['mode']) ? $attributes['mode'] : '';
     if (!$mode) {
-      if ($this->format == 'web' && $ext) {
+      // Try and default in old method for loading.
+      if ($this->format == 'web' && strlen($ext)<=4) {
         $mode = 'reference';
       }
     }
@@ -57,10 +59,10 @@ class FrxInclude extends FrxRenderer {
             $attributes['class'] = 'use-ajax forena-autoload';
           }
         }
-        $output = $this->render_reference($url, $ext, $attributes);
+        $output = $this->render_reference($url, $ext, $attributes, $title);
         break;
       case 'reference':
-        $output = $this->render_reference($url, $ext, $attributes);
+        $output = $this->render_reference($url, $ext, $attributes, $title);
         break;
       case 'inline':
       default:
@@ -70,8 +72,9 @@ class FrxInclude extends FrxRenderer {
     return $output;
   }
 
-  function render_reference($url, $ext, $attributes) {
+  function render_reference($url, $ext, $attributes, $title) {
     $ext = strtolower($ext);
+    if (!$title) $title = "$ext document";
     $attributes = $this->teng->replace($attributes);
     switch ($ext) {
       case 'png':
@@ -92,7 +95,7 @@ class FrxInclude extends FrxRenderer {
         if (isset($attributes['width'])) $x['width'] = $attributes['width'];
         break;
       default:
-        $x = new SimpleXMLElement('<a>' . $ext . ' document</a>' );
+        $x = new SimpleXMLElement('<a>' . htmlentities($title, ENT_QUOTES) . '</a>' );
         $x['href'] = $url;
     }
 
