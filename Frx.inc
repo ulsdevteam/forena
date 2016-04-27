@@ -166,9 +166,11 @@ class Frx {
    * @param string $class
    * @return Ambigous <string, unknown>
    */
-  public static function Controls($class='') {
+  public static function Controls($class='', $instantiate = TRUE) {
     static $instances = '';
+    static $classes = '';
     if (!$instances) {
+      $classes=array();
       foreach (module_list() as $module) {
         $function = $module . '_forena_controls';
         if (function_exists($function)) {
@@ -178,19 +180,36 @@ class Frx {
             $c['file'] = drupal_get_path('module' , $c['module']) . '/' . trim($c['file'], '/');
             if ($c['file']) {
               include_once($c['file'] );
-              if (class_exists($c['class'])) {
+              if (class_exists($c['class']) && $instantiate) {
                 $instances[$c['class']] =  new $c['class'];
               }
+              $classes[$c['class']] = $c['class'];
             }
           }
         }
       }
     }
     // Return class if we asked for one.
-    if ($class) {
+    if ($class && $instantiate) {
       return @$instances[$class];
     }
+    elseif (!$instantiate) {
+      return @$classes;
+    }
     return $instances;
+  }
+
+  /**
+   * Returns the FrxRendererInstances.
+   * @return FrxRenderer
+   */
+  public static function getRendererPlugins() {
+    require_once('renderers/FrxRenderer.inc');
+    $classes = Frx::Controls('',  FALSE);
+    foreach ($classes as $key => $class) {
+      if (!method_exists($class, 'render')) unset($classes[$key]);
+    }
+    return $classes;
   }
 
 

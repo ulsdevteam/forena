@@ -95,7 +95,6 @@ class FrxReportGenerator {
    */
   function get_report($report_name, $data=array()) {
     $r=NULL;
-    $this->alter_parameters($report_name, $data);
     if ($report_name) {
       $r_text = $this->app->load_report($report_name);
       if ($r_text) {

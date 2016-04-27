@@ -45,9 +45,23 @@ class FrxReport {
   public $file; // File handle for the forena code
   public $allowDirectWrite = FALSE; //Determine whether we can output directly.
   public $preview_mode = FALSE;    // This will make the report renderer put in editing controls when TRUE
+  protected $controls = array();
+  protected $renderers= array(
+    'FrxCrosstab' => 'FrxCrosstab',
+    'FrxInclude' => 'FrxInclude',
+    'FrxMyReports' => 'FrxMyReports',
+    'FrxParameterForm' => 'FrxParameterForm',
+    'FrxSource' => 'FrxSource',
+    'FrxSVGGraph' => 'FrxSVGGraph',
+    'FrxTemplate' => 'FrxTemplate',
+    'FrxTitle' => 'FrxTitle',
+    'FrxXML' => 'FrxXML',
+    'FrxRenderer' => 'FrxRenderer',
+  );
 
 
   public function __construct($xhtml='', $data=array(), $edit = FALSE) {
+    $this->renderers = Frx::getRendererPlugins();
     $this->access = array();
     $this->parameters = array();
     $this->options = array();
@@ -256,12 +270,12 @@ class FrxReport {
    * Render the report
    * @return unknown_type
    */
-  public function render($format, $render_form=TRUE, $cache_data=array()) {
+  public function render($format, $render_form=TRUE, $cache_data=array(), $existing_parms = FALSE) {
     $events = $this->commands;
     $this->commands = array();
     if (!$format) $format = 'web';
     // Only push the parameter conte
-    Frx::Data()->push($this->parms, 'parm');
+    if (!$existing_parms) Frx::Data()->push($this->parms, 'parm');
     $this->parameters_form = array();
 
     // Find the Body of the report.
@@ -272,7 +286,7 @@ class FrxReport {
     $body = $dom->getElementsByTagName('body')->item(0);
     $this->preloadData();
     // Render the rport.
-    $c = Frx::Controls('FrxRenderer');
+    $c = $this->getRenderer('FrxRenderer');
     $c->initReportNode($body, $this);
     if (!$this->missing_parms) $c->renderChildren($body, $this->html);
 
@@ -295,6 +309,7 @@ class FrxReport {
       if ($title) $title = $this->title = $title;
     }
 
+    if (!$existing_parms) Frx::Data()->pop();
     // Process the commands after the replacement
     if ($events) {
       foreach ($events as $event => $commands) {
@@ -842,6 +857,21 @@ class FrxReport {
         $this->html = '';
       }
     }
+  }
+
+  public function getRenderer($renderer='') {
+    if (!$renderer || !isset($this->renderers[$renderer])) {
+      $renderer = 'FrxRenderer';
+    }
+    // Build array of controls.
+    if (!isset($this->controls[$renderer])) {
+      $class = $this->renderers[$renderer];
+      if(class_exists($class)) {
+        $c = new $class();
+        $this->controls[$renderer] = $c;
+      }
+    }
+    return $this->controls[$renderer];
   }
 
 }

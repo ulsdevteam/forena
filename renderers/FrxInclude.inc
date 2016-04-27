@@ -13,6 +13,8 @@ class FrxInclude extends FrxRenderer {
 
     // Determine data type
     $include = @$attributes['src'];
+    // Quit if we have no data.
+    if (!$include) return '';
 
     // Reformat URL
     @list($url, $query_str)=@explode('?', $include);
@@ -34,11 +36,22 @@ class FrxInclude extends FrxRenderer {
     // Build URL
     $options = array('query' => $query);
     $url = url($url, $options);
-    if ($this->format=='web') {
-      $output = $this->render_reference($url, $ext, $attributes);
+
+    $mode = isset($attributes['mode']) ? $attributes['mode'] : '';
+    if (!$mode) {
+      if ($this->format == 'web' && $ext) {
+        $mode = 'reference';
+      }
     }
-    else {
-      $output = forena_report_include(str_replace('reports/', '', $report_url), $query);
+
+    switch ($mode) {
+      case 'reference':
+        $output = $this->render_reference($url, $ext, $attributes);
+        break;
+      case 'inline':
+      default:
+        $output = forena_report_include(str_replace('reports/', '', $report_url), $query);
+
     }
     return $output;
   }
