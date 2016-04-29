@@ -292,53 +292,36 @@
       </svg>
   </div>
 </div>
-<h2 id="frxinclude">FrxInclude</h2>
-  <p>This renderer includes another report as an asset with the appropriate tag. The primary use of this renderer is to
-    create references to external SVG assets. When rendered in a web page, these need to be wrapped in embed tags, but when being
-    included in a PDF document the raw SVG should be included. The {state_summary_ie8_report} report uses this renderer, for which
-    the .frx file includes these lines:
-  </p>
-  
-<div frx:renderer="FrxSource" id="frxsrc-9">
-  <div frx:src="reports/sample.state_graph.svg?height=400&amp;width=600" frx:renderer="FrxInclude" frx:height="480"
-    frx:width="640">...</div>
-</div>
-  <p>
-  The above example illustrates the following FRX attributes supported by the FrxInclude renderer:
-  </p>
+  <h2 id="frxinclude">FrxInclude</h2>
+  <p>This renderer facilitates report reuse within another report according to the "mode </p>
   <table>
     <tr>
-      <th>frx:src</th>
-      <td>The relative URL to the report asset that is to be rendered.</td>
+      <th>include</th>
+      <td>Includes the report inline within the existing report, using the context of the current report as parameters to the
+        included report. </td>
     </tr>
     <tr>
-      <th>frx:height</th>
-      <td>The height of the report asset that is to be rendered.</td>
+      <th>ajax</th>
+      <td>Load the report in the current location via ajax.  Note that the renderer must be provided a unique "id" attribute in
+        order to properly load the link. This is an experimental setting at this time. </td>
     </tr>
     <tr>
-      <th>frx:width</th>
-      <td>The width of the report asset that is to be rendered.</td>
+      <th>reference</th>
+      <td>Includes another report as an asset with the appropriate tag. The primary use of this mode is to
+        create references to external SVG assets. When rendered in a web page, these need to be wrapped in embed tags, but when being
+        included in a PDF document the raw SVG should be included.  When used with normal reports it will embed a link to the report.  </td>
     </tr>
-  </table>
-  <p>Some extra details about how this renderer processes various types of assets:
-  </p>
-  
-  <ul>
-    <li>The markup used to include the specified asset depends on the file extension of the asset as referenced.</li>
-    <li>These are the main groups of supported extensions for the assets:</li>
-    <ol>
-      <li><strong>svg</strong>: wrapped in an <strong>embed</strong> tag (using a <strong>src</strong> tag as specified in the
-        frx:src attribute), using <strong>height</strong> and <strong>width</strong> as specified in the frx attributes, and with an
-        <strong>image/svg+xml</strong> MIME type (which is assumed to be supported by the web server).</li>
-      <li><strong>png, gif, jpg or jpeg</strong>: wrapped in an <strong>img</strong> tag (using a <strong>src</strong> tag as
-        specified in the frx:src attribute), using <strong>height</strong> and <strong>width</strong> as specified in the frx
-        attributes.</li>
-      <li><strong>other extensions</strong>: wrapped in an <strong>a</strong> tag (anchor), using an the anchor text like <strong>abcd
-          document</strong> (abcd = the file extension), and with its <strong>href</strong> as specified in the frx:src attribute.</li>
-    </ol>
-    <li>Any lowercase / uppercases variations in the file extension of the asset are supported.</li>
-  </ul>
 
+  </table>
+  <p>
+    The following illustrates some common examples of using the FrxInclude renderer.
+  </p>
+  <div frx:renderer="FrxSource" id="frxsrc-9">
+    <div frx:src="reports/sample.state_graph.svg?height=400&amp;width=600" frx:renderer="FrxInclude" frx:mode="reference" frx:height="480"
+         frx:width="640">...</div>
+    <div frx:renderer="FrxInclude" frx:src="reports/sample.states" frx:mode="include"/>
+    <div frx:renderer="FrxInclude" frx:src="reports/sample.states" frx:mode="ajax"/>
+  </div>
 <h2 id="frxcrosstab">FrxCrosstab</h2>
 <p>
   A <strong>crosstab</strong> table is designed to pivot data, that is to creat a table whose columns are determined by the values in 
