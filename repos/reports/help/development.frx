@@ -142,6 +142,27 @@ function myexample_forena_parameters_alter($report_name, &amp;$parms) {
   }
   }
 </pre>
+  <h3>hook_forena_context</h3>
+  <p>
+    Advertise custom context objects that are loaded on demand.  The hook should
+    advertise classes that can be used for token replacement in either report
+    contexts or data blocks. Contexts should extend \FrxContextBase
+  </p>
+  <pre class="code">
+  function myexample_forena_context() {
+    $m_path = drupal_get_path('module', 'myexample');
+    $context['mycontext'] = array(
+      'class' => 'MyCustomContextClass',
+      'file' => "$m_path/MyCustomContextClass.inc"
+    );
+  }
+  </pre>
+  <p>The above example allows modules to be able to use {mycontext.property} to
+  reference public properties of a MyCustomContextClass object instance.  The
+  constructor is called and the object is instantiated on first use of the context.
+  See context/FrxContextBase.inc for additional information on methods that are
+  called by this calss.
+  </p>
    <h2 id="formats">Custom Formatters</h2>
     <p>Custom formatters may be implemented either in control objects or in data plugin objects. Formatters that are implemented in plugin objects are only available within data blocks that reference data block repositories that use that plugin type. For example, formatters defined by the FrxOracle plugin will only be available fore repositories that are Oracle repositories. Formatters defined in FrxControls, however, will be available in all reports.</p>
   <p>To implement a formatter in control or plugin class requires the implementation of two methods.</p>
