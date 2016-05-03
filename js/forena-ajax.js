@@ -2,8 +2,36 @@
  * @file
  *
  * Forena ajax library.  Includes useful functions for performing ajax replacements on reports.
+ * by imre.horan
  */
 (function ($) {
+  // Standard AJAX error handler.
+  /**
+   * Handler for ajax error responses.
+   *
+   */
+  Drupal.ajax.prototype.error = function(response, uri) {
+    // Suppressing the error message if status = 0.
+    if (response.status != 0) {
+      alert(Drupal.ajaxError(response, uri));
+    }
+    // Remove the progress element.
+    if (this.progress.element) {
+      $(this.progress.element).remove();
+    }
+    if (this.progress.object) {
+      this.progress.object.stopMonitoring();
+    }
+    // Undo hide.
+    $(this.wrapper).show();
+    // Re-enable the element.
+    $(this.element).removeClass('progress-disabled').removeAttr('disabled');
+    // Reattach behaviors, if they were detached in beforeSerialize().
+    if (this.form) {
+      var settings = response.settings || this.settings || Drupal.settings;
+      Drupal.attachBehaviors(this.form, settings);
+    }
+  };
 
   $.fn.forenaAutoload = function () {
     this.hide();
