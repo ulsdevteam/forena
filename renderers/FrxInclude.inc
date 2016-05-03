@@ -51,7 +51,7 @@ class FrxInclude extends FrxRenderer {
         if(strpos($url,'/nojs/')=== FALSE) {
           if (!isset($attributes['id'])) $attributes['id'] = 'frx-include';
           $id = @$attributes['id'];
-          $url .= "/nojs/$id/replace";
+          $url = url("$report_url/nojs/$id/replace", $options);
           if (isset($attributes['class'])) {
             $attributes['class'] .= ' use-ajax forena-autoload';
           }
