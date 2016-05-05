@@ -41,6 +41,15 @@ class FrxWebDoc extends FrxDocument {
       }
     }
 
+    // Check if ctools has been added.
+    if (isset($skin_data['ctools']['js'])) {
+      if (is_callable('ctools_add_js')) {
+        foreach ($skin_data['ctools']['js'] as $js_file) {
+          ctools_add_js($js_file);
+        }
+      }
+    }
+
     // Add inline styles
     if (isset($r->rpt_xml->head->style)) {
       $sheet = (string)$r->rpt_xml->head->style;
