@@ -39,6 +39,12 @@
     this.click();
   }
 
+  // jQuery plugin for adding a select class to element
+  $.fn.forenaSelect = function(selector) {
+    $('.selected', this).removeClass('selected');
+    $(selector, this).addClass('selected');
+  };
+  
   Drupal.behaviors.forenaAjax = {
     attach: function (context, settings) {
       // Auto click the reports for ajax.
