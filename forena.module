@@ -722,8 +722,12 @@ function forena_parameter_form($formid, &$form_state, $parameters, $attributes= 
         }
         else {
           $value = @(string)$node['default'];
-          $multi_value = array();
-          if (strpos($value, '|')!==FALSE) $multi_value = explode('|', $value);
+          if (strpos($value, '|')!==FALSE) {
+            $multi_value = explode('|', $value);
+          }
+          elseif ($value) {
+            $multi_value = (array) $value;
+          }
         }
         $desc =  @(string)$node['desc'];
         $label_field = @(string)$node['label_field'];
