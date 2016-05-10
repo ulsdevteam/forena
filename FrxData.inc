@@ -163,7 +163,7 @@ class FrxData extends FrxContext {
     }
     elseif (is_object($data) || is_array($data)) {
       if (is_array($data) ) {
-        if ( !$this->cur_context_xml) $this->cur_context_xml = DataContext::arrayToXml($data);
+        if ( !$this->cur_context_xml) $this->cur_context_xml = FrxData::arrayToXml($data);
         $data = $this->cur_context_xml;
       }
       elseif (!method_exists($data, 'xpath')) {
