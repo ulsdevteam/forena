@@ -446,7 +446,7 @@ class FrxReport {
     }
 
     if ($format && !$raw) {
-      $value = FrxReportGenerator::$instance->format_data($value, $format, $format_str, $this->teng, $default);
+      $value = FrxReportGenerator::instance()->format_data($value, $format, $format_str, $this->teng, $default);
       $value = trim($value);
     }
 
