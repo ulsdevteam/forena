@@ -9,7 +9,7 @@ class ForenaViewsPlugin extends views_plugin_style {
 
   function option_definition() {
     $options = parent::option_definition();
-    $options['report_name'] = array('default' => 'reports/test');
+    $options['report_name'] = array('default' => 'test');
     return $options;
   }
 
@@ -18,7 +18,8 @@ class ForenaViewsPlugin extends views_plugin_style {
    */
   function options_form(&$form, &$form_state) {
     $form['report_name'] = array(
-      '#title' => t('Create from report'),
+      '#title' => t('Report'),
+      '#description' => t('Name of an existing report used to render fields in this view'),
       '#type' => 'textfield',
       '#autocomplete_path' => 'forena/reports/autocomplete',
       '#default_value' => $this->options['report_name'],
