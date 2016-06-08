@@ -1459,7 +1459,7 @@ function _forena_filter_process($text='') {
   if (!$in_parms) $parms = $_GET;
 
   // Find the instances of [xmlreport:view,
-  if (preg_match_all("/\[report?:?([^\]]+)\]/i", $text, $match)) {
+  if (preg_match_all("/\[report?:?([^\]\n]+)\]/i", $text, $match)) {
 
     foreach ($match[1] as $idx => $value) {
       $parms=$in_parms;
