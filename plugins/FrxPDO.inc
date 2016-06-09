@@ -21,7 +21,7 @@ class FrxPDO extends FrxDataSource {
   public function __construct($conf, $repos_path, $name) {
     parent::__construct($conf, $repos_path, $name);
     $uri = $conf['uri'];
-    $this->debug = $conf['debug'];
+    $this->debug = @$conf['debug'];
     if ($uri) {
       // Test for PDO suport
       if (!class_exists('PDO')) {
@@ -60,7 +60,7 @@ class FrxPDO extends FrxDataSource {
       } catch (PDOException $e) {
         $this->error('Unable to connect to database', $e->getMessage());
       }
-      $this->db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_OBJ);
+      if($this->db) $this->db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_OBJ);
 
     }
     else {
@@ -181,7 +181,8 @@ class FrxPDO extends FrxDataSource {
    * @param unknown_type $key
    * @param unknown_type $data
    */
-  public function format($value, $key) {
+  public function format($value, $key, $raw = FALSE) {
+    if ($raw) return $value;
     $db = $this->db;
     $value = $this->parmConvert($key, $value);
     if ($db) {

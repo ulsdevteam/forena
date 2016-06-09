@@ -10,7 +10,7 @@ class FrxDocument {
   public $content_type='';
   public $charset = 'UTF-8';
   public $allowDirectOutput = FALSE;
-
+  public $print;
   public function header($r, $print = TRUE) {
     $r->html = '';
     if ($this->content_type) {
@@ -21,6 +21,7 @@ class FrxDocument {
       header('Content-Disposition: attachment; filename="' . $file_name . '"');
       header('Cache-Control: must-revalidate');
     }
+    $this->print = $print;
   }
 
   public function loadCSSFiles($format) {
@@ -84,7 +85,7 @@ class FrxDocument {
    * @param $output
    */
   public function check_markup($output) {
-    return check_markup($output, variable_get('forena_input_format', filter_default_format()));
+    return check_markup($output, variable_get('forena_input_format', 'none'));
   }
 
   public function convertCharset($data, $default_encoding='UTF-8') {

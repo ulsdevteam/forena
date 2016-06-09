@@ -100,13 +100,17 @@ function forena_query_requirements($phase) {
   	  $writeable = is_writable(Frx::DataFile()->dir);
   	  if (!$writeable) {
     	  $requirements['fornea_writable'] = array(
-    	      'title' => 'Forena Data Directory',
-    	      'value' => Frx::File()->dir,
+    	      'title' => 'Forena Query Data Directory',
+    	      'value' => Frx::DataFile()->dir,
     	      'severity' => REQUIREMENT_ERROR,
-    	      'description' => t('The directory must be writable by the web user in order to create custom SQL data sources. '),
+    	      'description' => t('The directory must be writable by the web user in order to create custom SQL data sources.').
+               t('Configure <a href="@private_path">private file system paths</a> or specificy a differnt <a href="@data_directory">data directory</a>."',
+               array('@private_path' => url('admin/config/media/file-system'), '@data_directory' => url('admin/config/content/forena')))
+
     	  ) ;
   	  }
   }
+  return $requirements;
 }
 
 function forena_query_forena_query_builders() {

@@ -17,9 +17,12 @@ class FrxControls {
                      'xhtml' => 'XHTML Decode of data',
                      'drupal_text_format' => 'Drupal Text Format',
                      'iso_date' => 'ISO Date',
-                     'sprintf' => 'PHP sprintf()',
+                     'sprintf' => 'Sprintf() function',
                      'number' => 'Number',
-                     'drupal_translation' => 'Translatable Text'
+                     'drupal_translation' => 'Translation Text (Drupal)',
+                     'template' => 'Template (Field is a forena)',
+                     'indentation' => 'Indentation',
+                     'expression' => 'Expression (xpath)'
                      );
                      return $formats;
   }
@@ -42,7 +45,8 @@ class FrxControls {
     $field = $teng->replace($field, NULL, TRUE);
     $vars = array();
     if ($field) {
-      $vars = (array) @unserialize($field);
+      $vars = @unserialize($field);
+      if (!$vars) $vars = array();
     }
     return t($value, $vars);
   }
@@ -79,8 +83,13 @@ class FrxControls {
         $format='';
         break;
       default:
-        $type = 'custom';
-        $format = $format_str;
+        if(variable_get('date_format_' . $format_str, FALSE)){
+          $type = $format_str;
+          $format = '';
+        } else {
+          $type = 'custom';
+          $format = $format_str;
+        }
     }
     if ($value) {
       $value = function_exists('format_date') ? format_date($value, $type, $format) : date($format, $value);
@@ -111,7 +120,7 @@ class FrxControls {
     return $value;
   }
 
-  public function number($value, $format_str, $data='') {
+  public function number($value, $format_str, $teng) {
     // Determine number nubmer formatter from the string.
     $chars = str_replace(array('9', '0', '$'), '', $format_str);
     if (strlen($chars) > 1) {
@@ -139,6 +148,54 @@ class FrxControls {
 
 
     if ($value && $this->is_number($value))  $value = number_format($value, $dec, $dec_sep, $th_sep);
+    return $value;
+  }
+
+  /**
+   * Indicates the data in the field is a template that can be used by forena to format.
+   * @param unknown $value
+   * @param unknown $format_str
+   * @param string $teng
+   * @return Ambigous <string, The, mixed>
+   */
+  public function template($value, $format_str, $teng='', $default='') {
+    if (!$value) {
+      $value = $default;
+    }
+    if ($value) {
+      $value = $teng->replace($value);
+      $value = html_entity_decode($value, ENT_QUOTES, 'UTF-8');
+      if ($format_str && filter_format_exists($format_str)) {
+        $value = check_markup($value, $format_str);
+      }
+    }
+
+    return $value;
+  }
+
+  public function indentation($value, $format_str, $teng='') {
+    if ($value) {
+      $vars = array('size' => $value);
+      $value = theme_indentation($vars);
+    }
+    else {
+      $value = '';
+    }
+    return $value;
+  }
+
+  /**
+   * @param $value
+   * @param $format_str
+   * @param string $teng
+   * @return mixed
+   * Return an xapth expression based on data in the
+   */
+  public function expression($value, $format_str, $teng='', $default='') {
+    if ($value) {
+      $value = $teng->replace($format_str);
+      if ($value) $value = $teng->replace('{' . $value . '}');
+    }
     return $value;
   }
 

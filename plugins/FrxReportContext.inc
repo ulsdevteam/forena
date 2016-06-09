@@ -10,7 +10,7 @@ class FrxReportContext {
   // Get report based on current context and embed it.
   public function getValue($key, $context) {
     $context = Frx::Data()->currentContextArray();
-    $output = forena_report($key . '.xml', $context, FALSE);
+    $output = forena_report($key, $context, FALSE);
     return $output;
   }
 

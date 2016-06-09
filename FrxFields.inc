@@ -21,7 +21,7 @@ class FrxFields {
    * Formatter used by the syntax engine to alter data that gets extracted.
   * This invokes the field translation
   */
-  public function format($value, $key) {
+  public function format($value, $key, $raw=FALSE) {
     // Determine if there is a field overide entry
     $default='';
     $link ='';
@@ -30,12 +30,19 @@ class FrxFields {
     $target = '';
     $class = '';
     $rel = '';
+    $calc = '';
     // Extract the formatter for this field;
     if ($this->fields  && isset($this->fields[$key])) {
       extract($this->fields[$key]);
     }
 
-    if ($format) {
+    // Evaluate any calculations first.
+    if ($calc) {
+      $calc = $this->teng->replace($calc);
+      if ($calc) $value = $this->teng->replace('{=' . $calc . '}');
+    }
+
+    if ($format && !$raw) {
       $value = FrxReportGenerator::$instance->format_data($value, $format, $format_str, $this->teng);
     }
 
@@ -48,7 +55,7 @@ class FrxFields {
       $value = $default;
     }
 
-    if ($link) {
+    if ($link && !$raw) {
       $attributes = array();
       $target = $this->teng->replace($target, TRUE);
       // use the target attribute to open links in new tabs or as popups.

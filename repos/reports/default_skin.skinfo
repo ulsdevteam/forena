@@ -5,7 +5,11 @@
 ;  and thirdly in the sites/all/libraries folder. 
 ;  
 name = Default Skin
-description = Default skin for use with Forena. 
+description = Default skin for use with Forena.
+; ------------------------------------------------------
+; Core Libraries can be added provided you know the module
+; name and library name as defined in hook_library
+; libraries[] = module/library
 ; ------------------------------------------------------
 ; Javascript libraries can be added.  Forena will
 ; automatically search sites/all/libraries in 
@@ -44,3 +48,4 @@ stylesheets[all][] = table_padding.css
 ; Then you could reference {skin.company_name} anywhere in your report.
 FrxSVGGraph[legend_position] = outer right -5 5
 FrxSVGGraph[add_js] = TRUE
+FrxSVGGraph[semantic_classes] = 1

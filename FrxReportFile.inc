@@ -34,10 +34,24 @@ class FrxReportFile extends FrxFile {
     $reports = array();
     $this->validateAllCache();
     $data = $this->getCache('frx');
+    $def_language = language_default('language');
     if ($data) foreach ($data as $base_name => $obj) {
-      if ($obj->cache && $obj->cache['language'] == $language->language) {
-        $obj->name = $base_name;
-        $reports[] = $obj;
+        if ($obj->cache) {
+          if ($obj->cache['language'] != 'en') {
+            $rpt_name = substr($base_name, strlen($obj->cache['language']) +1);
+          }
+          else {
+            $rpt_name = $base_name;
+          }
+          if($obj->cache['language'] == $language->language) {
+            $reports[$rpt_name] = $obj;
+          }
+          elseif ($obj->cache['language'] == $def_language
+              && (!isset($reports[$rpt_name]) || $reports[$rpt_name]->cache['language'] == 'en')) {
+            $reports[$rpt_name] = $obj;
+          } elseif ($obj->cache['language'] == 'en' && !isset($reports[$rpt_name])) {
+            $reports[$rpt_name] = $obj;
+        }
       }
     }
     uasort($reports, 'FrxReportFile::reportCompare');
@@ -111,10 +125,10 @@ class FrxReportFile extends FrxFile {
   public function reportsByCategory($categories = array()) {
     GLOBAL $language;
     $this->validateAllCache();
-    $data = $this->getCache('frx');
+    $data = $this->allReports();
     $reports = array();
     if ($data) foreach ($data as $base_name => $obj) {
-      if ($obj->cache && @$obj->cache['category'] && !$obj->cache['hidden'] && $obj->cache['language'] == $language->language ) {
+      if ($obj->cache && @$obj->cache['category'] && !$obj->cache['hidden'] ) {
         $cache = $obj->cache;
         if (!$categories || array_search($cache['category'], $categories)!==FALSE) {
           // Check each callback function to see if we have an error.
@@ -163,7 +177,7 @@ class FrxReportFile extends FrxFile {
     $this->getCache('skinfo');
     $skins = array();
     if (isset($this->cache['skinfo'])) foreach ($this->cache['skinfo'] as $name => $obj) {
-      $skins[$name] = $obj->cache['name'];
+      $skins[$name] = isset($obj->cache['name']) ? $obj->cache['name'] : $name;
     }
     return $skins;
   }
@@ -205,7 +219,6 @@ class FrxReportFile extends FrxFile {
           $cache['language'] = $lang;
           $cache['category'] = $r->category;
           $cache['hidden'] = @$r->options['hidden'];
-          //$cache['hidden'] = $r->options['hidden'];
         }
         $object->cache = $cache;
     	  if ($r) $r->__destruct();

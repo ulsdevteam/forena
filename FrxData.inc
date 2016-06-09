@@ -14,10 +14,35 @@ class FrxData extends FrxContext {
 
   public $id;
   private $cur_context;  // The data of the xml;
+  private $cur_context_xml; //
   private $data_sources = array();
   private $data_stack = array();
   private $id_stack = array();
 
+  /**
+   * Constructor to initialize drupal site specific settings.
+   *
+   */
+  public function __construct() {
+    $site = array();
+    global $language;
+    global $user;
+    global $theme_path;
+    global $base_root;
+    $site['base_path'] = base_path();
+    $site['dir'] = rtrim(base_path(), '/');
+    $site['theme_path'] = base_path() . $theme_path;
+    $site['theme_dir'] = &$theme_path;
+    $site['base_url'] = &$base_root;
+    $site['user_name'] = $user->uid ? $user->name : '';
+    $site['uid'] = $user ? $user->uid : 0;
+    $site['language'] = &$language;
+    $site['args'] = arg();
+    $site['page'] = base_path() . $_GET['q'];
+    $dest = drupal_get_destination();
+    $site['destination'] = $dest['destination'];
+    $this->setContext('site', $site);
+  }
 
   // For backward compatibility.
   public static function instance() {
@@ -83,6 +108,34 @@ class FrxData extends FrxContext {
   }
 
 
+  static public function arrayToXml($a, &$xml=NULL) {
+    if (!$xml) $xml = new SimpleXMLElement('<root/>');
+    $tag = '';
+    foreach($a as $k => $v) {
+      if (preg_match('/^[0-9\-\.]/', $k)) {
+        if (!$tag) $tag = "element";
+      }
+      else {
+        $tag = $k;
+      }
+      if (is_array($v) || is_object($v)) {
+        $node = $xml->addChild($tag, '');
+        if ($tag != $k) {
+          $node['key'] = $k;
+        }
+        $node['type'] = is_object($v) ? 'object' : 'array';
+        FrxData::arrayToXml($v, $node);
+      }
+      else {
+        $node = $xml->addChild($tag, htmlspecialchars($v));
+        $node['key'] = $k;
+      }
+
+      $tag =  preg_replace( '/[^a-zA-Z0-9]/', '_', (string) $k);
+    }
+    return $xml;
+  }
+
   /**
    * Get the value from the data.
    * This is used by token_replace method to extract the data based on the path provided.
@@ -96,13 +149,19 @@ class FrxData extends FrxContext {
     $data = $this->currentContext();
 
     if ($context && $this->contextExists($context)) {
+
       $data = $this->getContext($context);
+
     }
-    if (is_array($data)) {
+    if (is_array($data) && !preg_match('/[\=\[\/\]\(\)]/', $key)) {
+
       $retvar = @$data[$key];
     }
-    elseif (is_object($data)) {
-
+    elseif (is_object($data) || is_array($data)) {
+      if (is_array($data) || !method_exists($data, 'xpath')) {
+        if ( !$this->cur_context_xml) $this->cur_context_xml = FrxData::arrayToXml($data);
+        $data = $this->cur_context_xml;
+      }
       if (strpos($key, '=')===0) {
         $retvar = $this->simplexml_evaluate($data, ltrim($key, '='));
       }
@@ -142,7 +201,15 @@ class FrxData extends FrxContext {
       }
     }
 
-    if (!is_array($retvar)) $retvar = trim((string)$retvar);
+    if (!is_array($retvar)) {
+      if (is_object($retvar) && is_a($retvar, 'DOMNodeList')) {
+        $retvar = $retvar->item(0);
+        if ($retvar) ($retvar = trim($retvar->textContent));
+      }
+      else {
+        $retvar = trim((string)$retvar);
+      }
+    }
     return $retvar;
   }
 
@@ -154,10 +221,11 @@ class FrxData extends FrxContext {
   public function setValue($key, $value, $context='') {
     if (is_array($this->cur_context)) {
       $this->cur_context[$key] = $value;
+      if ($this->cur_context_xml) $this->cur_context_xml->$key = $value;
     }
     elseif (is_object($this->cur_context)) {
       if (strpos($key, '@')===0) {
-        $this->cur_context[$key] = $value;
+        $this->cur_context[trim($key, '@')] = $value;
       }
       else {
         $this->cur_context->$key = $value;
@@ -179,6 +247,7 @@ class FrxData extends FrxContext {
     $this->id_stack[] = $this->id;
     $this->id = $id;
     $this->cur_context = $data;
+    $this->cur_context_xml = '';
 
     if ($id) {
       /*    if (@is_array($this->data_sources[$id]) && is_array($data)) {
@@ -189,8 +258,13 @@ class FrxData extends FrxContext {
     }
   }
 
-  public function setContext($id, $data) {
-    $this->data_sources[$id] = $data;
+  public function setContext($id, &$data) {
+    if (is_object($data)) {
+      $this->data_sources[$id] = $data;
+    }
+    else {
+      $this->data_sources[$id] = &$data;
+    }
   }
 
   /**
@@ -202,6 +276,7 @@ class FrxData extends FrxContext {
   public function pop() {
     $this->id = array_pop($this->id_stack);
     $this->cur_context = array_pop($this->data_stack);
+    $this->cur_context_xml = '';
   }
 
   /**
@@ -230,7 +305,27 @@ class FrxData extends FrxContext {
     drupal_set_message(filter_xss('cur_context ' . $this->id . '<br/>Stack<br/><pre>' . print_r($this->cur_context, 1) . '</pre>'));
   }
 
-
+  /**
+   * Iterate the data based on the provided path.
+   *
+   * @param $path xpath to iterate xml on
+   * @param $group grouping value
+   * @param $sort Sort criteria
+   */
+  public function group($data,  $group='') {
+    $rows = array();
+    if (is_array($group)) $group = implode(' ', $group);
+    $group = (string)$group;
+    if (is_array($data) || is_object($data)) {
+      foreach ($data as $row) {
+        Frx::Data()->push($row, '_group');
+        $gval = $this->teng->replace($group, TRUE);
+        Frx::Data()->pop();
+        $rows[$gval][] = $row;
+      }
+    }
+    return $rows;
+  }
 
 
 }

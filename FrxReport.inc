@@ -11,6 +11,7 @@ require_once('renderers/FrxRenderer.inc');
 class FrxReport {
   public $block_edit_mode = false;
   public $blocks_loaded;
+  public $data;
   public $rpt_xml;
   public $fields;
   public $category;
@@ -144,6 +145,14 @@ class FrxReport {
         	    $this->parameters[$id] = $parm;
         	  }
         	  break;
+        	case 'data':
+        	  $data = array();
+        	  foreach($node->attributes() as $key => $value) {
+        	    $data [$key] = (string)$value;
+        	  }
+            $data['data'] = $node;
+        	  $this->data[] = $data;
+        	  break;
         	case 'doctypes':
         	  $this->doctypes = $value;
         	  break;
@@ -159,7 +168,7 @@ class FrxReport {
    * @param $block
    * @return unknown_type
    */
-  public function getData($block, $id='', $data_uri='') {
+  public function getData($block, $id='', $data_uri='', $raw_mode=FALSE) {
     $data = array();
     if ($data_uri) {
       parse_str($data_uri, $data);
@@ -168,7 +177,7 @@ class FrxReport {
       }
     }
 
-    $xml = Frx::BlockEditor($block, $this->block_edit_mode)->data($data);
+    $xml = Frx::BlockEditor($block, $this->block_edit_mode)->data($data, $raw_mode);
 
     if ($xml) {
       $this->blocks_loaded = TRUE;
@@ -188,6 +197,43 @@ class FrxReport {
     }
   }
 
+  public function preloadData() {
+    $blocks_loaded = $this->blocks_loaded;
+
+    $jsonData = array();
+    if ($this->data) foreach ($this->data as $d) {
+      if (!empty($d['block'])) {
+        $id = @$d['id'];
+        $block = $d['block'];
+        $parms = @$d['parameters'];
+        $raw = !empty($d['json']) || !empty($d['raw_mode']);
+
+        $data = $this->getData($block, $id, $parms, $raw);
+        if (@$d['path'] && !$raw && $data) {
+          $data = $data->xpath((string)$d['path']);
+          if ($data) $data = $data[0];
+        }
+        Frx::Data()->setContext($id, $data);
+        if (!empty($d['json']) && $this->format == 'web') {
+          $ret = array();
+          if ($data) foreach($data as $row) {
+            $ret[] = $row;
+          }
+          $jsonData[$d['json']] = $ret;
+        }
+      }
+      else {
+        $id = @$d['id'];
+        if ($id) Frx::Data()->setContext($id, $d['data']);
+      }
+    }
+
+    if ($jsonData) {
+      drupal_add_js(array('forenaData' => $jsonData), 'setting');
+    }
+    $this->blocks_loaded = $blocks_loaded;
+  }
+
   /**
    * Render the report
    * @return unknown_type
@@ -201,8 +247,10 @@ class FrxReport {
     // Find the Body of the report.
     $this->format = $format;
     $dom = $this->dom;
+    // Trap error condition
+    if (!$dom) return '';
     $body = $dom->getElementsByTagName('body')->item(0);
-
+    $this->preloadData();
     // Render the rport.
     $c = Frx::Controls('FrxRenderer');
     $c->initReportNode($body, $this);
@@ -212,7 +260,7 @@ class FrxReport {
     if (!$this->parameters_form) $this->parametersForm(array('collapsible' => TRUE, 'collapsed' => $this->blocks_loaded));
 
     // Determine the correct filter.
-    $filter = variable_get('forena_input_format', filter_default_format());
+    $filter = variable_get('forena_input_format', 'none');
     $skinfo = Frx::Data()->getContext('skin');
     if (isset($skinfo['input_format'])) $filter = $skinfo['input_format'];
     if (isset($this->options['input_format'])) $filter = $this->options['input_format'];
@@ -270,7 +318,7 @@ class FrxReport {
 
 
   public function getField($id) {
-    $field = array_fill_keys(array('default', 'link', 'add-query', 'class', 'rel', 'format', 'format-string', 'target'), '');
+    $field = array_fill_keys(array('default', 'link', 'add-query', 'class', 'rel', 'format', 'format-string', 'target', 'calc', 'context'), '');
     if ($this->fields) {
       $path = 'frx:field[@id="' . $id . '"]';
       $formatters = $this->fields->xpath($path);
@@ -285,6 +333,7 @@ class FrxReport {
         $field['format'] = (string) $formatter['format'];
         $field['format-string'] = (string) $formatter['format-string'];
         $field['target'] = (string) $formatter['target'];
+        $field['calc'] = (string) $formatter['calc'];
       }
     }
 
@@ -295,7 +344,7 @@ class FrxReport {
    * Formatter used by the syntax engine to alter data that gets extracted.
    * This invokes the field translation
    */
-  public function format($value, $key) {
+  public function format($value, $key, $raw=FALSE) {
     // Determine if there is a field overide entry
     $default='';
     $link ='';
@@ -304,6 +353,7 @@ class FrxReport {
     $target = '';
     $class = '';
     $rel = '';
+    $calc= '';
     if ($this->fields) {
       $path = 'frx:field[@id="' . $key . '"]';
       $formatters = $this->fields->xpath($path);
@@ -317,17 +367,27 @@ class FrxReport {
           $class = (string)$formatter['class'];
           $rel = (string)$formatter['rel'];
           $format = (string) $formatter['format'];
+          $calc = (string) $formatter['calc'];
+          $context = (string) $formatter['context'];
           $format_str = (string) $formatter['format-string'];
           $target = (string) $formatter['target'];
         }
       }
     }
 
-    if ($format) {
-      $value = FrxReportGenerator::$instance->format_data($value, $format, $format_str, $this->teng);
+    // Evaluate any calculations first.
+    if ($calc) {
+      if ($context) $context .= ".";
+      $calc = $this->teng->replace($calc);
+      if ($calc) $value = $this->teng->replace('{' . $context . '=' . $calc . '}', TRUE);
     }
 
-    if (is_array($value)) {
+    if ($format && !$raw) {
+      $value = FrxReportGenerator::$instance->format_data($value, $format, $format_str, $this->teng, $default);
+      $value = trim($value);
+    }
+
+    if (is_array($value) && !$raw) {
       $value = implode(' ', $value);
     }
 
@@ -336,18 +396,25 @@ class FrxReport {
       $value = $default;
     }
 
-    if ($link) {
+
+    if ($link && !$raw) {
+
       $attributes = array();
       $target = $this->teng->replace($target, TRUE);
       // use the target attribute to open links in new tabs or as popups.
       if (@strpos(strtolower($target), 'popup')===0) {
-        $opts = 'status=1';
         $options = "status=1";
         $attributes = array('onclick' =>
           'window.open(this.href, \'' . $target . '\', "' . $options . '"); return false;');
       }
       else {
         if ($target) $attributes['target'] = $target;
+      }
+
+      // Adding support for ctools modals.
+      if ($link && strpos($class, 'ctools-use-modal') !== FALSE && is_callable('ctools_include')) {
+        ctools_include('modal');
+        ctools_modal_add_js();
       }
       if ($rel) $attributes['rel'] = $this->teng->replace($rel, TRUE);
       if ($class) $attributes['class'] = explode(' ', trim($this->teng->replace($class, TRUE)));
@@ -372,7 +439,7 @@ class FrxReport {
         array('fragment' => $fragment, 'query' => $data, 'attributes' => $attributes, 'absolute' => TRUE)
       );
     }
-    if ($this->preview_mode) $value .= Frx::Editor()->fieldLink($key, $value);
+    if ($this->preview_mode && !$raw) $value .= Frx::Editor()->fieldLink($key, $value);
     return $value;
   }
 
@@ -581,7 +648,7 @@ class FrxReport {
       }
     }
     $this->parms = $parms;
-    return $this->missing_parms;
+    return $missing_parms;
   }
 
   public function parametersArray() {
@@ -692,18 +759,31 @@ class FrxReport {
    * @param $group grouping value
    * @param $sort Sort criteria
    */
-  public function group($data,  $group='') {
+  public function group($data,  $group='', $sums= array()) {
     $rows = array();
+    $totals = array();
     if (is_array($group)) $group = implode(' ', $group);
     $group = (string)$group;
     if (is_array($data) || is_object($data)) {
       foreach ($data as $row) {
         Frx::Data()->push($row, '_group');
         $gval = $this->teng->replace($group, TRUE);
+        foreach($sums as $sum_col) {
+          $sval = $this->teng->replace($sum_col, FALSE);
+          $skey = trim($sum_col, '{}');
+          $totals[$gval][$skey] = isset($totals[$gval][$skey]) ? $totals[$gval][$skey] + $sval : (float)$sval;
+        }
         Frx::Data()->pop();
         $rows[$gval][] = $row;
       }
     }
+    foreach($totals as $gval => $col) {
+      foreach ($col as $skey => $total) {
+        $tkey = $skey . '_total';
+        $rows[$gval][0]->$tkey = (string)$total;
+      }
+    }
+
     return $rows;
   }
 

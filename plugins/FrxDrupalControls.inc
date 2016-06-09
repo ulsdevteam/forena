@@ -17,7 +17,8 @@ class FrxDrupalControls {
    * @param unknown_type $key
    * @param unknown_type $data
    */
-  public function format($value, $key, $data) {
+  public function format($value, $key,  $raw = FALSE) {
+    if ($raw) return $value;
     $db = Database::getConnection('default');
     if ($db) {
       if ($value=='')

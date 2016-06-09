@@ -376,7 +376,7 @@ class Frx {
   static public function Editor($report_name = '', $edit=TRUE) {
     static $o='';
     require_once('FrxEditor.inc');
-    if (!$o) {
+    if (!$o || !$edit) {
       $o = new FrxEditor($report_name, $edit);
     }
     else {

@@ -7,7 +7,7 @@ class FrxDrupalNode {
   public $access = 'access content';
   public $tokens = array('nid', 'vid');
 
-  public function load($parms = array()) {
+  public function data($parms = array()) {
     $nid = isset($parms['nid']) ? $parms['nid'] : 1;
     $vid = isset($parms['vid']) ? $parms['vid'] : NULL;
 

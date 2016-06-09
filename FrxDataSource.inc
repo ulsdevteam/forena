@@ -57,12 +57,9 @@ class FrxDataSource{
   }
 
   protected function loadBlockFromFile($block_name) {
-    $base_file = $this->block_path . '/' . $block_name;
-    $parts = @explode('.', $block_name);
     $full_name = $this->name . '/' . $block_name;
-    $php_method = array_pop($parts);
-    $php_class = implode('.', $parts);
-    $php_file = $this->block_path . '/' . $php_class . '.inc';
+    $php_class = $block_name;
+    $php_file = $this->block_path . '/' . $php_class . '.php';
     if (Frx::DataFile()->exists($full_name . '.sql')) {
       $contents = Frx::DataFile()->contents($full_name . '.sql');
       $block = $this->parseSQLFile($contents);
@@ -73,14 +70,14 @@ class FrxDataSource{
       $block = $this->parseXMLFile($contents);
       $block['type'] = 'xml';
     }
-    elseif (file_exists($php_file)) {
-      require_once $php_file;
+    elseif (Frx::DataFile()->exists($full_name . '.php')) {
+      include_once $php_file;
+
       if (class_exists($php_class)) {
         $o = new $php_class();
         $block['type'] = 'php';
         $block['access'] = @$o->access;
         $block['object'] = $o;
-        $block['method'] = $php_method;
         if (method_exists($o, 'tokens' )) {
           $block['tokens'] = $o->tokens();
         }
@@ -144,6 +141,7 @@ class FrxDataSource{
    * @return unknown
    */
   public function list_blocks($search, &$block_list, $subdir='') {
+    $count=0;
     // First find files that match the search string
     $path = $this->block_path . '/';
     if ($subdir) $path .= $subdir . '/';
@@ -270,6 +268,7 @@ class FrxDataSource{
     $file = '';
     $skip = FALSE;
     $in_info = FALSE;
+    $found_case = FALSE;
     $info_text = '';
     $tokens = array();
     $options = array();
@@ -313,10 +312,12 @@ class FrxDataSource{
               $in_info = TRUE;
               break;
             case 'INCLUDE':
-              $inc_block = $this->getSQLInclude(trim($o));
-              if ($inc_block) {
-                $data .= $inc_block['source'];
-                $tokens = array_merge($tokens, $inc_block['tokens']);
+              if (!$skip) {
+                $inc_block = $this->getSQLInclude(trim($o));
+                if ($inc_block) {
+                  $data .= $inc_block['source'];
+                  $tokens = array_merge($tokens, $inc_block['tokens']);
+                }
               }
               break;
           }
@@ -340,7 +341,7 @@ class FrxDataSource{
       $i++;
     }
     $tokens = array_merge($tokens, $this->tokens($contents));
-    $options = drupal_parse_info_format($info_text);
+    if ($info_text) $options = drupal_parse_info_format($info_text);
 
     $block = array( 'source' => $data, 'file' => trim($file, " \n"),
       'tokens' => $tokens, 'options' => $options, 'access' => $access);
@@ -363,6 +364,7 @@ class FrxDataSource{
    */
   public function xmlData($source, $parm_data='') {
     $xml ='';
+    $xmlData='';
     try {
       $xmlData = $source;
       $xml = new SimpleXMLElement($xmlData);
@@ -372,10 +374,11 @@ class FrxDataSource{
     return $xml;
   }
 
-  public function phpData($o, $method, $parameters) {
+  public function phpData($o, $parameters) {
     $data = NULL;
-    if (is_object($o) && is_callable(array($o, $method))) {
-      $data = $o->$method($parameters);
+
+    if (is_object($o) && is_callable(array($o, 'data'))) {
+      $data = $o->data($parameters);
     }
     return $data;
   }

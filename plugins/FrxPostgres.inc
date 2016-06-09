@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Oracle specific driver that takes advantage of oracles native XML support
+ * Postgres specific driver that takes advantage of native XML support
  *
  * In order to take advantage of XML support the following XML
  *
@@ -98,7 +98,7 @@ class FrxPostgres extends FrxDataSource {
       if (!$this->block_name) {
         $short = t('%e', array('%e' => $text));
       } else {
-        $short = t('SQL Error in %b.sql', array('%b' => $this.block_name));
+        $short = t('SQL Error in %b.sql', array('%b' => $this->block_name));
       }
       $this->error($short, $text);
       return;
@@ -157,7 +157,8 @@ class FrxPostgres extends FrxDataSource {
    * @param unknown_type $key
    * @param unknown_type $data
    */
-  public function format($value, $key) {
+  public function format($value, $key, $raw = FALSE) {
+    if ($raw) return $value;
     $value = $this->parmConvert($key, $value);
     if ($value===''||$value===NULL)
     $value = 'NULL';

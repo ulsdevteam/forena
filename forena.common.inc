@@ -104,8 +104,8 @@ function forena_report_object($report='', $data='') {
  * @return string
  */
 function forena_inner_xml($xml, $tag) {
-  if (is_object($xml) && is_object($xml->$tag)) {
-    $xml_data = $xml->$tag->asXML();
+  if (is_object($xml) && $tag) {
+    $xml_data = $xml->asXML();
     $xml_data = preg_replace("/<\/?" . $tag . "(.|\s)*?>/", "", $xml_data);
   };
   return $xml_data;
@@ -169,6 +169,11 @@ function forena_my_reports_block() {
  * @param integer $count Number of documents to send.
  */
 function forena_confirm_email($formid, &$form_state, $docs, $count, $prompt_subject, $prompt_body) {
+  // Make sure user has permission for email merge.
+  if (!user_access('perform email merge')) {
+    drupal_access_denied();
+    exit();
+  }
   // Save arguments away for rebuild
   if (!isset($form_state['storage']['args'])) {
     $form_state['storage']['args'] = array(
@@ -232,6 +237,7 @@ function forena_confirm_email_submit($form, &$form_state) {
   $test_send = @$form_state['values']['send']=='test' ? TRUE : variable_get('forena_email_override', FALSE);
   $max = (integer)$form_state['values']['max'];
   $i = 0;
+  $sent = 0;
   if (isset($form_state['values']['body']['value'])) {
     $body =  check_markup($form_state['values']['body']['value'],$form_state['values']['body']['format']);
   }
@@ -251,26 +257,20 @@ function forena_confirm_email_submit($form, &$form_state) {
       // Remove bcc and cc
       unset($doc['parms']['headers']);
     }
-    if ($i <= $max) drupal_mail('forena', 'mailmerge', $to, language_default(), $doc['parms'], $from, TRUE);
+    if ($i <= $max) {
+      $sent++;
+      drupal_mail('forena', 'mailmerge', $to, language_default(), $doc['parms'], $from, TRUE);
+    }
   }
-  $form_state['rebuild'] = TRUE;
+  drupal_set_message(t('Sent %count messages ', array('%count' => $sent)));
+  if (isset($form_state['values']['send']) && $form_state['values']['send'] == 'test') {
+    $form_state['rebuild'] = TRUE;
+  }
+  else {
+    $form_state['redirect'] = 'forena';
+  }
 }
 
-/**
- * Send report block XML
- * Enter description here ...
- * @param unknown_type $block_name
- */
-function forena_block_xml($block_name='') {
-  $block_name = str_replace('.', '/', $block_name);
-  $parms = $_GET;
-  unset($parms['q']);
-  $xml = Frx::RepoMan()->data($block_name, $parms);
-  if (is_object($xml)) {
-    header('Content-Type: text/xml');
-    print $xml->asXML();
-  }
-}
 
 /**
  * Save the report file to disk

@@ -17,7 +17,7 @@ class FrxSkin {
   public $stylesheets = array();
   public $scripts = array();
   public $default_skin = '';
-  public $info = '';
+  public $info = array();
 
   /**
    * Method constructor.
@@ -32,7 +32,10 @@ class FrxSkin {
    * @param $sheet
    */
   public function addCSS($type, $sheet) {
-    if (Frx::File()->exists($sheet)) {
+    if (strpos($sheet, 'http:') === 0 || strpos($sheet, 'https:') === 0) {
+      $this->stylesheets[$type][] = $sheet;
+    }
+    elseif (Frx::File()->exists($sheet)) {
       $this->stylesheets[$type][] = Frx::File()->path($sheet);
     }
     elseif (file_exists($sheet)) {
@@ -46,7 +49,10 @@ class FrxSkin {
    * @param unknown_type $script
    */
   public function addJS($script) {
-    if (Frx::File()->exists($script)) {
+    if (strpos($script, 'http:') === 0 || strpos($script, 'https:') === 0) {
+      $this->scripts[] = $script;
+    }
+    elseif (Frx::File()->exists($script)) {
       $this->scripts[] = Frx::File()->path($script);
     }
     elseif (file_exists('sites/all/libraries/' . $script)) {
@@ -66,9 +72,11 @@ class FrxSkin {
     if ($this->name != $name) {
       //Check for an info file
       if (Frx::File()->exists($name . '.skinfo')) {
-
         // Parse the info file using drupals stock version
         $this->info = drupal_parse_info_format(Frx::File()->contents($name . '.skinfo'));
+        $path_info = Frx::File()->pathinfo($name . '.skinfo');
+        $this->info['base_path'] = base_path() . $path_info['dirname'];
+        $this->info['dir'] = base_path() . $path_info['dirname'];
         Frx::Data()->setContext('skin', $this->info);
         if (isset($this->info['stylesheets'])) {
           foreach ($this->info['stylesheets'] as $type => $sheets) {

@@ -41,7 +41,8 @@ class FrxDrupalApplication {
    */
   public function theme($r, $title, $doc_type) {
     $output = $r->html;
-    $output = check_markup($output, variable_get('forena_input_format', filter_default_format()));
+    $input_format = variable_get('forena_input_format', 'none');
+    if ($input_format != 'none') $output = check_markup($output, $input_format);
 
     if (!$doc_type || $doc_type='embed') {
       // Set the title and return the output

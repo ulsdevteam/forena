@@ -11,12 +11,8 @@
 </frx:parameters>
 <frx:docgen>
   <frx:doc type="email" />
-  <frx:doc type="h">h</frx:doc>
-  <frx:doc type="e">e</frx:doc>
 </frx:docgen>
 <frx:fields>
-  <frx:field id="mail" link="" format="" format-string="" target="" />
-  <frx:field id="name" link="" format="" format-string="" target="" />
 </frx:fields>
 </head>
 <body>
@@ -52,3 +48,4 @@
   </div>
 </body>
 </html>
+

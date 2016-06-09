@@ -12,10 +12,14 @@ ul.forena-doclinks li {
   display: inline; 
 }
 
+#forena-block-preview table {
+	width : 100%;
+}
+
 .forena-editor-links {
 	display: block; 
 	float: right; 
-	width: 10em; 
+	width: 5em; 
 	clear: right; 
 	text-align: right;
 }
@@ -94,5 +98,18 @@ ul.forena-doclinks {
 	text-align: right;
 }
 
+.forena-edit-links img, .forena-editor-links img,
+.forena-field-config img { height: 1.3em; vertical-align: middle; }
+.forena-edit-links a, .forena-editor-links a { display: inline-block;
+  padding: 0.2em;
+  background-color: #eee; 
+  border: solid 1px #ddd;
+  text-decoration: none; 
+  font-size: 1.1em; 
+  vertical-align: middle; 
+  margin-bottom: 0.5em; 
+  border-radius: .5em; }
+
+.forena-edit-links a:hover { text-decoration: none;  }
 
 

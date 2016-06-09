@@ -9,17 +9,14 @@
 include_once('FrxCrosstab.inc');
 include_once('FrxTable.inc');
 class FrxSVGGraph extends FrxRenderer {
-  private $graph;
-  private $links;
+  public $graph;
   public $templateName = 'Graph (svg)';
   public $xy_data = FALSE;
-  private $point_attributes;
-  private $headers = array();
-  private $weight;
-  private $graphData;
-  private $graphOptions;
-  private $colors;
-  private $unset_attrs = array(
+  public $weight;
+  public $wrap_label;
+  public $graphData;
+  public $graphOptions;
+  public $unset_attrs = array(
     'base_type',
     'crosstab_columns',
     'content',
@@ -29,7 +26,7 @@ class FrxSVGGraph extends FrxRenderer {
   );
 
   // Place to indicate which fields are sourced from the data.
-  private $field_sources = array();
+  public $field_sources = array();
 
   public function __construct() {
     parent::__construct();
@@ -41,34 +38,44 @@ class FrxSVGGraph extends FrxRenderer {
    * Re-architect the data into something that the graphing engine can work with
    */
   public function generateGraphData(&$data, $series, $key) {
-
-    // Default controling attributes
-    $dim_headers = array($key);
-
+    // Default controlling attributes
+    $counts = array();
+    $legend = array();
     $this->graphOptions['structure']['value'] = array();
-    foreach($series as $dk) {
-      foreach($series as $col) {
-        $this->graphOptions['structure']['value'][] = trim("$col", '{}');
-      }
+    foreach($series as $col) {
+      $this->graphOptions['structure']['value'][] = trim("$col", '{}');
     }
+
 
     $this->graphData = array();
     foreach ($data as $row) {
       Frx::Data()->push($row, '_row');
       $trow = array();
       // Base group
-      $trow['key'] =  $this->teng->replace($key, TRUE);;
+      $trow['key'] =  $this->wrap_label ? wordwrap($this->teng->replace($key, TRUE), $this->wrap_label) : $this->teng->replace($key, TRUE);
       // Dimensions
       foreach($series as $col) {
           $val = $this->teng->replace($col, TRUE);
-          if(!$val) $val = 0;
-          $trow[trim("$col", '{}')] = $val;
+          if ($val != '' && $val !==NULL) {
+            $trow[trim("$col", '{}')] = $val;
+            @$counts[trim("$col", '{}')]++;
+          }
       }
       foreach($this->field_sources as $k => $src) {
         $trow[$k] = $this->teng->replace($src, TRUE);
       }
+      if(isset($this->field_sources['legend_entries'])) {
+        $legend_str = $trow['legend_entries'];
+        $legend[$legend_str] = $legend_str;
+      }
       Frx::Data()->pop();
       $this->graphData[] = $trow;
+    }
+    $this->counts = $counts;
+
+    // Deal with rare case where legend are supposed to come from data
+    if (isset($this->field_sources['legend_entries'])) {
+      $this->graphOptions['legend_entries'] = array_values($legend);
     }
   }
 
@@ -76,17 +83,15 @@ class FrxSVGGraph extends FrxRenderer {
    /**
    * Re-architect the data into something that the graphing engine can work with
    */
-  public function generateGroupGraphData(&$block_data, $group, $series, $key, $dim) {
+  public function generateGroupGraphData(&$block_data, $group, $series, $key, $dim, $sum) {
     $dim_headers = array();
     $dim_rows = array();
-    $dim_columns = array();
-    $group_headers = array();
     $dim_values = array();
     $rows = array();
-    $data = $this->frxReport->group($block_data, $group);
-    $this->graphOptions['structure'] = array('key' => 0);
-    $structure_idx = 0;
-
+    $legend = array();
+    $counts = array();
+    $data = $this->frxReport->group($block_data, $group, $sum);
+    $this->graphOptions['structure'] = array('key' => $group);
     foreach ($data as $gk => $group_rows) {
       $row_copy = array_values($group_rows);
       $dims = $this->frxReport->group($group_rows, $dim);
@@ -102,23 +107,12 @@ class FrxSVGGraph extends FrxRenderer {
     $dim_headers = array($key);
     $dim_columns = $series;
 
-    // Add the dimension headers.
-    foreach ($dim_values as $dk) {
-      foreach ($dim_headers as $i => $col) {
-        $cell = '';
-        if (count($dim_columns) > 1) {
-          $cell = $i ? $col : $dk . ' ' . $col;
-        }
-        $hrow []  = $cell;
-      }
-    }
-
     foreach($dim_values as $dk) {
       foreach($dim_columns as $col) {
-        $structure_idx++;
+        $structure_idx = trim($dk, '{}') . trim($col, '{}');
         $this->graphOptions['structure']['value'][] = $structure_idx;
         foreach($this->field_sources as $k=>$fld) {
-          $structure_idx++;
+          $structure_idx = $dk . $k;
           $this->graphOptions['structure'][$k][] = $structure_idx;
         }
       }
@@ -132,7 +126,8 @@ class FrxSVGGraph extends FrxRenderer {
       // Base group
 
       $gkey = $this->teng->replace($group, TRUE);
-      $trow[] = $gkey;
+      if ($this->wrap_label) $gkey = wordwrap($gkey, $this->wrap_label);
+      $trow['key'] = $gkey;
       Frx::Data()->pop();
       // Dimensions
       $dim_data = $dim_rows[$k];
@@ -141,19 +136,35 @@ class FrxSVGGraph extends FrxRenderer {
         frx::Data()->push($dim_row, '_dim');
         foreach($dim_columns as $col) {
 
-          $cell = $col;
           $val = $this->teng->replace($col, TRUE);
-          if(!$val) $val = 0;
-          $trow[] = $val;
+          if ($val !== '' && $val !== NULL) {
+            $trow[trim($dk, '{}') . trim($col, '{}')] = $val;
+            @$counts[trim($dk, '{}') . trim($col, '{}')]++;
+          }
           foreach($this->field_sources as $fk => $src) {
-            $trow[] = $this->teng->replace($src, TRUE);
+            $trow[$dk . $fk] = $this->teng->replace($src, TRUE);
+            if (isset($this->field_sources['legend_entries'])) {
+              $legend_str = $this->teng->replace($this->field_sources['legend_entries']);
+              $legend[$legend_str] = $legend_str;
+            }
+
           }
         }
+
+
         frx::Data()->pop();
       }
       $this->graphData[] = $trow;
+      $this->counts = $counts;
 
     }
+
+    // Deal with rare case where legend are supposed to come from data
+    if (isset($this->field_sources['legend_entries'])) {
+
+      $this->graphOptions['legend_entries'] = array_values($legend);
+    }
+    $this->graphOptions['structure']['key'] = 'key';
     return $this->graphData;
   }
 
@@ -176,14 +187,14 @@ class FrxSVGGraph extends FrxRenderer {
    */
   public function scrapeConfig() {
     $this->weight = 0;
-    $attrs = array();
-    $svg = '';
-    $nodes =  $this->reportDocNode->xpath('//svg');
+
+    $nodes =  $this->reportDocNode->xpath('svg');
     if ($nodes) {
       $svg = $nodes[0];
       $config = $this->mergedAttributes($svg);
     }
-
+    $table_nodes = $this->reportDocNode->xpath('table');
+    $config['gen_table'] = $table_nodes ? 1 : 0;
     // Determine graph type
     $graph_type =  isset($config['type']) ? $config['type'] : 'BarGraph';
 
@@ -219,32 +230,22 @@ class FrxSVGGraph extends FrxRenderer {
     return $config;
   }
 
-  /**
-   * Render the graph.
-   * @return Ambigous <string, mixed>
-   */
-  public function render() {
-    // Get data from source
-    $output = '';
-    $options = array();
-    $series = array();
-    $label = '';
-    $links = '';
-    $dim='';
-    $seriesx = array();
+  public function prepareGraph() {
+    $skin_options = Frx::Data()->getContext('skin');
+    $options = isset($skin_options['FrxSVGGraph']) ? $skin_options['FrxSVGGraph'] : array();
     $attributes = $this->mergedAttributes();
     // Default in xpath for backward compatibility
     // Legacy options.  New charts should be generated using Frx:attribute syntax
     if (isset($attributes['options'])) {
-      parse_str($attributes['options'], $options);
+      $attr_options = array();
+      parse_str($attributes['options'], $attr_options);
       unset($attributes['options']);
-      foreach ($options as $key => $value) {
+      foreach ($attr_options as $key => $value) {
         $options[$key] = $this->teng->replace($value, TRUE);
       }
-      $options  = array_merge($attributes, $options);
     }
     else {
-      $options = $attributes;
+      $options = array_merge($options, $attributes);
     }
 
     // Main Graphing options
@@ -252,13 +253,13 @@ class FrxSVGGraph extends FrxRenderer {
     if (!$path) $path = $this->extract('xpath', $options); //Deprecated
     if (!$path) $path = '*';
     $group = $this->extract('group', $options);
-    $series = @$attributes['series'];
-    $label = @$attributes['label'];
+    $series = @(array)$attributes['series'];
+    $sums = @(array)$attributes['sum'];
     $key = @$attributes['key'];
     if (!$key) $key = @$attributes['label']; //Backward compatibility for old graphs.
     $options['key'] = $key;
     $dim = $this->extract('dim', $options);
-    $type = $this->extract('type', $options);
+    $this->wrap_label = (int)$this->extract('wrap_label', $options);
     if (!$key) $key = @$options['seriesx']; // Deprecated
 
     // Determine basic data to iterate.
@@ -285,7 +286,7 @@ class FrxSVGGraph extends FrxRenderer {
 
     // Find out data that is designed to be sepecif to series.
     $this->field_sources = array();
-    $i= 0;
+
     foreach ($options as $fk => $opt) {
       if ($fk != 'value' && $fk != 'key' && $opt && !is_array($opt) && strpos($options[$fk], '{')!==FALSE) {
         $this->field_sources[$fk] = $opt;
@@ -301,28 +302,66 @@ class FrxSVGGraph extends FrxRenderer {
 
     $this->graphOptions = $options;
 
-    if ($group && $dim) {
-      $this->generateGroupGraphData($nodes, $group, $series, $key, $dim);
+    if ($group) {
+      $this->generateGroupGraphData($nodes, $group, $series, $key, $dim, $sums);
     }
     else {
       $this->generateGraphData($nodes, $series, $key);
     }
 
-
-    // Deal with rare case where legend are supposed to come from data
-    if (isset($this->field_sources['legend_entries'])) {
-      $legend = array();
-      foreach($this->graphData as $row) {
-        $legend[] = $row['legend_entries'];
-      }
-      $this->graphOptions['legend_entries'] = $legend;
-    }
     if (isset($this->graphOptions['legend_entries']) && !is_array($this->graphOptions['legend_entries'])) {
       $this->graphOptions['legend_entries'] = explode('|', $this->graphOptions['legend_entries']);
     }
-    if ($data) {
-      $output = $this->renderChart($type, $data);
+
+  }
+
+  public function validSeries() {
+    $valid = TRUE;
+    $removed = array();
+    if (is_array($this->graphOptions['structure']['value'])) {
+      foreach ($this->graphOptions['structure']['value'] as $k=>$series) {
+        if (!isset($this->counts[$series])) {
+          // remove empty series.
+          unset($this->graphOptions['structure']['value'][$k]);
+          $removed[] = $k;
+        }
+      }
+
+      if ($removed) {
+        $this->graphOptions['structure']['value'] = array_values($this->graphOptions['structure']['value']);
+        foreach($this->graphOptions as $option => $data) {
+          if (is_array($data)) {
+            $modified = FALSE;
+            foreach($removed as $k) {
+              if (isset($data[$k])) {
+                unset($this->graphOptions[$option][$k]);
+                $modified = TRUE;
+              }
+            }
+            if ($modified) {
+              $this->graphOptions[$option] = array_values($this->graphOptions[$option]);
+            }
+          }
+        }
+        if (!$this->graphOptions['structure']['value']) $valid = FALSE;
+      }
     }
+    return $valid;
+  }
+
+  /**
+   * Render the graph.
+   * @return Ambigous <string, mixed>
+   */
+  public function render() {
+    // Get data from source
+    $output = '';
+    $this->prepareGraph();
+    $type = $this->graphOptions['type'];
+    if ($this->graphData && $this->validSeries()) {
+      $output = $this->renderChart($type);
+    }
+
     return $output;
   }
 
@@ -331,19 +370,33 @@ class FrxSVGGraph extends FrxRenderer {
       'BarGraph' => array('type' => 'Bar Graph', 'style' => 'Simple' ),
       'Bar3DGraph' => array('type' => 'Bar Graph', 'style' => '3D' ),
       'StackedBarGraph' => array('type' => 'Bar Graph', 'style' => 'Stacked'),
+      'StackedBar3DGraph' => array('type' => 'Bar Graph', 'style' => 'Stacked 3d'),
+      'GroupedBar3DGraph' => array('type' => 'Bar Graph', 'style' => 'Grouped 3d'),
       'GroupedBarGraph' => array('type' => 'Bar Graph', 'style' => 'Grouped'),
+      'StackedGroupedBarGraph' => array('type' => 'Bar Graph', 'Stacked Grouped'),
+      'BarAndLineGraph' => array('type' => 'Bar and Line Graph', 'style' => 'Grouped'),
       'CylinderGraph' => array('type' => 'Bar Graph', 'style' => 'Cylinder'),
       'StackedCylinderGraph' => array('type' => 'Bar Graph', 'style' => 'Stacked Cylinder'),
       'GroupedCylinderGraph' =>  array('type' => 'Bar Graph', 'style' => 'Grouped Cylinder'),
       'PieGraph' => array('type' => 'Pie Chart', 'style' => 'Simple'),
       'Pie3DGraph' => array('type' => 'Pie Chart', 'style' => '3D'),
+      'DonutGraph' => array('type' => 'Pie Chart', 'style' => 'Donut'),
+      'PolarAreaGraph' => array('type' => 'Pie Chart', 'style' => 'Polar Area'),
+      'ExplodedPieGraph' => array('type' => 'Pie Chart', 'style' => 'Exploded Pie'),
       'HorizontalBarGraph' => array('type' => 'Bar Graph', 'style' => 'Horizontal'),
+      'HorizontalStackedBarGraph' => array('type' => 'Bar Graph', 'style' => 'Horizontal Stacked'),
+      'HorizontalGroupedBarGraph' => array('type' => 'Bar Graph', 'style' => 'Horizontal Grouped'),
+      'PoopulationPyramid' => array('type' => 'Bar Graph', 'style' => 'Population Pyramid'),
       'LineGraph' =>array('type' => 'Line Graph', 'style' => 'Simple'),
       'MultiLineGraph' => array('type' => 'Line Graph', 'style' => 'Multi'),
       'ScatterGraph' => array('type' => 'Scatter Plot', 'style' => 'Simple', 'xaxis' => TRUE),
       'MultiScatterGraph' => array('type' => 'Scatter Plot', 'style' => '3D', 'xaxis' => TRUE),
       'RadarGraph' => array('type' => 'Radar Graph', 'style' => 'Simple'),
       'MultiRadarGraph' => array('type' => 'Radar Graph', 'style' => 'Multi'),
+      'FloatingBarGraph' => array('type' => 'Floating Bar', 'style' => 'Vertical'),
+      'HorizontalFloatingBarGraph' => array('type' => 'Floating Bar', 'style' => 'Horizontal'),
+      'BubbleGraph' => array('type' => 'Other', 'style' => 'Bubble'),
+      'BoxAndWhiskerGraph' => array('type' => 'Other', 'style' => 'Box and Whisker')
     );
   }
 
@@ -356,9 +409,8 @@ class FrxSVGGraph extends FrxRenderer {
     return array('types' => $type, 'styles' => $style);
   }
 
-  function renderChart($type, $data ) {
-    $options['width'] = @$options['width'] ? $options['width'] : 600;
-    $options['height'] = @$options['height'] ? $options['height'] : 400;
+  function renderChart($type ) {
+
     $type = strtolower($type);
     // Legacy sustitions for backcward compatibility.
     if ($type == 'piechart') $type = 'piegraph';
@@ -371,9 +423,7 @@ class FrxSVGGraph extends FrxRenderer {
     // Build map for array types.
     $lower_graphs_types = array_change_key_case($graph_types);
     $graph_classes = array_combine(array_keys($lower_graphs_types), array_keys($graph_types));
-
-
-    if ($data && isset($graph_classes[$type])) {
+    if (isset($graph_classes[$type])) {
       $class = $graph_classes[$type];
       $output = $this->renderGraph($class);
     }
@@ -382,9 +432,8 @@ class FrxSVGGraph extends FrxRenderer {
 
 
   function renderGraph($type) {
-    static $jsinc = '';
 
-    $options = $this->graphOptions;
+    $options = $this->replaceTokens($this->graphOptions);
     $data = $this->graphData;
 
     if (!isset($options['scatter_2d']) && ($type == 'ScatterGraph' || $type=='MultiScatterGraph') && $this->xy_data && !isset($options['scatter_2d'])) {
@@ -404,15 +453,15 @@ class FrxSVGGraph extends FrxRenderer {
     // Generate the graph
     $output = $graph->Fetch($type, FALSE);
     // Add a viewbox to be compatible with Prince PDF generation.
-    $output = str_replace('<svg width', "<svg viewBox='0 0 $width $height' width", $output);
-    $javascript = '/<script[^>]*?>.*?<\/script>/si';
-    $noscript = '';
-    if (!$jsinc && $this->format == 'web') {
+    if (!@$options['noviewbox']) $options['auto_fit'] = true; 
+    if (!@$options['noviewbox'] && !strpos($output, 'viewBox')) $output = str_replace('<svg width', "<svg viewBox='0 0 $width $height' width", $output);
+
+
+    if ($this->format == 'web') {
       if (@!$options['no_js']) {
         $js =  $graph->FetchJavascript();
         $output .= $js;
       }
-      $jsinc = TRUE;
     }
     return $output;
   }
@@ -442,7 +491,6 @@ class FrxSVGGraph extends FrxRenderer {
   }
 
   public function configForm($config) {
-    $form = array();
     $graph_options = FrxSVGGraph::graphOptions();
     $graph_types = FrxSVGGraph::graphTypes();
     $gt = array_change_key_case($graph_types);
@@ -455,7 +503,6 @@ class FrxSVGGraph extends FrxRenderer {
       $base_type = $config['base_type'];
     }
     $styles = $graph_options['styles'][$base_type];
-    $types = $graph_options['types'];
     $form = parent::configForm($config);
 
     $form['base_type'] = array(
@@ -563,7 +610,7 @@ class FrxSVGGraph extends FrxRenderer {
     $media = 'FrxSVGGraph';
     $div = $this->blockDiv($config);
     $this->removeChildren($div);
-    $attrs  = array();
+
     // PUt on the header
     if (isset($config['header']['value'])) {
       $header = $this->extract('header', $config);
@@ -613,7 +660,7 @@ class FrxSVGGraph extends FrxRenderer {
     if (!$type) $type = 'Bar Graph';
 
     $gen_table = $this->extract('gen_table', $config);
-    $graph_options = FrxSVGGraph::graphOptions();
+
     // LImit the config
     $frxattrs = $config;
     // Unset common option configurations?
@@ -625,7 +672,7 @@ class FrxSVGGraph extends FrxRenderer {
     $frxattrs['renderer'] = 'FrxSVGGraph';
     $frxattrs['type'] = $type;
 
-    $svg = $this->setFirstNode($div, 2, 'svg',  NULL, NULL,  $frxattrs);
+    $this->setFirstNode($div, 2, 'svg',  NULL, NULL,  $frxattrs);
 
     if (isset($config['footer']['value'])) $this->addFragment($div, $config['footer']['value']);
     if ($gen_table) {
@@ -672,6 +719,7 @@ class FrxSVGGraph extends FrxRenderer {
    * @param unknown $dim
    */
   function generateCrossTab($xml, &$config, &$div, $group, $dim) {
+    $attrs = array();
     $table_frx['renderer'] = 'FrxCrosstab';
     $table_frx['group'] = is_array($group) ? implode(' ', $group) : $group;
     $table_frx['dim'] = $dim;

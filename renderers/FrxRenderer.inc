@@ -27,7 +27,7 @@ class FrxRenderer {
   public $doc_types = array();    // Specify the required document types to use this format.
 
   public function __construct() {
-    $this->input_format = variable_get('forena_input_format', filter_default_format());
+    $this->input_format = variable_get('forena_input_format', 'none');
   }
 
   /**
@@ -61,7 +61,21 @@ class FrxRenderer {
    * @return Ambigous <unknown_type, text, mixed, string, unknown>
    */
   public function replaceTokens($text, $raw_mode=FALSE) {
-    return $this->teng->replace($text, $raw_mode);
+    if (is_array($text)) {
+      foreach($text as $k => $v) {
+        $text[$k] = $this->replaceTokens($v, $raw_mode);
+      }
+      return $text;
+    }
+    elseif (is_object($text)) {
+      foreach($text as $k => $v) {
+        $text->$k = $this->replaceTokens($v, $raw_mode);
+      }
+      return $text;
+    }
+    else {
+      return $this->teng->replace($text, $raw_mode);
+    }
   }
 
   /**
@@ -83,10 +97,10 @@ class FrxRenderer {
     {
       $text = $dom_node->textContent;
       if (!empty($settings['stripWhiteSpace'])) {
-       $o .= trim( $this->teng->replace(htmlspecialchars($text)));
+       $o .= trim( $this->teng->replace(htmlspecialchars($text, ENT_NOQUOTES)));
       }
       else {
-        $o .= $this->teng->replace(htmlspecialchars($text));
+        $o .= $this->teng->replace(htmlspecialchars($text, ENT_NOQUOTES));
       }
       return;
     }
@@ -158,18 +172,19 @@ class FrxRenderer {
     }
 
     if ((string)$frx['block']) {
+      // Determine the context
       $this->blockName = (string)$frx['block'];
       $this->blockParms = $context;
-    }
-    if ($this->frxReport->preview_mode) $o .= Frx::Editor()->blockLinks($this->blockName, $frx, $attrs, $id, $this->blockParms);
+      if   ($this->frxReport->preview_mode) $o .= Frx::Editor()->blockLinks($this->blockName, $frx, $attrs, $id, $this->blockParms);
 
-    if ((string)$frx['block']) {
+      // Now get the block
       $is_data_block = TRUE;
       $xml = $this->frxReport->getData((string)$frx['block'], $id, (string)$frx['parameters']);
       if ($xml) {
         Frx::Data()->push($xml, $id);
       }
       else {
+        if ($id) Frx::Data()->setContext($id, $xml);
         return;
       }
     }
@@ -180,7 +195,7 @@ class FrxRenderer {
       if (!$this->teng->test($cond)) return ;
     }
 
-    // Preserve non frx attributes
+    // Preserve plain attributes
     $attr_text='';
     $tmp_attrs = array();
     if ($attrs) foreach ($attrs as $key => $value) {
@@ -188,17 +203,34 @@ class FrxRenderer {
       $tmp_attrs[$key] = (string)$value;
     }
 
+    // Preserve other namespaced attributes
+    $ns_attrs = '';
+    foreach ($node->getNamespaces() as $ns_key => $ns_uri) {
+      if ($ns_key && $ns_key != 'frx') {
+        foreach ($node->attributes($ns_uri) as $key => $value) {
+          $ns_attrs .= ' ' . $ns_key . ':' . $key . '="' . (string)$value . '"';
+        }
+      }
+    }
+
     // Determine if we have a custom renderer
     $renderer = (string)$frx['renderer'];
     // if we have a foreach in this node, we need to iterate the children
 
     if ((string)$frx['foreach'] ) {
-      // Save xml
+      // Get proper XML for current data context.
       $path = $this->teng->replace((string)$frx['foreach'], TRUE);
-      $data = Frx::Data()->currentContext();
+      if ($path && strpos($path, '.')) {
+        @list($context, $path) = explode('.', $path, 2);
+        $data = Frx::Data()->getContext($context);
+      }
+      else {
+        $data = Frx::Data()->currentContext();
+      }
 
-      if (is_object($data)) {
-        if (method_exists($data, 'xpath') && $path != '*') {
+      if (is_object($data) || $path != '*') {
+        if ((method_exists($data, 'xpath') || is_array($data))) {
+          if (is_array($data)) $data = FrxData::arrayToXml($data);
           $nodes = $data->xpath($path);
         }
         else {
@@ -216,10 +248,12 @@ class FrxRenderer {
         $this->frxReport->sort($data, $sort, $compare_type);
       }
 
-      // Group values
+      //  values
       $group = @(string)$frx['group'];
       if ($group) {
-        $nodes = $this->frxReport->group($nodes, $group);
+        $opt = $this->mergedAttributes($node);
+        $sums = (array)@$opt['sum'];
+        $nodes = $this->frxReport->group($nodes, $group, $sums);
       }
 
       $i=0;
@@ -236,7 +270,7 @@ class FrxRenderer {
         $r_attr_text = '';
         if (trim($id)) {
           if (strpos($attrs['id'],'{')!== FALSE) {
-            $id = $this->teng->replace($attrs['id']);
+            $id_attr = $this->teng->replace($attrs['id']);
           }
           else {
             if (!empty($settings['numericFrxForeachID'])) {
@@ -257,7 +291,7 @@ class FrxRenderer {
           $r_attr_text .=  ' ' . $key . '="' . (string)$value . '"';
         }
 
-        if ($include_root) $o .= $this->teng->replace('<' . $tag . $r_attr_text . '>', TRUE);
+        if ($include_root) $o .= $this->teng->replace('<' . $tag . $r_attr_text . $ns_attrs .  '>', TRUE);
         foreach ($dom_node->childNodes as $child) {
           $this->renderDomNode($child, $o);
         }
@@ -285,7 +319,7 @@ class FrxRenderer {
       }
       else {
         if ($has_children) {
-          if ($include_root) $o .= $this->teng->replace('<' . $tag . $attr_text . '>', TRUE);
+          if ($include_root) $o .= $this->teng->replace('<' . $tag . $attr_text . $ns_attrs .  '>', TRUE);
 
           // None found, so render children
           foreach ($dom_node->childNodes as $child) {
@@ -294,7 +328,7 @@ class FrxRenderer {
           if ($include_root) $o .= '</' . $tag . '>';
         }
         else {
-          $o .= $this->teng->replace('<' . $tag . $attr_text . '/>', TRUE);
+          $o .= $this->teng->replace('<' . $tag . $attr_text . $ns_attrs . '/>', TRUE);
         }
       }
     }
@@ -866,7 +900,7 @@ class FrxRenderer {
    */
   public function extractSource(DOMNode $node) {
     $content = '';
-    switch ($$node->nodeType) {
+    switch ($node->nodeType) {
       	case XML_ELEMENT_NODE:
       	  $content = $this->dom->saveXML($node);
       	  break;

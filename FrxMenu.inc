@@ -56,14 +56,13 @@ class FrxMenu {
     // Determine if the report has an extention that is one of the docuemnt types
     $p = pathinfo($url);
     if (isset($p['extension']) && array_search($p['extension'], $this->doc_formats)!==FALSE) {
-      $name = $p['filename'];
+      $name = $p['dirname'] == '.' ? $p['filename'] : $p['dirname'] . '/' . $p['filename'];
       $format = $p['extension'];
     }
     else {
       $format = 'web';
       $ext = '';
     }
-
     // Convert class names to directory names.
     $base_name = str_replace('.', '/', $name);
     $name = $base_name;
@@ -90,13 +89,20 @@ class FrxMenu {
       }
       else {
         if ($lang != 'en') {
-          $name = $lang . '/' . $name;
+          $def_language = language_default('language');
+          if (Frx::File()->exists("$lang/$name.frx")) {
+            $name = "$lang/$name";
+          }
+          elseif($def_language != 'en' && Frx::File()->exists("$def_language/$name.frx")) {
+            $name = "$def_language/$name";
+            $lang = $def_language;
+          }
         }
       }
     }
-
     //$name = trim(str_replace('.', '/', $base_name), '/');
     $filename = $name . '.frx';
+
 
     $desc['name'] = $this->name = $name;
     $desc['directory'] = Frx::File()->directory($filename);
@@ -107,7 +113,6 @@ class FrxMenu {
     $desc['i_link']= 'reports/' . $this->i_link = str_replace('/', '.', $i_name);
     $desc['language'] = $this->language = $lang;
     $desc['format'] = $this->format = $format;
-
     return $desc;
   }
 

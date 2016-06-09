@@ -192,10 +192,29 @@ class FrxMSSQL extends FrxDataSource {
    * @param unknown_type $key
    * @param unknown_type $data
    */
-  public function format($value, $key) {
+  public function format($value, $key, $raw = FALSE) {
+    if ($raw) return $value;
     $value = $this->parmConvert($key, $value);
     if ($value===''||$value===NULL) {
       $value = 'NULL';
+    }
+    elseif (is_array($value)) {
+      if ($value == array()) {
+        $value = 'NULL';
+      }
+      else {
+        // Build a array of values string
+        $i=0;
+        $val = '';
+        foreach ($value as $v) {
+          $i++;
+          if ($i>1) {
+            $val .= ',';
+          }
+          $val .=  "'" . str_replace("'", "''", $v) . "'";
+        }
+        $value = $val;
+      }
     }
     elseif (is_int($value)) {
       $value = (int)$value;

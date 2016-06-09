@@ -1044,6 +1044,22 @@ function forena_report_field_form($form, &$form_state, $report_name, $id) {
       '#description' => t('The value to be displayed in the report when no value exists.')
   );
 
+  $form['field']['calc'] = array(
+    '#type' => 'textfield',
+    '#title' => t('calculation'),
+    '#default_value' => $field['calc'],
+    '#size' => 100,
+    '#description' => t('Enter a valid XPath expression used to calculate this field. Tokens (e.g. {title} may be used in the calculation.'),
+  );
+
+  $form['field']['context'] = array(
+    '#type' => 'textfield',
+    '#title' => t('context'),
+    '#default_value' => $field['context'],
+    '#size' => 100,
+    '#description' => t('Enter the data context used in the calculation. ')
+  );
+
   $form['update'] = array(
     '#type' => 'submit',
     '#value' => t('Update'),
@@ -1052,7 +1068,7 @@ function forena_report_field_form($form, &$form_state, $report_name, $id) {
   $form['cancel'] = array(
     '#type' => 'submit',
     '#value' => t('Cancel'),
-    '#submit' => array('forena_update_cacnel'),
+    '#submit' => array('forena_update_cancel'),
   );
 
   return $form;
@@ -1179,7 +1195,7 @@ function forena_report_parameter_config_form($formid, $form_state, $report_name,
 
   $form['parm']['data_source'] = array(
       '#type' => 'textfield',
-      '#title' => t('Data Source'),
+      '#title' => t('Source Data'),
       '#default_value' => @$parm['data_source'],
       '#autocomplete_path' => 'forena/data_block/autocomplete',
       '#description' => t('Data block to be used for select, multiselect, and checkboxes types'),
@@ -1488,7 +1504,7 @@ function forena_report_layout_form($form, &$form_state, $report_name) {
   // Need to get all option attributes
   $frx_options = $r->getOptions();
   $report_form = @$frx_options['form'];
-  $filter = variable_get('forena_input_format', filter_default_format());
+  $filter = variable_get('forena_input_format', 'none');
   if (isset($frx_options['input_format'])) $filter = $frx_options['input_format'];
 
   $body = $r->simplexml->body->asXML();
@@ -1505,14 +1521,14 @@ function forena_report_layout_form($form, &$form_state, $report_name) {
 
   // Skin control
   $frx_options = $r->getOptions();
-  $report_form = @$frx_options['form'];
-  $skins[''] = t('Use Default');
-  $skins = array_merge(variable_get('forena_skins', array()), $skins);
-  $form['form'] = array(
+  $skin = @$frx_options['skin'];
+  $skins = Frx::File()->skins();
+  $form['skin'] = array(
       '#type' => 'select',
       '#title' => t('Skin'),
       '#options' => $skins,
-      '#default_value' => $report_form,
+      '#empty_option' => t('--use default--'),
+      '#default_value' => $skin,
       '#description' => t('The page style of your report.  The {skin}.skinfo file specifies css and js file in your report.')
   );
 
@@ -1586,11 +1602,12 @@ function forena_report_layout_form_submit($form, &$form_state) {
   $r_link = $r->report_link;
 
   $options = array();
-  $filter = variable_get('forena_input_format', filter_default_format());
+  $filter = variable_get('forena_input_format', 'none');
   if (isset($values['body']['format']) && $values['body']['format'] != $filter) {
     $options['input_format'] = $values['body']['format'];
-    $r->setOptions($options);
   }
+  $options['skin'] = $values['skin'];
+  $r->setOptions($options);
 
   // Body
   $r->setBody($values['body']['value']);

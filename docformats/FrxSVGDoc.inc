@@ -15,9 +15,6 @@ class FrxSVGDoc extends FrxDocument {
     $r->html = '';
     if ($print && $this->content_type) {
       header('Content-Type: ' . $this->content_type);
-      header('Cache-Control:');
-      header('Pragma:');
-      header('Cache-Control: must-revalidate');
     }
   }
 
@@ -30,15 +27,20 @@ class FrxSVGDoc extends FrxDocument {
     libxml_use_internal_errors(true);
     $doc->loadXML($xml_body);
     libxml_clear_errors();
-    //print($xml_body);
+
     $xml = simplexml_import_dom($doc);
     $xml->registerXPathNamespace('__empty_ns', 'http://www.w3.org/2000/svg');
     if ($xml) $svg = $xml->xpath('//__empty_ns:svg');
+    if ($xml && !$svg) $svg = $xml->xpath('//svg');
     if ($svg) {
-      $output .= $svg[0]->asXML();
+      $output = $svg[0]->asXML();
     }
     else {
       $output = '<svg/>';
+    }
+    // Add in namespaces
+    if (!strpos( $output, 'xmlns') ) {
+      $output = str_replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"', $output);
     }
     return $output;
   }

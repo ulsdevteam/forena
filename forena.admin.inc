@@ -26,8 +26,8 @@ function forena_admin_reports() {
   // Add Data tables if it exists.
   $headers = array(t('category'), t('title'), t('name'), t('operation'));
   $result = Frx::File()->allReports();
-  foreach ($result as $row) {
-    $rpt = str_replace('/', '.', $row->name);
+  foreach ($result as $report => $row) {
+    $rpt = str_replace('/', '.', $report);
     if ($row->include) {
       $edit = l(t('Override'), 'reports/' . $rpt . '/edit');
     }
@@ -47,7 +47,7 @@ function forena_admin_reports() {
     }
 
     $title = l(t($row->cache['title']), 'reports/' . $rpt);
-    $data[] = array($row->cache['category'], $title, $row->name, $edit . ' ' . $clone . ' ' . $delete);
+    $data[] = array($row->cache['category'], $title, $report, $edit . ' ' . $clone . ' ' . $delete);
   }
   $output .= '<div id="forena-reports-list">';
   $output .= theme('forena_data_table', array('header' => $headers, 'rows' => $data));
@@ -112,7 +112,7 @@ function forena_sync_form($formid, &$form_state) {
 
   $form['sync_overwrite'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Revert all delivered reports to orignial'),
+    '#title' => t('Revert all delivered reports to original'),
     '#required' => TRUE,
     '#description' => t('All customizations to module delivered reports will be lost.')
   );
@@ -131,7 +131,7 @@ function forena_sync_form($formid, &$form_state) {
  * Forena admin settings form
  *
  */
-function forena_settings() {
+function forena_settings($form, &$form_state) {
   $skins = Frx::File()->skins();
 
   $report_path = forena_report_path();
@@ -140,8 +140,8 @@ function forena_settings() {
   $form['forena_report_repos'] = array(
     '#type' => 'textfield',
     '#title' => t('Report Repository'),
-    '#description' => t('Indicate the directory that you want to use for your reports.  In order for you to ' .
-                        'to be able to save reports, this directory should be writable by the web user. Relative' .
+    '#description' => t('Indicate the directory that you want to use for storing your report sources (frx files). In order for you ' .
+                        'to be able to save report sources, this directory should be writable by the web user. Relative ' .
                         'paths should be entered relative to the base path of your drupal installation.'),
     '#default_value' => $report_path,
   );
@@ -155,11 +155,11 @@ function forena_settings() {
       $form['forena_query_data_path'] = array(
         '#type' => 'textfield',
         '#title' => t('Custom Data Block Repository'),
-        '#description' => t('Indicate the directory that you want to use to save custom created data blocks using
-            the forena query builder tool.  These will override any module delivered data blocks.  This needs to
-            be a directory that is writable by the web user but should not be browsable by the web.  It defaults to
-            '),
-        '#default_value' => Frx::DataFile()->dir,
+        '#description' => t('Indicate the directory that you want to use to save custom created data blocks (SQLs or
+            XMLs) using the forena query builder tool. These will override any module delivered data blocks. This
+            needs to be a directory that is writable by the web user but should not be browsable by the web.  If you leave this blank
+            Forena will use a data path in your <a href="@file_config">private file system</a>', array('@file_config' => url('admin/config/media/file-system'))),
+        '#default_value' => variable_get('fornea_query_data_path', ''),
       );
 
       $form['forena_last_query_data_path'] = array(
@@ -169,7 +169,25 @@ function forena_settings() {
 
   }
 
-  $form['forena_input_format'] = forena_filter_element(variable_get('forena_input_format', filter_default_format()), 'forena_input_format');
+  $input_format = variable_get('forena_input_format', 'none');
+  $input_format_enabled = isset($form_state['values']['forena_input_format_enabled']) ? $form_state['values']['forena_input_format_enabled'] : $input_format != 'none';
+
+  $form['format'] = array('#prefix' => '<div id="forena-format">', '#suffix' => '</div>');
+  $form['format']['forena_input_format_enabled'] = array(
+  	'#type' => 'checkbox',
+    '#title' => t('Use Text Format filtering system'),
+    '#description' => t('Checking this allows use of Drupal\' custom markup and automatic URL replacement in reports with a slight performance penalty.'),
+    '#default_value' => $input_format_enabled,
+    '#ajax' => array(
+  	  'callback' => 'forena_settings_format_callback',
+      'wrapper' => 'forena-format',
+    ),
+  );
+
+  $form['format']['forena_input_format'] = forena_filter_element(variable_get('forena_input_format', filter_default_format()), 'forena_input_format');
+
+  $form['format']['forena_input_format']['#access'] = $input_format_enabled;
+  $form['format']['forena_input_format']['#collapsible'] = FALSE;
   $form['forena_default_form'] = array(
     '#type' => 'select',
     '#title' => t('Default report skin'),
@@ -179,52 +197,63 @@ function forena_settings() {
     '#default_value' => variable_get('forena_default_form', ''),
     );
 
-    $form =  system_settings_form($form);
-    return $form;
+  $form =  system_settings_form($form);
+  return $form;
 
 }
 
+function forena_settings_format_callback($form, &$form_state) {
+  return $form['format'];
+}
+
 function forena_settings_validate($form, &$form_state) {
+
   $values = $form_state['values'];
+  if (!$values['forena_input_format_enabled']) $form_state['values']['forena_input_format'] = 'none';
   $path = $values['forena_report_repos'];
   if ($path != $values['forena_last_report_path']) {
     if (!file_exists($path)) {
       try {
-        if (file_exists($path)) {
-          drupal_set_message(t('Created directory %s', array('%s' => $path))) ;
-        }
         mkdir($path);
-
+        if (file_exists($path)) {
+          drupal_set_message(t('Created Report Directory %s', array('%s' => $path))) ;
+        }
       } catch (Exception $e) {
-        Frx::error(t('Unable to create report directory'), $e->getMessage());
+        Frx::error(t('Unable to create Report Directory'), $e->getMessage());
       }
     }
   }
-  if (!file_exists($path) || !is_writable($path)) {
-    form_set_error('forena_report_repos', 'Report Directory must be writable by the web user');
+  if (!file_exists($path)) {
+    form_set_error('forena_report_repos', t('Report Directory (') . $path . t(') does not exist'));
   }
-  if ($values['forena_query_data_path']) {
+  else {
+    if (!is_writable($path)) {
+      form_set_error('forena_report_repos', t('Report Directory (') . $path . t(') must be writable by the web user'));
+    }
+  }
+  if (isset($values['forena_query_data_path'])) {
     $path = $values['forena_query_data_path'];
-    if ($path != $values['forena_last_query_data_path']) {
+    if ($path != $values['forena_last_query_data_path'] && $path) {
       if (!file_exists($path)) {
         try {
-
           mkdir($path);
           if (file_exists($path)) {
-            drupal_set_message(t('Created directory %s', array('%s' => $path))) ;
+            drupal_set_message(t('Created Custom Data Block Directory %s', array('%s' => $path))) ;
           }
-
         } catch (Exception $e) {
-          Frx::error(t('Unable to create data directory'), $e->getMessage());
+          Frx::error(t('Unable to create Custom Data Block Directory'), $e->getMessage());
         }
       }
     }
-    if (!file_exists($path) || !is_writable($path)) {
-      form_set_error('forena_query_data_path', 'Data Directory must be writable by the web user');
+    if ($path && !file_exists($path)) {
+      form_set_error('forena_query_data_path', t('Custom Data Block Directory (') . $path . t(') does not exist'));
+    }
+    else {
+      if ($path && !is_writable($path)) {
+	form_set_error('forena_query_data_path', t('Custom Data Block Directory (') . $path . t(') must be writable by the web user'));
+      }
     }
   }
-
-
 }
 
 
@@ -499,6 +528,7 @@ function forena_data_settings_edit($form, &$form_state, $source=-1) {
     '' => 'None',
     'forena_current_user_id' => 'UID',
     'forena_current_user_name' => 'User name',
+    'forena_current_user_email' => 'Email address',
   );
 
   $form['user_callback'] = array(

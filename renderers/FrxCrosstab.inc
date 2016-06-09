@@ -15,6 +15,8 @@ class FrxCrosstab extends FrxRenderer {
 
 
     $variables = $this->mergedAttributes();
+    $attributes = $this->replacedAttributes();
+
     if (!empty($variables['hidden']) && $this->format != 'csv' && $this->format != 'xls') {
       return '';
     }
@@ -22,6 +24,7 @@ class FrxCrosstab extends FrxRenderer {
     if (!$path) $path = "*";
     $group = $variables['group'];
     $dim = $variables['dim'];
+    $sum = (array)@$variables['sum'];
     // Get the current context
     $data = Frx::Data()->currentContext();
 
@@ -39,7 +42,7 @@ class FrxCrosstab extends FrxRenderer {
     }
 
     // Group the data.
-    $data = $this->frxReport->group($nodes, $group);
+    $data = $this->frxReport->group($nodes, $group, $sum);
     $this->dim_headers = array();
     $this->dim_rows = array();
     $this->dim_columns = array();
@@ -86,7 +89,9 @@ class FrxCrosstab extends FrxRenderer {
       // Base group
       foreach($this->group_columns as $col) {
         $cell = $col;
-        $cell['data'] = $this->teng->replace($col['data']);
+        foreach ($col as $key => $v) {
+          $cell[$key] = $this->teng->replace($v);
+        }
         $trow[] = $cell;
       }
       Frx::Data()->pop();
@@ -98,7 +103,9 @@ class FrxCrosstab extends FrxRenderer {
         frx::Data()->push($dim_row, '_dim');
         foreach($this->dim_columns as $col) {
           $cell = $col;
-          $cell['data'] = $this->teng->replace($col['data']);
+          foreach ($col as $k => $v) {
+            $cell[$k] = $this->teng->replace($v);
+          }
           $trow[] = $cell;
         }
         frx::Data()->pop();
@@ -106,11 +113,18 @@ class FrxCrosstab extends FrxRenderer {
       $trows[] = $trow;
 
     }
+
+
+    $class = 'crosstab-table';
+    if (isset($attributes['class'])) $class .= ' ' . $attributes['class'];
+
     $vars = array(
     	'header' => $hrow,
       'rows' => $trows,
-      'attributes' => array('class' => array('crosstab-table' )),
+      'attributes' => array('class' => array($class)),
     );
+
+
 
     $output = theme('table', $vars);
     return $output;
@@ -123,11 +137,12 @@ class FrxCrosstab extends FrxRenderer {
     $node = $this->reportDocNode;
     if ($node->thead && $node->thead->tr) {
     		foreach ($node->thead->tr->children() as $name => $cell) {
-    		  $hcol['data'] = (string)$cell;
+    		  $hcol = array();
+    		  $hcol['data'] = forena_inner_xml($cell, $name);
     		  $hcol['depth'] = 1;
-    		  $hcol['colspan'] = @(string)$cell['colspan'];
-    		  $hcol['class'] = @(string)$cell['class'];
-    		  $hcol['style'] = @(string)$cell['style'];
+    		  foreach ($cell->attributes() as $k => $v) {
+    		    $hcol[$k] = (string)$v;
+    		  }
     		  if ($name == 'th') {
     		    $this->group_headers[] = $hcol;
     		  }
@@ -138,9 +153,11 @@ class FrxCrosstab extends FrxRenderer {
     }
     if ($node->tbody && $node->tbody->tr) {
     		foreach ($node->tbody->tr->children() as $name => $cell) {
-    		  $col['data'] = @(string)$cell;
-    		  $col['class'] = @(string)$cell['class'];
-    		  $col['style'] = @(string)$col['style'];
+    		  $col = array();
+    		  $col['data'] = forena_inner_xml($cell, $name);
+    		  foreach ($cell->attributes() as $k => $v) {
+    		    $col[$k] = (string)$v;
+    		  }
     		  if ($name == 'th') {
     		    $this->group_columns[] = $col;
     		  }

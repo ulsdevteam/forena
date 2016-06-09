@@ -91,7 +91,11 @@ class FrxOracle extends FrxDataSource {
         }
       }
       if ($this->debug) {
-        $d = ($xml) ? htmlspecialchars($xml->asXML()) : '';
+        if (is_object($xml) && method_exists($xml, 'asXML')) {
+          $d   = ($xml) ? htmlspecialchars($xml->asXML()) : '';
+        } else {
+          $d = ($xml) ? htmlspecialchars(print_r($xml,1)) : '';
+        }
         $this->debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "\n</pre>");
       }
       return $xml;
@@ -343,7 +347,8 @@ class FrxOracle extends FrxDataSource {
    * @param unknown_type $key
    * @param unknown_type $data
    */
-  public function format($value, $key) {
+  public function format($value, $key, $raw = FALSE) {
+    if ($raw) return $value;
     $value = $this->parmConvert($key, $value);
     if ($value==='' || $value ===NULL || $value ===array())
     $value = 'NULL';

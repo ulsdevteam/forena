@@ -1,20 +1,22 @@
 <?php
 /**
  * @file forena.data.inc
- * Common files for diplaying and previewing data blocks.
+ * Common files for displaying and previewing data blocks.
  */
 function forena_display_blocks() {
 
   $header = array(t('Block'), t('Access'), t('Keywords'), t('Actions'));
-  $blocks = Frx::BlockEditor()->revertDBBLocks();
+  Frx::BlockEditor()->revertDBBLocks();
   $blocks = Frx::DataFile()->userBlocks();
-  $links[] = array('href' => 'admin/structure/forena/data/add', 'title' => 'Create New SQL Query)' );
-  $content['add']['#markup'] = theme('links',
-      array(
-          'links' => $links,
-          'attributes' => array('class' => 'action-links'),
-      )
-  );
+  if(module_exists('forena_query') && user_access('build forena sql blocks')) {
+    $links[] = array('href' => 'admin/structure/forena/data/add', 'title' => 'Create New SQL Query' );
+    $content['add']['#markup'] = theme('links',
+        array(
+            'links' => $links,
+            'attributes' => array('class' => 'action-links'),
+        )
+    );
+  }
   $data=array();
 
   foreach ($blocks as $block_name => $block) {
@@ -54,6 +56,9 @@ function forena_display_blocks() {
 
 
 function forena_data_block_preview($block_name, $parms = array(), $edit=FALSE) {
+  if (isset($_SESSION['forena_report_editor']['__forena_block_preview__'])) {
+    unset($_SESSION['forena_report_editor']['__forena_block_preview__']);
+  }
   $o = Frx::Editor('__forena_block_preview__');
   $o->frxReport->block_edit_mode = $edit;
   $o->alterParameters($parms);
@@ -61,7 +66,7 @@ function forena_data_block_preview($block_name, $parms = array(), $edit=FALSE) {
   $config = array();
   $o->addBlock($block_name, 'FrxTable', $config);
   $o->update();
-  $content = $o->preview($parms);
+  $content =   $o->preview($parms);
   $o->cancel();
   return $content;
 }
@@ -72,7 +77,21 @@ function forena_data_preview() {
   $parms = $_GET;
   unset($parms['q']);
   $content['add_report']['form'] = drupal_get_form('forena_data_quick_report_form', $block_name);
+
   $content['preview'] = forena_data_block_preview($block_name, $parms);
+  $content['preview']['#prefix'] = '<div id="forena-block-preview">';
+  $content['preview']['#suffix'] = '</div>';
+  $m_path = drupal_get_path('module', 'forena');
+  $content['#attached'] = array(
+    'js' => array(
+      "$m_path/forena.admin.js",
+      forena_library_file('dataTables'),
+    ),
+    'css' => array(
+      "$m_path/forena.css",
+
+    ),
+  );
   return $content;
 }
 

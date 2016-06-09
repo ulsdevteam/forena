@@ -119,7 +119,7 @@ class FrxBlockEditor {
    * @param unknown $parms
    * @return Ambigous <unknown, string, NULL>
    */
-  public function data($parms = array()) {
+  public function data($parms = array(), $raw_mode = FALSE) {
     // Merge in current_context
     $parms = array_merge(Frx::Data()->currentContextArray(), $parms);
     $report_parms = Frx::Data()->getContext('parm');
@@ -130,10 +130,24 @@ class FrxBlockEditor {
       $xml = Frx::RepoMan()->sqlData($this->provider,  $this->block['file'], $parms);
     }
     else {
-      $xml = Frx::RepoMan()->data($this->block_name);
+      $xml = Frx::RepoMan()->data($this->block_name, $raw_mode);
     }
 
+    $driver = get_class(Frx::RepoMan()->repository($this->provider));
+
+    // Allow modules to alter data returned.
+    $context = array(
+      'block' => $this->block_name,
+      'definition' => $this->block,
+      'provider' => $this->provider,
+      'parameters' => $parms,
+      'raw_mode' => $raw_mode,
+      'driver' => $driver,
+    );
+    drupal_alter('forena_data', $xml, $context);
+
     if ($parms) Frx::Data()->pop();
+
 
     return $xml;
   }
@@ -192,7 +206,8 @@ class FrxBlockEditor {
    * Return the tokens for the block.
    */
   public function tokens()  {
-
+    // skip non-sql blocks
+    if (!isset($this->block['file'])) return array();
     $block = Frx::RepoMan()->sqlBlock($this->provider, $this->block['file']);
     $tokens = @$block['tokens'];
     $c_idx = array_search('current_user', $tokens);

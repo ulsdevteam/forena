@@ -334,7 +334,7 @@ class FrxEditor {
     $this->verifyHeaderElements(array('fields'));
     $this->setFrxHeader('fields', 'field',
     $fieldElements,
-    array('id', 'link', 'format', 'format-string', 'target', 'rel', 'class', 'add-query'),
+    array('id', 'link', 'format', 'format-string', 'target', 'rel', 'class', 'add-query', 'calc', 'context'),
       'default');
 
   }
@@ -914,7 +914,8 @@ class FrxEditor {
   public function preview($parms = array()) {
     $r = $this->frxReport;
     if(strpos($this->report_name, '__') !== 0) $r->preview_mode = TRUE;
-    return $this->report($parms, TRUE, TRUE);
+    $content = $this->report($parms, TRUE, TRUE);
+    return $content;
   }
 
   /**
@@ -928,7 +929,6 @@ class FrxEditor {
     global $user;
     global $language;
     $this->field_ids = array();
-    $content = array();
     $format = $this->desc['format'];
     if ($format == 'web' && $print) {
       drupal_add_css(drupal_get_path('module', 'forena') . '/forena.css');
@@ -945,11 +945,12 @@ class FrxEditor {
     $this->alterParameters($parms);
 
     //check for default parameters
-    $r->processParameters($parms);
+    $missing_parms = $r->processParameters($parms);
     Frx::Skin()->load($r->skin);
     Frx::Skin()->loadSkinFiles($this->report_name);
     $cached_data = FALSE;
     $cache = array();
+
 
     $o =  Frx::Document($format);
     $o->header($this->frxReport, $print);
@@ -958,56 +959,61 @@ class FrxEditor {
       $this->frxReport->file = fopen($filename, 'w');
     }
 
-    /**
-     * Allow modules to alter the parameters of a report.
-     * @param unknown_type $report_name
-     * @param unknown_type $parms
-     */
-
     Frx::Data()->push($parms, 'parm');
-    // Check for cache data
-    if ($r->cache && !$r->preview_mode) {
-      // Get file modification time for determining if cache needs to be rebuilt.
-      $entry = @Frx::File()->getCacheEntry($this->desc['filename']);
-      $cid = 'forena:report:' . $this->report_name . ':' . drupal_http_build_query($parms);
-      if (@$r->cache['per_user'] && $user) $cid .= ':' . $user->uid;
-      if (@$r->cache['per_doctype']) @$cid .= ':' . $format;
-      $cache = cache_get($cid, 'cache');
-      if (!$cache || (isset($r->cache['duration']) && $cache->expire < time()) || $cache->created < $entry->mtime || $no_cache) {
-        $this->field_ids = array();
-        $r->render($format);
-        $time = null;
-        if (isset($r->cache['duration'])) {
-          try {
-            $time = @new DateTime($r->cache['duration']);
+
+    if (!$missing_parms) {
+      // Check for cache data
+      if ($r->cache && !$r->preview_mode) {
+        // Get file modification time for determining if cache needs to be rebuilt.
+        $entry = @Frx::File()->getCacheEntry($this->desc['filename']);
+        $cid = 'forena:report:' . $this->report_name . ':' . drupal_http_build_query($parms);
+        if (@$r->cache['per_user'] && $user) $cid .= ':' . $user->uid;
+        if (@$r->cache['per_doctype']) @$cid .= ':' . $format;
+        $cache = cache_get($cid, 'cache');
+        if (!$cache || (isset($r->cache['duration']) && $cache->expire < time()) || $cache->created < $entry->mtime || $no_cache) {
+          $this->field_ids = array();
+          $r->render($format);
+          $time = null;
+          if (isset($r->cache['duration'])) {
+            try {
+              $time = @new DateTime($r->cache['duration']);
+            }
+            catch (Exception $e) {
+              drupal_set_message('Invalid Cache Duration', 'error', TRUE);
+            }
+            if ($time) $time = $time->getTimeStamp();
           }
-          catch (Exception $e) {
-            drupal_set_message('Invalid Cache Duration', 'error', TRUE);
+          if (!$time) {
+            $time = CACHE_PERMANENT;
           }
-          if ($time) $time = $time->getTimeStamp();
+          $r->cache['content'] = $r->html;
+          $r->cache['title'] = $r->title;
+          cache_set($cid, $r->cache, 'cache', $time);
         }
-        if (!$time) {
-          $time = CACHE_PERMANENT;
+        else {
+          $r->html = $cache->data['content'];
+          $r->title = $cache->data['title'];
         }
-        $r->cache['content'] = $r->html;
-        $r->cache['title'] = $r->title;
-        cache_set($cid, $r->cache, 'cache', $time);
       }
       else {
-        $r->html = $cache->data['content'];
-        $r->title = $cache->data['title'];
+
+        $r->render($format);
       }
     }
     else {
-      $r->render($format);
+      $r->parametersForm(array('collapsible' => FALSE, 'collapsed' => FALSE));
     }
+
     $links = '';
     if ($r->preview_mode) {
       $r_link = str_replace('/', '.', $this->report_name);
       $parms = $_GET;
       unset($parms['q']);
-      $links = $this->l_icon("reports/$r_link/edit/select-data/add-data", 'doc-option-add.png', 'Add Data', $parms);
+      $links = '<div class="forena-edit-links">';
+      $links .= $this->l_icon("reports/$r_link/edit/select-data/add-data", 'plus.svg', 'Add Data', $parms, t('Data'));
+      $links .= '</div>';
     }
+
     $content = array(
       '#has_data' => $r->blocks_loaded,
       'parameter_form' => $r->parameters_form,
@@ -1015,7 +1021,6 @@ class FrxEditor {
       'links' => $this->documentLinks(),
       'content' => array('#markup' => $r->html . $links),
     );
-
     if ($this->frxReport->file) {
       $this->frxReport->writeBuffer();
       fclose($this->frxReport->file);
@@ -1048,15 +1053,17 @@ class FrxEditor {
   public function fieldLink($id, $value) {
     $o = '';
     if (!isset($this->field_ids[$id])) {
+      $m_path = drupal_get_path('module', 'forena');
       $report_link = $this->report_link;
       $image = array(
-          'path' => url("misc/configure.png"),
+          'path' => url("$m_path/icons/cog.svg"),
           'alt' => t('Configure'),
           'title' => t('Configure'),
+          'class' => 'forena-field-config'
       );
       $image = theme('image', $image);
       $id = urlencode($id);
-      $o= l($image, "$report_link/edit/edit-field/$id", array('html' => TRUE));
+      $o= l($image, "$report_link/edit/edit-field/$id", array('html' => TRUE, 'attributes' => array( 'class' => 'forena-field-config')));
       $this->field_ids[$id] = 1;
     }
     return $o;
@@ -1075,13 +1082,13 @@ class FrxEditor {
     $report_name = $this->report_name;
     // Add the block or ID link
     $o .= '<div class="forena-edit-links">'
-        . $this->l_icon("reports/$report_name/edit/select-data/add-data/$id", 'doc-option-add.png', 'Add Detail')
+        . $this->l_icon("reports/$report_name/edit/select-data/add-data/$id", 'plus.svg', 'Add Detail', null, t("Data"))
         . "</div>";
     return $o;
   }
 
 
-  public function l_icon($link, $name, $alt, $context=array()) {
+  public function l_icon($link, $name, $alt, $context=array(), $label="") {
     $path = $name=='configure.png' ? 'misc' : drupal_get_path('module', 'forena') . '/icons';
 
     $image = array(
@@ -1091,14 +1098,15 @@ class FrxEditor {
     );
     $image = theme('image', $image);
     $options = array('query' => $context, 'html' => TRUE);
-    return l($image, $link, $options);
+    return l($image . $label, $link, $options);
   }
 
 
   public function blockLinks($block_name, $frx, $attrs, $id='', $context = array()) {
     $o = '';
+    if (!$context) $context = array();
     $parms = Frx::Data()->getContext('parm');
-    if ($parms) $context = array_merge($parms, $context);
+    if ($parms && is_array($context)) $context = array_merge($parms, $context);
     $class = @(string)$attrs['class'];
     $frx_class = strpos($class, 'Frx') !== FALSE;
     if ($frx_class) {
@@ -1123,15 +1131,15 @@ class FrxEditor {
       // Add the prepend link.
       if ($block_tag) {
         // If we have a block tag we're going to prepend another data block?
-        $o .= '<div class="forena-edit-links">' . $this->l_icon("reports/$report_name/edit/select-data/prepend-data/$id", 'doc-option-add.png', 'Insert Data').  "</div>";
+        $o .= '<div class="forena-edit-links">' . $this->l_icon("reports/$report_name/edit/select-data/prepend-data/$id", 'plus.svg', 'Insert Data', null, t("Data")).  "</div>";
       }
       else {
-        //$o .= '<div class="forena-edit-links">' . $this->l_icon("reports/$report_name/edit/prepend-section/$block_link/$id", 'doc-option-add.png', 'Add Data').  "</div>";
+        //$o .= '<div class="forena-edit-links">' . $this->l_icon("reports/$report_name/edit/prepend-section/$block_link/$id", 'plus.svg', 'Add Data').  "</div>";
       }
       // Add the block or ID link
       $o .= '<div class="forena-edit-links">'
          . l($block_label, "reports/$report_name/edit/edit-data/$block_link/$id", $options )
-         . ' ' . $this->l_icon("reports/$report_name/edit/delete-data/$id", 'doc-option-remove.png', 'Remove Data',  $context)
+         . ' ' . $this->l_icon("reports/$report_name/edit/delete-data/$id", 'minus.svg', 'Remove Data',  $context)
          . "</div>";
     }
     return $o;
@@ -1182,9 +1190,9 @@ class FrxEditor {
     if (!$this->edit && user_access('design any report')) {
     // Add the block or ID link
       $o .= '<div class="forena-editor-links">'
-          . $this->l_icon("$report_link/edit", 'doc-option-edit.png', 'Edit', (array)Frx::Data()->getContext('parm'));
-      if (module_exists('locale')) $o .= $this->l_icon("$report_link/translations", 'doc-option-tab.png', 'Translations');
-      if (!$this->cache->include) $o .= $this->l_icon("$report_link/delete", 'doc-option-remove.png', 'Delete');
+          . $this->l_icon("$report_link/edit", 'pencil.svg', 'Edit', (array)Frx::Data()->getContext('parm'));
+      if (module_exists('locale')) $o .= $this->l_icon("$report_link/translations", 'file.svg', 'Translations');
+      if (!$this->cache->include) $o .= $this->l_icon("$report_link/delete", 'minus.svg', 'Delete');
       $o .= "</div>";
     }
     return $o;

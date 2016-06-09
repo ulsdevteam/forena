@@ -58,6 +58,7 @@ class FrxCSVDoc extends FrxDocument {
         $value = decode_entities($value);
         $value = str_replace('"', '""', $value);
         $value = str_replace(array("\n"), '', $value);
+        $value = str_replace(array("\m"), '', $value);
         $value =  strpos($value, ',')!==FALSE || strpos($value, '"') !==FALSE ?  '"' . $value . '",' : "$value,";
         $line .= $value;
         // Add Column span elements

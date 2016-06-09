@@ -24,11 +24,16 @@ function forena_schema() {
   return $schema;
 }
 
-
+/**
+ * Obsolete clear cache
+ */
 function forena_update_7401()  {
   // Clear cache mechanism no longer needed
 }
 
+/**
+ * Remove forena_reports table
+ */
 function forena_update_7402() {
   if (db_table_exists('forena_reports')) db_drop_table('forena_reports');
 }
@@ -36,9 +41,6 @@ function forena_update_7402() {
 function forena_install() {
   $filters = filter_formats();
   // Set default input format.
-  if (isset($filters['full_html'])) {
-    variable_set('forena_input_format', 'full_html');
-  }
   $report_path = variable_get('file_' . file_default_scheme() . '_path', conf_path() . '/files/reports');
   @drupal_mkdir($report_path);
 }

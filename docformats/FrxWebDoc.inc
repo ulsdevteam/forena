@@ -22,9 +22,22 @@ class FrxWebDoc extends FrxDocument {
           case 'all':
           case 'print':
           case 'screen':
-            drupal_add_css($sheet, array('media' => $type));
+            $options = $type=='all' ? array() :  array('media' => $type);
+            if (strpos($sheet, 'http:') === 0 || strpos($sheet, 'https:') === 0) {
+              $options['type'] = 'external';
+            }
+            drupal_add_css($sheet, $options);
             break;
         }
+      }
+    }
+
+    // Add in defined libraries.
+    $skin_data  = Frx::Skin()->info;
+    if (isset($skin_data['libraries'])) {
+      foreach ($skin_data['libraries'] as $dependency)  {
+        list($module, $library) = explode('/', $dependency);
+        drupal_add_library($module, $library);
       }
     }
 
@@ -36,7 +49,13 @@ class FrxWebDoc extends FrxDocument {
 
     // Add javascript files
     foreach (Frx::Skin()->scripts as $script) {
-      drupal_add_js($script);
+      if (strpos($script, 'http:') === 0 || strpos($script, 'https:') === 0) {
+        drupal_add_js($script, 'external');
+      }
+      else {
+        drupal_add_js($script);
+
+      }
     }
 
     //$output = theme('forena_web_report', $variables);
@@ -44,7 +63,8 @@ class FrxWebDoc extends FrxDocument {
   }
 
   public function output(&$output) {
-    if ($this->title) {
+    $desc = Frx::Data()->getContext('report');
+    if ($this->title && $desc['print'] !== 'block') {
       drupal_set_title(filter_xss($this->title), PASS_THROUGH);
     }
     return FALSE;
