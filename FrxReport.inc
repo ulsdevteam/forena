@@ -256,7 +256,7 @@ class FrxReport {
       }
       else {
         $id = @$d['id'];
-        if ($id) Frx::Data()->setContext($id, $d['data']);
+        if ($id && isset($d['data'])) Frx::Data()->setContext($id, $d['data']);
       }
     }
 
