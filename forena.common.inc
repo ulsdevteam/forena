@@ -384,6 +384,7 @@ function theme_forena_inline_form($variables) {
 function _forena_render_form_template($fields, $template) {
   static $teng = '';
   if (!$teng) $teng = new FrxSyntaxEngine(FRX_TOKEN_EXP, '{}');
+  $teng->htmlencode = FALSE;
   $o = Frx::Data()->push($fields, 'form-fields');
   $build = $teng->replace($template, TRUE);
   $o = Frx::Data()->pop();

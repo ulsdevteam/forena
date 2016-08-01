@@ -13,6 +13,7 @@ class FrxSyntaxEngine {
   private $trim_chars;
   private $data; // Data object for current context.
   private $formatter; // Object used to format the data
+  public $htmlencode=TRUE;
   /**
   * Class for doing syntax replacements;
   * @param $regexp
@@ -56,7 +57,7 @@ class FrxSyntaxEngine {
       $o = $this->data;
     }
     $value = $o->getValue($key, $context);
-    if ($this->tpattern == FRX_TOKEN_EXP) {
+    if ($this->tpattern == FRX_TOKEN_EXP && $this->htmlencode) {
       $value = htmlentities($value);
     }
     if ($this->formatter) {
