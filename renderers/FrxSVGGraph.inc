@@ -442,6 +442,10 @@ class FrxSVGGraph extends FrxRenderer {
     else {
       $options['scatter_2d'] = (bool) @$options['scatter_2d'];
     }
+    // Sanitize label option for SVG Graph 2.20 and greater
+    if (isset($options['label']) && !is_array($options['label'])) {
+      unset($options['label']);
+    }
     $width = (@$options['width']) ? @$options['width'] : 600;
     $height = (@$options['height']) ? @$options['height'] : 400;
     $graph = new SVGGraph($width, $height, $options);
