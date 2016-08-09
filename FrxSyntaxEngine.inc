@@ -58,7 +58,7 @@ class FrxSyntaxEngine {
     }
     $value = $o->getValue($key, $context);
     if ($this->tpattern == FRX_TOKEN_EXP && $this->htmlencode) {
-      $value = htmlentities($value);
+      $value = htmlentities($value, NULL, 'UTF-8' );
     }
     if ($this->formatter) {
       $value = $this->formatter->format($value, $raw_key, $raw);
