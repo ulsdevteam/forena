@@ -95,7 +95,7 @@ class FrxInclude extends FrxRenderer {
         if (isset($attributes['width'])) $x['width'] = $attributes['width'];
         break;
       default:
-        $x = new SimpleXMLElement('<a>' . htmlentities($title, ENT_QUOTES) . '</a>' );
+        $x = new SimpleXMLElement('<a>' . htmlentities($title, ENT_QUOTES, 'UTF-8') . '</a>' );
         $x['href'] = $url;
     }
 

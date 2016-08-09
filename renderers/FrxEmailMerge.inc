@@ -86,19 +86,19 @@ class FrxEmailMerge extends FrxRenderer {
     $table = $this->addNode($header, 8, 'table');
     $tr = $this->addNode($table, 10, 'tr');
     $td = $this->addNode($tr, 12, 'th', 'From');
-    $td = $this->addNode($tr, 12, 'td', htmlentities($from), array('class' => 'email-header-from'));
+    $td = $this->addNode($tr, 12, 'td', htmlentities($from, NULL, 'UTF-8'), array('class' => 'email-header-from'));
     $tr = $this->addNode($table, 10, 'tr');
     $td = $this->addNode($tr, 12, 'th', 'To');
-    $td = $this->addNode($tr, 12, 'td', htmlentities($to), array('class' => 'email-header-to'));
+    $td = $this->addNode($tr, 12, 'td', htmlentities($to, NULL, 'UTF-8'), array('class' => 'email-header-to'));
     if ($cc) {
       $tr = $this->addNode($table, 10, 'tr');
       $td = $this->addNode($tr, 12, 'th', 'Cc');
-      $td = $this->addNode($tr, 12, 'td', htmlentities($cc), array('class' => 'email-header-cc'));
+      $td = $this->addNode($tr, 12, 'td', htmlentities($cc, NULL, 'UTF-8'), array('class' => 'email-header-cc'));
     }
     if ($bcc) {
       $tr = $this->addNode($table, 10, 'tr');
       $td = $this->addNode($tr, 12, 'th', 'Bcc');
-      $td = $this->addNode($tr, 12, 'td', htmlentities($bcc), array('class' => 'email-header-bcc'));
+      $td = $this->addNode($tr, 12, 'td', htmlentities($bcc, NULL, 'UTF-8'), array('class' => 'email-header-bcc'));
     }
 
     $tr = $this->addNode($table, 10, 'tr');

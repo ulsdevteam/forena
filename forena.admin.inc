@@ -878,7 +878,7 @@ function forena_xmlpp($xml, $html_output=FALSE) {
     }
   }
   $xml = implode("\n", $pretty);
-  return ($html_output) ? htmlentities($xml) : $xml;
+  return ($html_output) ? htmlentities($xml, NULL, 'UTF-8') : $xml;
 }
 
 /**

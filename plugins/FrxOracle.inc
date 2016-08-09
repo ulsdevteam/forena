@@ -125,9 +125,9 @@ class FrxOracle extends FrxDataSource {
     $r = oci_execute($stmt, OCI_DEFAULT);
     // Report errors
     if (!$r) {
-      $msg .=  htmlentities($e['message']);
+      $msg .=  htmlentities($e['message'], NULL, 'UTF-8');
       $msg .= "\n<pre>\n";
-      $msg .= htmlentities($e['sqltext']);
+      $msg .= htmlentities($e['sqltext'], NULL, 'UTF-8');
       //printf("\n%".($e['offset']+1)."s", "^");
       $msg .= "\n</pre>\n";
       $this->error('Database error in ' . $this->block_name . ' see logs for info', $msg);
@@ -173,9 +173,9 @@ class FrxOracle extends FrxDataSource {
         else {
           $short = t('%e in %b.sql line %o', array('%e' => $e['message'], '%b' => $this->block_name, '%o' => $e['offset']));
         }
-        $msg =  htmlentities($e['message']);
+        $msg =  htmlentities($e['message'], NULL, 'UTF-8');
         $msg .= "\n<pre>\n";
-        $msg .= htmlentities($e['sqltext']);
+        $msg .= htmlentities($e['sqltext'], NULL, 'UTF-8');
         $msg .= "\n</pre>\n";
         $this->error($short, $msg);
         return '';
@@ -288,9 +288,9 @@ class FrxOracle extends FrxDataSource {
             else {
               $short = t('%e in %b.sql line %o', array('%e' => $e['message'], '%b' => $this->block_name, '%o' => $e['offset']));
             }
-            $msg =  htmlentities($e['message']);
+            $msg =  htmlentities($e['message'], NULL, 'UTF-8');
             $msg .= "\n<pre>\n";
-            $msg .= htmlentities($e['sqltext']);
+            $msg .= htmlentities($e['sqltext'], NULL, 'UTF-8');
             $msg .= "\n</pre>\n";
             $this->error($short, $msg);
           }
@@ -304,9 +304,9 @@ class FrxOracle extends FrxDataSource {
         else {
           $short = t('%e in %b.sql line %o', array('%e' => $e['message'], '%b' => $this->block_name, '%o' => $e['offset']));
         }
-        $msg .=  htmlentities($e['message']);
+        $msg .=  htmlentities($e['message'], NULL, 'UTF-8');
         $msg .= "\n<pre>\n";
-        $msg .= htmlentities($e['sqltext']);
+        $msg .= htmlentities($e['sqltext'], NULL, 'UTF-8');
         //printf("\n%".($e['offset']+1)."s", "^");
         $msg .= "\n</pre>\n";
         $this->error($short, $msg);
