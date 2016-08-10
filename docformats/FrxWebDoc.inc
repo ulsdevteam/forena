@@ -45,7 +45,13 @@ class FrxWebDoc extends FrxDocument {
     if (isset($skin_data['ctools']['js'])) {
       if (is_callable('ctools_add_js')) {
         foreach ($skin_data['ctools']['js'] as $js_file) {
-          ctools_add_js($js_file);
+          if ($js_file == 'modal') {
+            ctools_include('modal');
+            ctools_modal_add_js();
+          }
+          else {
+            ctools_add_js($js_file);
+          }
         }
       }
     }
