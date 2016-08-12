@@ -23,19 +23,19 @@ class FrxDrupalNode {
         $field = field_view_field('node', $node, $key, $display);
         $field['#theme'] = array('forena_inline_field');
         $value  = drupal_render($field);
-        $f = $return->addChild($key, $value);
+        $f = $return->addChild($key, htmlspecialchars($value));
         if (isset($field['#field_type'])) $f['type'] = $field['#field_type'];
         if (isset($field['#field_name'])) $f['name'] = $field['#field_name'];
 
       } else if (is_array($val) && isset($val[$lang])) {
         $tmp = $val[$lang][0];
         if (isset($tmp['safe_value'])) {
-          $return->addChild($key, $tmp['safe_value']);
+          $return->addChild($key, htmlspecialchars($tmp['safe_value']));
         } else if (isset($tmp['value'])) {
-          $return->addChild($key, $tmp['value']);
+          $return->addChild($key, htmlspecialchars($tmp['value']));
         }
       } else if (is_scalar($val)) {
-        $return->addChild($key, $val);
+        $return->addChild($key, htmlspecialchars($val));
       }
     }
     return $return;

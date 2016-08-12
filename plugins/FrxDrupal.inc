@@ -178,7 +178,7 @@ class FrxDrupal extends FrxDataSource {
                     $field = field_view_field($type, $e, $key, $display);
                     $field['#theme'] = array('forena_inline_field');
                     $value = drupal_render($field);
-                    $f = $row_node->addChild($key, $value);
+                    $f = $row_node->addChild($key, htmlspecialchars($value));
                     if (isset($field['#field_type'])) {
                       $f['type'] = $field['#field_type'];
                     }
@@ -190,11 +190,11 @@ class FrxDrupal extends FrxDataSource {
                     if (is_array($val) && isset($val[$lang])) {
                       $tmp = $val[$lang][0];
                       if (isset($tmp['safe_value'])) {
-                        $row_node->addChild($key, $tmp['safe_value']);
+                        $row_node->addChild($key, htmlspecialchars($tmp['safe_value']));
                       }
                       else {
                         if (isset($tmp['value'])) {
-                          $row_node->addChild($key, $tmp['value']);
+                          $row_node->addChild($key, htmlspecialchars($tmp['value']));
                         }
                       }
                     }
@@ -202,17 +202,17 @@ class FrxDrupal extends FrxDataSource {
                       if (is_array($val) && isset($val['und'])) {
                         $tmp = $val['und'][0];
                         if (isset($tmp['safe_value'])) {
-                          $row_node->addChild($key, $tmp['safe_value']);
+                          $row_node->addChild($key, htmlspecialchars($tmp['safe_value']));
                         }
                         else {
                           if (isset($tmp['value'])) {
-                            $row_node->addChild($key, $tmp['value']);
+                            $row_node->addChild($key, htmlspecialchars($tmp['value']));
                           }
                         }
                       }
                       else {
                         if (is_scalar($val)) {
-                          $row_node->addChild($key, $val);
+                          $row_node->addChild($key, htmlspecialchars($val));
                         }
                       }
                     }
@@ -223,7 +223,7 @@ class FrxDrupal extends FrxDataSource {
               if ($select_fields[$id]) {
                 foreach ($select_fields[$id] as $key => $val) {
                   if (!isset($row_node->$key)) {
-                    $row_node->addChild($key, $val);
+                    $row_node->addChild($key, htmlspecialchars($val));
                   }
                 }
               }
