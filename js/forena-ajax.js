@@ -48,7 +48,7 @@
   Drupal.behaviors.forenaAjax = {
     attach: function (context, settings) {
       // Auto click the reports for ajax.
-      $('.use-ajax.ajax-processed.forena-autoload:not(.forena-autoload-processed', context).forenaAutoload();
+      $('.use-ajax.ajax-processed.forena-autoload:not(.forena-autoload-processed)', context).forenaAutoload();
     }
   };
 
