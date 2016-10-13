@@ -71,8 +71,10 @@ class FrxOracle extends FrxDataSource {
     $xml ='';
     // Load the types array based on data
     $this->types = isset($options['type']) ? $options['type'] : array();
-
+    //place this before any script you want to calculate time
     if ($sql && $db) {
+      $time_start = microtime(true);
+
       // See if this block matches a declare begin end; syntax.
       if (stripos($sql, 'end;')>= stripos($sql, 'begin') && stripos($sql, 'begin')!==FALSE) {
         $params = $this->te->object_to_array(Frx::Data()->currentContext());
@@ -90,13 +92,16 @@ class FrxOracle extends FrxDataSource {
           $xml = $this->php_xml($sql, $options);
         }
       }
+      $time_end = microtime(true);
+
       if ($this->debug) {
         if (is_object($xml) && method_exists($xml, 'asXML')) {
           $d   = ($xml) ? htmlspecialchars($xml->asXML()) : '';
         } else {
           $d = ($xml) ? htmlspecialchars(print_r($xml,1)) : '';
         }
-        $this->debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "\n</pre>");
+        $elapsed = (int)(($time_end - $time_start) * 1000.00);
+        $this->debug("SQL (${elapsed}ms): " . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "\n</pre>");
       }
       return $xml;
     }

@@ -100,6 +100,7 @@ class FrxPDO extends FrxDataSource {
     $this->types = isset($options['type']) ? $options['type'] : array();
 
     if ($sql && $db) {
+      $time_start = microtime(true);
       $sql = $this->te->replace($sql);
       try {
         $rs = $db->query($sql);
@@ -143,13 +144,14 @@ class FrxPDO extends FrxDataSource {
           }
         }
       }
-
+      $time_end = microtime(true);
       if ($this->debug) {
         $d = '';
         if ($xml)  {
           $d = htmlspecialchars($xml->asXML());
         }
-        $this->debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "/n</pre>");
+        $elapsed = (int)(($time_end - $time_start) * 1000.00);
+        $this->debug("SQL (${elapsed}ms): " . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "/n</pre>");
       }
       return $xml;
     }

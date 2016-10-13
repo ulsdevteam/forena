@@ -64,17 +64,19 @@ class FrxPostgres extends FrxDataSource {
 
     if ($sql && $db) {
       $sql = $this->te->replace($sql);
-
+      $time_start = microtime(true);
       if ($this->use_postgres_xml) {
         $xml = $this->postgres_xml($sql, 'table');
       }
       else {
         $xml = $this->php_xml($sql);
       }
+      $time_end = microtime(true);
       if ($this->debug) {
         $d = '';
         if ($xml) $d = htmlspecialchars($xml->asXML());
-        $this->debug('SQL: ' . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "\n</pre>");
+        $elapsed = (int)(($time_end - $time_start) * 1000.00);
+        $this->debug("SQL (${elapsed}ms): " . $sql, '<pre> SQL:' . $sql . "\n XML: " . $d . "\n</pre>");
       }
       return $xml;
     }
