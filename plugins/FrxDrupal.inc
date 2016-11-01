@@ -16,8 +16,9 @@ class FrxDrupal extends FrxDataSource {
   /**
    * Object constructor
    *
-   * @param unknown_type $uri Database connection string.
+   * @param array $conf Configuration key value pairs.
    * @param string $repos_path Path to location of data block definitions
+   * @param string $name Name of data provider
    */
   public function __construct($conf, $repos_path, $name) {
     parent::__construct($conf, $repos_path, $name);

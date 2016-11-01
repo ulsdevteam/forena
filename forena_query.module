@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Provides the ability to create saved queries
@@ -6,7 +7,7 @@
  */
 
 /**
- * Implementation of hook_menu
+ * Implementation of hook_menu.
  */
 function forena_query_menu() {
   $items = array();
@@ -58,9 +59,11 @@ function forena_query_menu() {
 }
 
 /**
- * Access function based on data b
- * @param unknown $block_name
+ * Access function based on data b.
+ * @param string $block_name
+ *   Name of block to check access on.
  * @param string $action
+ *   Determines type of block right to check.
  * @return boolean
  */
 function forena_query_editor_access($block_name, $action='create') {
@@ -71,7 +74,7 @@ function forena_query_editor_access($block_name, $action='create') {
 
 
 /**
- * Implementation of hook_permission
+ * Implementation of hook_permission.
  */
 function forena_query_permission() {
   $perms =  array(
@@ -82,16 +85,19 @@ function forena_query_permission() {
   );
   foreach (Frx::RepoMan()->repositories as $repos => $conf) {
     $name = $conf['title'] ? $conf['title'] : $repos;
-    $perms['create '. $repos . ' blocks'] = array('title' =>  'Create ' . $name . ' Data Blocks');
-    $perms['delete '. $repos . ' blocks'] = array('title' =>  'Delete ' . $name . ' Data Blocks');
+    $perms['create ' . $repos . ' blocks'] = array('title' =>  'Create ' . $name . ' Data Blocks');
+    $perms['delete ' . $repos . ' blocks'] = array('title' =>  'Delete ' . $name . ' Data Blocks');
 
   }
   return $perms;
 }
 
 /**
- * Implmentation of hook_requirements
- * @param unknown $phase
+ * Implmentation of hook_requirements.
+ * @param string $phase
+ *   Phase of requirement check to perform.
+ * @return array
+ *   Requirements analysis.
  */
 function forena_query_requirements($phase) {
   $requirements = array();
@@ -125,7 +131,10 @@ function forena_query_forena_query_builders() {
 /**
  * Return permission as to whether the user can save data
  * in the repository.
- * @param $repos string
+ * @param string $repos
+ *   Name of repository to check.
+ * @return bool
+ *   True implies user has access to data provided by the connection.
  */
 function forena_query_access_repository($repos) {
   @list($repos, $block) = @explode('/', $repos, 2);

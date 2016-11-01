@@ -15,12 +15,18 @@ class FrxSyntaxEngine {
   private $formatter; // Object used to format the data
   public $htmlencode=TRUE;
   /**
-  * Class for doing syntax replacements;
-  * @param $regexp
-  * @param $trim Trim characgers
-  * @param $data Data object to be used for resolving contexts.
-  * @return unknown_type
-  */
+   * Class for doing syntax replacements;
+   * @param string $regexp
+   *
+   * @param string $trim
+   *   Trim characters
+   * @param object $data
+   *   Data object to be used for resolving contexts.
+   * @param $formatter
+   *   Field formatter used to format fields
+   * @param $data
+   *   Data used to perform the replacement on.
+   */
   public function __construct($regexp, $trim, $formatter=NULL, $data=NULL) {
     $this->tpattern = $regexp;
     $this->trim_chars = $trim;
@@ -42,9 +48,11 @@ class FrxSyntaxEngine {
   /**
    * Get the value from the data.
    * This is used by token_replace method to extract the data based on the path provided.
-   * @param $data
-   * @param $key
-   * @return unknown_type
+   * @param string $key
+   *   Key name used to access data.
+   * @param bool $raw
+   *   True implies that value will not be formatted. Defaults to FALSE.
+   * @return string Value of the data
    */
   protected function get_value($key, $raw=FALSE) {
     $context = '';
@@ -69,9 +77,12 @@ class FrxSyntaxEngine {
 
   /**
    *
-   * @param $text text that needs replacing
-   * @param $data
-   * @return unknown_type
+   * @param string $text
+   *   Text on which to perform token replacment.
+   * @param bool $raw
+   *   TRUE implies data will  not be formatted. Defaults to FALSE.
+   * @return string
+   *   Replaced text.
    */
   public function replace($text, $raw=FALSE) {
     if (is_array($text)) {
@@ -89,8 +100,6 @@ class FrxSyntaxEngine {
       // If we are replacing a single value then return exactly
       // the single value in its native type;
       $single_value = ($match && count($match[0]) == 1 && $match[0][0]==$text && $raw);
-      //list($params) = $match[1];
-      $i=0;
 
       foreach ($match[0] as $match_num => $token) {
         $path = trim($token, $this->trim_chars);
@@ -120,7 +129,6 @@ class FrxSyntaxEngine {
     $tokens = array();
 
     if (preg_match_all($this->tpattern, $text, $match)) {
-      $i=0;
       foreach ($match[0] as $match_num => $token) {
         $path = trim($token, $this->trim_chars);
         if (array_search($path, $tokens)===FALSE) {
@@ -132,11 +140,17 @@ class FrxSyntaxEngine {
   }
 
   /**
-   * Convert an object into an array
-   * @param mixed $data
+   * Convert an object into an array.
+   *
    * Iterates the object and builds an array of strings from it.
    * If the object appears to be an xml object and has an attributes
    * method, do the same for it.
+   *
+   * @param mixed $data
+   *   Object or array containing data
+   * @return array
+   *   Array representation of object.
+   *
    */
   public function object_to_array($data) {
     if (is_object($data)) {
@@ -159,7 +173,10 @@ class FrxSyntaxEngine {
   /**
    * Test for TRUE/FALSE for conditions that are able to be represented using bind parameters
    * Note that | are used to separate the different conditions and these are to be OR'd together.
-   * @param  $condition String
+   * @param string $condition
+   *   String data containing position
+   * @return bool
+   *   evaluated condittion.
    */
   public function test($condition) {
     $eval = TRUE;
