@@ -457,7 +457,7 @@ class FrxEditor {
     $this->verifyHeaderElements(array('category'));
     $head = $dom->getElementsByTagName('head')->item(0);
     $cnode = $dom->getElementsByTagNameNS($this->xmlns, 'category')->item(0);
-    $node = $dom->createElementNS($this->xmlns, 'category', $category);
+    $node = $dom->createElementNS($this->xmlns, 'category', htmlspecialchars($category));
     $head->replaceChild($node, $cnode);
   }
 
@@ -465,7 +465,7 @@ class FrxEditor {
     $dom = $this->dom;
     $this->verifyHeaderElements(array('category'));
     $cnode = $dom->getElementsByTagNameNS($this->xmlns, 'category')->item(0);
-    return $cnode->textContent;
+    return htmlspecialchars_decode($cnode->textContent);
   }
 
   /**
