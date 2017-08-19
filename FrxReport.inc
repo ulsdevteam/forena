@@ -15,6 +15,7 @@ class FrxReport {
   public $rpt_xml;
   public $fields;
   public $category;
+  public $description;
   public $cache;
   public $descriptor;
   public $form;
@@ -121,6 +122,13 @@ class FrxReport {
         $arr = $value->attributes();
         $this->formats[] = (string)$arr['type'];
       }
+      $nodes = $rpt_xml->xpath('//head/meta[@name="description"]');
+      $arr = array('content' => '');
+      if ($nodes) foreach ($nodes as $node) {
+        $arr = $node->attributes();
+        break;
+      }
+      $this->description = (string)$arr['content'];
 
 
       foreach ($rpt_xml->head->children(FRX_NS) as $name => $node) {
@@ -736,6 +744,13 @@ class FrxReport {
   public function parametersForm($variables = array()) {
     $parms = $this->parametersArray();
     $form =  drupal_get_form('forena_parameter_form', $parms, $variables);
+    // prefix the form with the report description, if applicable
+    if ($this->description && isset($form['params']) && is_array($form['params'])) {
+      $form['params'] = array('forena-report-description' => array(
+        '#type' => 'item',
+        '#markup' => htmlspecialchars($this->description),
+      )) + $form['params'];
+    }
     $this->parameters_form = $form;
     return $form;
   }

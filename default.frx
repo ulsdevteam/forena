@@ -5,6 +5,7 @@
 <html xmlns:frx="urn:FrxReports">
 <head>
 <title></title>
+<meta type="description" content="" />
 <frx:category></frx:category>
 <frx:options></frx:options>
 <frx:parameters>

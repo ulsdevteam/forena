@@ -447,6 +447,49 @@ class FrxEditor {
   }
 
   /**
+   * Set the report description
+   * @param string $description
+   */
+  public function setDescription($description) {
+    $ret = array();
+    $dom = $this->dom;
+    $head = $dom->getElementsByTagName('head')->item(0);
+    $cnodes = $dom->getElementsByTagName('meta');
+    $node = $dom->createElement('meta');
+    $node->setAttribute('content', htmlspecialchars($description));
+    $node->setAttribute('name', 'description');
+    $cnode = NULL;
+    foreach ($cnodes as $cnode) {
+      if ($cnode->getAttribute('name') == 'description') {
+        break;
+      }
+    }
+    if (is_object($cnode)) {
+      $head->replaceChild($node, $cnode);
+    } else {
+      $head->appendChild($node);
+    }
+  }
+
+  /**
+   * Get the report description
+   * @return string 
+   */
+  public function getDescription() {
+    $dom = $this->dom;
+    $this->verifyHeaderElements(array('description'));
+    $cnodes = $dom->getElementsByTagName('meta');
+    $cnode = NULL;
+    foreach ($cnodes as $cnode) {
+      if ($cnode->getAttribute('name') == 'description') {
+        break;
+      }
+    }
+    $textContent = is_object($cnode) ? $cnode->getAttribute('content') : '';
+    return htmlspecialchars_decode($textContent);
+  }
+
+  /**
    * Set the report category
    * Enter description here ...
    * @param unknown_type $cateogry
