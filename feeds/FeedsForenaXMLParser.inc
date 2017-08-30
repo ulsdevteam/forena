@@ -7,12 +7,12 @@ class FeedsForenaXMLParser extends FeedsParser {
   public function parse(FeedsSource $source, FeedsFetcherResult $fetcher_result) {
     $source_config = $source->getConfigFor($this);
     $result = new FeedsParserResult();
-    $parser = Frx::Fields($fields);
     // Load and configure parser.
     $xpath = @$this->config['xpath'];
     $options = @$this->config['options'];
     $options = @drupal_parse_info_format($source_config['options']);
     $fields = @$options['fields'];
+    $parser = Frx::Fields($fields);
     if (!$fields) $fields= array();
     $format = @!$options['format'];
     $raw = $fetcher_result->getRaw();
