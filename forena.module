@@ -983,11 +983,11 @@ function forena_user_reports($category = '') {
   foreach ($reports as $category => $reports) {
     $links .= '<li><a href="#' . urlencode($category) . '">' . $category . '</a></li> ';
     $output .= '<h3 id="' . urlencode($category) . '">' . $category . '</h3>';
-    $output .= '<ul>';
+    $output .= '<ul>'."\n";
     foreach ($reports as $r) {
-      $output .= '<li>' . l($r['title'], $report_repos . '/' . str_replace('/', '.', $r['report_name'])) . '</li>';
+      $output .= '<li>' . l($r['title'], $report_repos . '/' . str_replace('/', '.', $r['report_name'])) . '<div class="forena-report-description">' . $r['description'] . '</div></li>'."\n";
     }
-    $output .= '</ul>';
+    $output .= '</ul>'."\n";
   }
   return $output;
 }
