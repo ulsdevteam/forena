@@ -748,7 +748,7 @@ class FrxReport {
     if ($this->description && isset($form['params']) && is_array($form['params'])) {
       $form['params'] = array('forena-report-description' => array(
         '#type' => 'item',
-        '#markup' => htmlspecialchars($this->description),
+        '#markup' => $this->description,
       )) + $form['params'];
     }
     $this->parameters_form = $form;
