@@ -1420,9 +1420,9 @@ function forena_report_add_parameter_form($form, &$form_state, $report_name) {
   );
 
   $form['cancel'] = array(
-      '#type' => 'submit',
-      '#value' => t('Cancel'),
-      '#submit' => array('forena_update_cancel'),
+       '#type' => 'link',
+       '#href' => "reports/$report_name/edit",
+       '#title' => 'Cancel'
   );
 
   return $form;
