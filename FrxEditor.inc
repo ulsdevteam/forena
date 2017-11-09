@@ -422,16 +422,23 @@ class FrxEditor {
   }
 
 
-  public function addParameters($parms_to_add) {
+  public function addParameters($parms_to_add, $keyValue = false) {
     $parms_to_add = (array)$parms_to_add;
-    foreach ($parms_to_add as $parm) {
-      $parms= array();
-      $parms[$parm] = array('id' => $parm );
-      $this->setFrxHeader('parameters', 'parm',
+    if ($keyValue) {
+      foreach ($parms_to_add as $key=>$parm) {
+        $parms= array();
+        $parms[$key] = array('id' => $key, 'label' => $parm);    
+      }
+    } else {
+      foreach ($parms_to_add as $parm) {
+        $parms= array();
+        $parms[$parm] = array('id' => $parm );      
+      }
+    }
+    $this->setFrxHeader('parameters', 'parm',
       $parms,
       array('id', 'label', 'require', 'desc', 'data_source', 'data_field', 'type'),
         'default');
-    }
   }
 
   /**

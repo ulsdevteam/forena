@@ -1435,7 +1435,7 @@ function forena_report_add_parameter_form_submit($form, &$form_state) {
   $r = Frx::Editor($report_name);
   $r_link = $r->report_link;
   //add the new parms
-  $r->addParameters($param['id']);
+  $r->addParameters(array($param['id'] => $param['label']), true);
   $r->update();
   $form_state['redirect'] = array("$r_link/edit/parameters", array('query' => Frx::parms()));
 }
