@@ -1276,6 +1276,7 @@ function forena_report_parameters_form($form, &$form_state, $report_name) {
   );
   $i=0;
   $form['parameters'] = array('#tree' => TRUE);
+  $parameter_count = count($parameters);
   foreach ($parameters as $parameter) {
     $id = urlencode($parameter['id']);
     $ctl = array();
@@ -1318,7 +1319,8 @@ function forena_report_parameters_form($form, &$form_state, $report_name) {
     $ctl['weight'] = array(
     	'#type' => 'weight',
       '#title' => 'Weight',
-      '#default_value' => $i,
+      '#default_value' => $i * 2 - $parameter_count + 1,
+      '#delta' => $parameter_count,
       '#title_display' => 'invisible',
     );
     $i++;
