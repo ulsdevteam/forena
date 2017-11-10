@@ -422,16 +422,15 @@ class FrxEditor {
   }
 
 
-  public function addParameters($parms_to_add, $keyValue = false) {
+  public function addParameters($parms_to_add, $keyValue = false) {     //keyValue flag is used check whether array passed is a plain array or array of objects
     $parms_to_add = (array)$parms_to_add;
-    if ($keyValue) {
-      foreach ($parms_to_add as $key=>$parm) {
-        $parms= array();
+    $parms= array();
+    if ($keyValue) {        
+      foreach ($parms_to_add as $key=>$parm) {        
         $parms[$key] = array('id' => $key, 'label' => $parm);    
       }
     } else {
-      foreach ($parms_to_add as $parm) {
-        $parms= array();
+      foreach ($parms_to_add as $parm) {        
         $parms[$parm] = array('id' => $parm );      
       }
     }
