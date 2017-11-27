@@ -979,15 +979,13 @@ function forena_user_reports($category = '') {
   if (!$reports) {
     $output = 'No Reports Found';
   }
-  $links = '';
   foreach ($reports as $category => $reports) {
-    $links .= '<li><a href="#' . urlencode($category) . '">' . $category . '</a></li> ';
-    $output .= '<h3 id="' . urlencode($category) . '">' . $category . '</h3>';
+    $output .= '<h3 id="' . urlencode($category) . '">' . htmlspecialchars($category) . '</h3>';
     $output .= '<ul>';
     foreach ($reports as $r) {
-      $output .= '<li>' . l($r['title'], $report_repos . '/' . str_replace('/', '.', $r['report_name'])) . '</li>';
+      $output .= '<li>' . l($r['title'], $report_repos . '/' . str_replace('/', '.', $r['report_name'])) . '<div class="forena-report-description">' . $r['description'] . '</div></li>'."\n";
     }
-    $output .= '</ul>';
+    $output .= '</ul>'."\n";
   }
   return $output;
 }
@@ -1524,7 +1522,7 @@ function _forena_filter_process($text='') {
   if (!$in_parms) $parms = $_GET;
 
   // Find the instances of [xmlreport:view,
-  if (preg_match_all("/\[report?:?([^\]]+)\]/i", $text, $match)) {
+  if (preg_match_all("/\[report?:?([^\]\n]+)\]/i", $text, $match)) {
 
     foreach ($match[1] as $idx => $value) {
       $parms=$in_parms;

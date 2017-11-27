@@ -62,6 +62,11 @@ function forena_add_report_form($formid, $form_state, $report_name='') {
       '#machine_name' => array('source' => array('report_name'), 'label' => 'Report_name'),
   );
 
+  $form['description'] = array(
+      '#type' => 'textarea',
+      '#title' => t('Description'),
+      '#description' => t('A description of the report, visible in the report list and in the parameters form.'),
+  );
 
   $form['category'] = array(
       '#type' => 'textfield',
@@ -126,6 +131,7 @@ function forena_create_report_submit($form, &$form_state) {
   // Title and category
   $r->setTitle($values['title']);
   $r->setCategory($values['category']);
+  $r->setDescription($values['description']);
   // Form options
   $options = array(
       'hidden' => $values['hidden'],
@@ -1431,7 +1437,8 @@ function forena_report_add_parameter_form_submit($form, &$form_state) {
   $r = Frx::Editor($report_name);
   $r_link = $r->report_link;
   //add the new parms
-  $r->addParameters($param['id']);
+  $params = array($param['id'] => $param['label']);
+  $r->addParameters($params, true); //true flag is used to indicate that $params is a key value array
   $r->update();
   $form_state['redirect'] = array("$r_link/edit/parameters", array('query' => Frx::parms()));
 }
@@ -1509,6 +1516,8 @@ function forena_report_layout_form($form, &$form_state, $report_name) {
   $filter = variable_get('forena_input_format', 'none');
   if (isset($frx_options['input_format'])) $filter = $frx_options['input_format'];
 
+  $description = $r->getDescription();
+
   $body = $r->simplexml->body->asXML();
   $css = @(string)$r->simplexml->head->style;
 
@@ -1534,6 +1543,11 @@ function forena_report_layout_form($form, &$form_state, $report_name) {
       '#description' => t('The page style of your report.  The {skin}.skinfo file specifies css and js file in your report.')
   );
 
+  $form['description'] = array(
+      '#type' => 'textarea',
+      '#title' => t('Description'),
+      '#default_value' => $description,
+  );
 
   $form['body'] = array(
       '#type' => 'text_format',
@@ -1611,6 +1625,8 @@ function forena_report_layout_form_submit($form, &$form_state) {
   $options['skin'] = $values['skin'];
   $r->setOptions($options);
 
+  // Description
+  $r->setDescription($values['description']);
   // Body
   $r->setBody($values['body']['value']);
   // CSS

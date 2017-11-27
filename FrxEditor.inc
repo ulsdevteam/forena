@@ -422,16 +422,22 @@ class FrxEditor {
   }
 
 
-  public function addParameters($parms_to_add) {
+  public function addParameters($parms_to_add, $keyValue = false) {     //keyValue flag is used check whether array passed is a plain array or array of objects
     $parms_to_add = (array)$parms_to_add;
-    foreach ($parms_to_add as $parm) {
-      $parms= array();
-      $parms[$parm] = array('id' => $parm );
-      $this->setFrxHeader('parameters', 'parm',
+    $parms= array();
+    if ($keyValue) {        
+      foreach ($parms_to_add as $key=>$parm) {        
+        $parms[$key] = array('id' => $key, 'label' => $parm);    
+      }
+    } else {
+      foreach ($parms_to_add as $parm) {        
+        $parms[$parm] = array('id' => $parm );      
+      }
+    }
+    $this->setFrxHeader('parameters', 'parm',
       $parms,
       array('id', 'label', 'require', 'desc', 'data_source', 'data_field', 'type'),
         'default');
-    }
   }
 
   /**
@@ -447,6 +453,49 @@ class FrxEditor {
   }
 
   /**
+   * Set the report description
+   * @param string $description
+   */
+  public function setDescription($description) {
+    $ret = array();
+    $dom = $this->dom;
+    $head = $dom->getElementsByTagName('head')->item(0);
+    $cnodes = $dom->getElementsByTagName('meta');
+    $node = $dom->createElement('meta');
+    $node->setAttribute('content', htmlspecialchars($description));
+    $node->setAttribute('name', 'description');
+    $cnode = NULL;
+    foreach ($cnodes as $cnode) {
+      if ($cnode->getAttribute('name') == 'description') {
+        break;
+      }
+    }
+    if (is_object($cnode)) {
+      $head->replaceChild($node, $cnode);
+    } else {
+      $head->appendChild($node);
+    }
+  }
+
+  /**
+   * Get the report description
+   * @return string 
+   */
+  public function getDescription() {
+    $dom = $this->dom;
+    $this->verifyHeaderElements(array('description'));
+    $cnodes = $dom->getElementsByTagName('meta');
+    $cnode = NULL;
+    foreach ($cnodes as $cnode) {
+      if ($cnode->getAttribute('name') == 'description') {
+        break;
+      }
+    }
+    $textContent = is_object($cnode) ? $cnode->getAttribute('content') : '';
+    return htmlspecialchars_decode($textContent);
+  }
+
+  /**
    * Set the report category
    * Enter description here ...
    * @param unknown_type $cateogry
@@ -457,7 +506,7 @@ class FrxEditor {
     $this->verifyHeaderElements(array('category'));
     $head = $dom->getElementsByTagName('head')->item(0);
     $cnode = $dom->getElementsByTagNameNS($this->xmlns, 'category')->item(0);
-    $node = $dom->createElementNS($this->xmlns, 'category', $category);
+    $node = $dom->createElementNS($this->xmlns, 'category', htmlspecialchars($category));
     $head->replaceChild($node, $cnode);
   }
 
@@ -465,7 +514,7 @@ class FrxEditor {
     $dom = $this->dom;
     $this->verifyHeaderElements(array('category'));
     $cnode = $dom->getElementsByTagNameNS($this->xmlns, 'category')->item(0);
-    return $cnode->textContent;
+    return htmlspecialchars_decode($cnode->textContent);
   }
 
   /**

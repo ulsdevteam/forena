@@ -155,6 +155,7 @@ class FrxReportFile extends FrxFile {
                 'title' => $cache['title'],
                 'category' => $cache['category'],
                 'report_name' => $base_name,
+                'description' => $cache['description'],
             );
           }
 
@@ -219,6 +220,7 @@ class FrxReportFile extends FrxFile {
           $cache['language'] = $lang;
           $cache['category'] = $r->category;
           $cache['hidden'] = @$r->options['hidden'];
+          $cache['description'] = $r->description;
         }
         $object->cache = $cache;
     	  if ($r) $r->__destruct();
