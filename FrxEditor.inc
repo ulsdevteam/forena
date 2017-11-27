@@ -427,7 +427,7 @@ class FrxEditor {
     $parms= array();
     if ($keyValue) {        
       foreach ($parms_to_add as $key=>$parm) {        
-        $parms[$key] = array('id' => $key, 'label' => $parm);    
+        $parms[$key] = array('id' => $parm['id'], 'label' => $parm['label']);    
       }
     } else {
       foreach ($parms_to_add as $parm) {        
