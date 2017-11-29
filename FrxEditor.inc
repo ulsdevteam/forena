@@ -421,8 +421,11 @@ class FrxEditor {
       'default');
   }
 
-
-  public function addParameters($parms_to_add, $keyValue = false) {     //keyValue flag is used check whether array passed is a plain array or array of objects
+  /**
+   * Add parameters to report
+   * @param array $parms_to_add, boolean $keyValue
+  */
+  public function addParameters($parms_to_add, $keyValue = false) {    
     $parms_to_add = (array)$parms_to_add;
     $parms= array();
     if ($keyValue) {        
