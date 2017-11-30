@@ -1292,6 +1292,7 @@ function forena_forena_document_types() {
   require_once 'docformats/FrxSVGDoc.inc';
   require_once 'docformats/FrxWordDoc.inc';
   require_once 'docformats/FrxXLSDoc.inc';
+  require_once 'docformats/FrxXLSXDoc.inc';
   require_once 'docformats/FrxXMLDoc.inc';
   require_once 'docformats/FrxEmailMergeDoc.inc';
   $items['web'] = array(
@@ -1328,6 +1329,18 @@ function forena_forena_document_types() {
     'class' => 'FrxXLSDoc',
     'title' => t('Excel Document'),
   );
+<<<<<<< HEAD
+=======
+
+  $checkInstalled = forena_library_file("PHPSpreadSheet");	
+  //check whether library is installed or not
+  if ($checkInstalled != "") {
+    $items['xlsx'] = array(
+      'class' => 'FrxXLSXDoc',
+      'title' => t('Excel Document'),
+    );
+  }
+>>>>>>> 745e3a2... implement separate xlsx export
 
   $items['xml'] = array(
     'class' => 'FrxXMLDoc',
