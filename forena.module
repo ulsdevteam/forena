@@ -1329,8 +1329,6 @@ function forena_forena_document_types() {
     'class' => 'FrxXLSDoc',
     'title' => t('Excel Document'),
   );
-<<<<<<< HEAD
-=======
 
   $checkInstalled = forena_library_file("PHPSpreadSheet");	
   //check whether library is installed or not
@@ -1340,7 +1338,6 @@ function forena_forena_document_types() {
       'title' => t('Excel Document'),
     );
   }
->>>>>>> 745e3a2... implement separate xlsx export
 
   $items['xml'] = array(
     'class' => 'FrxXMLDoc',
