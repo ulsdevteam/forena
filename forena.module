@@ -1846,7 +1846,7 @@ function forena_machine_name_validate($element, &$form_state) {
 }
 
 function forena_process_machine_name($element, &$form_state) {
-  $element['#machine_name']['replace_pattern'] = '[^A-Za-z0-9_\.\/]+';
+  $element['#machine_name']['replace_pattern'] = '[^A-Za-z0-9_\.\/-]+';
   return $element;
 }
 

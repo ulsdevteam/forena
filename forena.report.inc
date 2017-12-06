@@ -1324,7 +1324,7 @@ function forena_report_parameters_form($form, &$form_state, $report_name) {
     $ctl['weight'] = array(
     	'#type' => 'weight',
       '#title' => 'Weight',
-      '#default_value' => $i,
+      '#default_value' => 0,
       '#title_display' => 'invisible',
     );
     $i++;
@@ -1435,7 +1435,10 @@ function forena_report_add_parameter_form_submit($form, &$form_state) {
   $r = Frx::Editor($report_name);
   $r_link = $r->report_link;
   //add the new parms
-  $r->addParameters($param['id']);
+  
+  $params = array();
+  $params[] = array('id' => $param['id'], 'label' => $param['label']);
+  $r->addParameters($params, true);
   $r->update();
   $form_state['redirect'] = array("$r_link/edit/parameters", array('query' => Frx::parms()));
 }
