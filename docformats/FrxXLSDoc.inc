@@ -75,7 +75,7 @@ class FrxXLSDoc extends FrxDocument {
           }
           else {
             $output .= '      <Cell><Data ss:Type="String">' . $value . '</Data></Cell>' . "\n";
-          }	    
+          } 
         }
         $output .= '    </Row>' . "\n";
       }
@@ -87,8 +87,8 @@ class FrxXLSDoc extends FrxDocument {
       $output .= '  </WorksheetOptions>' . "\n";
       $output .= '</Worksheet>' . "\n";
     }
-      $output .= '</Workbook>';
-      return $output;
+    $output .= '</Workbook>';
+    return $output;
   }
 
   public function output(&$output) {
@@ -96,5 +96,4 @@ class FrxXLSDoc extends FrxDocument {
     parent::output($output);
     return TRUE;
   }
-
 }
