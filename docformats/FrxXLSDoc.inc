@@ -10,8 +10,8 @@ class FrxXLSDoc extends FrxDocument {
     $this->content_type = 'application/msexcel';
   }
 
-
   public function render($r, $format, $options = array()) {
+    $title= $r->title;
     $body = $r->html;
     $output = '<?xml version="1.0"?>' . "\n";
     $output .= '<?mso-application progid="Excel.Sheet"?>' . "\n";
@@ -36,7 +36,6 @@ class FrxXLSDoc extends FrxDocument {
     @$doc->loadHTML($body);
     libxml_clear_errors();
     $xml = simplexml_import_dom($doc);
-
     $tables = $xml ? $xml->xpath('//table') : array();
     $count = 1;
     if ($tables) foreach ($tables as $table) {
@@ -50,8 +49,11 @@ class FrxXLSDoc extends FrxDocument {
       $output .= '<Worksheet ss:Name="' . $sheet_name . '">' . "\n";
       $count ++;
       $output .= '  <Table>' . "\n";
-
       $rows = $table->xpath('descendant::tr');
+      //to add report title in first row
+      $output .= '    <Row>' . "\n";
+      $output .= '      <Cell><Data ss:Type="String">' . $title . '</Data></Cell>' . "\n";
+      $output .= '    </Row>' . "\n";
       if ($rows) foreach ($rows as $row) {
         $output .= '    <Row>' . "\n";
         foreach ($row as $column) {
@@ -73,7 +75,7 @@ class FrxXLSDoc extends FrxDocument {
           }
           else {
             $output .= '      <Cell><Data ss:Type="String">' . $value . '</Data></Cell>' . "\n";
-          }
+          }	    
         }
         $output .= '    </Row>' . "\n";
       }
@@ -85,8 +87,8 @@ class FrxXLSDoc extends FrxDocument {
       $output .= '  </WorksheetOptions>' . "\n";
       $output .= '</Worksheet>' . "\n";
     }
-    $output .= '</Workbook>';
-    return $output;
+      $output .= '</Workbook>';
+      return $output;
   }
 
   public function output(&$output) {
