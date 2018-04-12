@@ -181,7 +181,8 @@ class Frx {
             if ($c['file']) {
               include_once($c['file'] );
               if (class_exists($c['class']) && $instantiate) {
-                $instances[$c['class']] =  new $c['class'];
+                $cls = $c['class'];
+                $instances[$c['class']] =  new $cls();
               }
               $classes[$c['class']] = $c['class'];
             }
