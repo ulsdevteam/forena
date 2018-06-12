@@ -433,6 +433,25 @@ class FrxEditor {
         'default');
     }
   }
+  
+  /** 
+   * Removing duplicate parameters, so it does not overwrite the current parameter options
+   * @param array $report_arr Current Parameter Array from method ParametersArray 
+   * in FrxReport.inc.
+   * @param array $token_arr Parameters used by current block, called from method tokens
+   * in FrxBlockEditor.inc
+   * @return array Token array($token_arr) after removing the duplicate parameters which 
+   * were present in the current parameter array($report_arr). 
+   */
+  public function removeDuplicateParameters($report_arr,$token_arr){
+      foreach ($report_arr as $key => $value1) {
+        $key_found = array_search($value1["id"], $token_arr);
+        if($key_found !== FALSE){
+            unset($token_arr[$key_found]);
+        }
+    }
+    return $token_arr;
+  }
 
   /**
    * Set the report title
@@ -902,7 +921,8 @@ class FrxEditor {
     $config['block'] = $block_name;
     $b = Frx::BlockEditor($block_name, $this->frxReport->block_edit_mode);
     $data= $b->data($this->parms);
-    $this->addParameters($b->tokens());
+    $tokens_add=$this->removeDuplicateParameters($this->frxReport->parametersArray(),$b->tokens());
+    $this->addParameters($tokens_add);
     $c = Frx::Template($template_class);
     if ($c) {
       $c->initReportNode($node, $this->frxReport);
@@ -940,7 +960,8 @@ class FrxEditor {
     $config['block'] = $block_name;
     $b = Frx::BlockEditor($block_name, $this->frxReport->block_edit_mode);
     $data= $b->data($this->parms);
-    $this->addParameters($b->tokens());
+    $tokens_add=$this->removeDuplicateParameters($this->frxReport->parametersArray(),$b->tokens());
+    $this->addParameters($tokens_add);
     $this->frxReport->setReport($this->dom, $this->xpq, $this->edit);
     $c = Frx::Template($template_class);
     if ($c) {
