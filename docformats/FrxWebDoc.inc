@@ -7,6 +7,7 @@
  */
 class FrxWebDoc extends FrxDocument {
   private $title;
+  static $js_added = [];
   public function render($r, $format, $content=array()) {
     // Set title based on report.
     if ($r->title) {
@@ -63,13 +64,16 @@ class FrxWebDoc extends FrxDocument {
     }
 
     // Add javascript files
-    foreach (Frx::Skin()->scripts as $script) {
-      if (strpos($script, 'http:') === 0 || strpos($script, 'https:') === 0) {
-        drupal_add_js($script, 'external');
-      }
-      else {
-        drupal_add_js($script);
-
+    $scripts = array_unique(Frx::Skin()->scripts);
+    foreach ($scripts as $script) {
+      if (empty(FrxWebDoc::$js_added[$script])) {
+        if (strpos($script, 'http:') === 0 || strpos($script, 'https:') === 0) {
+          drupal_add_js($script, 'external');
+        }
+        else {
+          drupal_add_js($script);
+        }
+        FrxWebDoc::$js_added[$script] = $script;
       }
     }
 
