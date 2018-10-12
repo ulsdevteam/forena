@@ -422,26 +422,29 @@ class FrxEditor {
   }
 
   /**
-   * Add parameters to report
-   * @param array $parms_to_add, boolean $keyValue
+  * Add report patameters
+  * @param array $parm
+  * @param bool $keyvalue = false
   */
-  public function addParameters($parms_to_add, $keyValue = false) {    
-    $parms_to_add = (array)$parms_to_add;
-    $parms= array();
-    if ($keyValue) {        
-      foreach ($parms_to_add as $key=>$parm) {        
-        $parms[$key] = array('id' => $parm['id'], 'label' => $parm['label']);    
-      }
-    } else {
-      foreach ($parms_to_add as $parm) {        
-        $parms[$parm] = array('id' => $parm );      
-      }
-    }
-    $this->setFrxHeader('parameters', 'parm',
-      $parms,
-      array('id', 'label', 'require', 'desc', 'data_source', 'data_field', 'type'),
-        'default');
-  }
+  public function addParameters($parms_to_add, $keyValue = false) {
+      $parms_to_add = (array)$parms_to_add;
+     $parms = array();
+     foreach ($parms_to_add as $idx => $rows) {
+         if ($keyValue) {
+             foreach ($rows as $key => $value) {
+                 $params[$key] = $value;
+            }
+            $params = array($params);
+         } else {
+             $params['id'] = $rows;
+         }
+     }
+     drupal_set_message(t(serialize(array($params))), 'warning');
+     $this->setFrxHeader('parameters', 'parm',
+       $params,
+       array('id', 'label', 'require', 'desc', 'data_source', 'data_field', 'type'),
+         'default');
+   }
 
   /**
    * Set the report title
@@ -482,7 +485,7 @@ class FrxEditor {
 
   /**
    * Get the report description
-   * @return string 
+   * @return string
    */
   public function getDescription() {
     $dom = $this->dom;
@@ -999,7 +1002,7 @@ class FrxEditor {
     //check for default parameters
     $missing_parms = $r->processParameters($parms);
     Frx::Skin()->load($r->skin);
-    Frx::Skin()->merge($r->skin_override); 
+    Frx::Skin()->merge($r->skin_override);
     Frx::Skin()->loadSkinFiles($this->report_name);
     $cached_data = FALSE;
     $cache = array();
