@@ -12,8 +12,11 @@ class FrxXLSXDoc extends FrxDocument {
   }
 
   public function render($r, $format, $options = array()) {
+    $phpspreadsheetPsr = forena_library_file('PHPSpreadSheetPsr');
     $phpspreadsheet = forena_library_file('PHPSpreadSheet');
+    require $phpspreadsheetPsr;
     require $phpspreadsheet;
+
     $title= $r->title;
     $spreadsheet = new PhpOffice\PhpSpreadsheet\Spreadsheet();
     $body = $r->html;
@@ -29,7 +32,7 @@ class FrxXLSXDoc extends FrxDocument {
       $count ++;
       $rows = $table->xpath('descendant::tr');
       $rowCounter = 1;
-      $columnCounter = 0;
+      $columnCounter = 1;
       $spreadsheet->createSheet();
       $spreadsheet->getSheet($count - 1)->setCellValue('A1',$title);  //insert report title in first row and column
       $rowCounter++;
@@ -54,10 +57,10 @@ class FrxXLSXDoc extends FrxDocument {
           }
           else {
             $spreadsheet->getSheet($count - 1)->setCellValueByColumnAndRow($columnCounter, $rowCounter, $value);
-          }	    
+          }
 	  $columnCounter++;
         }
-	$columnCounter = 0;
+	$columnCounter = 1;
       }
     }
     $sheetIndex = $spreadsheet->getIndex(
