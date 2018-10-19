@@ -35,7 +35,6 @@ class FrxXLSXDoc extends FrxDocument {
       $columnCounter = 1;
       $spreadsheet->createSheet();
       $spreadsheet->getSheet($count - 1)->setCellValue('A1',$title);  //insert report title in first row and column
-      $rowCounter++;
       if ($rows) foreach ($rows as $row) {
 	$rowCounter++;
         foreach ($row as $column) {
