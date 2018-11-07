@@ -422,26 +422,22 @@ class FrxEditor {
   }
 
   /**
-  * Add report patameters
+  * Add report parameters
   * @param array $parm
   * @param bool $keyvalue = false
   */
   public function addParameters($parms_to_add, $keyValue = false) {
-      $parms_to_add = (array)$parms_to_add;
+     $parms_to_add = (array)$parms_to_add;
      $parms = array();
-     foreach ($parms_to_add as $idx => $rows) {
+     foreach ($parms_to_add as $rows) {
          if ($keyValue) {
-             foreach ($rows as $key => $value) {
-                 $params[$key] = $value;
-            }
-            $params = array($params);
+           $parms[] = $rows;
          } else {
-             $params['id'] = $rows;
+           $parms['id'] = $rows;
          }
      }
-     drupal_set_message(t(serialize(array($params))), 'warning');
      $this->setFrxHeader('parameters', 'parm',
-       $params,
+       $parms,
        array('id', 'label', 'require', 'desc', 'data_source', 'data_field', 'type'),
          'default');
    }
