@@ -423,8 +423,13 @@ class FrxEditor {
 
   /**
   * Add report parameters
-  * @param array $parm
+  * @param array $parms_to_add
   * @param bool $keyvalue = false
+  * 
+  * 1. Set key-value(id-label) array with multiple parameters, call this function as
+  *    addParameters( array( array('id'=>'one', 'label'=>'One'), array('id'=>'two', 'label'=>'Two') ), true )
+  * 2. Set key(id) only parameters, call this function as
+  *    addParameters( array('one', 'two', 'three'), false )
   */
   public function addParameters($parms_to_add, $keyValue = false) {
      $parms_to_add = (array)$parms_to_add;
