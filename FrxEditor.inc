@@ -1000,6 +1000,9 @@ class FrxEditor {
 
         $r->render($format);
       }
+      if (!$r->blocks_loaded) {
+         drupal_set_message('There is no relevant data.'); 
+      }
     }
     else {
       $r->parametersForm(array('collapsible' => FALSE, 'collapsed' => FALSE));
