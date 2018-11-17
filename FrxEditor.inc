@@ -421,18 +421,31 @@ class FrxEditor {
       'default');
   }
 
-
-  public function addParameters($parms_to_add) {
-    $parms_to_add = (array)$parms_to_add;
-    foreach ($parms_to_add as $parm) {
-      $parms= array();
-      $parms[$parm] = array('id' => $parm );
-      $this->setFrxHeader('parameters', 'parm',
-      $parms,
-      array('id', 'label', 'require', 'desc', 'data_source', 'data_field', 'type'),
-        'default');
-    }
-  }
+  /**
+  * Add report parameters
+  * @param array $parms_to_add
+  * @param bool $keyvalue = false
+  * 
+  * 1. Set key-value(id-label) array with multiple parameters, call this function as
+  *    addParameters( array( array('id'=>'one', 'label'=>'One'), array('id'=>'two', 'label'=>'Two') ), true )
+  * 2. Set key(id) only parameters, call this function as
+  *    addParameters( array('one', 'two', 'three'), false )
+  */
+  public function addParameters($parms_to_add, $keyValue = false) {
+     $parms_to_add = (array)$parms_to_add;
+     $parms = array();
+     foreach ($parms_to_add as $rows) {
+         if ($keyValue) {
+           $parms[] = $rows;
+         } else {
+           $parms['id'] = $rows;
+         }
+     }
+     $this->setFrxHeader('parameters', 'parm',
+       $parms,
+       array('id', 'label', 'require', 'desc', 'data_source', 'data_field', 'type'),
+         'default');
+   }
 
   /**
    * Set the report title
@@ -473,7 +486,7 @@ class FrxEditor {
 
   /**
    * Get the report description
-   * @return string 
+   * @return string
    */
   public function getDescription() {
     $dom = $this->dom;
@@ -990,7 +1003,7 @@ class FrxEditor {
     //check for default parameters
     $missing_parms = $r->processParameters($parms);
     Frx::Skin()->load($r->skin);
-    Frx::Skin()->merge($r->skin_override); 
+    Frx::Skin()->merge($r->skin_override);
     Frx::Skin()->loadSkinFiles($this->report_name);
     $cached_data = FALSE;
     $cache = array();
