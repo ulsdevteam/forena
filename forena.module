@@ -441,7 +441,9 @@ function forena_library_file($library) {
       'dataTables' => 'dataTables/media/js/jquery.dataTables.min.js',
       'mpdf' => 'mpdf/mpdf.php',
       'SVGGraph' => 'SVGGraph/SVGGraph.php',
-      'prince' => 'prince/prince.php'
+      'prince' => 'prince/prince.php',
+      'PHPSpreadSheetPsr' => 'PhpOffice/Psr/autoloader.php',
+      'PHPSpreadSheet' => 'PhpOffice/autoloader.php'
   );
   $path = isset($libraries[$library]) && file_exists('sites/all/libraries/' . $libraries[$library]) ? 'sites/all/libraries/' . $libraries[$library] : '';
   return $path;
@@ -1059,7 +1061,7 @@ function forena_report_page_callback($report_name, $js_mode, $id='', $command = 
       case 'replace':
         $commands[] = ajax_command_replace("#$id", $report);
         break;
-      
+
     }
 
     if (!empty($content['content']['#ajax_commands']['post'])) {
@@ -1075,7 +1077,7 @@ function forena_report_page_callback($report_name, $js_mode, $id='', $command = 
  * In this function the arglist is used to get the full path to the report.
  *
  * @return string|array
- *   Render array or content. 
+ *   Render array or content.
  */
 function forena_report($name_in, $parms = NULL, $print = TRUE, $filename='') {
   $in_block = FALSE;
@@ -1292,6 +1294,7 @@ function forena_forena_document_types() {
   require_once 'docformats/FrxSVGDoc.inc';
   require_once 'docformats/FrxWordDoc.inc';
   require_once 'docformats/FrxXLSDoc.inc';
+  require_once 'docformats/FrxXLSXDoc.inc';
   require_once 'docformats/FrxXMLDoc.inc';
   require_once 'docformats/FrxEmailMergeDoc.inc';
   $items['web'] = array(
@@ -1329,6 +1332,15 @@ function forena_forena_document_types() {
     'title' => t('Excel Document'),
   );
 
+  $checkInstalled = forena_library_file("PHPSpreadSheet");
+  //check whether library is installed or not
+  if ($checkInstalled != "") {
+    $items['xlsx'] = array(
+      'class' => 'FrxXLSXDoc',
+      'title' => t('Excel Document'),
+    );
+  }
+
   $items['xml'] = array(
     'class' => 'FrxXMLDoc',
     'title' => t('XML Document'),
@@ -1354,7 +1366,7 @@ function forena_forena_controls() {
 
   $controls[] = array(
     'file' => 'renderers/FrxAjax.inc',
-    'class' => 'FrxAjax', 
+    'class' => 'FrxAjax',
   );
 
   $controls[] = array(
